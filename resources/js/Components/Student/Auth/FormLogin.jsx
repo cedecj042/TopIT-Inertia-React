@@ -1,24 +1,22 @@
-import { usePage,Link } from "@inertiajs/react";
-import { useState } from "react";
+import {Link, useForm } from "@inertiajs/react";
+
 
 export default function FormLogin() {
-    const { errors } = usePage().props;
 
-    const [formData, setFormData] = useState({
+    const { data, setData, post, errors, reset } = useForm({
         username: "",
         password: "",
     });
 
     const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
+        setData(e.target.name, e.target.value); // Updates the form data in the state
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        Inertia.post("/student/login", formData);
+        post(route('student.login'), {
+            onSuccess: () => reset('password'), // Optionally reset the password field after success
+        });
     };
 
     return (
@@ -33,13 +31,14 @@ export default function FormLogin() {
                         >
                             Username
                         </label>
-                        <input
+
+                         <input
                             type="text"
                             className="form-control auth-textbox"
                             placeholder="juan123"
                             id="username"
                             name="username"
-                            value={formData.username}
+                            value={data.username}
                             onChange={handleChange}
                             required
                         />
@@ -62,7 +61,7 @@ export default function FormLogin() {
                             placeholder="*****"
                             id="password"
                             name="password"
-                            value={formData.password}
+                            value={data.password}
                             onChange={handleChange}
                             required
                         />

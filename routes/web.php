@@ -27,6 +27,7 @@ use Inertia\Inertia;
 // });
 Route::middleware('guest')->group(function () {
     Route::get('/login', [StudentController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [StudentController::class, 'loginStudent'])->name('student.login');
 });
 
 // Route::prefix('')->group(function () {
@@ -37,7 +38,7 @@ Route::middleware('guest')->group(function () {
 Route::redirect('/','/dashboard');
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    return Inertia::render('Auth/Student/Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth','admin'])->group(function(){
