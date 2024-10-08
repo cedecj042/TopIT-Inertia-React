@@ -33,34 +33,34 @@ class QuestionSeeder extends Seeder
                 ['What does ETL stand for?', 'Extract, Transform, Load', ['Extract, Transform, Load', 'Encode, Transfer, Launch', 'Edit, Test, Learn', 'Examine, Tally, List']],
                 ['Select all the steps in the data analysis process.', json_encode(['Collecting data', 'Cleaning data']), ['Collecting data', 'Cleaning data', 'Writing code', 'Testing models']],
             ],
-            // 'Overview of System Architecture' => [
-            //     ['What is system architecture?', 'The conceptual design of a system', ['The conceptual design of a system', 'A type of operating system', 'A network protocol', 'A physical server']],
-            //     ['Which component is part of the system architecture?', 'Hardware', ['Hardware', 'Software licenses', 'Internet connection', 'Databases']],
-            //     ['What does CPU stand for?', 'Central Processing Unit', ['Central Processing Unit', 'Computer Processing Unit', 'Central Program Unit', 'Computer Programming Utility']],
-            //     ['What is the role of an operating system in system architecture?', 'To manage hardware resources.', []],
-            //     ['Select two common types of system architecture.', json_encode(['Client-server', 'Peer-to-peer']), ['Client-server', 'Peer-to-peer', 'Command-line', 'Mainframe']],
-            // ],
-            // 'Understanding Information Security' => [
-            //     ['What is information security?', 'Protection of information from unauthorized access', ['Protection of information from unauthorized access', 'A type of encryption', 'A programming language', 'A software license']],
-            //     ['Name one type of encryption.', 'AES', []],
-            //     ['Which of the following is an information security threat?', 'Phishing', ['Phishing', 'Spreadsheet', 'Firewall', 'Backup system']],
-            //     ['What is the role of a firewall?', 'To protect a network by controlling incoming and outgoing traffic.', []],
-            //     ['Select two methods used to secure information.', json_encode(['Encryption', 'Access Control']), ['Encryption', 'Access Control', 'Backup', 'Data Deletion']],
-            // ],
-            // 'Understanding the IT Business and Ethics' => [
-            //     ['What is business ethics?', 'The moral principles guiding business decisions', ['The moral principles guiding business decisions', 'A type of contract', 'A law about business', 'A corporate policy']],
-            //     ['Name a principle of IT ethics.', 'Confidentiality', []],
-            //     ['Which of the following is a business ethical issue?', 'Data privacy', ['Software design', 'Software updates', 'Data privacy', 'System architecture']],
-            //     ['What is corporate social responsibility (CSR)?', 'A company’s responsibility to manage its business processes to produce an overall positive impact on society.', []],
-            //     ['Select two ethical principles in IT.', json_encode(['Integrity', 'Accountability']), ['Integrity', 'Profitability', 'Accountability', 'Market share']],
-            // ],
-            // 'Project Management & Technical Communication' => [
-            //     ['What is project management?', 'The application of knowledge, skills, tools, and techniques to project activities', ['The application of knowledge, skills, tools, and techniques to project activities', 'The process of writing technical documents', 'The planning of software systems', 'The organization of a company']],
-            //     ['Name a key phase in project management.', 'Planning', []],
-            //     ['Which of the following is NOT a project management tool?', 'Python', ['Gantt chart', 'Critical Path Method', 'PERT chart', 'Python']],
-            //     ['What is the purpose of technical communication in project management?', 'To clearly convey project goals, progress, and outcomes.', []],
-            //     ['Select two common project management methodologies.', json_encode(['Agile', 'Waterfall']), ['Agile', 'Waterfall', 'Scrum', 'Test-driven development']],
-            // ]
+            'Overview of System Architecture' => [
+                ['What is system architecture?', 'The conceptual design of a system', ['The conceptual design of a system', 'A type of operating system', 'A network protocol', 'A physical server']],
+                ['Which component is part of the system architecture?', 'Hardware', ['Hardware', 'Software licenses', 'Internet connection', 'Databases']],
+                ['What does CPU stand for?', 'Central Processing Unit', ['Central Processing Unit', 'Computer Processing Unit', 'Central Program Unit', 'Computer Programming Utility']],
+                ['What is the role of an operating system in system architecture?', 'To manage hardware resources.', []],
+                ['Select two common types of system architecture.', json_encode(['Client-server', 'Peer-to-peer']), ['Client-server', 'Peer-to-peer', 'Command-line', 'Mainframe']],
+            ],
+            'Understanding Information Security' => [
+                ['What is information security?', 'Protection of information from unauthorized access', ['Protection of information from unauthorized access', 'A type of encryption', 'A programming language', 'A software license']],
+                ['Name one type of encryption.', 'AES', []],
+                ['Which of the following is an information security threat?', 'Phishing', ['Phishing', 'Spreadsheet', 'Firewall', 'Backup system']],
+                ['What is the role of a firewall?', 'To protect a network by controlling incoming and outgoing traffic.', []],
+                ['Select two methods used to secure information.', json_encode(['Encryption', 'Access Control']), ['Encryption', 'Access Control', 'Backup', 'Data Deletion']],
+            ],
+            'Understanding the IT Business and Ethics' => [
+                ['What is business ethics?', 'The moral principles guiding business decisions', ['The moral principles guiding business decisions', 'A type of contract', 'A law about business', 'A corporate policy']],
+                ['Name a principle of IT ethics.', 'Confidentiality', []],
+                ['Which of the following is a business ethical issue?', 'Data privacy', ['Software design', 'Software updates', 'Data privacy', 'System architecture']],
+                ['What is corporate social responsibility (CSR)?', 'A company’s responsibility to manage its business processes to produce an overall positive impact on society.', []],
+                ['Select two ethical principles in IT.', json_encode(['Integrity', 'Accountability']), ['Integrity', 'Profitability', 'Accountability', 'Market share']],
+            ],
+            'Project Management & Technical Communication' => [
+                ['What is project management?', 'The application of knowledge, skills, tools, and techniques to project activities', ['The application of knowledge, skills, tools, and techniques to project activities', 'The process of writing technical documents', 'The planning of software systems', 'The organization of a company']],
+                ['Name a key phase in project management.', 'Planning', []],
+                ['Which of the following is NOT a project management tool?', 'Python', ['Gantt chart', 'Critical Path Method', 'PERT chart', 'Python']],
+                ['What is the purpose of technical communication in project management?', 'To clearly convey project goals, progress, and outcomes.', []],
+                ['Select two common project management methodologies.', json_encode(['Agile', 'Waterfall']), ['Agile', 'Waterfall', 'Scrum', 'Test-driven development']],
+            ]
         ];
 
 

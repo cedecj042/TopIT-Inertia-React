@@ -90,9 +90,9 @@ export default function FormLogin() {
                 </div>
                 <br />
                 <div className="mt-5 text-center">
-                    <Link href="/admin/login" className="text-dark auth_btn">
+                    <a href="/admin/login" className="text-dark auth_btn">
                         Admin Login
-                    </Link>
+                    </a>
                 </div>
             </div>
         </div>

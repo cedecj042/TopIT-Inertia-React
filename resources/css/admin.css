@@ -1,0 +1,30 @@
+.admin-bg{
+    background-color: #175FC3;
+}
+
+.auth_btn{
+    font-size: 1em;
+    text-decoration: none;
+}
+
+.auth-labels {
+    font-size: 20px;
+}
+
+.auth-textbox {
+    margin-bottom: .5em;
+    height: 3.25em;
+    font-size: 16px !important;
+    background-color: #eeeeee;
+    border-color: #C9C9C9;
+}
+.auth-textbox:focus {
+    outline: 1px solid #d7dee4;
+    border-color: #d7dee4 !important;
+    box-shadow: none;
+}
+.auth-textbox:active {
+    background-color: #E9E9E9;
+    border-color: #C9C9C9;
+    box-shadow: none;
+}

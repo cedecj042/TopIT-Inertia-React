@@ -25,8 +25,8 @@ class StudentSeeder extends Seeder
             'address' => 'Address 123',
             'school' => 'Cebu Institute of Technology University',
             'course'=>'BSCS',
-            'school_year' => '3',
-            'profile_image' => 'pochacco.jpg',
+            'year' => '3',
+            'profile_image' => '',
         ]);
 
         User::create([
@@ -46,8 +46,8 @@ class StudentSeeder extends Seeder
             'address' => 'Another Address 123',
             'school' => 'University of San Jose Recoletos',
             'course'=>'BSIT',
-            'school_year' => '2',
-            'profile_image' => 'pochacco.jpg',
+            'year' => '2',
+            'profile_image' => '',
         ]);
 
         User::create([
@@ -67,8 +67,8 @@ class StudentSeeder extends Seeder
             'address' => 'Village This 123',
             'school' => 'Cebu Institute of Technology University',
             'course'=>'BSCS',
-            'school_year' => '2',
-            'profile_image' => 'pochacco.jpg',
+            'year' => '2',
+            'profile_image' => '',
         ]);
 
         User::create([
@@ -88,8 +88,8 @@ class StudentSeeder extends Seeder
             'address' => 'Seoul, South Korea',
             'school' => 'University of San Jose Recoletos',
             'course'=>'BSIT',
-            'school_year' => '5',
-            'profile_image' => 'pochacco.jpg',
+            'year' => '5',
+            'profile_image' => '',
         ]);
 
         User::create([
@@ -109,8 +109,8 @@ class StudentSeeder extends Seeder
             'address' => 'Address 123',
             'school' => 'Cebu Institute of Technology University',
             'course'=>'BSCS',
-            'school_year' => '4',
-            'profile_image' => 'pochacco.jpg',
+            'year' => '4',
+            'profile_image' => '',
         ]);
 
         User::create([
@@ -130,8 +130,8 @@ class StudentSeeder extends Seeder
             'address' => 'Address 123',
             'school' => 'University of San Carlos',
             'course'=>'BSIT',
-            'school_year' => '4',
-            'profile_image' => 'pochacco.jpg',
+            'year' => '4',
+            'profile_image' => '',
         ]);
 
         User::create([

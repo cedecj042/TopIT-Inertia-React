@@ -15,7 +15,7 @@ export default function StudentNavbar(){
                         Hi, {auth.user && auth.user.username}
                     </span>
                     <img
-                        src={profileImageUrl}
+                        src={profileImageURL}
                         alt="Profile Image"
                         className="rounded-circle"
                         width="30"

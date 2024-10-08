@@ -49,7 +49,10 @@ class DatabaseSeeder extends Seeder
             DifficultySeeder::class,
             CourseSeeder::class,
             QuestionSeeder::class,
-            StudentSeeder::class
+            StudentSeeder::class,
+            TestSeeder::class,
+            TestSeeder::class,
+            TestSeeder::class,
         ]);
     }
 }

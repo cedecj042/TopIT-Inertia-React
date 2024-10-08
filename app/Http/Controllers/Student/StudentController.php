@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -12,15 +13,12 @@ class StudentController extends Controller
 {
     public function showLoginForm()
     {
-        return Inertia::render('Auth/Student/StudentLogin');
+        return Inertia::render('Auth/StudentLogin');
     }
 
-    public function loginStudent(Request $request){
+    public function loginStudent(LoginRequest $request){
         
-        $validated = $request->validate([
-            'username' => 'required|string|max:255',
-            'password' => 'required|string|min:6'
-        ]);
+        $validated = $request->validated();
 
         if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
             $user = Auth::user();
@@ -39,7 +37,6 @@ class StudentController extends Controller
         return back()->withErrors([
             'username' => 'The provided credentials do not match our records.'
         ])->withInput();
-
     }
     public function logout(Request $request)
     {

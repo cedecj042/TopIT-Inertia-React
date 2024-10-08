@@ -19,7 +19,7 @@ class TestCourse extends Model
         'course_id',
         'theta_score'
     ];
-
+    protected $table = 'test_courses';
     public function tests(){
         return $this->belongsTo(Test::class,'test_id','test_id');
     }

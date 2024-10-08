@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->string('school');
             $table->string('course');
-            $table->string('school_year');
+            $table->string('year');
             // $table->boolean('pretest_completed')->default(false);
             $table->timestamps();
         });

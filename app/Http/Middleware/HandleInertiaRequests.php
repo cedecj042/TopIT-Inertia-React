@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Admin;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -29,10 +31,18 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+        // Determine the user role (Admin or Student)
+        $userRole = null;
+        if ($user) {
+            $userRole = $user->userable instanceof Admin ? 'admin' : ($user->userable instanceof Student ? 'student' : null);
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
+                'role' => $userRole, 
             ],
         ];
     }

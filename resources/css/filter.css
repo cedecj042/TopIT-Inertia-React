@@ -1,0 +1,18 @@
+.input-container{
+    position:relative;
+    display:inline-block;
+}
+
+.input-container .input-icon{
+    position: absolute;
+    top: 0;
+    right: 25px;
+    transform: translateY(35%) scale(0.9);
+    color: #7f7f7f;
+    z-index: 0;
+}
+
+option{
+    border-radius: 5px !important;
+    outline: 1px solid rgba(0,0,0,0.07) !important;
+}

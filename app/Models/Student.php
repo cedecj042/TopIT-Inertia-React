@@ -24,7 +24,7 @@ class Student extends Model
         'address',
         'course',
         'school',
-        'school_year'
+        'year'
     ];
 
     public function user(){
@@ -34,6 +34,6 @@ class Student extends Model
         return $this->hasOne(Pretest::class,'student_id','student_id');
     }
     public function tests(){
-        return $this->hasOne(Test::class,'student_id','student_id');
+        return $this->hasMany(Test::class,'student_id','student_id');
     }
 }
