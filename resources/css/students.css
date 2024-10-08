@@ -88,24 +88,6 @@ body{
   'opsz' 40
 }
 
-.side-bar{
-    position: fixed;
-    z-index: 2;
-    background-color: #fff;
-    box-shadow: 4px 0px 10px 2px rgba(0,0,0,0.045);
-}
-
-
-.nav-link.focused {
-    border-radius: 0;
-    background-color: #e8f1ff;
-    color:#0757C6 !important;
-}
-
-.nav-link.dimmed {
-    opacity: 0.6;
-    background-color: #fff;
-}
 .tables,
 .figures,
 .codes {

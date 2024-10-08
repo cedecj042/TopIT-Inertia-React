@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\StudentController;
+use App\Http\Controllers\Student\StudentCourseController;
 use App\Http\Controllers\Student\StudentLoginController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
@@ -17,22 +19,31 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [StudentController::class, 'loginStudent'])->name('student.login');
     Route::get('/register', [StudentController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [StudentController::class, 'registerStudent'])->name('student.register');
-    Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
+    Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.loginform');
     Route::post('/admin/login', [AdminController::class, 'loginAdmin'])->name('admin.login');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
 Route::middleware(['student', 'auth'])->group(function () {
     Route::get('/dashboard', function () {
-        return Inertia::render('Auth/Student/Dashboard');
-    });
+        return Inertia::render('Student/Dashboard');})->name('dashboard');
+    Route::get('/profile', function () {
+        return Inertia::render('Student/Profile');})->name('profile');
+    
+    Route::get('/course', [StudentCourseController::class, 'showStudentCourse'])->name('student-course');
+    Route::get('/course/{id}', [StudentCourseController::class, 'showStudentCourseDetail'])->name('student-course-detail');
+    Route::get('/course/module/{id}', [StudentCourseController::class, 'showModuleDetail'])->name('student-module-detail');
 });
 
 
 Route::middleware(['admin', 'auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', [DashboardController::class,'index'])->name('dashboard');
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/profile',[AdminController::class,'showProfile'])->name('profile');
-    Route::get('/student/profile/{student_id}',[AdminController::class,'showStudentProfile'])->name('student.profile');
+    Route::get('/profile', [AdminController::class, 'showProfile'])->name('profile');
+    Route::get('/student/profile/{student_id}', [AdminController::class, 'showStudentProfile'])->name('student.profile');
 });
 
 // Route::middleware('auth')->group(function () {

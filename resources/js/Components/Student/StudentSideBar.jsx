@@ -1,6 +1,9 @@
 import { Link, usePage } from "@inertiajs/react";
+import "../../../css/student/sidebar.css";
+import '../../../css/students.css';
 
-export default function StudentSideBar(){
+
+export default function StudentSideBar({title}){
     const { url, component } = usePage();
     return (
         <div className="col-auto col-md-4 col-xl-2 py-4 px-0 side-bar d-flex flex-column justify-content-between h-100">
@@ -12,8 +15,10 @@ export default function StudentSideBar(){
                     <li className="nav-item w-100">
                         <Link
                             href={route('dashboard')}
-                            className={`nav-link text-dark py-3 ps-4 d-flex align-items-center gap-1 ${component === 'Dashboard' ? 'focused' : 'dimmed'}`}
-                            id="dashboard-link"
+                            className={`nav-link text-dark py-3 ps-4 d-flex align-items-center gap-1 ${
+                                title === 'Student Dashboard' ? 'active' : 'dimmed'
+                            }`}
+                            
                         >
                             <span className="material-symbols-outlined">home</span>
                             <span className="ms-1 d-none d-sm-inline fs-6">Dashboard</span>
@@ -21,8 +26,10 @@ export default function StudentSideBar(){
                     </li>
                     <li className="nav-item w-100">
                         <Link
-                            // href={route('profile')}
-                            className={`nav-link text-dark py-3 ps-4 d-flex align-items-center gap-1 ${component === 'Profile' ? 'focused' : 'dimmed'}`}
+                            href={route('profile')}
+                            className={`nav-link text-dark py-3 ps-4 d-flex align-items-center gap-1 ${
+                                title === 'Student Profile' ? 'active' : 'dimmed'
+                            }`}
                             id="profile-link"
                         >
                             <span className="material-symbols-outlined">person</span>
@@ -31,8 +38,10 @@ export default function StudentSideBar(){
                     </li>
                     <li className="nav-item w-100">
                         <Link
-                            // href={route('student-course')}
-                            className={`nav-link text-dark py-3 ps-4 d-flex align-items-center gap-1 ${component === 'StudentCourse' ? 'focused' : 'dimmed'}`}
+                            href={route('student-course')}
+                            className={`nav-link text-dark py-3 ps-4 d-flex align-items-center gap-1 ${
+                                title === 'Student Course' ? 'active' : 'dimmed'
+                            }`}
                             id="course-link"
                         >
                             <span className="material-symbols-outlined">description</span>
@@ -53,7 +62,7 @@ export default function StudentSideBar(){
             </div>
             <div className="pb-3">
                 <Link
-                    // href={route('logout')}
+                    href={route('logout')}
                     method="post"
                     as="button"
                     className="nav-link text-dark py-3 ps-4 d-flex align-items-center gap-1"
