@@ -178,7 +178,7 @@ export default function AdminNavbar({title}) {
                     <li>
                         <Link
                             className="dropdown-item fs-6"
-                            href="{{ route('logout') }}"
+                            href={route('logout')}
                             // onclick="clearMenuState();"
                         >
                             Sign out
