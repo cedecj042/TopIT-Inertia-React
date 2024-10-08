@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\StudentLoginController;
@@ -20,6 +21,12 @@ Route::middleware('guest')->group(function () {
     Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
     Route::post('/admin/login', [AdminController::class, 'loginAdmin'])->name('admin.login');
 });
+
+Route::middleware('auth')->group(function () {
+    Route::get('/logout', [AuthController::class, 'logout']);
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
+
 
 Route::middleware(['student', 'auth'])->group(function () {
     Route::get('/dashboard', function () {
