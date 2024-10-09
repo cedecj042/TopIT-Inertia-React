@@ -4,7 +4,7 @@ import axios from "axios";
 import "../../../css/students.css";
 import MainLayout from "@/Layouts/MainLayout";
 
-const Registration = () => {
+export default function StudentRegister(){
     const [formData, setFormData] = useState({
         profile_image: null,
         firstname: "",
@@ -321,5 +321,3 @@ const Registration = () => {
         </MainLayout>
     );
 };
-
-export default Registration;

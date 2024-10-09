@@ -6,7 +6,7 @@ export default function AdminNavbar({title}) {
 
     const profileImageUrl = auth.user && auth.user.profile_image
             ? `/storage/profile_images/${auth.user.profile_image}`
-            : "assets/profile-circle.png";
+            : "/assets/profile-circle.png";
 
     return (
         <div className="col-auto col-md-3 col-xl-2 py-4 px-0 side-bar d-flex flex-column justify-content-between h-100 navbar-bg">
@@ -28,7 +28,7 @@ export default function AdminNavbar({title}) {
                             href={route('admin.dashboard')}
                             // className="nav-link text-white py-3 ps-4 d-flex align-items-center gap-1"
                             className={`nav-link text-white py-3 ps-4 d-flex align-items-center gap-1 ${
-                                {title} == 'Admin Dashboard' ? '' : 'active'
+                                title === 'Admin Dashboard' ? 'active' : ''
                             }`}
                             id="dashboard-link"
                             data-page="admin.dashboard"
@@ -158,13 +158,13 @@ export default function AdminNavbar({title}) {
                     aria-expanded="false"
                 >
                     <img
-                        src="/assets/profile-circle.png"
+                        src={profileImageUrl}
                         alt="Profile Image"
                         className="rounded-circle"
                         width="30"
                         height="30"
                     />
-                    <span className="d-none d-sm-inline mx-1 fs-6">{auth.user.username}</span>
+                    <span className="d-none d-sm-inline mx-1 fs-6">{auth.username}</span>
                 </Link>
                 <ul className="dropdown-menu dropdown-menu text-small shadow">
                     <li>

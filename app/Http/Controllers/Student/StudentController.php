@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterStudentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Student;
 use Carbon\Carbon;
+use Illuminate\Validation\ValidationException;
 
 class StudentController extends Controller
 {
@@ -21,26 +23,13 @@ class StudentController extends Controller
         return Inertia::render('Auth/StudentRegister');
     }
 
-    public function registerStudent(Request $request)
+    public function registerStudent(RegisterStudentRequest $request)
     {
-        \Log::info('Registration attempt:', $request->all());
+        Log::info('Registration attempt:', $request->all());
         try {
-            $validated = $request->validate([
-                'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'firstname' => 'required|string|max:255',
-                'lastname' => 'required|string|max:255',
-                'username' => 'required|string|max:255|unique:users',
-                'birthdate' => 'nullable|date',
-                'gender' => 'nullable|in:male,female,others',
-                'address' => 'nullable|string|max:255',
-                'school' => 'required|string|max:255',
-                'course' => 'required|string|max:255',
-                'year' => 'required|integer|min:1|max:6',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:6|confirmed',
-            ]);
 
-            \Log::info('Validation passed:', $validated);
+            $validated = $request->validated();
+            Log::info('Validation passed:', $validated);
 
             DB::transaction(function () use ($validated) {
                 $imageName = null;
@@ -80,11 +69,11 @@ class StudentController extends Controller
             return redirect()->route('welcomepage');
 
             // return redirect()->route('login')->with(key: 'success', 'Registration successful. Please log in.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Validation failed: ' . $e->getMessage());
+        } catch (ValidationException $e) {
+            Log::error('Validation failed: ' . $e->getMessage());
             return response()->json(['errors' => $e->errors()], 422);
         } catch (\Exception $e) {
-            \Log::error('Registration error: ' . $e->getMessage());
+            Log::error('Registration error: ' . $e->getMessage());
             return response()->json(['error' => 'An error occurred during registration.'], 500);
         }
     }
@@ -100,7 +89,7 @@ class StudentController extends Controller
 
         $validated = $request->validated();
 
-        if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
+        if (Auth::attempt(['username' => $validated['username'], 'password' => $validated['password']])) {
             $user = Auth::user();
             Log::info('User authenticated successfully.', ['user_id' => $user->user_id]);
 
@@ -117,12 +106,5 @@ class StudentController extends Controller
         return back()->withErrors([
             'username' => 'The provided credentials do not match our records.'
         ])->withInput();
-    }
-    public function logout(Request $request)
-    {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        return redirect('/login');
     }
 }

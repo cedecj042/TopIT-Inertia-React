@@ -3,11 +3,12 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\StudentCourseController;
+use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\StudentLoginController;
+use App\Http\Controllers\Student\StudentProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -26,13 +27,12 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
 Route::middleware(['student', 'auth'])->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Student/Dashboard');})->name('dashboard');
-    Route::get('/profile', function () {
-        return Inertia::render('Student/Profile');})->name('profile');
+    Route::get('/dashboard',[StudentDashboardController::class,'index'])->name('dashboard');
+    Route::get('/profile',[StudentProfileController::class,'index'] )->name('profile');
     
     Route::get('/course', [StudentCourseController::class, 'showStudentCourse'])->name('student-course');
     Route::get('/course/{id}', [StudentCourseController::class, 'showStudentCourseDetail'])->name('student-course-detail');
@@ -43,14 +43,8 @@ Route::middleware(['student', 'auth'])->group(function () {
 Route::middleware(['admin', 'auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/profile', [AdminController::class, 'showProfile'])->name('profile');
-    Route::get('/student/profile/{student_id}', [AdminController::class, 'showStudentProfile'])->name('student.profile');
+    Route::get('/profile', [DashboardController::class, 'showProfile'])->name('profile');
+    Route::get('/student/{student_id}', [DashboardController::class, 'showStudentDetails'])->name('student');
 });
 
-// Route::middleware('auth')->group(function () {
-//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-// });
 
-// require __DIR__.'/auth.php';

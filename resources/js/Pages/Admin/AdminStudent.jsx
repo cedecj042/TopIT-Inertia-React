@@ -1,0 +1,36 @@
+import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
+import StudentProfile from "@/Components/Student/Profile/StudentProfile";
+import AdminLayout from "@/Layouts/AdminLayout";
+import "../../../css/admin/dashboard.css";
+
+export default function AdminStudent({ student, averageThetaScore ,title}) {
+
+    return (
+        <AdminLayout title={title}>
+            <div className="row p-3 mt-2">
+                <div className="row mt-4 px-5">
+                    <div className="d-flex justify-content-between flex-column">
+                        <div className="d-flex flex-row align-items-center">
+                            <button
+                                className="btn btn-transparent"
+                                onClick={() => window.history.back()}
+                            >
+                                <i className="bi bi-arrow-left"></i> 
+                            </button>
+                            <h5 className="fw-semibold m-0">Student Profile</h5>
+                        </div>
+                        <StudentProfile student={student.data}/>
+                    </div>
+                    <div className="row w-100 px-5 mb-3">
+                        <h5 className="fw-semibold">
+                            Average Theta Scores per Course
+                        </h5>
+                        <div className="chart-container">
+                            <ThetaScoreBar thetaScoreData={averageThetaScore} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </AdminLayout>
+    );
+}

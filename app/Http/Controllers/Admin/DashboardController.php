@@ -35,13 +35,13 @@ class DashboardController extends Controller
         if (request('year')) {
             $year = request('year');
             $query->whereHasMorph('userable', [Student::class], function ($q) use ($year) {
-                $q->where('year', $year); // Apply the year condition only to the 'students' table
+                $q->where('year', $year); 
             });
         }
         if (request('school')) {
             $school = request('school');
             $query->whereHasMorph('userable', [Student::class], function ($q) use ($school) {
-                $q->where('school', $school); // Apply the year condition only to the 'students' table
+                $q->where('school', $school); 
             });
         }
 
@@ -83,10 +83,8 @@ class DashboardController extends Controller
         return Inertia::render(
             'Admin/Dashboard',
             [
+                'auth' => Auth::user(),
                 'title' => 'Admin Dashboard',
-                'auth' => [
-                    'user' => Auth::user(),
-                ],
                 'students' => UserResource::collection($students),
                 'queryParams' => request()->query() ?: null,
                 'chartData' => $chartData,
@@ -97,9 +95,7 @@ class DashboardController extends Controller
     }
     private function prepareChartData($monthlyCounts)
     {
-
-        // Fill the array with 0 counts for months that have no data
-        $filledMonthlyCounts = array_fill(1, 12, 0); // Array from 1 to 12 for each month
+        $filledMonthlyCounts = array_fill(1, 12, 0); 
 
         foreach ($monthlyCounts as $month => $count) {
             $filledMonthlyCounts[$month] = $count;
@@ -111,5 +107,28 @@ class DashboardController extends Controller
         ];
     }
 
-    
+    public function showStudentDetails($studentId){
+        $student = Student::find($studentId);
+        $averageThetaScore = DB::table('test_courses')
+        ->select('courses.title as course_title', DB::raw('AVG(test_courses.theta_score) as avg_theta_score'))
+        ->join('tests', 'test_courses.test_id', '=', 'tests.test_id')
+        ->join('students', 'tests.student_id', '=', 'students.student_id')
+        ->join('courses', 'test_courses.course_id', '=', 'courses.course_id')
+        ->where('students.student_id', $studentId)
+        ->groupBy('courses.title')
+        ->get();
+
+        $averageTheta = [
+            'labels' => $averageThetaScore->pluck('course_title')->toArray(),
+            'data' => $averageThetaScore->pluck('avg_theta_score')->toArray()
+        ];
+
+        return Inertia::render('Admin/AdminStudent',[
+            'title' => 'Admin Dashboard',
+            'averageThetaScore' => $averageTheta,
+            'student' => new StudentResource($student)
+        ]);
+    }
+
+
 }

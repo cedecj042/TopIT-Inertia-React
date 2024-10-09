@@ -2,8 +2,7 @@ import React from "react";
 import { usePage } from "@inertiajs/react";
 import StudentLayout from "@/Layouts/StudentLayout";
 
-const Courses = () => {
-    const { courses } = usePage().props; 
+const Courses = ({courses}) => {
 
     return (
         <StudentLayout title="Student Course">

@@ -50,8 +50,7 @@ export default function StudentsTable({ students, visibleColumns }) {
                             )}
                             <td>
                                 <Link
-                                    href={route(
-                                        "admin.student.profile",
+                                    href={route("admin.student",
                                         data.userable.student_id
                                     )}
                                     className="btn text-primary fw-semibold d-flex justify-content-center"
@@ -59,7 +58,7 @@ export default function StudentsTable({ students, visibleColumns }) {
                                     <span className="material-symbols-outlined">
                                         person
                                     </span>{" "}
-                                    View Profile
+                                    View Student
                                 </Link>
                             </td>
                         </tr>

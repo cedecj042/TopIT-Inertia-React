@@ -15,7 +15,7 @@ export default function FormLogin() {
     const handleSubmit = (e) => {
         e.preventDefault();
         post(route('student.login'), {
-            onSuccess: () => reset('password'), // Optionally reset the password field after success
+            onSuccess: () => reset('password'),
         });
     };
 

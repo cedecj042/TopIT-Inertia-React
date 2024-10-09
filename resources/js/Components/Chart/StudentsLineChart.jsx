@@ -49,5 +49,5 @@ export default function StudentsChart({ chartData }) {
         },
     };
 
-    return <Line data={data} options={options} />;
+    return <Line data={data} options={options}/>;
 }
