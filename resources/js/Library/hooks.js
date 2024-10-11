@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { router } from "@inertiajs/react";
 
 export const useColumnVisibility = (initialColumns) => {
     const [visibleColumns, setVisibleColumns] = useState(initialColumns);
@@ -32,5 +33,64 @@ export const useColumnVisibility = (initialColumns) => {
     return {
         visibleColumns,
         onColumnChange,
+    };
+};
+
+
+export const useFilters = (filterState,setFilterState,routeName, components) => {
+    const updateUrlWithFilters = (filters) => {
+        const filteredParams = Object.fromEntries(
+            Object.entries(filters).filter(([k, v]) => v !== "")
+        );
+
+        router.get(route(routeName), filteredParams, {
+            preserveScroll: true,
+            preserveState: true,
+            replace: true,
+            only: components,
+        });
+    };
+
+    const handleFilterChange = (key, value) => {
+        const updatedFilters = {
+            ...filterState,
+            [key]: value || "",
+        };
+
+        setFilterState(updatedFilters);
+        updateUrlWithFilters(updatedFilters);
+    };
+
+    const handleClearInput = (key) => {
+        handleFilterChange(key, "");
+    };
+
+    const handleInputChange = (e) => {
+        handleFilterChange(e.target.name, e.target.value);
+    };
+
+    const onKeyPress = (key, e) => {
+        if (e.key === "Enter") {
+            handleFilterChange(key, e.target.value);
+        }
+    };
+    const handleClearFilter = (filterKeys = []) => {
+        const clearedFilters = { ...filterState };
+
+        filterKeys.forEach((key) => {
+            clearedFilters[key] = "";
+        });
+    
+        setFilterState(clearedFilters);
+        updateUrlWithFilters(clearedFilters);
+    };
+
+    return {
+        filterState,
+        handleFilterChange,
+        handleClearInput,
+        handleInputChange,
+        onKeyPress,
+        handleClearFilter
     };
 };

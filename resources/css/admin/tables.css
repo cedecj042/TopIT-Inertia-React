@@ -1,0 +1,36 @@
+.clickable{
+    cursor: pointer;
+}
+.clickable:hover td{
+    background-color: #daeafc !important;
+}
+
+.table-header{
+    padding:10px 20px 0px 20px;
+    border:1px solid rgba(0,0,0,0.08);
+    border-radius: 10px;
+}
+td{
+    padding:1rem !important;
+}
+table tbody tr:last-child td:first-child{
+    border-radius: 0 0 0 .8rem ;
+}
+table tbody tr:last-child td:last-child{
+    border-radius: 0 0 .8rem 0  ;
+}
+
+table tbody tr{
+    border: 0 solid rgb(248, 248, 248);
+}
+
+table tbody tr:nth-child(even) td{
+    background-color: #f1f1f1;
+}
+
+.w-6{
+    width: 6rem;
+}
+th{
+    align-content: center;
+}

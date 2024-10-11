@@ -40,15 +40,15 @@ body{
     border-radius: 50%;
 }
 
-/* .background{
+.background{
     position: fixed;
     z-index: -1;
     height: 100vh;
     width: 100vw;
-    background: rgb(232,245,255);
+    /* background: rgb(232,245,255);
     background: -moz-linear-gradient(325deg, rgb(247, 252, 255) 0%, rgb(251, 252, 253) 45%, rgba(237,239,246,1) 100%);
     background: -webkit-linear-gradient(325deg, rgb(247, 252, 255) 0%, rgb(251, 252, 253) 45%, rgba(237,239,246,1) 100%);
     background: linear-gradient(325deg, rgb(247, 252, 255) 0%, rgb(251, 252, 253) 45%, rgba(237,239,246,1) 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#e8f5ff",endColorstr="#edeff6",GradientType=1);
-} */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#e8f5ff",endColorstr="#edeff6",GradientType=1); */
+}
 

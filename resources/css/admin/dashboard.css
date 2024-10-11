@@ -7,19 +7,7 @@
     width:100%;
 }
 
-.table-header{
-    padding:10px 20px 0px 20px;
-    border:1px solid rgba(0,0,0,0.08);
-    border-radius: 10px;
-}
 
-table tbody tr:last-child{
-    border: 1px solid white;
-}
-
-table tbody tr:nth-child(even) td{
-    background-color: rgba(0,0,0,0.02);
-}
 
 .back-container{
     width: 20rem;

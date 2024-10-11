@@ -1,12 +1,12 @@
-import { router } from "@inertiajs/react";
 import { useState, useEffect } from "react";
 import SelectInput from "../SelectInput";
 import "../../../css/filter.css";
-import StudentColumnFilter from "./Filters/ColumnFilter";
 import SelectFilter from "./Filters/SelectFilter";
 import TextInputFilter from "./Filters/TextInputFilter";
-import { INITIAL_STUDENT_FILTER_STATE, STUDENT_COLUMN } from "@/Library/constants";
+import {  STUDENT_COLUMN, STUDENT_FILTER_COMPONENT } from "@/Library/constants";
+import { INITIAL_STUDENT_FILTER_STATE } from "@/Library/filterState";
 import ColumnFilter from "./Filters/ColumnFilter";
+import { useFilters } from "@/Library/hooks";
 
 export default function StudentFilters({
     visibleColumns,
@@ -14,7 +14,14 @@ export default function StudentFilters({
     filters,
     queryParams = {},
 }) {
-    const [filterState, setFilterState] = useState(INITIAL_STUDENT_FILTER_STATE(queryParams));
+    const [filterState, setFilterState] = useState(INITIAL_STUDENT_FILTER_STATE(queryParams));  
+    const {
+        handleFilterChange,
+        handleInputChange,
+        handleClearInput,
+        handleClearFilter,
+        onKeyPress,
+    } = useFilters(filterState,setFilterState, "admin.dashboard", STUDENT_FILTER_COMPONENT);
     const FILTER_DATA = [
         {
             data: filters.years,
@@ -27,56 +34,7 @@ export default function StudentFilters({
             keyValue: filterState.school,
         },
     ]
-
-    const updateUrlWithFilters = (filters) => {
-        const filteredParams = Object.fromEntries(
-            Object.entries(filters).filter(([k, v]) => v !== "")
-        );
-
-        router.get(route("admin.dashboard"), filteredParams, {
-            preserveScroll: true,
-            preserveState: true,
-            replace: true,
-            only: ["students", "filters", "students.meta", "queryParams"], // Only re-render specific components
-        });
-    };
-
-    const handleFilterChange = (key, value) => {
-        const updatedFilters = {
-            ...filterState,
-            [key]: value || "",
-        };
-
-        // Update the state and synchronize the URL
-        setFilterState(updatedFilters);
-        updateUrlWithFilters(updatedFilters);
-    };
-
-    const handleClearInput = (key) => {
-        handleFilterChange(key, "");
-    };
-
-    const handleInputChange = (e) => {
-        handleFilterChange(e.target.name, e.target.value);
-    };
-    const onKeyPress = (key, e) => {
-        if (e.key === "Enter") {
-            handleFilterChange(key, e.target.value);
-        }
-    };
-
-    const handleClearFilter = () => {
-        // Clear 'year' and 'school' filters while keeping other filters intact
-        const clearedFilters = {
-            ...filterState,
-            year: "",
-            school: "",
-        };
-
-        // Update the state and synchronize the URL
-        setFilterState(clearedFilters);
-        updateUrlWithFilters(clearedFilters);
-    };
+ 
 
     return (
         <div className="row justify-content-between">
@@ -114,7 +72,7 @@ export default function StudentFilters({
                         <div className="mb-3">
                             <button
                                 className="btn btn-light w-100"
-                                onClick={handleClearFilter}
+                                onClick={() =>handleClearFilter(['year','school'])}
                             >
                                 Clear Filters
                             </button>

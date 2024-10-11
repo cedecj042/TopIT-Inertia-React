@@ -6,7 +6,6 @@ import { router } from "@inertiajs/react";
 
 export default function Student({ student, averageThetaScore ,title,queryParams}) {
     const handleBackClick = () => {
-        // Navigate back to the dashboard with the queryParams from the previous page (dashboard)
         router.get(route('admin.dashboard', queryParams));
     };
     return (

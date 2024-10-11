@@ -1,36 +1,32 @@
-import { COURSE_COLUMN } from "@/Library/constants";
-import CourseColumnFilter from "./Filters/CourseColumnFilter";
+import { COURSE_COLUMN, COURSE_FILTER_COMPONENT } from "@/Library/constants";
+import { INITIAL_COURSE_FILTER_STATE } from "@/Library/filterState";
+import { useFilters } from "@/Library/hooks";
+import { useState } from "react";
+import TextInputFilter from "./Filters/TextInputFilter";
+import SelectInput from "../SelectInput";
+import ColumnFilter from "./Filters/ColumnFilter";
+import "../../../css/filter.css";
 
-export default function CourseFilters(){
-    const handleFilterChange = (key, value) => {
-        const updatedFilters = {
-            ...filterState,
-            [key]: value || "",
-        };
-
-        // Update the state and synchronize the URL
-        setFilterState(updatedFilters);
-        updateUrlWithFilters(updatedFilters);
-    };
-    const handleClearInput = () => {
-        handleFilterChange("name", "");
-    };
-
-    const handleInputChange = (e) => {
-        handleFilterChange("name", e.target.value);
-    };
-    const onKeyPress = (key, e) => {
-        if (e.key === "Enter") {
-            handleFilterChange(key, e.target.value);
-        }
-    };
+export default function CourseFilters({
+    visibleColumns,
+    onColumnChange,
+    queryParams = {},
+}){  
+    const [filterState, setFilterState] = useState(INITIAL_COURSE_FILTER_STATE(queryParams));
+    const {
+        handleFilterChange,
+        handleInputChange,
+        handleClearInput,
+        onKeyPress,
+    } = useFilters(filterState,setFilterState, "admin.course.index", COURSE_FILTER_COMPONENT);
 
     return(
         <div className="row justify-content-between">
             <div className="filter col-6 row">
-                <NameFilter
+                <TextInputFilter
                     onKeyPress={onKeyPress}
                     value={filterState.name}
+                    filterKey={'course title'}
                     handleInputChange={handleInputChange}
                     handleClearInput={handleClearInput}
                 />

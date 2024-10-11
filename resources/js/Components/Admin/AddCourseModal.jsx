@@ -8,6 +8,7 @@ export default function AddCourseModal({ show, onClose }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        
         router.post(route("admin.course.add"), {
             course_name: courseName,
             course_desc: courseDesc,

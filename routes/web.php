@@ -62,7 +62,8 @@ Route::middleware(['admin', 'auth'])->prefix('admin')->name('admin.')->group(fun
     // Courses
     Route::prefix('course')->name('course.')->group(function () {
         Route::get('/', [CourseController::class, 'index'])->name('index');
-        // Route::post('/add', [CourseController::class, 'addCourse'])->name('add');
+        Route::post('/add', [CourseController::class, 'add'])->name('add');
+        Route::post('/delete/{course_id}', [CourseController::class, 'delete'])->name('delete');
         Route::get('/{course_id}', [CourseController::class, 'show'])->name('detail');
         // Route::post('/pdf/upload', [PdfController::class, 'uploadPdf'])->name('pdf.upload');
         // Route::delete('/pdf/delete/{id}', [PdfController::class, 'deletePdf'])->name('pdf.delete');

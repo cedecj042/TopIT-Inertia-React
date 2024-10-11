@@ -1,16 +1,16 @@
 import { Link } from "@inertiajs/react";
+import '../../../css/admin/tables.css';
 
 export default function StudentsTable({ students, visibleColumns, queryParams}) {
     return (
         <div className="table-header mt-3">
-            <table className="table table-hover students-table">
+            <table className="table students-table">
                 <thead>
                     <tr>
-                        {visibleColumns.student_id && <td>ID</td>}
-                        {visibleColumns.firstname && <th>First Name</th>}
-                        {visibleColumns.lastname && <th>Last Name</th>}
+                        {visibleColumns.student_id && <th>ID</th>}
+                        {visibleColumns.name && <th>Name</th>}
                         {visibleColumns.school && <th>School</th>}
-                        {visibleColumns.year && <th>Year</th>}
+                        {visibleColumns.year && <th className="text-center w-6">Year</th>}
                         {visibleColumns.created_at && <th>Created At</th>}
                         <th className="text-center">Actions</th>
                     </tr>
@@ -23,14 +23,9 @@ export default function StudentsTable({ students, visibleColumns, queryParams}) 
                                     {data.userable.student_id}
                                 </td>
                             )}
-                            {visibleColumns.firstname && (
+                            {visibleColumns.name && (
                                 <td className="align-content-center">
-                                    {data.userable.firstname}
-                                </td>
-                            )}
-                            {visibleColumns.lastname && (
-                                <td className="align-content-center">
-                                    {data.userable.lastname}
+                                    {data.userable.firstname} {data.userable.lastname}
                                 </td>
                             )}
                             {visibleColumns.school && (
@@ -39,7 +34,7 @@ export default function StudentsTable({ students, visibleColumns, queryParams}) 
                                 </td>
                             )}
                             {visibleColumns.year && (
-                                <td className="align-content-center">
+                                <td className="align-content-center text-center">
                                     {data.userable.year}
                                 </td>
                             )}

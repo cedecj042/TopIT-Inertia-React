@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CourseRequest;
 use App\Http\Resources\CourseResource;
+use App\Jobs\ProcessCourse;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class CourseController extends Controller
@@ -25,7 +28,8 @@ class CourseController extends Controller
         return Inertia::render('Admin/Course',[
             'title' => 'Admin Course',
             'auth'=> Auth::user(),
-            'courses'=>CourseResource::collection($courses)
+            'courses'=>CourseResource::collection($courses),
+            'queryParams'=>request()->query() ? :null,
         ]);
     }
 
@@ -40,9 +44,26 @@ class CourseController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function add(CourseRequest $request)
     {
-        //
+        $validatedData = $request->validated();
+
+        Log::info('Validated data:', $validatedData);
+
+        try {
+            $course = Course::create([
+                'title' => $validatedData['course_name'],
+                'description' => $validatedData['course_desc'],
+            ]);
+            $course->save();
+
+            Log::info('Course saved successfully:', ['course_id' => $course->course_id]);
+            // ProcessCourse::dispatch($course->course_id);
+            return redirect()->back()->with('success', 'Course added successfully!');
+        } catch (\Exception $e) {
+            Log::error('Error saving course:', ['exception' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Failed to add course. Please try again.');
+        }
     }
 
     /**
@@ -72,8 +93,12 @@ class CourseController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function delete(string $course_id)
     {
         //
+        $course = Course::findOrFail($course_id);
+    
+        $course->delete();
+        return redirect()->back()->with('success', 'Course removed successfully!');
     }
 }

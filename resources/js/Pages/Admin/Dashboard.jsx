@@ -22,9 +22,9 @@ export default function Dashboard({
         <AdminLayout title={title}> 
             <Head title={title}/>
             <div className="row p-3">
-                <div className="row justify-content-center mt-4 px-5">
+                <div className="row justify-content-center mt-5 px-5">
                     <h3 className="fw-bold">Dashboard</h3>
-                    <div className="row mt-3 pt-4">
+                    <div className="row mt-2 p-0">
                         <div className="d-flex flex-column col-12">
                             <h5 className="fw-bolder mb-3">List of Students</h5>
                             <StudentFilters

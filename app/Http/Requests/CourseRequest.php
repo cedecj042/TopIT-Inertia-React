@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Admin;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class CourseRequest extends FormRequest
 {
@@ -11,7 +13,7 @@ class CourseRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return Auth::check() && Auth::user()->userable instanceof Admin;
     }
 
     /**
@@ -23,6 +25,8 @@ class CourseRequest extends FormRequest
     {
         return [
             //
+            'course_name' => 'required|max:255|string',
+            'course_desc' => 'required|string',
         ];
     }
 }
