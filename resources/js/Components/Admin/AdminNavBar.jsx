@@ -179,6 +179,7 @@ export default function AdminNavbar({title}) {
                         <Link
                             className="dropdown-item fs-6"
                             href={route('logout')}
+                            method="post"
                             // onclick="clearMenuState();"
                         >
                             Sign out

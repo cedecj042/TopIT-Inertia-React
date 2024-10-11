@@ -1,0 +1,30 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.nav-link.active {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.btn-outline-primary {
+    border-color: #dee2e6;
+    color: #495057;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary.answered {
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}

@@ -9,6 +9,7 @@ use App\Http\Controllers\Student\StudentCourseController;
 use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\StudentLoginController;
 use App\Http\Controllers\Student\StudentProfileController;
+use App\Http\Controllers\Student\PretestController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -27,10 +28,20 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+    // Route::get('/logout', [AuthController::class, 'logout'])->name(name: 'logout');
 });
 
 Route::middleware(['student', 'auth'])->group(function () {
+    Route::get('/welcome',[PretestController::class,'welcome'] )->name('welcome');
+    Route::prefix('pretest')->name('pretest.')->group(function () {
+        Route::get('/start', [PretestController::class, 'startPretest'])->name('start');
+        Route::get('/questions/{courseIndex?}', [PretestController::class, 'showQuestions'])->name('questions');
+        
+        Route::post('/submit', [PretestController::class, 'submitAnswers'])->name('submit');
+        Route::get('/finish/{pretestId}', [PretestController::class, 'showFinishAttempt'])->name('finish');
+        Route::get('/review/{pretestId}', [PretestController::class, 'reviewPretest'])->name('review');
+    });
+
     Route::get('/dashboard',[StudentDashboardController::class,'index'])->name('dashboard');
     Route::get('/profile',[StudentProfileController::class,'index'] )->name('profile');
     

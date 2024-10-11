@@ -64,7 +64,7 @@ export default function StudentSideBar({title}){
                 <Link
                     href={route('logout')}
                     method="post"
-                    as="button"
+                    // as="button"
                     className="nav-link text-dark py-3 ps-4 d-flex align-items-center gap-1"
                 >
                     <span className="material-symbols-outlined">logout</span>
