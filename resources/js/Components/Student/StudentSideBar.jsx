@@ -1,6 +1,6 @@
 import { Link, usePage } from "@inertiajs/react";
 import "../../../css/student/sidebar.css";
-import '../../../css/students.css';
+import '../../../css/student/students.css';
 
 
 export default function StudentSideBar({title}){

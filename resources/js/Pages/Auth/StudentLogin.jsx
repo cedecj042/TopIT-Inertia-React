@@ -3,7 +3,7 @@ import { useState } from "react";
 import MainLayout from "@/Layouts/MainLayout";
 import HeaderLogin from "@/Components/Student/Auth/HeaderLogin";
 import FormLogin from "@/Components/Student/Auth/FormLogin";
-import '../../../css/students.css';
+import '../../../css/student/students.css';
 
 
 export default function StudentLogin() {

@@ -44,6 +44,7 @@ body{
 .auth-button:hover{
     background-color: #1667da !important;
 }
+
 .background{
     position: fixed;
     z-index: -1;
@@ -52,7 +53,7 @@ body{
     background-size: cover;
     height: 100vh;
     width: 100vw;
-    background-image: url('../../public/assets/background.png');
+    background-image: url('../../../public/assets/background.png');
 }
 
 .form-bg{

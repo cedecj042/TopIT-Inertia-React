@@ -1,18 +1,18 @@
 import AddCourseModal from "@/Components/Admin/AddCourseModal";
+import CourseFilters from "@/Components/Filter/CourseFilters";
 import CourseTable from "@/Components/Tables/CourseTable";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { COURSE_COLUMN } from "@/Library/constants";
 import { Head } from "@inertiajs/react";
 import { useState } from "react";
 
-export default function Course({ title,courses }) {
-    const [showModal, setShowModal] = useState(false);
+export default function Course({ auth, title,courses }) {
 
+    const [showModal, setShowModal] = useState(false);
     const openModal = () => setShowModal(true);
     const closeModal = () => setShowModal(false);
-
     const [visibleColumns, setVisibleColumns] = useState(COURSE_COLUMN);
-
+    
     const onColumnChange = (columnName, isVisible) => {
         if (columnName === "all") {
             const updatedColumns = Object.keys(visibleColumns).reduce((columns, key) => {
@@ -50,6 +50,12 @@ export default function Course({ title,courses }) {
                     </div>
                     <div className="row px-0">
                         <h5 className="fw-semibold">List of Courses</h5>
+                        <CourseFilters 
+                            queryParams={queryParams}
+                            filters={filters}
+                            visibleColumns={visibleColumns}
+                            onColumnChange={onColumnChange}
+                        />
                         <CourseTable courses={courses.data} visibleColumns={visibleColumns}/>
                     </div>
 

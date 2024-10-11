@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import MainLayout from "@/Layouts/MainLayout";
-import Navbar from "@/Components/Navbar";
+import Navbar from "@/Components/Student/Navbar";
 import Sidebar from "@/Components/Pretest/Sidebar";
 import QuestionForm from "@/Components/Pretest/QuestionForm";
 import { Inertia } from '@inertiajs/inertia'; 

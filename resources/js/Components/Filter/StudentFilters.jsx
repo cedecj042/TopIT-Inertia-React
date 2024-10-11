@@ -2,38 +2,44 @@ import { router } from "@inertiajs/react";
 import { useState, useEffect } from "react";
 import SelectInput from "../SelectInput";
 import "../../../css/filter.css";
-import NameFilter from "./Filters/NameFilter";
-import YearFilter from "./Filters/YearFilter";
-import SchoolFilter from "./Filters/SchoolFilter";
-import StudentColumnFilter from "./Filters/StudentColumnFilter";
+import StudentColumnFilter from "./Filters/ColumnFilter";
+import SelectFilter from "./Filters/SelectFilter";
+import TextInputFilter from "./Filters/TextInputFilter";
+import { INITIAL_STUDENT_FILTER_STATE, STUDENT_COLUMN } from "@/Library/constants";
+import ColumnFilter from "./Filters/ColumnFilter";
 
 export default function StudentFilters({
     visibleColumns,
     onColumnChange,
     filters,
-    queryParams = {}, 
+    queryParams = {},
 }) {
-    const [filterState, setFilterState] = useState({
-        year: queryParams?.year || "",     
-        school: queryParams?.school || "",
-        name: queryParams?.name || "",
-        items: queryParams?.items || "", 
-    });
-
+    const [filterState, setFilterState] = useState(INITIAL_STUDENT_FILTER_STATE(queryParams));
+    const FILTER_DATA = [
+        {
+            data: filters.years,
+            filterKey: "year",
+            keyValue: filterState.year,
+        },
+        {
+            data: filters.schools,
+            filterKey: "school",
+            keyValue: filterState.school,
+        },
+    ]
 
     const updateUrlWithFilters = (filters) => {
         const filteredParams = Object.fromEntries(
             Object.entries(filters).filter(([k, v]) => v !== "")
         );
-        
+
         router.get(route("admin.dashboard"), filteredParams, {
             preserveScroll: true,
             preserveState: true,
             replace: true,
-            only: ["students", "filters", "students.meta",'queryParams'], // Only re-render specific components
+            only: ["students", "filters", "students.meta", "queryParams"], // Only re-render specific components
         });
     };
-
 
     const handleFilterChange = (key, value) => {
         const updatedFilters = {
@@ -46,12 +52,12 @@ export default function StudentFilters({
         updateUrlWithFilters(updatedFilters);
     };
 
-    const handleClearInput = () => {
-        handleFilterChange("name", "");
+    const handleClearInput = (key) => {
+        handleFilterChange(key, "");
     };
 
     const handleInputChange = (e) => {
-        handleFilterChange("name", e.target.value);
+        handleFilterChange(e.target.name, e.target.value);
     };
     const onKeyPress = (key, e) => {
         if (e.key === "Enter") {
@@ -75,9 +81,10 @@ export default function StudentFilters({
     return (
         <div className="row justify-content-between">
             <div className="filter col-6 row">
-                <NameFilter
+                <TextInputFilter
                     onKeyPress={onKeyPress}
                     value={filterState.name}
+                    filterKey={"name"}
                     handleInputChange={handleInputChange}
                     handleClearInput={handleClearInput}
                 />
@@ -95,16 +102,15 @@ export default function StudentFilters({
                         className="dropdown-menu p-3"
                         aria-labelledby="filterDropdown"
                     >
-                        <YearFilter
-                            filters={filters}
-                            yearValue={filterState.year}
-                            handleFilterChange={handleFilterChange}
-                        />
-                        <SchoolFilter
-                            filters={filters}
-                            schoolValue={filterState.school}
-                            handleFilterChange={handleFilterChange}
-                        />
+                        {FILTER_DATA.map((filter, index) => (
+                            <SelectFilter
+                                key={index} // Use index as key
+                                data={filter.data}
+                                filterKey={filter.filterKey}
+                                keyValue={filter.keyValue}
+                                handleFilterChange={handleFilterChange}
+                            />
+                        ))}
                         <div className="mb-3">
                             <button
                                 className="btn btn-light w-100"
@@ -119,10 +125,11 @@ export default function StudentFilters({
             <div className="col">
                 <div className="row justify-content-end">
                     <div className="col">
-                    <StudentColumnFilter
-                        visibleColumns={visibleColumns} // Ensure visibleColumns is passed
-                        onColumnChange={onColumnChange}
-                    />
+                        <ColumnFilter
+                            columnData={STUDENT_COLUMN}
+                            visibleColumns={visibleColumns}
+                            onColumnChange={onColumnChange}
+                        />
                     </div>
                     <div className="col-3">
                         <SelectInput

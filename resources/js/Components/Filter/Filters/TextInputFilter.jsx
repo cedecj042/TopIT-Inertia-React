@@ -1,20 +1,21 @@
 import TextInput from "../../TextInput";
 
-export default function NameFilter({value,handleInputChange,handleClearInput,onKeyPress}) {
+export default function TextInputFilter({value,filterKey,handleInputChange,handleClearInput,onKeyPress}) {
     return (
         <div className="col input-container">
             <TextInput
                 type="text"
                 className="form-control"
-                placeholder="Search by name"
+                placeholder={`Search by ${filterKey}`}
                 value={value}
+                name={filterKey}
                 onChange={handleInputChange}
-                onKeyPress={(e) => onKeyPress("name", e)}
+                onKeyPress={(e) => onKeyPress(filterKey, e)}
             />
             {value ? (
                 <span
                     className="material-symbols-outlined input-icon"
-                    onClick={handleClearInput}
+                    onClick={() => handleClearInput(filterKey)}
                     style={{ cursor: "pointer" }}
                 >
                     close

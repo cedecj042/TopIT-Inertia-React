@@ -5,9 +5,9 @@ import Pagination from "@/Components/Pagination";
 import StudentsTable from "@/Components/Tables/StudentsTable";
 import StudentsLineChart from "@/Components/Chart/StudentsLineChart";
 import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
-import {useState } from 'react';
 import StudentFilters from "@/Components/Filter/StudentFilters";
 import { STUDENT_COLUMN } from "@/Library/constants";
+import { useColumnVisibility } from "@/Library/hooks";
 export default function Dashboard({
     students,
     chartData,
@@ -16,22 +16,7 @@ export default function Dashboard({
     filters,
     queryParams
 }) {
-    const [visibleColumns, setVisibleColumns] = useState(STUDENT_COLUMN);
-
-    const onColumnChange = (columnName, isVisible) => {
-        if (columnName === "all") {
-            const updatedColumns = Object.keys(visibleColumns).reduce((columns, key) => {
-                columns[key] = isVisible;
-                return columns;
-            }, {});
-            setVisibleColumns(updatedColumns);
-        } else {
-            setVisibleColumns((prev) => ({
-                ...prev,
-                [columnName]: isVisible,
-            }));
-        }
-    };
+    const { visibleColumns, onColumnChange } = useColumnVisibility(STUDENT_COLUMN);
     return (
         
         <AdminLayout title={title}> 

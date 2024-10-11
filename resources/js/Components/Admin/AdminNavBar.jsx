@@ -1,4 +1,4 @@
-import { Link, usePage } from "@inertiajs/react";
+import { Link, router, usePage } from "@inertiajs/react";
 import { useState, useEffect } from "react";
 import "../../../css/admin/navigation.css";
 
@@ -148,7 +148,7 @@ export default function AdminNavbar({ title }) {
                         <Link className="dropdown-item fs-6" href="{route('admin.profile')}">Profile</Link>
                     </li>
                     <li>
-                        <Link className="dropdown-item fs-6" href={route('logout')}>Sign out</Link>
+                        <Link className="dropdown-item fs-6" href={route('logout')} method="post" as="button">Sign out</Link>
                     </li>
                 </ul>
             </div>

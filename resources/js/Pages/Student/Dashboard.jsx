@@ -3,11 +3,8 @@ import { Head } from "@inertiajs/react";
 import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
 import TestHistory from "@/Components/Test/TestHistory";
 import "../../../css/student/dashboard.css";
-import "../../../css/students.css";
-
 
 export default function Dashboard({ title, averageThetaScore, tests }) {
-    console.log('Props received in Dashboard:', { title, averageThetaScore, tests });
 
     const testsData = tests && tests.data ? tests.data : [];
 

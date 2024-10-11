@@ -1,7 +1,7 @@
 import React from "react";
 import StudentLayout from "@/Layouts/StudentLayout";
 import TestHistory from "@/Components/Test/TestHistory";
-import "../../../css/students.css";
+import "../../../css/student/students.css";
 
 const TestPage = (props) => {
 

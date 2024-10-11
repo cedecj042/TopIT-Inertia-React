@@ -1,7 +1,7 @@
 // Existing imports...
 import React, { useState } from "react";
 import axios from "axios";
-import "../../../css/students.css";
+import "../../../css/student/students.css";
 import MainLayout from "@/Layouts/MainLayout";
 
 export default function StudentRegister(){

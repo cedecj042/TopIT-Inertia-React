@@ -1,7 +1,7 @@
 import { useForm } from '@inertiajs/react';
 import { gsap } from 'gsap';
 import { useEffect, useRef } from 'react';
-import '../../../css/admin.css';
+import '../../../css/admin/admin.css';
 
 export default function Login() {
 
