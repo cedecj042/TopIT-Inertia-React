@@ -1,0 +1,24 @@
+.full-height {
+    height: calc(100vh - 100px);
+}
+
+.left-column {
+    padding-left: 2rem;
+    margin-left: 15rem;
+}
+
+.right-column {
+    margin-left: -5rem;
+    text-align: center;
+}
+
+img.img-fluid {
+    max-width: 100%;
+    height: auto;
+}
+
+.row.custom-margin {
+    margin-top: -60px; 
+    margin-left: 30px;
+    margin-bottom: 30px;
+}
