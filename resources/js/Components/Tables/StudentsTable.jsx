@@ -1,6 +1,6 @@
 import { Link } from "@inertiajs/react";
 
-export default function StudentsTable({ students, visibleColumns }) {
+export default function StudentsTable({ students, visibleColumns, queryParams}) {
     return (
         <div className="table-header mt-3">
             <table className="table table-hover students-table">
@@ -49,12 +49,11 @@ export default function StudentsTable({ students, visibleColumns }) {
                                 </td>
                             )}
                             <td>
-                                <Link
-                                    href={route("admin.student",
-                                        data.userable.student_id
-                                    )}
-                                    className="btn text-primary fw-semibold d-flex justify-content-center"
-                                >
+                            <Link
+                                href={route("admin.student", { student_id: data.userable.student_id, ...queryParams })} 
+                                preserveState
+                                className="btn text-primary fw-semibold d-flex justify-content-center"
+                            >
                                     <span className="material-symbols-outlined">
                                         person
                                     </span>{" "}
@@ -68,11 +67,3 @@ export default function StudentsTable({ students, visibleColumns }) {
         </div>
     );
 }
-            // {/* Student Profile Modal */}
-            // {selectedStudent && (
-            //     <StudentProfileModal
-            //         student={selectedStudent}
-            //         isOpen={isModalOpen}
-            //         onClose={closeModal}
-            //     />
-            // )}

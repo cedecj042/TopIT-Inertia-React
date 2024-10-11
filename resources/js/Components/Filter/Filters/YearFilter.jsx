@@ -1,4 +1,4 @@
-import SelectInput from "../SelectInput";
+import SelectInput from "../../SelectInput";
 
 export default function YearFilter({yearValue,filters,handleFilterChange}) {
     return (
@@ -9,10 +9,10 @@ export default function YearFilter({yearValue,filters,handleFilterChange}) {
             <SelectInput
                 onChange={(e) => handleFilterChange("year", e.target.value)}
                 value={yearValue}
-                className=" form-select"
+                className={` form-select ${yearValue === "" ? 'text-secondary' : ''}`}
                 id="schoolYearSelect"
             >
-                <option disabled>Year</option>
+                <option value="" disabled >Select year</option>
                 {filters.years.map((year) => (
                     <option key={year} value={year}>
                         {year}

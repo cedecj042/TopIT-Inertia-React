@@ -1,6 +1,6 @@
 import AdminNavbar from "@/Components/Admin/AdminNavBar";
 import MainLayout from "./MainLayout";
-import '../../css/admin.css';
+import '../../css/admin/admin.css';
 
 export default function AdminLayout({children,title}) {
     return (

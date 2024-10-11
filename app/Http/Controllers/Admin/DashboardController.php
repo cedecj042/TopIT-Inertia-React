@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -44,7 +45,7 @@ class DashboardController extends Controller
                 $q->where('school', $school); 
             });
         }
-
+        
         // Determine the pagination count
         $perPage = request('items', 5);
 
@@ -123,10 +124,12 @@ class DashboardController extends Controller
             'data' => $averageThetaScore->pluck('avg_theta_score')->toArray()
         ];
 
-        return Inertia::render('Admin/AdminStudent',[
+        return Inertia::render('Admin/Student',[
+            'auth' => Auth::user(),
             'title' => 'Admin Dashboard',
             'averageThetaScore' => $averageTheta,
-            'student' => new StudentResource($student)
+            'student' => new StudentResource($student),
+            'queryParams' => request()->query() ?: null,
         ]);
     }
 

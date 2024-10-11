@@ -1,11 +1,11 @@
 
-import AllColumn from "./StudentColumnFilter/AllColumn";
-import CreatedAt from "./StudentColumnFilter/CreatedAt";
-import FirstNameColumn from "./StudentColumnFilter/FirstNameColumn";
-import IdColumn from "./StudentColumnFilter/IdColumn";
-import LastNameColumn from "./StudentColumnFilter/LastNameColumn";
-import SchoolColumn from "./StudentColumnFilter/SchoolColumn";
-import YearColumn from "./StudentColumnFilter/YearColumn";
+import AllColumn from "../ColumnFilter/AllColumn";
+import CreatedAt from "../ColumnFilter/CreatedAt";
+import FirstNameColumn from "../ColumnFilter/FirstNameColumn";
+import IdColumn from "../ColumnFilter/IdColumn";
+import LastNameColumn from "../ColumnFilter/LastNameColumn";
+import SchoolColumn from "../ColumnFilter/SchoolColumn";
+import YearColumn from "../ColumnFilter/YearColumn";
 
 export default function StudentColumnFilter({visibleColumns,onColumnChange}) {
 

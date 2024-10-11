@@ -2,9 +2,13 @@ import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
 import StudentProfile from "@/Components/Student/Profile/StudentProfile";
 import AdminLayout from "@/Layouts/AdminLayout";
 import "../../../css/admin/dashboard.css";
+import { router } from "@inertiajs/react";
 
-export default function AdminStudent({ student, averageThetaScore ,title}) {
-
+export default function Student({ student, averageThetaScore ,title,queryParams}) {
+    const handleBackClick = () => {
+        // Navigate back to the dashboard with the queryParams from the previous page (dashboard)
+        router.get(route('admin.dashboard', queryParams));
+    };
     return (
         <AdminLayout title={title}>
             <div className="row p-3 mt-2">
@@ -13,7 +17,7 @@ export default function AdminStudent({ student, averageThetaScore ,title}) {
                         <div className="d-flex flex-row align-items-center">
                             <button
                                 className="btn btn-transparent"
-                                onClick={() => window.history.back()}
+                                onClick={handleBackClick} 
                             >
                                 <i className="bi bi-arrow-left"></i> 
                             </button>

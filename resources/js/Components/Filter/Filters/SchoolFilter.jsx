@@ -1,4 +1,4 @@
-import SelectInput from "../SelectInput";
+import SelectInput from "../../SelectInput";
 
 export default function SchoolFilter({schoolValue,filters,handleFilterChange}) {
     return (
@@ -9,10 +9,10 @@ export default function SchoolFilter({schoolValue,filters,handleFilterChange}) {
             <SelectInput
                 onChange={(e) => handleFilterChange("school", e.target.value)}
                 value={schoolValue}
-                className=" form-select"
+                className={` form-select ${schoolValue === "" ? 'text-secondary' : ''}`}
                 id="schoolSelect"
             >
-                <option disabled>School</option>
+                <option value="" disabled>Select school</option>
                 {filters.schools.map((school) => (
                     <option key={school} value={school}>
                         {school}

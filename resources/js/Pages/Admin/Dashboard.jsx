@@ -2,11 +2,12 @@ import AdminLayout from "@/Layouts/AdminLayout";
 import "../../../css/admin/dashboard.css";
 import { Head, router } from "@inertiajs/react";
 import Pagination from "@/Components/Pagination";
-import StudentsTable from "@/Components/StudentsTable";
+import StudentsTable from "@/Components/Tables/StudentsTable";
 import StudentsLineChart from "@/Components/Chart/StudentsLineChart";
 import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
-import Filters from "@/Components/Filter/Filters";
 import {useState } from 'react';
+import StudentFilters from "@/Components/Filter/StudentFilters";
+import { STUDENT_COLUMN } from "@/Library/constants";
 export default function Dashboard({
     students,
     chartData,
@@ -15,25 +16,15 @@ export default function Dashboard({
     filters,
     queryParams
 }) {
-    const [visibleColumns, setVisibleColumns] = useState({
-        student_id: true,
-        firstname: true,
-        lastname: true,
-        school: true,
-        year: true,
-        created_at: true,
-    });
+    const [visibleColumns, setVisibleColumns] = useState(STUDENT_COLUMN);
 
     const onColumnChange = (columnName, isVisible) => {
         if (columnName === "all") {
-            setVisibleColumns({
-                student_id: isVisible,
-                firstname: isVisible,
-                lastname: isVisible,
-                school: isVisible,
-                year: isVisible,
-                created_at: isVisible,
-            });
+            const updatedColumns = Object.keys(visibleColumns).reduce((columns, key) => {
+                columns[key] = isVisible;
+                return columns;
+            }, {});
+            setVisibleColumns(updatedColumns);
         } else {
             setVisibleColumns((prev) => ({
                 ...prev,
@@ -41,8 +32,8 @@ export default function Dashboard({
             }));
         }
     };
-
     return (
+        
         <AdminLayout title={title}> 
             <Head title={title}/>
             <div className="row p-3">
@@ -51,7 +42,7 @@ export default function Dashboard({
                     <div className="row mt-3 pt-4">
                         <div className="d-flex flex-column col-12">
                             <h5 className="fw-bolder mb-3">List of Students</h5>
-                            <Filters
+                            <StudentFilters
                                 queryParams={queryParams}
                                 filters={filters}
                                 visibleColumns={visibleColumns}
@@ -60,6 +51,7 @@ export default function Dashboard({
                             <StudentsTable
                                 students={students.data}
                                 visibleColumns={visibleColumns}
+                                queryParams={queryParams}
                             />
                             <Pagination links={students.meta.links} />
                         </div>

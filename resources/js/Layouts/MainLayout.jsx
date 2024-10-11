@@ -1,3 +1,4 @@
+import '../../css/app.css';
 export default function MainLayout({children}) {
     return (
         <div>

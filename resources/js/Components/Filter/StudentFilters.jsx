@@ -1,37 +1,36 @@
 import { router } from "@inertiajs/react";
-import StudentColumnFilter from "./StudentColumnFilter";
-import NameFilter from "./NameFilter";
 import { useState, useEffect } from "react";
-import YearFilter from "./YearFilter";
-import SchoolFilter from "./SchoolFilter";
 import SelectInput from "../SelectInput";
 import "../../../css/filter.css";
+import NameFilter from "./Filters/NameFilter";
+import YearFilter from "./Filters/YearFilter";
+import SchoolFilter from "./Filters/SchoolFilter";
+import StudentColumnFilter from "./Filters/StudentColumnFilter";
 
-export default function Filters({
+export default function StudentFilters({
     visibleColumns,
     onColumnChange,
     filters,
-    queryParams,
+    queryParams = {}, 
 }) {
-    const urlParams = new URLSearchParams(window.location.search);
-
     const [filterState, setFilterState] = useState({
-        year: urlParams.get('year') || "",
-        school: urlParams.get('school') || "",
-        name: urlParams.get('name') || "",
-        items: urlParams.get('items') || "", 
+        year: queryParams?.year || "",     
+        school: queryParams?.school || "",
+        name: queryParams?.name || "",
+        items: queryParams?.items || "", 
     });
+
 
     const updateUrlWithFilters = (filters) => {
         const filteredParams = Object.fromEntries(
             Object.entries(filters).filter(([k, v]) => v !== "")
         );
-
+        
         router.get(route("admin.dashboard"), filteredParams, {
             preserveScroll: true,
             preserveState: true,
             replace: true,
-            only: ["students", "filters", "students.meta"], // Only re-render specific components
+            only: ["students", "filters", "students.meta",'queryParams'], // Only re-render specific components
         });
     };
 
@@ -117,12 +116,14 @@ export default function Filters({
                     </div>
                 </div>
             </div>
-            <div className="col-4 input-container">
+            <div className="col">
                 <div className="row justify-content-end">
+                    <div className="col">
                     <StudentColumnFilter
                         visibleColumns={visibleColumns} // Ensure visibleColumns is passed
                         onColumnChange={onColumnChange}
                     />
+                    </div>
                     <div className="col-3">
                         <SelectInput
                             className=" form-select"

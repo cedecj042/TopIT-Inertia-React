@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CourseResource;
+use App\Models\Course;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class CourseController extends Controller
 {
@@ -12,7 +16,17 @@ class CourseController extends Controller
      */
     public function index()
     {
+        $query = Course::query();
+
+        $perPage = request('items', 5);
+
+        $courses = $query->paginate($perPage)->onEachSide(1);
         //
+        return Inertia::render('Admin/Course',[
+            'title' => 'Admin Course',
+            'auth'=> Auth::user(),
+            'courses'=>CourseResource::collection($courses)
+        ]);
     }
 
     /**

@@ -11,7 +11,7 @@ export default function StudentProfileModal({ student, isOpen, onClose }) {
         return () => {
             document.body.style.overflow = '';
         };
-    }, [isOpen]); // Run this effect whenever isOpen changes
+    }, [isOpen]);
 
     if (!isOpen) return null;
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -31,9 +32,9 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['student', 'auth'])->group(function () {
-    Route::get('/dashboard',[StudentDashboardController::class,'index'])->name('dashboard');
-    Route::get('/profile',[StudentProfileController::class,'index'] )->name('profile');
-    
+    Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/profile', [StudentProfileController::class, 'index'])->name('profile');
+
     Route::get('/course', [StudentCourseController::class, 'showStudentCourse'])->name('student-course');
     Route::get('/course/{id}', [StudentCourseController::class, 'showStudentCourseDetail'])->name('student-course-detail');
     Route::get('/course/module/{id}', [StudentCourseController::class, 'showModuleDetail'])->name('student-module-detail');
@@ -43,8 +44,15 @@ Route::middleware(['student', 'auth'])->group(function () {
 Route::middleware(['admin', 'auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Courses
+    Route::prefix('course')->name('course.')->group(function () {
+        Route::get('/', [CourseController::class, 'index'])->name('index');
+        // Route::post('/add', [CourseController::class, 'addCourse'])->name('add');
+        Route::get('/{course_id}', [CourseController::class, 'show'])->name('detail');
+        // Route::post('/pdf/upload', [PdfController::class, 'uploadPdf'])->name('pdf.upload');
+        // Route::delete('/pdf/delete/{id}', [PdfController::class, 'deletePdf'])->name('pdf.delete');
+    });
+
     Route::get('/profile', [DashboardController::class, 'showProfile'])->name('profile');
     Route::get('/student/{student_id}', [DashboardController::class, 'showStudentDetails'])->name('student');
 });
-
-
