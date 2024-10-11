@@ -50,8 +50,9 @@ export default function StudentSideBar({title}){
                     </li>
                     <li className="nav-item w-100">
                         <Link
-                            // href={route('test')}
-                            className={`nav-link text-dark py-3 ps-4 d-flex align-items-center gap-1 ${component === 'Test' ? 'focused' : 'dimmed'}`}
+                            href={route('test')}
+                            className={`nav-link text-dark py-3 ps-4 d-flex align-items-center gap-1 ${
+                                title === 'Student Test' ? 'active' : 'dimmed'}`}
                             id="test-link"
                         >
                             <span className="material-symbols-outlined">quiz</span>

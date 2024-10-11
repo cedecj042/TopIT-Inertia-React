@@ -24,7 +24,7 @@ export default function StudentProfile({ student }) {
                 <span>Student ID : {student.student_id}</span>
                 <hr />
                 <div>
-                    <h5>Personal Details</h5>
+                    <h5 className="mb-3">Personal Details</h5>
                     <p>Birthdate: {student.birthdate}</p>
                     <p>Age: {student.age}</p>
                     <p>Gender: {student.gender}</p>

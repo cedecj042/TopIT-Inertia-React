@@ -10,6 +10,7 @@ use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\StudentLoginController;
 use App\Http\Controllers\Student\StudentProfileController;
 use App\Http\Controllers\Student\PretestController;
+use App\Http\Controllers\Student\TestController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -48,6 +49,9 @@ Route::middleware(['student', 'auth'])->group(function () {
     Route::get('/course', [StudentCourseController::class, 'showStudentCourse'])->name('student-course');
     Route::get('/course/{id}', [StudentCourseController::class, 'showStudentCourseDetail'])->name('student-course-detail');
     Route::get('/course/module/{id}', [StudentCourseController::class, 'showModuleDetail'])->name('student-module-detail');
+
+    Route::get('/test',action: [TestController::class,'index'] )->name('test');
+
 });
 
 
