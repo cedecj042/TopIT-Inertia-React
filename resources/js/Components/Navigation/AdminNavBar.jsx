@@ -74,9 +74,6 @@ export default function AdminNavbar({ title }) {
                                     <span className="ms-1 d-none d-sm-inline fs-6">Modules</span>
                                 </Link>
                             </li>
-                            {/* <li className="w-100">
-                                <Link href="{route('admin.sections.index')}" className="nav-link text-white py-3 ps-5">Sections</Link>
-                            </li> */}
                         </ul>
                     </li>
                     <li className="nav-item w-100">

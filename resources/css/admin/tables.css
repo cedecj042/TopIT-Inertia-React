@@ -33,4 +33,15 @@ table tbody tr:nth-child(even) td{
 }
 th{
     align-content: center;
+    padding: .5rem 1rem !important;
+}
+
+.icon-up{
+    margin-bottom: -0.25rem;
+}
+.icon-down{
+    margin-top: -0.25rem;
+}
+.icon-container{
+    width: 2.5rem;
 }

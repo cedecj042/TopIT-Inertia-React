@@ -1,16 +1,32 @@
 import { Link } from "@inertiajs/react";
 import '../../../css/admin/tables.css';
 
-export default function StudentsTable({ students, visibleColumns, queryParams}) {
+export default function StudentsTable({ students, visibleColumns, queryParams }) {
     return (
         <div className="table-header mt-3">
             <table className="table students-table">
                 <thead>
                     <tr>
-                        {visibleColumns.student_id && <th>ID</th>}
+                        {visibleColumns.student_id && <th onClick={(e) => sortChanged('student_id')}>
+                            <div className="d-flex flex-row justify-content-center">
+                                <span className="align-content-center">ID</span>
+                                <div className="d-flex row justify-content-center align-items-center icon-container">
+                                    <span className="material-symbols-outlined icon-up">keyboard_arrow_up</span>
+                                    <span className="material-symbols-outlined icon-down">keyboard_arrow_down</span>
+                                </div>
+                            </div>
+                        </th>}
                         {visibleColumns.name && <th>Name</th>}
                         {visibleColumns.school && <th>School</th>}
-                        {visibleColumns.year && <th className="text-center w-6">Year</th>}
+                        {visibleColumns.year && <th className="text-center w-6" onClick={(e) => sortChanged('year')}>
+                                <div className="d-flex flex-row">
+                                    <span className="align-content-center">Year</span>
+                                    <div className="d-flex row justify-content-center align-items-center icon-container">
+                                        <span className="material-symbols-outlined icon-up">keyboard_arrow_up</span>
+                                        <span className="material-symbols-outlined icon-down">keyboard_arrow_down</span>
+                                    </div>
+                                </div>
+                            </th>}
                         {visibleColumns.created_at && <th>Created At</th>}
                         <th className="text-center">Actions</th>
                     </tr>
@@ -19,7 +35,7 @@ export default function StudentsTable({ students, visibleColumns, queryParams}) 
                     {students.map((data) => (
                         <tr key={data.userable.student_id}>
                             {visibleColumns.student_id && (
-                                <td className="align-content-center">
+                                <td className="align-content-center text-center">
                                     {data.userable.student_id}
                                 </td>
                             )}
@@ -44,11 +60,11 @@ export default function StudentsTable({ students, visibleColumns, queryParams}) 
                                 </td>
                             )}
                             <td>
-                            <Link
-                                href={route("admin.student", { student_id: data.userable.student_id, ...queryParams })} 
-                                preserveState
-                                className="btn text-primary fw-semibold d-flex justify-content-center"
-                            >
+                                <Link
+                                    href={route("admin.student", { student_id: data.userable.student_id, ...queryParams })}
+                                    preserveState
+                                    className="btn text-primary fw-semibold d-flex justify-content-center"
+                                >
                                     <span className="material-symbols-outlined">
                                         person
                                     </span>{" "}

@@ -3,7 +3,7 @@ import { Link, usePage } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 import "../../../../css/student/welcome.css";
 import "../../../../css/students.css";
-import Navbar from "@/Components/Student/Navbar";
+import Navbar from "@/Components/Navigation/Navbar";
 
 const Welcome = () => {
     const { auth } = usePage().props;

@@ -1,4 +1,4 @@
-import StudentProfile from "@/Components/Student/Profile/StudentProfile";
+import StudentProfile from "@/Components/Profile/StudentProfile";
 import StudentLayout from "@/Layouts/StudentLayout"; 
 
 export default function Profile ({title,student}){

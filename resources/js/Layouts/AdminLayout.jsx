@@ -1,4 +1,4 @@
-import AdminNavbar from "@/Components/Admin/AdminNavBar";
+import AdminNavbar from "@/Components/Navigation/AdminNavBar";
 import MainLayout from "./MainLayout";
 import '../../css/admin/admin.css';
 
