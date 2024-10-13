@@ -1,5 +1,5 @@
 import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
-import StudentProfile from "@/Components/Student/Profile/StudentProfile";
+import StudentProfile from "@/Components/Profile/StudentProfile";
 import AdminLayout from "@/Layouts/AdminLayout";
 import "../../../css/admin/dashboard.css";
 import { router } from "@inertiajs/react";

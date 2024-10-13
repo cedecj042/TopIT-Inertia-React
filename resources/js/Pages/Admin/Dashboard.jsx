@@ -60,7 +60,7 @@ export default function Dashboard({
             </div>
             <div className="row w-100 px-5 mb-3">
                 <h5 className="fw-semibold">Total Number of Students Registered</h5>
-                <div className="chart-container">
+                <div className="chart-container d-flex justify-content-center">
                     <StudentsLineChart chartData={chartData} />
                 </div>
             </div>

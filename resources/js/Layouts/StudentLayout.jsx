@@ -1,5 +1,5 @@
-import StudentNavbar from "@/Components/Student/StudentNavbar";
-import StudentSideBar from "@/Components/Student/StudentSideBar";
+import StudentNavbar from "@/Components/Navigation/StudentNavbar";
+import StudentSideBar from "@/Components/Navigation/StudentSideBar";
 import { Head, usePage } from "@inertiajs/react";
 import MainLayout from "./MainLayout";
 import '../../css/student/students.css';
