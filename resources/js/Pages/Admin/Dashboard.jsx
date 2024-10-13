@@ -6,17 +6,18 @@ import StudentsTable from "@/Components/Tables/StudentsTable";
 import StudentsLineChart from "@/Components/Chart/StudentsLineChart";
 import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
 import StudentFilters from "@/Components/Filter/StudentFilters";
-import { STUDENT_COLUMN } from "@/Library/constants";
-import { useColumnVisibility } from "@/Library/hooks";
-import { useEffect } from "react";
+import { STUDENT_COLUMN, STUDENT_FILTER_COMPONENT } from "@/Library/constants";
+import { useColumnVisibility, useFilters } from "@/Library/hooks";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { INITIAL_STUDENT_FILTER_STATE } from "@/Library/filterState";
 export default function Dashboard({
     students,
     chartData,
     title,
     thetaScoreData,
     filters,
-    queryParams
+    queryParams ={}
 }) {
     const { visibleColumns, onColumnChange } = useColumnVisibility(STUDENT_COLUMN);
 
@@ -26,6 +27,17 @@ export default function Dashboard({
             toast.success(props.flash.success, { duration: 3000 });
         }
     }, [props.flash.success]);
+
+    const [filterState, setFilterState] = useState(INITIAL_STUDENT_FILTER_STATE(queryParams));  
+    const {
+        handleFilterChange,
+        handleInputChange,
+        handleClearInput,
+        handleClearFilter,
+        onKeyPress,
+        changeSort
+    } = useFilters(filterState,setFilterState, "admin.dashboard", STUDENT_FILTER_COMPONENT);
+
     return (
         
         <AdminLayout title={title}> 
@@ -41,11 +53,19 @@ export default function Dashboard({
                                 filters={filters}
                                 visibleColumns={visibleColumns}
                                 onColumnChange={onColumnChange}
+                                handleClearFilter={handleClearFilter}
+                                handleClearInput={handleClearInput}
+                                handleFilterChange={handleFilterChange}
+                                handleInputChange={handleInputChange}
+                                onKeyPress={onKeyPress}
+                                queryParams={queryParams}
+                                filterState={filterState}
                             />
                             <StudentsTable
                                 students={students.data}
                                 visibleColumns={visibleColumns}
                                 queryParams={queryParams}
+                                changeSort={changeSort}
                             />
                             <Pagination links={students.meta.links} />
                         </div>

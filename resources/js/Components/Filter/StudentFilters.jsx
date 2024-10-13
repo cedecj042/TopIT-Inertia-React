@@ -12,16 +12,15 @@ export default function StudentFilters({
     visibleColumns,
     onColumnChange,
     filters,
-    queryParams = {},
+    filterState,
+    queryParams,
+    handleFilterChange,
+    handleInputChange,
+    handleClearInput,
+    handleClearFilter,
+    onKeyPress,
 }) {
-    const [filterState, setFilterState] = useState(INITIAL_STUDENT_FILTER_STATE(queryParams));  
-    const {
-        handleFilterChange,
-        handleInputChange,
-        handleClearInput,
-        handleClearFilter,
-        onKeyPress,
-    } = useFilters(filterState,setFilterState, "admin.dashboard", STUDENT_FILTER_COMPONENT);
+    
     const FILTER_DATA = [
         {
             data: filters.years,

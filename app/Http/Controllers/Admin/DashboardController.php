@@ -22,35 +22,41 @@ class DashboardController extends Controller
     public function index()
     {
         // $query = User::query();
-        $query = User::query()->where('userable_type', 'App\\Models\\Student')->with('userable');;
+        $query = User::query()
+            ->where('userable_type', 'App\\Models\\Student')
+            ->join('students', 'users.userable_id', '=', 'students.student_id')
+            ->select('users.*'); // Selecting users fields
 
+        // Filter by name (firstname, lastname, or both)
         if (request('name')) {
             $name = request('name');
-            $query->whereHas('userable', function ($q) use ($name) {
-                $q->where('firstname', 'like', '%' . $name . '%')
-                    ->orWhere('lastname', 'like', '%' . $name . '%')
-                    ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ['%' . $name . '%']);
+            $query->where(function ($q) use ($name) {
+                $q->where('students.firstname', 'like', '%' . $name . '%')
+                    ->orWhere('students.lastname', 'like', '%' . $name . '%')
+                    ->orWhereRaw("CONCAT(students.firstname, ' ', students.lastname) LIKE ?", ['%' . $name . '%']);
             });
         }
 
+        // Filter by year
         if (request('year')) {
             $year = request('year');
-            $query->whereHasMorph('userable', [Student::class], function ($q) use ($year) {
-                $q->where('year', $year); 
-            });
+            $query->where('students.year', $year);
         }
+
+        // Filter by school
         if (request('school')) {
             $school = request('school');
-            $query->whereHasMorph('userable', [Student::class], function ($q) use ($school) {
-                $q->where('school', $school); 
-            });
+            $query->where('students.school', $school);
         }
-        
-        // Determine the pagination count
+
+        $query->orderByRaw("CONCAT(students.firstname, ' ', students.lastname) desc");
+
+
         $perPage = request('items', 5);
 
-        //Paginate Students
         $students = $query->paginate($perPage)->onEachSide(1);
+
+        $students->load('userable');
 
 
         $averageScores = DB::table('test_courses')
@@ -72,7 +78,7 @@ class DashboardController extends Controller
             ->pluck('count', 'month');
 
         $schools = DB::table('students')->distinct()->pluck('school');
-        $years = DB::table('students')->distinct()->orderBy('year','asc')->pluck('year');
+        $years = DB::table('students')->distinct()->orderBy('year', 'asc')->pluck('year');
         $filters = [
             'schools' => $schools,
             'years' => $years,
@@ -80,7 +86,7 @@ class DashboardController extends Controller
 
         $chartData = $this->prepareChartData($monthlyCounts);
         $successMessage = session('success');
-        
+
         return Inertia::render(
             'Admin/Dashboard',
             [
@@ -90,7 +96,7 @@ class DashboardController extends Controller
                 'queryParams' => request()->query() ?: null,
                 'chartData' => $chartData,
                 'thetaScoreData' => $averageTheta,
-                'filters'=> $filters,
+                'filters' => $filters,
                 'flash' => [
                     'success' => $successMessage,
                 ],
@@ -99,7 +105,7 @@ class DashboardController extends Controller
     }
     private function prepareChartData($monthlyCounts)
     {
-        $filledMonthlyCounts = array_fill(1, 12, 0); 
+        $filledMonthlyCounts = array_fill(1, 12, 0);
 
         foreach ($monthlyCounts as $month => $count) {
             $filledMonthlyCounts[$month] = $count;
@@ -111,23 +117,24 @@ class DashboardController extends Controller
         ];
     }
 
-    public function showStudentDetails($studentId){
+    public function showStudentDetails($studentId)
+    {
         $student = Student::find($studentId);
         $averageThetaScore = DB::table('test_courses')
-        ->select('courses.title as course_title', DB::raw('AVG(test_courses.theta_score) as avg_theta_score'))
-        ->join('tests', 'test_courses.test_id', '=', 'tests.test_id')
-        ->join('students', 'tests.student_id', '=', 'students.student_id')
-        ->join('courses', 'test_courses.course_id', '=', 'courses.course_id')
-        ->where('students.student_id', $studentId)
-        ->groupBy('courses.title')
-        ->get();
+            ->select('courses.title as course_title', DB::raw('AVG(test_courses.theta_score) as avg_theta_score'))
+            ->join('tests', 'test_courses.test_id', '=', 'tests.test_id')
+            ->join('students', 'tests.student_id', '=', 'students.student_id')
+            ->join('courses', 'test_courses.course_id', '=', 'courses.course_id')
+            ->where('students.student_id', $studentId)
+            ->groupBy('courses.title')
+            ->get();
 
         $averageTheta = [
             'labels' => $averageThetaScore->pluck('course_title')->toArray(),
             'data' => $averageThetaScore->pluck('avg_theta_score')->toArray()
         ];
 
-        return Inertia::render('Admin/Student',[
+        return Inertia::render('Admin/Student', [
             'auth' => Auth::user(),
             'title' => 'Admin Dashboard',
             'averageThetaScore' => $averageTheta,
@@ -135,6 +142,4 @@ class DashboardController extends Controller
             'queryParams' => request()->query() ?: null,
         ]);
     }
-
-
 }

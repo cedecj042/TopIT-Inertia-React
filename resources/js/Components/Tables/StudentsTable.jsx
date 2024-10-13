@@ -1,24 +1,25 @@
 import { Link } from "@inertiajs/react";
 import '../../../css/admin/tables.css';
 
-export default function StudentsTable({ students, visibleColumns, queryParams }) {
+export default function StudentsTable({ students, visibleColumns, queryParams,changeSort }) {
+
     return (
         <div className="table-header mt-3">
             <table className="table students-table">
                 <thead>
                     <tr>
-                        {visibleColumns.student_id && <th onClick={(e) => sortChanged('student_id')}>
-                            <div className="d-flex flex-row justify-content-center">
-                                <span className="align-content-center">ID</span>
+                        {visibleColumns.student_id && <th>ID</th>}
+                        {visibleColumns.name && <th className=" clickable" onClick={(e) => changeSort('name')}>
+                            <div className="d-flex flex-row justify-content-start">
+                                <span className="align-content-center">Name</span>
                                 <div className="d-flex row justify-content-center align-items-center icon-container">
                                     <span className="material-symbols-outlined icon-up">keyboard_arrow_up</span>
                                     <span className="material-symbols-outlined icon-down">keyboard_arrow_down</span>
                                 </div>
-                            </div>
+                            </div>    
                         </th>}
-                        {visibleColumns.name && <th>Name</th>}
                         {visibleColumns.school && <th>School</th>}
-                        {visibleColumns.year && <th className="text-center w-6" onClick={(e) => sortChanged('year')}>
+                        {visibleColumns.year && <th className="text-center w-6 clickable" onClick={(e) => changeSort('year')}>
                                 <div className="d-flex flex-row">
                                     <span className="align-content-center">Year</span>
                                     <div className="d-flex row justify-content-center align-items-center icon-container">

@@ -85,12 +85,27 @@ export const useFilters = (filterState,setFilterState,routeName, components) => 
         updateUrlWithFilters(clearedFilters);
     };
 
+    const changeSort = (field) => {
+        const updatedFilters = {
+            ...filterState,
+            field,
+            direction: filterState.field === field
+                ? (filterState.direction === "asc" ? "desc" : "asc")
+                : "asc",
+        };
+
+        setFilterState(updatedFilters);
+        updateUrlWithFilters(updatedFilters);
+    };
+
     return {
         filterState,
         handleFilterChange,
         handleClearInput,
         handleInputChange,
         onKeyPress,
-        handleClearFilter
+        handleClearFilter,
+        changeSort
     };
 };
+
