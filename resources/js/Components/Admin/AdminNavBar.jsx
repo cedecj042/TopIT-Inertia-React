@@ -149,6 +149,7 @@ export default function AdminNavbar({ title }) {
                     </li>
                     <li>
                         <Link className="dropdown-item fs-6" href={route('logout')} method="post" as="button">Sign out</Link>
+                        
                     </li>
                 </ul>
             </div>

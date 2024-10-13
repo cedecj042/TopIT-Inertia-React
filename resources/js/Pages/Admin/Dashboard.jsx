@@ -1,6 +1,6 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import "../../../css/admin/dashboard.css";
-import { Head, router } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
 import Pagination from "@/Components/Pagination";
 import StudentsTable from "@/Components/Tables/StudentsTable";
 import StudentsLineChart from "@/Components/Chart/StudentsLineChart";
@@ -8,6 +8,8 @@ import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
 import StudentFilters from "@/Components/Filter/StudentFilters";
 import { STUDENT_COLUMN } from "@/Library/constants";
 import { useColumnVisibility } from "@/Library/hooks";
+import { useEffect } from "react";
+import { toast } from "sonner";
 export default function Dashboard({
     students,
     chartData,
@@ -17,6 +19,13 @@ export default function Dashboard({
     queryParams
 }) {
     const { visibleColumns, onColumnChange } = useColumnVisibility(STUDENT_COLUMN);
+
+    const { props } = usePage();
+    useEffect(() => {
+        if (props.flash.success) {
+            toast.success(props.flash.success, { duration: 3000 });
+        }
+    }, [props.flash.success]);
     return (
         
         <AdminLayout title={title}> 

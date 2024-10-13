@@ -57,14 +57,15 @@ Route::middleware(['student', 'auth'])->group(function () {
 
 
 Route::middleware(['admin', 'auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::redirect('/','/admin/dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Courses
     Route::prefix('course')->name('course.')->group(function () {
         Route::get('/', [CourseController::class, 'index'])->name('index');
         Route::post('/add', [CourseController::class, 'add'])->name('add');
-        Route::post('/delete/{course_id}', [CourseController::class, 'delete'])->name('delete');
         Route::get('/{course_id}', [CourseController::class, 'show'])->name('detail');
+        Route::delete('/delete/{course_id}', [CourseController::class, 'delete'])->name('delete');
         // Route::post('/pdf/upload', [PdfController::class, 'uploadPdf'])->name('pdf.upload');
         // Route::delete('/pdf/delete/{id}', [PdfController::class, 'deletePdf'])->name('pdf.delete');
     });

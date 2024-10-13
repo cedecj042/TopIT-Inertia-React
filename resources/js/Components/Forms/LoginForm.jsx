@@ -2,8 +2,9 @@ import { useForm} from "react-hook-form";
 import { gsap } from 'gsap';
 import { useEffect, useRef } from 'react';
 import { router } from "@inertiajs/react";
+import { toast } from "sonner";
 
-export default function FormLogin({routeName,btn}) {
+export default function LoginForm({routeName,btn}) {
     const {
         register,
         handleSubmit,
@@ -15,18 +16,13 @@ export default function FormLogin({routeName,btn}) {
     const onSubmit = (data) => {
         router.post(route(routeName), data, {
             onSuccess: (page) => {
-                alert('Login successful!');
+                toast.success('Login successful!', { duration: 3000 });
                 reset();
             },
             onError: (formErrors) => {
-                if (formErrors.username) {
-                    alert('Username Error: ' + formErrors.username);
+                if (formErrors.username || formErrors.password) {
+                    toast.error("Wrong username or password. Please try again.", { duration: 3000 });
                 }
-            
-                if (formErrors.password) {
-                    alert('Password Error: ' + formErrors.password);
-                }
-                console.error("Submission failed", formErrors);
             }
         });
     };
@@ -82,7 +78,7 @@ export default function FormLogin({routeName,btn}) {
             <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`btn w-100 btn-lg stagger-item auth-btn ${btn}`}
+                className={`btn w-100 btn-lg stagger-item auth-btn ${btn} btn-size`}
             >
                 Login
             </button>

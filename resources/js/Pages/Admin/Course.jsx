@@ -1,5 +1,6 @@
 import CourseFilters from "@/Components/Filter/CourseFilters";
-import AddCourse from "@/Components/Forms/AddCourse";
+import CourseForm from "@/Components/Forms/CourseForm";
+import Modal from "@/Components/Modal";
 import Pagination from "@/Components/Pagination";
 import CourseTable from "@/Components/Tables/CourseTable";
 import AdminLayout from "@/Layouts/AdminLayout";
@@ -8,15 +9,11 @@ import { useColumnVisibility } from "@/Library/hooks";
 import { Head, usePage } from "@inertiajs/react";
 import { useState } from "react";
 
-export default function Course({ title,courses,queryParams }) {
-
+export default function Course({ title, courses, queryParams }) {
     const [showModal, setShowModal] = useState(false);
     const openModal = () => setShowModal(true);
     const closeModal = () => setShowModal(false);
-    const { visibleColumns, onColumnChange } = useColumnVisibility(COURSE_COLUMN);
-    const { props } = usePage();
-    const flash = props.flash || {};
-    const { success, error } = flash;
+    const { visibleColumns, onColumnChange } =useColumnVisibility(COURSE_COLUMN);
     return (
         <AdminLayout title={title}>
             <Head title={title} />
@@ -27,35 +24,32 @@ export default function Course({ title,courses,queryParams }) {
                         <div className="btn-toolbar mb-2 mb-md-0">
                             <button
                                 type="button"
-                                className="btn btn-primary btn-md"
-                                style={{
-                                    fontSize: "0.9rem",
-                                    padding: "0.8em 1em",
-                                }}
+                                className="btn btn-primary btn-md btn-size"
                                 onClick={openModal}
                             >
                                 Add Course
                             </button>
                         </div>
                     </div>
-                    {/* Display Success or Error Messages */}
-                    {success && <div className="alert alert-success">{success}</div>}
-                    {error && <div className="alert alert-danger">{error}</div>}
                     <div className="row px-0">
                         <h5 className="fw-semibold">List of Courses</h5>
-                        <CourseFilters 
+                        <CourseFilters
                             queryParams={queryParams}
                             visibleColumns={visibleColumns}
                             onColumnChange={onColumnChange}
                         />
-                        <CourseTable courses={courses.data} visibleColumns={visibleColumns}/>
+                        <CourseTable
+                            courses={courses.data}
+                            visibleColumns={visibleColumns}
+                        />
                         <Pagination links={courses.meta.links} />
                     </div>
 
-                    <AddCourse show={showModal} onClose={closeModal} />
+                    <Modal show={showModal} onClose={closeModal} modalTitle={"Add Course"}>
+                        <CourseForm onClose={closeModal}/>
+                    </Modal>
                 </div>
             </div>
         </AdminLayout>
     );
 }
-

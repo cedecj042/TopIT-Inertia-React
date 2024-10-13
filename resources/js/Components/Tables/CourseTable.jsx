@@ -1,7 +1,22 @@
-import { Link, router } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 import "../../../css/admin/tables.css";
+import { toast } from "sonner";
 
-export default function CourseTable({ courses, visibleColumns, queryParams }) {
+export default function CourseTable({ courses, visibleColumns }) {
+    const deleteCourse = (event, course_id) => {
+        event.stopPropagation();
+
+        router.delete(route("admin.course.delete", course_id), {
+            onSuccess: () => {
+                toast.success("Course deleted successfully", {
+                    duration: 3000,
+                });
+            },
+            onError: (error) => {
+                toast.error(error, { duration: 3000 });
+            },
+        });
+    };
     return (
         <div className="table-header mt-3">
             <table className="table table-hover students-table">
@@ -48,19 +63,18 @@ export default function CourseTable({ courses, visibleColumns, queryParams }) {
                                 </td>
                             )}
                             <td>
-                                <Link href={route("admin.course.delete", {
-                                        course_id: data.course_id,
-                                    })}
-                                    method="post"
-                                    as="button"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="btn text-danger fw-semibold d-flex justify-content-center"
+                                <button
+                                    type="button"
+                                    onClick={(e) =>
+                                        deleteCourse(e, data.course_id)
+                                    }
+                                    className="btn btn-outline-danger d-flex justify-content-center"
                                 >
                                     <span className="material-symbols-outlined">
                                         delete
                                     </span>{" "}
                                     Delete
-                                </Link>
+                                </button>
                             </td>
                         </tr>
                     ))}

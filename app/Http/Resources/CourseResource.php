@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\PdfResource;
 
 class CourseResource extends JsonResource
 {
@@ -19,7 +20,8 @@ class CourseResource extends JsonResource
             'course_id' =>$this->course_id,
             'title' => $this->title,
             'description' => $this->description,
-            'created_at' => (new Carbon($this->created_at))->format('Y-m-d'),
+            'created_at' => (new Carbon($this->created_at))->format('F d, Y'),
+            'pdfs' => PdfResource::collection($this->whenLoaded('pdfs')),
         ];
     }
 }

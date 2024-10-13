@@ -29,11 +29,11 @@ class AdminController extends Controller
 
             if ($user->userable_type === 'App\Models\Admin') {
                 Log::info('Authenticated user is an Admin.', ['user_id' => $user->user_id]);
-                return redirect()->route('admin.dashboard');
+                return redirect()->route('admin.dashboard')->with(['success' => 'Login Successfully!']);
             } else {
                 Auth::logout();
                 Log::info('Access restricted. User is not an Admin.', ['user_id' => $user->user_id]);
-                return redirect()->route('admin.loginform')->withErrors(['username' => 'Access restricted to admins only.']);
+                return redirect()->route('admin.login')->withErrors(['username' => 'Access restricted to admins only.']);
             }
         }
         Log::warning('Admin authentication failed for username.', ['username' => $validated['username']]);

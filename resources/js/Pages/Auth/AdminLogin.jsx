@@ -1,6 +1,6 @@
 import { Head } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout";
-import FormLogin from "@/Components/Forms/Login";
+import LoginForm from "@/Components/Forms/LoginForm";
 import "../../../css/admin/admin.css";
 
 export default function AdminLogin() {
@@ -19,7 +19,7 @@ export default function AdminLogin() {
                                     height="50"
                                 />
                             </h2>
-                            <FormLogin routeName={'admin.login'} btn="btn-danger"/>
+                            <LoginForm routeName={'admin.login'} btn="btn-danger"/>
                         </div>
 
                         <div className="mt-5 text-center">

@@ -79,7 +79,7 @@ class DashboardController extends Controller
         ];
 
         $chartData = $this->prepareChartData($monthlyCounts);
-
+        $successMessage = session('success');
         
         return Inertia::render(
             'Admin/Dashboard',
@@ -91,6 +91,9 @@ class DashboardController extends Controller
                 'chartData' => $chartData,
                 'thetaScoreData' => $averageTheta,
                 'filters'=> $filters,
+                'flash' => [
+                    'success' => $successMessage,
+                ],
             ]
         );
     }

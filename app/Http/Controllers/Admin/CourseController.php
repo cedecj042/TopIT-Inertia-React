@@ -70,9 +70,17 @@ class CourseController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $course_id)
     {
         //
+        $course = Course::with('pdfs')->findOrFail($course_id);
+        
+        return Inertia::render('Admin/CourseDetail',[
+            'title' => 'Admin Course',
+            'auth'=> Auth::user(),
+            'course'=> new CourseResource($course),
+            'queryParams'=>request()->query() ? :null,
+        ]);
     }
 
     /**
@@ -98,7 +106,6 @@ class CourseController extends Controller
     {
         //
         $course = Course::findOrFail($course_id);
-    
         $course->delete();
         return redirect()->back()->with('success', 'Course removed successfully!');
     }
