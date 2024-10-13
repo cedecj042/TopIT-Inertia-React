@@ -46,6 +46,7 @@ class CourseController extends Controller
      */
     public function add(CourseRequest $request)
     {
+        Log::info('running');
         $validatedData = $request->validated();
 
         Log::info('Validated data:', $validatedData);
@@ -59,10 +60,10 @@ class CourseController extends Controller
 
             Log::info('Course saved successfully:', ['course_id' => $course->course_id]);
             // ProcessCourse::dispatch($course->course_id);
-            return redirect()->back()->with('success', 'Course added successfully!');
+            return redirect()->back()->with(['success'=>'Course added successfully!']);
         } catch (\Exception $e) {
             Log::error('Error saving course:', ['exception' => $e->getMessage()]);
-            return redirect()->back()->with('error', 'Failed to add course. Please try again.');
+            return redirect()->back()->withErrors(['error'=>'Failed to add course. Please try again.']);
         }
     }
 

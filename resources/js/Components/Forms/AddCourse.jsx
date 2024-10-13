@@ -1,19 +1,28 @@
-import React, { useState } from "react";
+import React from "react";
 import { router } from "@inertiajs/react";
+import { useForm } from "react-hook-form";
 import '../../../css/modal.css';
 
-export default function AddCourseModal({ show, onClose }) {
-    const [courseName, setCourseName] = useState("");
-    const [courseDesc, setCourseDesc] = useState("");
+export default function AddCourse({ show, onClose }) {
+    const {
+        register,
+        reset,
+        formState:{errors,isSubmitting},
+        handleSubmit,
+    } = useForm();
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        
-        router.post(route("admin.course.add"), {
-            course_name: courseName,
-            course_desc: courseDesc,
+    const onSubmit = (data) => {
+        router.post(route("admin.course.add"),data,{
+            onSuccess: (page) => {
+                alert('Course Added successfully!');
+                reset();
+                onClose();
+            },
+            onError: (formErrors) => {
+                console.error('Form errors:', formErrors); // This will now get triggered for non-200 responses
+                alert('Failed to add course. Please check the form and try again.');
+            }
         });
-        onClose();
     };
 
     if (!show) return null;
@@ -26,7 +35,7 @@ export default function AddCourseModal({ show, onClose }) {
                         <h5 className="modal-title" id="addCourseLabel">Add Course</h5>
                         <button type="button" className="btn-close" onClick={onClose}></button>
                     </div>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit(onSubmit)}>
                         <div className="modal-body">
                             <div className="mb-3">
                                 <label htmlFor="courseName" className="form-label fs-6">Course Name</label>
@@ -35,10 +44,13 @@ export default function AddCourseModal({ show, onClose }) {
                                     className="form-control"
                                     id="courseName"
                                     name="course_name"
-                                    value={courseName}
-                                    onChange={(e) => setCourseName(e.target.value)}
-                                    required
+                                    {...register('course_name',{
+                                        required:"Course Name is required"
+                                    })}
                                 />
+                                {errors.courseName &&(
+                                    <p className="text-danger">{`${errors.course_name.message}`}</p>
+                                )}
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="courseDescription" className="form-label fs-6">Course Description</label>
@@ -46,17 +58,19 @@ export default function AddCourseModal({ show, onClose }) {
                                     className="form-control"
                                     id="courseDescription"
                                     name="course_desc"
-                                    value={courseDesc}
-                                    onChange={(e) => setCourseDesc(e.target.value)}
-                                    required
+                                    {...register('course_desc',{
+                                        required:"Course Description is required"
+                                    })}
                                 ></textarea>
+                                {errors.courseDesc &&(
+                                    <p className="text-danger">{`${errors.course_desc.message}`}</p>
+                                )}                                
                             </div>
                         </div>
                         <div className="modal-footer">
                             <button
                                 type="button"
                                 className="btn btn-secondary"
-                                style={{ fontSize: "0.9rem", padding: "0.7em 1em" }}
                                 onClick={onClose}
                             >
                                 Close
@@ -64,7 +78,7 @@ export default function AddCourseModal({ show, onClose }) {
                             <button
                                 type="submit"
                                 className="btn btn-primary"
-                                style={{ fontSize: "0.9rem", padding: "0.7em 1em" }}
+                                disabled={isSubmitting}
                             >
                                 Add
                             </button>

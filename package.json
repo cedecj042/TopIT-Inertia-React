@@ -27,6 +27,7 @@
         "gsap": "^3.12.5",
         "material-symbols": "^0.24.0",
         "react-chartjs-2": "^5.2.0",
+        "react-hook-form": "^7.53.0",
         "react-router-dom": "^6.26.2"
     }
 }

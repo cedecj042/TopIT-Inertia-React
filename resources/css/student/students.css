@@ -20,12 +20,14 @@ body{
     overflow-x: hidden;   
 }
 .auth-labels {
-    font-size: 24px;
+    font-size: 1.2rem;
+    color: #212529;
 }
 
 .auth-textbox {
     margin-bottom: .5em;
     height: 3.25em;
+    font-size: 1rem !important;
     background-color: #fbfcff;
     border-color: #C9C9C9;
 }
@@ -44,7 +46,10 @@ body{
 .auth-button:hover{
     background-color: #1667da !important;
 }
-
+.auth_btn{
+    font-size: 1em;
+    text-decoration: none;
+}
 .background{
     position: fixed;
     z-index: -1;

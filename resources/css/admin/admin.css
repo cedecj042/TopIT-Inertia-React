@@ -16,12 +16,13 @@ body{
 
 .auth-labels {
     font-size: 1.2em;
+    color: white;
 }
 
 .auth-textbox {
     margin-bottom: .5em;
     height: 3.25em;
-    font-size: 16px !important;
+    font-size: 1rem !important;
     background-color: #eeeeee;
     border-color: #C9C9C9;
 }

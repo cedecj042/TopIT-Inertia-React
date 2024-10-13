@@ -11,7 +11,7 @@ export default function CourseTable({ courses, visibleColumns, queryParams }) {
                         {visibleColumns.title && <th>Course Title</th>}
                         {visibleColumns.description && <th>Description</th>}
                         {visibleColumns.created_at && <th>Created At</th>}
-                        <th>Actions</th>
+                        <th className="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

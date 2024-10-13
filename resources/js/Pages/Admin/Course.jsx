@@ -1,5 +1,5 @@
-import AddCourseModal from "@/Components/Admin/AddCourseModal";
 import CourseFilters from "@/Components/Filter/CourseFilters";
+import AddCourse from "@/Components/Forms/AddCourse";
 import Pagination from "@/Components/Pagination";
 import CourseTable from "@/Components/Tables/CourseTable";
 import AdminLayout from "@/Layouts/AdminLayout";
@@ -15,7 +15,7 @@ export default function Course({ title,courses,queryParams }) {
     const closeModal = () => setShowModal(false);
     const { visibleColumns, onColumnChange } = useColumnVisibility(COURSE_COLUMN);
     const { props } = usePage();
-    const flash = props.flash || {}; // Safely handle if flash is undefined
+    const flash = props.flash || {};
     const { success, error } = flash;
     return (
         <AdminLayout title={title}>
@@ -52,7 +52,7 @@ export default function Course({ title,courses,queryParams }) {
                         <Pagination links={courses.meta.links} />
                     </div>
 
-                    <AddCourseModal show={showModal} onClose={closeModal} />
+                    <AddCourse show={showModal} onClose={closeModal} />
                 </div>
             </div>
         </AdminLayout>
