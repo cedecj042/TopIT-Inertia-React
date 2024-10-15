@@ -10,4 +10,11 @@ export default defineConfig({
         }),
         react(),
     ],
+    server: {
+        host: '0.0.0.0',  // This makes the dev server accessible on the network
+        port: 3000,        // You can change this port if necessary
+        hmr: {
+            host: '192.168.1.6', // Replace with your machine's local IP address
+        },
+    },
 });

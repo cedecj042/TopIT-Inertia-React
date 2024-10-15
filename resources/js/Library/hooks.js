@@ -1,33 +1,16 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { router } from "@inertiajs/react";
 
 export const useColumnVisibility = (initialColumns) => {
     const [visibleColumns, setVisibleColumns] = useState(initialColumns);
 
     const onColumnChange = (columnName, isVisible) => {
-        if (columnName === "all") {
-            // Update visibility for all columns
-            const updatedColumns = Object.keys(visibleColumns).reduce((columns, key) => {
-                columns[key] = isVisible;
-                return columns;
-            }, {});
-            setVisibleColumns(updatedColumns);
-        } else {
-            // Update visibility for specific column
-            const updatedColumns = {
-                ...visibleColumns,
-                [columnName]: isVisible,
-            };
-    
-            // Automatically update the "all" checkbox based on other columns
-            const allChecked = Object.keys(initialColumns)
-                .filter((key) => key !== "all")
-                .every((key) => updatedColumns[key]); // Check if all other columns are true
-    
-            updatedColumns["all"] = allChecked; // Update "all" checkbox
-    
-            setVisibleColumns(updatedColumns);
-        }
+        const updatedColumns = visibleColumns.map((column) =>
+            column.key === columnName
+                ? { ...column, visible: isVisible }
+                : column
+        );
+        setVisibleColumns(updatedColumns);
     };
 
     return {
@@ -35,12 +18,29 @@ export const useColumnVisibility = (initialColumns) => {
         onColumnChange,
     };
 };
+export const useCombinedState = (
+    initialFilterState = {},
+    initialSortState = ":",
+    initialOtherState = {},
+    routeName,
+    components
+) => {
+    const [filterState, setFilterState] = useState(initialFilterState);
+    const [sortState, setSortState] = useState(initialSortState);
+    const [otherState, setOtherState] = useState(initialOtherState);
 
 
-export const useFilters = (filterState,setFilterState,routeName, components) => {
-    const updateUrlWithFilters = (filters) => {
+    const updateUrlWithAllStates = (sortState, filterState, otherState) => {
+        const combinedState = {
+            ...filterState,
+            ...otherState,
+        };
+
+        if (sortState !== ":") {
+            combinedState.sort = sortState;
+        }
         const filteredParams = Object.fromEntries(
-            Object.entries(filters).filter(([k, v]) => v !== "")
+            Object.entries(combinedState).filter(([key, value]) => value !== "")
         );
 
         router.get(route(routeName), filteredParams, {
@@ -51,61 +51,92 @@ export const useFilters = (filterState,setFilterState,routeName, components) => 
         });
     };
 
+    // Handle filter changes
     const handleFilterChange = (key, value) => {
         const updatedFilters = {
             ...filterState,
             [key]: value || "",
         };
-
         setFilterState(updatedFilters);
-        updateUrlWithFilters(updatedFilters);
+        updateUrlWithAllStates(sortState, updatedFilters, otherState);
     };
 
-    const handleClearInput = (key) => {
-        handleFilterChange(key, "");
+    // Handle clearing filters
+    const handleClearFilter = (filterKeys = []) => {
+        const clearedFilters = { ...filterState };
+        filterKeys.forEach((key) => {
+            clearedFilters[key] = "";
+        });
+        setFilterState(clearedFilters);
+        updateUrlWithAllStates(sortState, clearedFilters, otherState);
+    };
+
+    // Handle sorting changes (field:direction)
+    const changeSort = (field) => {
+        const [currentField, currentDirection] = sortState.split(":"); 
+
+        const newDirection =
+            currentField === field
+                ? currentDirection === "asc"
+                    ? "desc"
+                    : "asc"
+                : "asc";
+
+        const updatedSort = `${field}:${newDirection}`;
+        setSortState(updatedSort);
+        updateUrlWithAllStates(updatedSort, filterState, otherState);
+    };
+
+    // Handle clearing the sort state (reset to empty ":")
+    const handleClearSort = () => {
+        const clearedSort = ":"; // Reset to empty sort (no field, no direction)
+        setSortState(clearedSort);
+        updateUrlWithAllStates(clearedSort, filterState, otherState);
+    };
+
+    // Handle other changes
+    const handleOtherChange = (key, value) => {
+        const updatedOther = {
+            ...otherState,
+            [key]: value || "",
+        };
+        setOtherState(updatedOther);
+        updateUrlWithAllStates(sortState, filterState, updatedOther);
     };
 
     const handleInputChange = (e) => {
-        handleFilterChange(e.target.name, e.target.value);
+        handleOtherChange(e.target.name, e.target.value);
     };
 
     const onKeyPress = (key, e) => {
         if (e.key === "Enter") {
-            handleFilterChange(key, e.target.value);
+            handleOtherChange(key, e.target.value);
         }
     };
-    const handleClearFilter = (filterKeys = []) => {
-        const clearedFilters = { ...filterState };
-
-        filterKeys.forEach((key) => {
-            clearedFilters[key] = "";
-        });
-    
-        setFilterState(clearedFilters);
-        updateUrlWithFilters(clearedFilters);
-    };
-
-    const changeSort = (field) => {
-        const updatedFilters = {
-            ...filterState,
-            field,
-            direction: filterState.field === field
-                ? (filterState.direction === "asc" ? "desc" : "asc")
-                : "asc",
+    const handleClearInput = (key) => {
+        const clearedFilters = {
+            ...otherState,
+            [key]: "",
         };
-
-        setFilterState(updatedFilters);
-        updateUrlWithFilters(updatedFilters);
+        setOtherState(clearedFilters);
+        updateUrlWithAllStates(sortState, filterState, clearedFilters);
     };
 
     return {
+        // States
         filterState,
+        sortState,
+        otherState,
+        // Handlers for filter
         handleFilterChange,
-        handleClearInput,
-        handleInputChange,
-        onKeyPress,
         handleClearFilter,
-        changeSort
+        // Handlers for sort
+        changeSort,
+        handleClearSort,
+        // Handlers for other
+        handleOtherChange,
+        handleInputChange,
+        handleClearInput,
+        onKeyPress,
     };
 };
-

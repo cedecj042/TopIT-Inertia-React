@@ -1,26 +1,24 @@
-import { useState, useEffect } from "react";
-import SelectInput from "../SelectInput";
 import "../../../css/filter.css";
 import SelectFilter from "./Filters/SelectFilter";
-import TextInputFilter from "./Filters/TextInputFilter";
-import {  STUDENT_COLUMN, STUDENT_FILTER_COMPONENT } from "@/Library/constants";
-import { INITIAL_STUDENT_FILTER_STATE } from "@/Library/filterState";
-import ColumnFilter from "./Filters/ColumnFilter";
-import { useFilters } from "@/Library/hooks";
+import ClearFunction from "@/Components/Filter/Filters/ClearFunction";
+import TextInputFilter from "@/Components/Filter/Filters/TextInputFilter";
+import { INITIAL_STUDENT_FILTER_STATE, INITIAL_STUDENT_SORT_STATE } from "@/Library/filterState";
+import OtherFilter from "@/Components/Filter/Filters/OtherFilter";
 
 export default function StudentFilters({
-    visibleColumns,
-    onColumnChange,
     filters,
     filterState,
-    queryParams,
-    handleFilterChange,
-    handleInputChange,
-    handleClearInput,
+    sortState,
     handleClearFilter,
+    handleClearSort,
+    handleFilterChange,
+    otherState,
+    handleOtherChange,
+    handleInputChange,
     onKeyPress,
+    visibleColumns,
+    onColumnChange
 }) {
-    
     const FILTER_DATA = [
         {
             data: filters.years,
@@ -32,19 +30,33 @@ export default function StudentFilters({
             filterKey: "school",
             keyValue: filterState.school,
         },
-    ]
- 
+    ];
 
     return (
         <div className="row justify-content-between">
+            <ClearFunction
+                currentState={filterState}
+                initialState={INITIAL_STUDENT_FILTER_STATE()}
+                handleClearFunction={handleClearFilter}
+                label={"filter"}
+            />
+            <br />
+            <ClearFunction
+                currentState={sortState}
+                initialState={INITIAL_STUDENT_SORT_STATE()}
+                handleClearFunction={handleClearSort}
+                label={"sort"}
+            />
             <div className="filter col-6 row">
-                <TextInputFilter
-                    onKeyPress={onKeyPress}
-                    value={filterState.name}
-                    filterKey={"name"}
-                    handleInputChange={handleInputChange}
-                    handleClearInput={handleClearInput}
-                />
+                <div className="col w-100 input-container">
+                    <TextInputFilter
+                        onKeyPress={onKeyPress}
+                        value={otherState.name}
+                        filterKey={"name"}
+                        handleInputChange={handleInputChange}
+                        handleClearInput={handleOtherChange}
+                    />
+                </div>
                 <div className="col-5 dropdown">
                     <button
                         className="btn btn-transparent dropdown-toggle"
@@ -71,7 +83,9 @@ export default function StudentFilters({
                         <div className="mb-3">
                             <button
                                 className="btn btn-light w-100"
-                                onClick={() =>handleClearFilter(['year','school'])}
+                                onClick={() =>
+                                    handleClearFilter(["year", "school"])
+                                }
                             >
                                 Clear Filters
                             </button>
@@ -79,30 +93,12 @@ export default function StudentFilters({
                     </div>
                 </div>
             </div>
-            <div className="col">
-                <div className="row justify-content-end">
-                    <div className="col">
-                        <ColumnFilter
-                            columnData={STUDENT_COLUMN}
-                            visibleColumns={visibleColumns}
-                            onColumnChange={onColumnChange}
-                        />
-                    </div>
-                    <div className="col-3">
-                        <SelectInput
-                            className=" form-select"
-                            onChange={(e) =>
-                                handleFilterChange("items", e.target.value)
-                            }
-                            defaultValue={filterState.items}
-                        >
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                            <option value="15">15</option>
-                        </SelectInput>
-                    </div>
-                </div>
-            </div>
+            <OtherFilter
+                visibleColumns={visibleColumns}
+                onColumnChange={onColumnChange}
+                handleOtherChange={handleOtherChange}
+                otherState={otherState}
+            />
         </div>
     );
 }

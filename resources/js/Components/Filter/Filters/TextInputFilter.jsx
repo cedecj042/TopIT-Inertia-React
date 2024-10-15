@@ -2,7 +2,7 @@ import TextInput from "../../TextInput";
 
 export default function TextInputFilter({value,filterKey,handleInputChange,handleClearInput,onKeyPress}) {
     return (
-        <div className="col input-container">
+        <>
             <TextInput
                 type="text"
                 className="form-control"
@@ -25,6 +25,6 @@ export default function TextInputFilter({value,filterKey,handleInputChange,handl
                     search
                 </span>
             )}
-        </div>
+        </>
     );
 }

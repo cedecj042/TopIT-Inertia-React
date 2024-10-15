@@ -1,4 +1,4 @@
-import '../../../../css/admin/admin.css';
+import '../../../css/admin/admin.css';
 
 export default function StudentProfile({ student }) {
     const profileImageURL = student.profile_image

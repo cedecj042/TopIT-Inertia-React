@@ -18,11 +18,9 @@ class AdminAccess
     public function handle(Request $request, Closure $next): Response
     {
         $user = Auth::user();
-
-        if(!$user || !$user->userable instanceof Admin){
-            Auth::logout();
-            return redirect()->route('admin.login')->withErrors('You do not have access to this page.');
+        if($user && $user->userable instanceof Admin){
+            return $next($request);
         }
-        return $next($request);
+        return redirect()->route('access.denied')->withErrors(['error'=>'You do not have access to this page.']);
     }
 }

@@ -1,9 +1,12 @@
 <?php
 
+use App\Events\UploadEvent;
 use App\Http\Controllers\Admin\CourseController;
+use App\Http\Controllers\Admin\PdfController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\StudentCourseController;
@@ -17,23 +20,26 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Route::redirect('/','/dashboard');
+Route::get('/access-denied',[ErrorController::class,'index'])->name('access.denied');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [StudentController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [StudentController::class, 'loginStudent'])->name('student.login');
     Route::get('/register', [StudentController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [StudentController::class, 'registerStudent'])->name('student.register');
-    Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.loginform');
+    Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
+    Route::post('/admin/login', [AdminController::class, 'loginAdmin'])->name('admin.login');
+    Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
     Route::post('/admin/login', [AdminController::class, 'loginAdmin'])->name('admin.login');
 });
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    // Route::get('/logout', [AuthController::class, 'logout'])->name(name: 'logout');
 });
 
-Route::middleware(['student', 'auth'])->group(function () {
+Route::middleware(['auth','student'])->group(function () {
+    Route::redirect('','/dashboard');
+    Route::redirect('/','/dashboard');
     Route::get('/welcome',[PretestController::class,'welcome'] )->name('welcome');
     Route::prefix('pretest')->name('pretest.')->group(function () {
         Route::get('/start', [PretestController::class, 'startPretest'])->name('start');
@@ -51,13 +57,15 @@ Route::middleware(['student', 'auth'])->group(function () {
     Route::get('/course/{id}', [StudentCourseController::class, 'showStudentCourseDetail'])->name('student-course-detail');
     Route::get('/course/module/{id}', [StudentCourseController::class, 'showModuleDetail'])->name('student-module-detail');
 
-    Route::get('/test',action: [TestController::class,'index'] )->name('test');
+    Route::get('/test', [TestController::class,'index'] )->name('test');
 
 });
 
 
-Route::middleware(['admin', 'auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::redirect('/','/admin/dashboard');
+Route::middleware(['auth','admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::redirect('/', '/admin/dashboard');
+    Route::redirect('','/admin/dashboard');
+    Route::redirect('/admin','/admin/dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Courses
@@ -66,7 +74,7 @@ Route::middleware(['admin', 'auth'])->prefix('admin')->name('admin.')->group(fun
         Route::post('/add', [CourseController::class, 'add'])->name('add');
         Route::get('/{course_id}', [CourseController::class, 'show'])->name('detail');
         Route::delete('/delete/{course_id}', [CourseController::class, 'delete'])->name('delete');
-        // Route::post('/pdf/upload', [PdfController::class, 'uploadPdf'])->name('pdf.upload');
+        Route::post('/pdf/upload', [PdfController::class, 'process'])->name('pdf.upload');
         // Route::delete('/pdf/delete/{id}', [PdfController::class, 'deletePdf'])->name('pdf.delete');
     });
 

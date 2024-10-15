@@ -1,10 +1,6 @@
 import ColumnCheckbox from "./ColumnCheckbox";
 
-export default function ColumnFilter({
-    visibleColumns,
-    onColumnChange,
-    columnData
-}) {
+export default function ColumnFilter({ onColumnChange, visibleColumns }) {
     return (
         <div className="col d-flex flex-row justify-content-end input-container">
             <div className="dropdown">
@@ -22,11 +18,12 @@ export default function ColumnFilter({
                     aria-labelledby="columnDropdown"
                 >
                     <div>
-                        {Object.keys(columnData).map((columnKey) => (
+                        {visibleColumns.map((column) => (
                             <ColumnCheckbox
-                                key={columnKey}
-                                columnKey={columnKey}
-                                visibleColumns={visibleColumns}
+                                key={column.key}
+                                columnKey={column.key}
+                                visible={column.visible}
+                                label={column.label}
                                 onColumnChange={onColumnChange}
                             />
                         ))}

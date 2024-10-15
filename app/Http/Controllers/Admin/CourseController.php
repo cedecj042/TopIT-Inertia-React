@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseRequest;
 use App\Http\Resources\CourseResource;
+use App\Http\Resources\PdfResource;
 use App\Jobs\ProcessCourse;
 use App\Models\Course;
+use App\Models\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -20,6 +22,10 @@ class CourseController extends Controller
     public function index()
     {
         $query = Course::query();
+        
+        if($title = request('title')){
+            $query->where('title', 'like', '%' . $title . '%');
+        }
 
         $perPage = request('items', 5);
 
@@ -33,20 +39,8 @@ class CourseController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function add(CourseRequest $request)
     {
-        Log::info('running');
         $validatedData = $request->validated();
 
         Log::info('Validated data:', $validatedData);
@@ -67,18 +61,18 @@ class CourseController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
+
     public function show(string $course_id)
     {
         //
-        $course = Course::with('pdfs')->findOrFail($course_id);
+        $course = Course::findOrFail($course_id);
+        $pdfs = $course->pdfs()->paginate(5)->onEachSide(1);
         
         return Inertia::render('Admin/CourseDetail',[
             'title' => 'Admin Course',
             'auth'=> Auth::user(),
             'course'=> new CourseResource($course),
+            'pdfs' => PdfResource::collection($pdfs),
             'queryParams'=>request()->query() ? :null,
         ]);
     }

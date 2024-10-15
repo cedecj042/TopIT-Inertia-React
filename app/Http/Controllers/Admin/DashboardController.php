@@ -21,42 +21,49 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        Log::info(request()->query());
         // $query = User::query();
-        $query = User::query()
-            ->where('userable_type', 'App\\Models\\Student')
-            ->join('students', 'users.userable_id', '=', 'students.student_id')
-            ->select('users.*'); // Selecting users fields
+        $query = Student::query()
+            ->select(['student_id', 'firstname', 'lastname', 'year', 'school', 'created_at', DB::raw("CONCAT(students.firstname, ' ', students.lastname) AS name")]);
 
-        // Filter by name (firstname, lastname, or both)
-        if (request('name')) {
-            $name = request('name');
+        $sort = request()->query('sort', ''); // Empty by default
+        $sortField = $sortDirection = null;  // Initialize sortField and sortDirection as null
+
+        // Only split if $sort is not empty
+        if (!empty($sort)) {
+            [$sortField, $sortDirection] = explode(':', $sort);
+
+            // Ensure sortDirection is either 'asc' or 'desc', otherwise set it to null
+            if (!in_array($sortDirection, ['asc', 'desc'])) {
+                $sortDirection = null;
+            }
+        }
+        // Filter by name (firstname, lastname, or concatenated name)
+        if ($name = request('name')) {
             $query->where(function ($q) use ($name) {
-                $q->where('students.firstname', 'like', '%' . $name . '%')
-                    ->orWhere('students.lastname', 'like', '%' . $name . '%')
-                    ->orWhereRaw("CONCAT(students.firstname, ' ', students.lastname) LIKE ?", ['%' . $name . '%']);
+                $q->where('firstname', 'like', '%' . $name . '%')
+                    ->orWhere('lastname', 'like', '%' . $name . '%')
+                    ->orWhere(DB::raw("CONCAT(firstname, ' ', lastname)"), 'like', '%' . $name . '%');
             });
         }
 
         // Filter by year
         if (request('year')) {
             $year = request('year');
-            $query->where('students.year', $year);
+            $query->where('year', $year);
         }
-
-        // Filter by school
+        
         if (request('school')) {
             $school = request('school');
-            $query->where('students.school', $school);
+            $query->where('school', $school);
         }
-
-        $query->orderByRaw("CONCAT(students.firstname, ' ', students.lastname) desc");
-
+        if (!empty($sortField) && !empty($sortDirection)) {
+            $query->orderBy($sortField, $sortDirection);
+        }
 
         $perPage = request('items', 5);
 
         $students = $query->paginate($perPage)->onEachSide(1);
-
-        $students->load('userable');
 
 
         $averageScores = DB::table('test_courses')
@@ -92,7 +99,7 @@ class DashboardController extends Controller
             [
                 'auth' => Auth::user(),
                 'title' => 'Admin Dashboard',
-                'students' => UserResource::collection($students),
+                'students' => StudentResource::collection($students),
                 'queryParams' => request()->query() ?: null,
                 'chartData' => $chartData,
                 'thetaScoreData' => $averageTheta,

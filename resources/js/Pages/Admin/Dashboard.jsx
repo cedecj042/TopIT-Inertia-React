@@ -1,16 +1,16 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import "../../../css/admin/dashboard.css";
-import { Head, router, usePage } from "@inertiajs/react";
+import { usePage } from "@inertiajs/react";
 import Pagination from "@/Components/Pagination";
 import StudentsTable from "@/Components/Tables/StudentsTable";
 import StudentsLineChart from "@/Components/Chart/StudentsLineChart";
 import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
 import StudentFilters from "@/Components/Filter/StudentFilters";
 import { STUDENT_COLUMN, STUDENT_FILTER_COMPONENT } from "@/Library/constants";
-import { useColumnVisibility, useFilters } from "@/Library/hooks";
-import { useEffect, useState } from "react";
+import { useColumnVisibility, useCombinedState } from "@/Library/hooks";
+import { useEffect, } from "react";
 import { toast } from "sonner";
-import { INITIAL_STUDENT_FILTER_STATE } from "@/Library/filterState";
+import { INITIAL_STUDENT_FILTER_STATE, INITIAL_STUDENT_OTHER_STATE, INITIAL_STUDENT_SORT_STATE } from "@/Library/filterState";
 export default function Dashboard({
     students,
     chartData,
@@ -19,8 +19,6 @@ export default function Dashboard({
     filters,
     queryParams ={}
 }) {
-    const { visibleColumns, onColumnChange } = useColumnVisibility(STUDENT_COLUMN);
-
     const { props } = usePage();
     useEffect(() => {
         if (props.flash.success) {
@@ -28,20 +26,31 @@ export default function Dashboard({
         }
     }, [props.flash.success]);
 
-    const [filterState, setFilterState] = useState(INITIAL_STUDENT_FILTER_STATE(queryParams));  
+    const { visibleColumns, onColumnChange } = useColumnVisibility(STUDENT_COLUMN);
+    
     const {
+        filterState,
+        sortState,
+        otherState,
         handleFilterChange,
-        handleInputChange,
-        handleClearInput,
         handleClearFilter,
+        changeSort,
+        handleClearSort,
+        handleOtherChange,
+        handleInputChange,
         onKeyPress,
-        changeSort
-    } = useFilters(filterState,setFilterState, "admin.dashboard", STUDENT_FILTER_COMPONENT);
+    } = useCombinedState(
+        INITIAL_STUDENT_FILTER_STATE(queryParams),
+        INITIAL_STUDENT_SORT_STATE(queryParams),
+        INITIAL_STUDENT_OTHER_STATE(queryParams),
+        "admin.dashboard",
+        STUDENT_FILTER_COMPONENT
+    );
+
 
     return (
         
         <AdminLayout title={title}> 
-            <Head title={title}/>
             <div className="row p-3">
                 <div className="row justify-content-center mt-5 px-5">
                     <h3 className="fw-bold">Dashboard</h3>
@@ -49,23 +58,26 @@ export default function Dashboard({
                         <div className="d-flex flex-column col-12">
                             <h5 className="fw-bolder mb-3">List of Students</h5>
                             <StudentFilters
-                                queryParams={queryParams}
-                                filters={filters}
-                                visibleColumns={visibleColumns}
-                                onColumnChange={onColumnChange}
+                                filterState={filterState}
+                                sortState={sortState}
                                 handleClearFilter={handleClearFilter}
-                                handleClearInput={handleClearInput}
+                                handleClearSort={handleClearSort}
+                                filters={filters}
                                 handleFilterChange={handleFilterChange}
+                                otherState={otherState}
+                                handleOtherChange={handleOtherChange}
                                 handleInputChange={handleInputChange}
                                 onKeyPress={onKeyPress}
-                                queryParams={queryParams}
-                                filterState={filterState}
-                            />
-                            <StudentsTable
-                                students={students.data}
                                 visibleColumns={visibleColumns}
-                                queryParams={queryParams}
+                                onColumnChange={onColumnChange}
+                            />
+                            <StudentsTable 
+                                data={students.data}
+                                sortState={sortState}
+                                visibleColumns={visibleColumns}
                                 changeSort={changeSort}
+                                keyField={"student_id"}
+                                queryParams={queryParams}
                             />
                             <Pagination links={students.meta.links} />
                         </div>

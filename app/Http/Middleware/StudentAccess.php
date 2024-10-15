@@ -19,10 +19,10 @@ class StudentAccess
     {
         $user = Auth::user();
 
-        if(!$user || !$user->userable instanceof Student){
-            Auth::logout();
-            return redirect()->route('login')->withErrors('You do not have access to this page.');
+        $user = Auth::user();
+        if($user && $user->userable instanceof Student){
+            return $next($request);
         }
-        return $next($request);
+        return redirect()->route('access.denied')->withErrors(['error'=>'You do not have access to this page.']);
     }
 }

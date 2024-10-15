@@ -1,0 +1,113 @@
+Setting Up Pusher:
+
+Create account in pusher
+php artisan install:broadcasting
+
+composer require pusher/pusher-php-server
+
+npm install --save-dev laravel-echo
+
+
+2. Set up Pusher credentials:
+
+```
+
+BROADCAST_DRIVER=pusher
+
+PUSHER_APP_ID=your_pusher_app_id
+PUSHER_APP_KEY=your_pusher_app_key
+PUSHER_APP_SECRET=your_pusher_app_secret
+PUSHER_HOST=your_pusher_host # optional, only if you have a custom setup
+PUSHER_PORT=your_pusher_port # optional, only if you have a custom setup
+PUSHER_SCHEME=https # or http
+PUSHER_APP_CLUSTER=your_pusher_app_cluster
+```
+
+Configure Broadcasting driver
+
+'connections' => [
+    'pusher' => [
+        'driver' => 'pusher',
+        'key' => env('PUSHER_APP_KEY'),
+        'secret' => env('PUSHER_APP_SECRET'),
+        'app_id' => env('PUSHER_APP_ID'),
+        'options' => [
+            'cluster' => env('PUSHER_APP_CLUSTER'),
+            'useTLS' => true,
+        ],
+    ],
+],
+
+
+3. Make sure to set the BROADCAST_DRIVER to pusher in your .env file:
+BROADCAST_DRIVER=pusher
+
+4. Run the following command to generate the necessary assets for Laravel Echo:
+npm install --save pusher-js
+npm install --save-dev laravel-echo
+
+
+
+# Creating event in laravel 
+php artisan make:event YourBroadcastEvent
+
+Open the event file YourBroadcastEvent.php and modify it to implement broadcasting:
+
+```
+class YourBroadcastEvent implements ShouldBroadcast
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    public $message;
+
+    public function __construct($message)
+    {
+        $this->message = $message;
+    }
+
+    public function broadcastOn()
+    {
+        return new Channel('your-channel');
+    }
+    
+    public function broadcastAs()
+    {
+        return 'your-event-name';
+    }
+}
+```
+
+
+5. Broadcast the Event
+
+```
+use App\Events\YourBroadcastEvent;
+
+class YourController extends Controller
+{
+    public function triggerEvent()
+    {
+        $message = 'This is a test broadcast';
+        broadcast(new YourBroadcastEvent($message));
+    }
+}
+```
+
+6.  Set up Laravel Echo in React.js
+Install laravel-echo and pusher-js in your React app:
+npm install --save laravel-echo pusher-js
+
+In your React app, set up Laravel Echo in a file like echo.js:
+import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
+
+window.Pusher = Pusher;
+
+const echo = new Echo({
+    broadcaster: 'pusher',
+    key: process.env.MIX_PUSHER_APP_KEY,
+    cluster: process.env.MIX_PUSHER_APP_CLUSTER,
+    forceTLS: true,
+});
+
+export default echo;
