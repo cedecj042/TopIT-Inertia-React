@@ -122,9 +122,5 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
-    'pusher' => [
-        'key' => env('PUSHER_APP_KEY'),
-        'cluster' => env('PUSHER_APP_CLUSTER'),
-    ],
 
 ];
