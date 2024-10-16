@@ -52,11 +52,13 @@ return [
             'secret' => env('PUSHER_APP_SECRET'),
             'app_id' => env('PUSHER_APP_ID'),
             'options' => [
-                'cluster' => env('PUSHER_APP_CLUSTER'),
-                'useTLS' => false,
+                'cluster'=>env('PUSHER_APP_CLUSTER'),
+                'useTLS'=>false,
+                'verify_ssl'=>false,
                 'curl_options' => [
-                    CURLOPT_SSL_VERIFYPEER => false
-                ],
+                    CURLOPT_SSL_VERIFYHOST => 0,
+                    CURLOPT_SSL_VERIFYPEER => 0,
+                ]
             ],
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html

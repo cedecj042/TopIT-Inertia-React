@@ -10,7 +10,6 @@ export default function LoginForm({routeName,btn}) {
         handleSubmit,
         formState:{errors,isSubmitting},
         reset,
-        getValues,
     } = useForm();
 
     const onSubmit = (data) => {

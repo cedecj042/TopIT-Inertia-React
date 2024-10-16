@@ -39,7 +39,7 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    'debug' => (bool) env('APP_DEBUG', true),
 
     /*
     |--------------------------------------------------------------------------
@@ -121,10 +121,6 @@ return [
     'maintenance' => [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
-    ],
-    'pusher' => [
-        'key' => env('PUSHER_APP_KEY'),
-        'cluster' => env('PUSHER_APP_CLUSTER'),
-    ],
+    ]
 
 ];
