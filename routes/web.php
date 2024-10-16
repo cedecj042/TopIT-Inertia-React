@@ -18,9 +18,7 @@ use App\Http\Controllers\Student\TestController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-Route::get('/access-denied',[ErrorController::class,'index'])->name('access.denied');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [StudentController::class, 'showLoginForm'])->name('login');
@@ -81,3 +79,5 @@ Route::middleware(['auth','admin'])->prefix('admin')->name('admin.')->group(func
     Route::get('/profile', [DashboardController::class, 'showProfile'])->name('profile');
     Route::get('/student/{student_id}', [DashboardController::class, 'showStudentDetails'])->name('student');
 });
+
+Route::get('/access-denied',[ErrorController::class,'index'])->name('access.denied');

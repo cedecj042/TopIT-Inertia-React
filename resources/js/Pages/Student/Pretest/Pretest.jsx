@@ -5,7 +5,7 @@ import Sidebar from "@/Components/Pretest/Sidebar";
 import QuestionForm from "@/Components/Pretest/QuestionForm";
 import { Inertia } from '@inertiajs/inertia'; 
 import { usePage } from '@inertiajs/react'; 
-import "../../../../css/students.css";
+import "../../../../css/student/students.css";
 import "../../../../css/student/pretest.css";
 
 const Pretest = () => {
