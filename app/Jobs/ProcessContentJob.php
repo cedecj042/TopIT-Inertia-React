@@ -3,6 +3,12 @@
 namespace App\Jobs;
 
 use App\Events\UploadEvent;
+use App\Models\Lesson;
+use App\Models\Module;
+use App\Models\Pdf;
+use App\Models\Section;
+use App\Models\Subsection;
+
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -19,13 +25,15 @@ class ProcessContentJob implements ShouldQueue
 
     protected $processed_data;
     protected $course_id;
+    protected $file_name;
     /**
      * Create a new job instance.
      */
-    public function __construct($course_id)
+    public function __construct($course_id,$processed_data,$file_name)
     {
-        // $this->processed_data = $processed_data;
+        $this->processed_data = $processed_data;
         $this->course_id=$course_id;
+        $this->file_name=$file_name;
     }
 
     /**
@@ -33,112 +41,101 @@ class ProcessContentJob implements ShouldQueue
      */
     public function handle()
     {
-        try{
-            $this->triggerEvent();
-        }catch(Exception){
 
-        }
+        DB::beginTransaction();
 
-        //
-        // Log::info('Starting the process of storing processed PDF data', [
-        //     'course_id' => $course_id,
-        //     'processed_data_length' => count($request->processed_data),
-        // ]);
-
-        // $request->validate([
-        //     'course_id' => 'required|exists:courses,course_id',
-        //     'processed_data' => 'required|array',
-        // ]);
-
-        // DB::beginTransaction();
-
-        // try {
+        try {
             
-        //     foreach ($request->processed_data['Modules'] as $moduleData) {
-        //         Log::info('Processing module', ['module_title' => $moduleData['Title']]);
+            foreach ($this->processed_data['Modules'] as $moduleData) {
+                Log::info('Processing module', ['module_title' => $moduleData['Title']]);
 
-        //         $module = Module::create([
-        //             'course_id' => $request->course_id,
-        //             'title' => $moduleData['Title'],
-        //             'content' => json_encode($moduleData['Content'])
-        //         ]);
+                $module = Module::create([
+                    'course_id' => $this->course_id,
+                    'title' => $moduleData['Title'],
+                    'content' => json_encode($moduleData['Content'])
+                ]);
 
-        //         foreach ($moduleData['Lessons'] as $lessonData) {
-        //             Log::info('Processing lesson', ['lesson_title' => $lessonData['Title']]);
+                foreach ($moduleData['Lessons'] as $lessonData) {
+                    Log::info('Processing lesson', ['lesson_title' => $lessonData['Title']]);
 
-        //             $lesson = Lesson::create([
-        //                 'module_id' => $module->module_id,
-        //                 'title' => $lessonData['Title'],
-        //                 'content' => json_encode($lessonData['Content'])
-        //             ]);
+                    $lesson = Lesson::create([
+                        'module_id' => $module->module_id,
+                        'title' => $lessonData['Title'],
+                        'content' => json_encode($lessonData['Content'])
+                    ]);
 
-        //             foreach ($lessonData['Sections'] as $sectionData) {
-        //                 $sectionTitle = $sectionData['Title'];
-        //                 Log::info('Processing section', [
-        //                     'section_title' => $sectionTitle,
-        //                     'section_content' => $sectionData['Content']
-        //                 ]);
+                    foreach ($lessonData['Sections'] as $sectionData) {
+                        $sectionTitle = $sectionData['Title'];
+                        Log::info('Processing section', [
+                            'section_title' => $sectionTitle,
+                            'section_content' => $sectionData['Content']
+                        ]);
 
-        //                 $section = Section::create([
-        //                     'lesson_id' => $lesson->lesson_id,
-        //                     'title' => $sectionTitle,
-        //                     'content' => json_encode($sectionData['Content']),
-        //                 ]);
+                        $section = Section::create([
+                            'lesson_id' => $lesson->lesson_id,
+                            'title' => $sectionTitle,
+                            'content' => json_encode($sectionData['Content']),
+                        ]);
 
-        //                 // Define the content types to process
-        //                 $contentTypes = ['Tables', 'Figures', 'Codes'];
+                        $contentTypes = ['Tables', 'Figures', 'Codes'];
 
-        //                 foreach ($contentTypes as $contentType) {
-        //                     // Check if the content type exists in the current section and is an array
-        //                     if (isset($sectionData[$contentType]) && is_array($sectionData[$contentType])) {
-        //                         foreach ($sectionData[$contentType] as $item) {
-        //                             if (is_array($item) && isset($item['type'])) {
-        //                                 $this->processContent($item, $section);
-        //                             }
-        //                         }
-        //                     }
-        //                 }
+                        foreach ($contentTypes as $contentType) {
+                            // Check if the content type exists in the current section and is an array
+                            if (isset($sectionData[$contentType]) && is_array($sectionData[$contentType])) {
+                                foreach ($sectionData[$contentType] as $item) {
+                                    if (is_array($item) && isset($item['type'])) {
+                                        $this->processContent($item, $section);
+                                    }
+                                }
+                            }
+                        }
 
-        //                 foreach ($sectionData['Subsections'] as $subsectionData) {
-        //                     $subsectionTitle = $subsectionData['Title'];
-        //                     Log::info('Processing subsection', [
-        //                         'subsection_title' => $subsectionTitle,
-        //                         'subsection_content' => $subsectionData['Content']
-        //                     ]);
+                        foreach ($sectionData['Subsections'] as $subsectionData) {
+                            $subsectionTitle = $subsectionData['Title'];
+                            Log::info('Processing subsection', [
+                                'subsection_title' => $subsectionTitle,
+                                'subsection_content' => $subsectionData['Content']
+                            ]);
 
-        //                     $subsection = Subsection::create([
-        //                         'section_id' => $section->section_id,
-        //                         'title' => $subsectionTitle,
-        //                         'content' => json_encode($subsectionData['Content'])
-        //                     ]);
+                            $subsection = Subsection::create([
+                                'section_id' => $section->section_id,
+                                'title' => $subsectionTitle,
+                                'content' => json_encode($subsectionData['Content'])
+                            ]);
 
-        //                     $contentTypes = ['Tables', 'Figures', 'Codes'];
+                            $contentTypes = ['Tables', 'Figures', 'Codes'];
 
-        //                     foreach ($contentTypes as $contentType) {
-        //                         // Check if the content type exists in the current section and is an array
-        //                         if (isset($subsectionData[$contentType]) && is_array($subsectionData[$contentType])) {
-        //                             foreach ($subsectionData[$contentType] as $item) {
-        //                                 if (is_array($item) && isset($item['type'])) {
-        //                                     $this->processContent($item, $subsection);
-        //                                 }
-        //                             }
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
+                            foreach ($contentTypes as $contentType) {
+                                // Check if the content type exists in the current section and is an array
+                                if (isset($subsectionData[$contentType]) && is_array($subsectionData[$contentType])) {
+                                    foreach ($subsectionData[$contentType] as $item) {
+                                        if (is_array($item) && isset($item['type'])) {
+                                            $this->processContent($item, $subsection);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
-        //     DB::commit();
+            DB::commit();
 
-        //     response()->json(['success' => 'Successfully stored processed PDF data'], 201);
-        //     Log::info('Successfully stored processed PDF data');
-        //     return response()->json(['message' => 'Processed PDF data stored successfully'], 201);
-        // } catch (\Exception $e) {
-        //     DB::rollBack();
-        //     Log::error('Failed to store processed PDF data', ['error' => $e->getMessage()]);
-        //     return response()->json(['message' => 'Failed to store processed PDF data', 'error' => $e->getMessage()], 500);
-        // }
+            $pdf = Pdf::where('course_id', $this->course_id)
+                ->where('file_name', $this->file_name)
+                ->firstOrFail();
+            $pdf->status = 'Done';
+            $pdf->save();
+            $this->broadcastEvent(null,"Successfully processed the PDF",null);
+            Log::info('Successfully stored processed PDF data');
+            return response()->json(['message' => 'Processed PDF data stored successfully'], 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+            $this->broadcastEvent(null,null,"Failed to process PDF data");
+            Log::error('Failed to store processed PDF data', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Failed to store processed PDF data', 'error' => $e->getMessage()], 500);
+        }
     }
 
     private function processContent($contentItem, $parent)
@@ -231,11 +228,10 @@ class ProcessContentJob implements ShouldQueue
 
         return $imageName;
     }
-    public function triggerEvent()
+    public function broadcastEvent($info=null,$success=null,$error=null)
     {
-        $message = 'PDF processing started.';
         Log::info('starting the event');
-        broadcast(new UploadEvent('sample'));
+        broadcast(new UploadEvent($info,$success,$error));
         Log::info('Event broadcasted');
     }
 }

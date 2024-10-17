@@ -1,6 +1,5 @@
-import AdminLayout from "@/Layouts/AdminLayout";
 import { router } from "@inertiajs/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "../../../css/admin/dashboard.css";
 import PdfTable from "@/Components/Tables/PdfTable";
 import Pagination from "@/Components/Pagination";
@@ -8,9 +7,10 @@ import { useColumnVisibility } from "@/Library/hooks";
 import { PDF_COLUMN } from "@/Library/constants";
 import Modal from "@/Components/Modal";
 import PdfForm from "@/Components/Forms/PdfForm";
+import { AdminContent } from "@/Components/AdminContent";
 
 
-export default function CourseDetail({ title, course, pdfs, queryParams }) {
+function CourseDetail({ title, course, pdfs, queryParams }) {
 
     const [showModal, setShowModal] = useState(false);
     const openModal = () => setShowModal(true);
@@ -21,7 +21,7 @@ export default function CourseDetail({ title, course, pdfs, queryParams }) {
     };
 
     return (
-        <AdminLayout title={title}>
+        <>
             <div className="container-fluid p-5">
                 <div className="row">
                     <div className="col btn-toolbar mb-3">
@@ -86,6 +86,8 @@ export default function CourseDetail({ title, course, pdfs, queryParams }) {
                             </div>
                         </div> */}
             </div>
-        </AdminLayout>
+        </>
     );
 }
+
+export default AdminContent(CourseDetail);

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Admin;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class ProcessContentRequest extends FormRequest
 {
@@ -11,7 +13,7 @@ class ProcessContentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return Auth::check() && Auth::user()->userable instanceof Admin;
     }
 
     /**
@@ -24,6 +26,8 @@ class ProcessContentRequest extends FormRequest
         return [
             'course_id' => 'required|exists:courses,course_id',
             'processed_data' => 'required|array',
+            'file_name' => 'required',
         ];
+        
     }
 }

@@ -1,11 +1,11 @@
 import AdminNavbar from "@/Components/Navigation/AdminNavBar";
 import '../../css/admin/admin.css';
 import { Head } from "@inertiajs/react";
-import MainLayout from "./MainLayout";
+import AdminListener from "./AdminListener";
 
 export default function AdminLayout({ children, title }) {
     return (
-        <MainLayout>
+        <>
             <Head title={title} />
             <div className="container-fluid">
                 <div className="row h-100">
@@ -15,6 +15,6 @@ export default function AdminLayout({ children, title }) {
                     </main>
                 </div>
             </div>
-        </MainLayout>
+        </>
     );
 }

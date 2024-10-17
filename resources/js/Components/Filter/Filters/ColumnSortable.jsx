@@ -4,7 +4,7 @@ export default function ColumnSortable({fieldName,sortState = null, changeSort }
     const { field, direction } = splitSortState(sortState);
     return (
         <th className="clickable" onClick={() => changeSort(fieldName)}>
-            <div className="d-flex flex-row justify-content-start">
+            <div className="d-flex flex-row justify-content-start gap-1">
                 <span className="align-content-center">{capitalizeFirstLetter(fieldName)}</span>
                 {sortState !== null && (
                     <div className="d-flex flex-column justify-content-center align-items-center icon-container">

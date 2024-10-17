@@ -2,12 +2,28 @@ import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
+Pusher.logToConsole = true;
 
-const echo = new Echo({
-    broadcaster: 'pusher',
-    key: import.meta.env.VITE_PUSHER_APP_KEY,    // Correct usage for environment variables in Vite
-    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
-    forceTLS: false,
-});
+let echo = null;
 
-export default echo;
+function initializeEcho() {
+    if (!echo) {
+        echo = new Echo({
+            broadcaster: 'pusher',
+            key: import.meta.env.VITE_PUSHER_APP_KEY,
+            cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+            forceTLS: false,
+            authEndpoint: "/broadcasting/auth",
+        });
+    }
+    return echo;
+}
+
+function disconnectEcho() {
+    if (echo) {
+        echo.disconnect();
+        echo = null;
+    }
+}
+
+export { initializeEcho, disconnectEcho };

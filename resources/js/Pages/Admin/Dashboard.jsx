@@ -6,28 +6,25 @@ import StudentsTable from "@/Components/Tables/StudentsTable";
 import StudentsLineChart from "@/Components/Chart/StudentsLineChart";
 import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
 import StudentFilters from "@/Components/Filter/StudentFilters";
+import { AdminContent } from "@/Components/AdminContent";
 import { STUDENT_COLUMN, STUDENT_FILTER_COMPONENT } from "@/Library/constants";
 import { useColumnVisibility, useCombinedState } from "@/Library/hooks";
-import { useEffect, } from "react";
-import { toast } from "sonner";
-import { INITIAL_STUDENT_FILTER_STATE, INITIAL_STUDENT_OTHER_STATE, INITIAL_STUDENT_SORT_STATE } from "@/Library/filterState";
-export default function Dashboard({
+import {
+    INITIAL_STUDENT_FILTER_STATE,
+    INITIAL_STUDENT_OTHER_STATE,
+    INITIAL_STUDENT_SORT_STATE,
+} from "@/Library/filterState";
+
+function Dashboard({
     students,
     chartData,
-    title,
     thetaScoreData,
     filters,
-    queryParams ={}
+    queryParams = {},
 }) {
-    const { props } = usePage();
-    useEffect(() => {
-        if (props.flash.success) {
-            toast.success(props.flash.success, { duration: 3000 });
-        }
-    }, [props.flash.success]);
+    const { visibleColumns, onColumnChange } =
+        useColumnVisibility(STUDENT_COLUMN);
 
-    const { visibleColumns, onColumnChange } = useColumnVisibility(STUDENT_COLUMN);
-    
     const {
         filterState,
         sortState,
@@ -47,10 +44,8 @@ export default function Dashboard({
         STUDENT_FILTER_COMPONENT
     );
 
-
     return (
-        
-        <AdminLayout title={title}> 
+        <>
             <div className="row p-3">
                 <div className="row justify-content-center mt-5 px-5">
                     <h3 className="fw-bold">Dashboard</h3>
@@ -71,7 +66,7 @@ export default function Dashboard({
                                 visibleColumns={visibleColumns}
                                 onColumnChange={onColumnChange}
                             />
-                            <StudentsTable 
+                            <StudentsTable
                                 data={students.data}
                                 sortState={sortState}
                                 visibleColumns={visibleColumns}
@@ -91,11 +86,15 @@ export default function Dashboard({
                 </div>
             </div>
             <div className="row w-100 px-5 mb-3">
-                <h5 className="fw-semibold">Total Number of Students Registered</h5>
+                <h5 className="fw-semibold">
+                    Total Number of Students Registered
+                </h5>
                 <div className="chart-container d-flex justify-content-center">
                     <StudentsLineChart chartData={chartData} />
                 </div>
             </div>
-        </AdminLayout>
+        </>
     );
 }
+
+export default AdminContent(Dashboard);

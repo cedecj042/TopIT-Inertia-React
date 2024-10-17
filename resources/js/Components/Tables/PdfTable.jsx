@@ -1,5 +1,6 @@
 import { router } from "@inertiajs/react";
 import Table from "./Table";
+import { toast } from "sonner";
 
 export default function PdfTable({
     data,
@@ -8,7 +9,7 @@ export default function PdfTable({
     const deletePdf = (event, pdf_id) => {
         event.stopPropagation();
 
-        router.delete(route("admin.pdf.delete", pdf_id), {
+        router.delete(route("admin.course.pdf.delete", pdf_id), {
             onSuccess: () => {
                 toast.success("Pdf deleted successfully", {
                     duration: 3000,

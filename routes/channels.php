@@ -14,11 +14,11 @@ use Illuminate\Support\Facades\Broadcast;
 */
 
 // Authorize users to listen to the 'admin' private channel
-Broadcast::channel('admin-channel', function ($user) {
-    return $user->isAdmin(); 
+Broadcast::channel('admin', function ($user) {
+    return $user && $user->isAdmin(); 
 });
 
 
 Broadcast::channel('student-channel', function ($user) {
-    return $user->isStudent(); 
+    return $user && $user->isStudent(); 
 });

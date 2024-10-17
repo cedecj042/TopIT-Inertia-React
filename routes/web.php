@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\PdfController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ProcessedPdfController;
 use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\StudentController;
@@ -27,12 +28,18 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [StudentController::class, 'registerStudent'])->name('student.register');
     Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
     Route::post('/admin/login', [AdminController::class, 'loginAdmin'])->name('admin.login');
-    Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
-    Route::post('/admin/login', [AdminController::class, 'loginAdmin'])->name('admin.login');
 });
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
+
+// Admin
+Route::middleware('guest')->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/login', [AdminController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AdminController::class, 'login']);
+    Route::post('/store-processed-pdf', [ProcessedPdfController::class, 'store'])->name('store-pdf');
+    // Route::post('/store-questions', [ProcessQuestionController::class, 'storeQuestions'])->name('store-questions');
 });
 
 Route::middleware(['auth','student'])->group(function () {
@@ -72,8 +79,8 @@ Route::middleware(['auth','admin'])->prefix('admin')->name('admin.')->group(func
         Route::post('/add', [CourseController::class, 'add'])->name('add');
         Route::get('/{course_id}', [CourseController::class, 'show'])->name('detail');
         Route::delete('/delete/{course_id}', [CourseController::class, 'delete'])->name('delete');
-        Route::post('/pdf/upload', [PdfController::class, 'process'])->name('pdf.upload');
-        // Route::delete('/pdf/delete/{id}', [PdfController::class, 'deletePdf'])->name('pdf.delete');
+        Route::post('/pdf/upload', [PdfController::class, 'store'])->name('pdf.upload');
+        Route::delete('/pdf/delete/{id}', [PdfController::class, 'delete'])->name('pdf.delete');
     });
 
     Route::get('/profile', [DashboardController::class, 'showProfile'])->name('profile');

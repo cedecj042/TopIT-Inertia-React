@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -18,7 +19,8 @@ class PdfResource extends JsonResource
             'pdf_id' => $this->pdf_id,
             'file_name' => $this->file_name,
             'status' => $this->status,
-            'uploaded_by' => $this->uploaded_by
+            'uploaded_by' => $this->uploaded_by,
+            'created_at'=>(new Carbon($this->created_at))->format('Y-m-d')
         ];
     }
 }

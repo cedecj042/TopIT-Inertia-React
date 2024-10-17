@@ -11,6 +11,7 @@ use App\Jobs\ProcessPdfJob;
 use App\Models\Course;
 use App\Models\Pdf;
 use App\Services\FastApiService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -100,20 +101,49 @@ class PdfController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function delete($id)
     {
-        //
+        $pdf = Pdf::findOrFail($id);
+
+        $this->deletePdfFile($pdf);
+        $this->deleteImagesViaFastAPI($pdf);
+
+        $pdf->delete();
+
+        return redirect()->back()->with('success', 'PDF and associated images deleted successfully');
     }
-    public function process(PdfRequest $request){
-        
-        $validatedData= $request->validated();
+
+    public function process(ProcessContentRequest $request){
+        $validated = $request->validated();
+        try{
+            ProcessContentJob::dispatch($validated['course_id'],$validated['processed_data'],$validated['file_name']);
+        }catch(Exception $e){
+            Log::error('Error processing content:', ['exception' => $e->getMessage()]);
+            return redirect()->back()->withErrors(['error'=>'Failed to process content. Please try again.']);
+        }
+    }
+
+    private function deletePdfFile(Pdf $pdf)
+    {
+        $pdfPath = storage_path('app/' . $pdf->file_path);
+        if (file_exists($pdfPath)) {
+            unlink($pdfPath);
+        }
+    }
+
+    private function deleteImagesViaFastAPI(Pdf $pdf)
+    {
+        $pdfName = pathinfo($pdf->file_name, PATHINFO_FILENAME);
         try {
-            ProcessContentJob::dispatch($validatedData['course_id']);
-            Log::error('PDF processing');
-            return redirect()->back()->with(['message' => 'PDF processing started.'], 201);
-        } catch (\Exception $e) {
-            Log::error('Failed to start PDF processing', ['error' => $e->getMessage()]);
-            return redirect()->back()->withErrors(['message' => 'Failed to start PDF processing', 'error' => $e->getMessage()], 500);
+            $response = $this->fastAPIService->deleteImages($pdfName);
+
+            if ($response->successful()) {
+                Log::info('FastAPI delete response: ' . $response->body());
+            } else {
+                Log::error('FastAPI delete request failed: ' . $response->body());
+            }
+        } catch (Exception $e) {
+            Log::error('Error deleting images via FastAPI: ' . $e->getMessage());
         }
     }
 

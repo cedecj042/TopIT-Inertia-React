@@ -4,12 +4,13 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class UploadEvent implements ShouldBroadcast
+class VectorizeEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -24,14 +25,13 @@ class UploadEvent implements ShouldBroadcast
         $this->success = $success;
         $this->error = $error;
     }
-    
     public function broadcastOn()
     {
         return [new PrivateChannel('admin')];
     }
     public function broadcastAs()
     {
-        return 'upload';
+        return 'vectorize';
     }
     public function broadcastWith()
     {

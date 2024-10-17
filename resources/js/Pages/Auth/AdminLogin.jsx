@@ -5,7 +5,7 @@ import "../../../css/admin/admin.css";
 
 export default function AdminLogin() {
     return (
-        <MainLayout>
+        <>
             <Head title="Admin Login" />
             <div className="container-fluid vh-100 admin-bg">
                 <div className="row h-100 justify-content-center align-items-center">
@@ -33,6 +33,7 @@ export default function AdminLogin() {
                     </div>
                 </div>
             </div>
-        </MainLayout>
+        </>
     );
 }
+AdminLogin.layout = (page) => <MainLayout children={page}/>;

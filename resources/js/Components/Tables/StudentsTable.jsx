@@ -13,9 +13,9 @@ export default function StudentsTable({
         return (
             <button
                 onClick={(e) => onClick(e, rowData)} 
-                className="btn text-primary fw-semibold d-flex justify-content-center align-items-left"
+                className="btn btn-outline-primary d-flex justify-content-center align-items-left"
             >
-                <span className="material-symbols-outlined">person</span>{" "} View Student
+                <span className="material-symbols-outlined align-self-center">person</span>{" "} View Student
             </button>
         );
     };

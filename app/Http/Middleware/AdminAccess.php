@@ -15,12 +15,18 @@ class AdminAccess
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle($request, Closure $next)
     {
-        $user = Auth::user();
-        if($user && $user->userable instanceof Admin){
-            return $next($request);
+        if (Auth::check()) {
+            $user = Auth::user();
+            if ($user->userable instanceof Admin) {
+                return $next($request);
+            } else {
+                Auth::logout();
+                return redirect()->route('admin.login')->withErrors(['error' => 'You do not have access to this page.']);
+            }
+        } else {
+            return redirect()->route('admin.login');
         }
-        return redirect()->route('access.denied')->withErrors(['error'=>'You do not have access to this page.']);
     }
 }
