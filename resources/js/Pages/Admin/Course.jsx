@@ -1,11 +1,11 @@
-import { AdminContent } from "@/Components/AdminContent";
+import { AdminContent } from "@/Components/Content/AdminContent";
 import CourseFilters from "@/Components/Filter/CourseFilters";
 import CourseForm from "@/Components/Forms/CourseForm";
 import Modal from "@/Components/Modal";
 import Pagination from "@/Components/Pagination";
 import CourseTable from "@/Components/Tables/CourseTable";
 import AdminLayout from "@/Layouts/AdminLayout";
-import AdminListener from "@/Layouts/AdminListener";
+import AdminListener from "@/Components/Content/AdminListener";
 import MainLayout from "@/Layouts/MainLayout";
 import { COURSE_COLUMN } from "@/Library/constants";
 import { useColumnVisibility } from "@/Library/hooks";

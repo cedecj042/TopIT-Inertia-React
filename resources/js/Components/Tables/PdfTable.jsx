@@ -1,15 +1,19 @@
 import { router } from "@inertiajs/react";
 import Table from "./Table";
 import { toast } from "sonner";
+import { useState } from "react";
 
 export default function PdfTable({
     data,
     visibleColumns
 }){
-    const deletePdf = (event, pdf_id) => {
+    const [isProcessing,setIsProcessing] = useState(false);
+
+    const deletePdf = async (event, pdf_id) => {
+        setIsProcessing(true);
         event.stopPropagation();
 
-        router.delete(route("admin.course.pdf.delete", pdf_id), {
+        await router.delete(route("admin.course.pdf.delete", pdf_id), {
             onSuccess: () => {
                 toast.success("Pdf deleted successfully", {
                     duration: 3000,
@@ -18,6 +22,9 @@ export default function PdfTable({
             onError: (error) => {
                 toast.error(error, { duration: 3000 });
             },
+            onFinish: () => {
+                setIsProcessing(false)
+            }
         });
     };
     
@@ -26,6 +33,7 @@ export default function PdfTable({
             <button
                 type="button"
                 onClick={(e) => deletePdf(e, rowData.pdf_id)}
+                disabled={isProcessing}
                 className="btn btn-outline-danger d-flex justify-content-center"
             >
                 <span className="material-symbols-outlined">delete</span> Delete Pdf

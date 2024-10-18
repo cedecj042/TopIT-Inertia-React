@@ -2,6 +2,7 @@ import { router } from "@inertiajs/react";
 import { useForm } from "react-hook-form"
 import { toast } from "sonner";
 import "../../../css/modal.css";
+import { useState } from "react";
 
 export default function PdfForm({id,onClose}){
     const {
@@ -10,13 +11,14 @@ export default function PdfForm({id,onClose}){
         formState: { errors, isSubmitting },
         handleSubmit,
     } = useForm();
-
-    const onSubmit = (data) => {
+    const [isProcessing,setIsProcessing] = useState(false);
+    const onSubmit = async (data) => {
+        setIsProcessing(false)
         const formData = new FormData();
         formData.append("course_id", data.course_id);
         formData.append("pdf_file", data.pdf_file[0]);
-        console.log(data.pdf_file[0])
-        router.post(route("admin.course.pdf.upload"), formData, {
+
+        await router.post(route("admin.course.pdf.upload"), formData, {
             forceFormData: true, // Ensures that the FormData is sent properly
             onSuccess: () => {
                 // toast.info("uploading");
@@ -27,6 +29,9 @@ export default function PdfForm({id,onClose}){
                 console.error("Form errors:", formErrors);
                 toast.error("Error occurred while uploading the PDF.");
             },
+            onFinish: () => {
+                setIsProcessing(false);  
+            }
         });
     };
     return(
@@ -74,13 +79,14 @@ export default function PdfForm({id,onClose}){
                     type="button"
                     className="btn btn-secondary"
                     onClick={onClose}
+                    disabled={isSubmitting || isProcessing}
                 >
                     Close
                 </button>
                 <button
                     type="submit"
                     className="btn btn-primary"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isProcessing}
                 >
                     Add
                 </button>

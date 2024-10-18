@@ -48,4 +48,4 @@ export default function StudentLogin() {
     );
 }
 
-StudentLogin.layout = (page) => <MainLayout/>
+StudentLogin.layout = (page) => <MainLayout>{page}</MainLayout>

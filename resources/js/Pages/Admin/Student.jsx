@@ -2,7 +2,7 @@ import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
 import StudentProfile from "@/Components/Profile/StudentProfile";
 import "../../../css/admin/dashboard.css";
 import { router } from "@inertiajs/react";
-import { AdminContent } from "@/Components/AdminContent";
+import { AdminContent } from "@/Components/Content/AdminContent";
 
 function Student({ student, averageThetaScore ,title,queryParams}) {
     const handleBackClick = () => {

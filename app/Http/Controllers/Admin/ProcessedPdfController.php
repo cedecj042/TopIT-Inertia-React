@@ -13,6 +13,7 @@ class ProcessedPdfController extends Controller
 {
     //
     public function store(ProcessContentRequest $request){
+        Log::info("now processing the pdf" . $request);
         $validated = $request->validated();
         try{
             ProcessContentJob::dispatch($validated['course_id'],$validated['processed_data'],$validated['file_name']);

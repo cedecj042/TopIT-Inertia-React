@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { router } from "@inertiajs/react";
 import { useForm } from "react-hook-form";
 import "../../../css/modal.css";
@@ -11,9 +11,12 @@ export default function AddCourse({ onClose }) {
         formState: { errors, isSubmitting },
         handleSubmit,
     } = useForm();
+    const [isProcessing,setIsProcessing] = useState(false);
 
-    const onSubmit = (data) => {
-        router.post(route("admin.course.add"), data, {
+    const onSubmit = async (data) => {
+        setIsProcessing(true);
+
+        await router.post(route("admin.course.add"), data, {
             onSuccess: (page) => {
                 toast.success("Course Added successfully!");
                 reset();
@@ -25,6 +28,9 @@ export default function AddCourse({ onClose }) {
                     "Failed to add course. Please check the form and try again."
                 );
             },
+            onFinish: () => {
+                setIsProcessing(false);  
+            }
         });
     };
 
@@ -79,7 +85,7 @@ export default function AddCourse({ onClose }) {
                 <button
                     type="submit"
                     className="btn btn-primary"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isProcessing}
                 >
                     Add
                 </button>

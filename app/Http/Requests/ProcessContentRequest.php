@@ -13,7 +13,7 @@ class ProcessContentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::check() && Auth::user()->userable instanceof Admin;
+        return true;
     }
 
     /**

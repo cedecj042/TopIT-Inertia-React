@@ -1,8 +1,7 @@
-import AdminLayout from "@/Layouts/AdminLayout";
-import AdminListener from "@/Layouts/AdminListener";
 import MainLayout from "@/Layouts/MainLayout";
+import StudentLayout from "@/Layouts/StudentLayout";
 
-export const AdminContent = (Component) => {
+export const StudentContent = (Component) => {
     const LayoutWrapper = (page) => {
         const {
             props: { title },
@@ -10,9 +9,7 @@ export const AdminContent = (Component) => {
 
         return (
             <MainLayout>
-                <AdminListener>
-                    <AdminLayout title={title}>{page}</AdminLayout>
-                </AdminListener>
+                <StudentLayout title={title}>{page}</StudentLayout>
             </MainLayout>
         );
     };

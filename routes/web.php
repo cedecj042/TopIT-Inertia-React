@@ -36,11 +36,9 @@ Route::middleware('auth')->group(function () {
 
 // Admin
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/login', [AdminController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AdminController::class, 'login']);
-    Route::post('/store-processed-pdf', [ProcessedPdfController::class, 'store'])->name('store-pdf');
     // Route::post('/store-questions', [ProcessQuestionController::class, 'storeQuestions'])->name('store-questions');
 });
+Route::post('/admin/store-processed-pdf', [ProcessedPdfController::class, 'store'])->name('store-pdf');
 
 Route::middleware(['auth','student'])->group(function () {
     Route::redirect('','/dashboard');

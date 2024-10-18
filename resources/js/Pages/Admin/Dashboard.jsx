@@ -6,7 +6,7 @@ import StudentsTable from "@/Components/Tables/StudentsTable";
 import StudentsLineChart from "@/Components/Chart/StudentsLineChart";
 import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
 import StudentFilters from "@/Components/Filter/StudentFilters";
-import { AdminContent } from "@/Components/AdminContent";
+import { AdminContent } from "@/Components/Content/AdminContent";
 import { STUDENT_COLUMN, STUDENT_FILTER_COMPONENT } from "@/Library/constants";
 import { useColumnVisibility, useCombinedState } from "@/Library/hooks";
 import {

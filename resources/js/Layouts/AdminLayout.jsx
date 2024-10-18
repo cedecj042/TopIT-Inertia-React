@@ -1,7 +1,7 @@
 import AdminNavbar from "@/Components/Navigation/AdminNavBar";
 import '../../css/admin/admin.css';
 import { Head } from "@inertiajs/react";
-import AdminListener from "./AdminListener";
+import AdminListener from "../Components/Content/AdminListener";
 
 export default function AdminLayout({ children, title }) {
     return (
