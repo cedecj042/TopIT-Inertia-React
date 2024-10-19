@@ -1,3 +1,5 @@
+import { router } from "@inertiajs/react";
+
 export const capitalizeFirstLetter = (string) => {
     return string
         .replace(/_/g, ' ')          // Replace underscores with spaces

@@ -12,6 +12,13 @@ export const COURSE_COLUMN = [
     {key:'description',label:'Description', sortable:false,visible:true},
     {key:'created_at',label:'Created At', sortable:false,visible:true}
 ]
+export const MODULE_COLUMN = [
+    {key:'module_id',label:'ID', sortable:false,visible:true},
+    {key:'course_title',label:'Course', sortable:false,visible:true},
+    {key:'title',label:'Title', sortable:false,visible:true},
+    {key:'description',label:'Description', sortable:false,visible:true},
+    {key:'created_at',label:'Created At', sortable:false,visible:true}
+]
 
 export const PDF_COLUMN = [
     {key:'pdf_id',label:'ID', sortable:false,visible:true},

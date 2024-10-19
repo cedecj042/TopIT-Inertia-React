@@ -18,27 +18,20 @@ export const useColumnVisibility = (initialColumns) => {
         onColumnChange,
     };
 };
-export const useCombinedState = (
-    initialFilterState = {},
-    initialSortState = ":",
-    initialOtherState = {},
-    routeName,
-    components
-) => {
-    const [filterState, setFilterState] = useState(initialFilterState);
-    const [sortState, setSortState] = useState(initialSortState);
-    const [otherState, setOtherState] = useState(initialOtherState);
 
+export const useCombinedState = (initialState = {}, routeName, components) => {
+    const [state, setState] = useState(initialState);
 
-    const updateUrlWithAllStates = (sortState, filterState, otherState) => {
+    const updateUrlWithAllStates = () => {
         const combinedState = {
-            ...filterState,
-            ...otherState,
+            ...state.filterState,
+            ...state.otherState,
         };
 
-        if (sortState !== ":") {
-            combinedState.sort = sortState;
+        if (state.sortState !== ":") {
+            combinedState.sort = state.sortState;
         }
+
         const filteredParams = Object.fromEntries(
             Object.entries(combinedState).filter(([key, value]) => value !== "")
         );
@@ -51,6 +44,16 @@ export const useCombinedState = (
         });
     };
 
+    return {
+        state,
+        setState,
+        updateUrlWithAllStates,
+    };
+};
+
+export const useFilterState = (initialState = {}) => {
+    const [filterState, setFilterState] = useState(initialState);
+
     // Handle filter changes
     const handleFilterChange = (key, value) => {
         const updatedFilters = {
@@ -58,9 +61,7 @@ export const useCombinedState = (
             [key]: value || "",
         };
         setFilterState(updatedFilters);
-        updateUrlWithAllStates(sortState, updatedFilters, otherState);
     };
-
     // Handle clearing filters
     const handleClearFilter = (filterKeys = []) => {
         const clearedFilters = { ...filterState };
@@ -68,12 +69,20 @@ export const useCombinedState = (
             clearedFilters[key] = "";
         });
         setFilterState(clearedFilters);
-        updateUrlWithAllStates(sortState, clearedFilters, otherState);
     };
+    return {
+        filterState,
+        handleFilterChange,
+        handleClearFilter,
+    };
+};
+
+export const useSortState = (initialState = ":", updateUrlWithAllStates) => {
+    const [sortState, setSortState] = useState(initialState);
 
     // Handle sorting changes (field:direction)
     const changeSort = (field) => {
-        const [currentField, currentDirection] = sortState.split(":"); 
+        const [currentField, currentDirection] = sortState.split(":");
 
         const newDirection =
             currentField === field
@@ -84,24 +93,41 @@ export const useCombinedState = (
 
         const updatedSort = `${field}:${newDirection}`;
         setSortState(updatedSort);
-        updateUrlWithAllStates(updatedSort, filterState, otherState);
+        updateUrlWithAllStates();
     };
 
     // Handle clearing the sort state (reset to empty ":")
     const handleClearSort = () => {
         const clearedSort = ":"; // Reset to empty sort (no field, no direction)
         setSortState(clearedSort);
-        updateUrlWithAllStates(clearedSort, filterState, otherState);
+        updateUrlWithAllStates();
     };
 
-    // Handle other changes
+    return {
+        sortState,
+        changeSort,
+        handleClearSort,
+    };
+};
+
+export const useOtherState = (initialOtherState = {}, setState,updateUrlWithAllStates) => {
+    const [otherState, setOtherState] = useState(initialOtherState);
+
     const handleOtherChange = (key, value) => {
         const updatedOther = {
             ...otherState,
             [key]: value || "",
         };
         setOtherState(updatedOther);
-        updateUrlWithAllStates(sortState, filterState, updatedOther);
+
+        // Update the combined state with the new otherState
+        setState((prevState) => ({
+            ...prevState,
+            otherState: updatedOther,
+        }));
+
+        // Optionally call updateUrlWithAllStates to reflect changes in the URL
+        updateUrlWithAllStates();
     };
 
     const handleInputChange = (e) => {
@@ -113,30 +139,29 @@ export const useCombinedState = (
             handleOtherChange(key, e.target.value);
         }
     };
+
     const handleClearInput = (key) => {
-        const clearedFilters = {
+        const clearedOtherState = {
             ...otherState,
             [key]: "",
         };
-        setOtherState(clearedFilters);
-        updateUrlWithAllStates(sortState, filterState, clearedFilters);
+        setOtherState(clearedOtherState);
+
+        // Update the combined state with the cleared otherState
+        setState((prevState) => ({
+            ...prevState,
+            otherState: clearedOtherState,
+        }));
+
+        updateUrlWithAllStates();
     };
 
     return {
-        // States
-        filterState,
-        sortState,
         otherState,
-        // Handlers for filter
-        handleFilterChange,
-        handleClearFilter,
-        // Handlers for sort
-        changeSort,
-        handleClearSort,
-        // Handlers for other
         handleOtherChange,
         handleInputChange,
         handleClearInput,
         onKeyPress,
     };
 };
+

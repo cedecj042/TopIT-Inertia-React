@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import "../../../css/modal.css";
 import { toast } from "sonner";
 
-export default function CourseForm({ onClose }) {
+export default function ModuleForm({ onClose }) {
     const {
         register,
         reset,
@@ -16,16 +16,16 @@ export default function CourseForm({ onClose }) {
     const onSubmit = async (data) => {
         setIsProcessing(true);
 
-        await router.post(route("admin.course.add"), data, {
+        await router.post(route("admin.module.vectorize"), data, {
             onSuccess: (page) => {
-                toast.success("Course Added successfully!");
+                toast.success("Module is processing");
                 reset();
                 onClose();
             },
             onError: (formErrors) => {
                 console.error("Form errors:", formErrors); // This will now get triggered for non-200 responses
                 alert(
-                    "Failed to add course. Please check the form and try again."
+                    "Failed to process module. Please check the form and try again."
                 );
             },
             onFinish: () => {

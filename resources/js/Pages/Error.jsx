@@ -5,7 +5,6 @@ import { useEffect } from "react";
 
 export default function Error({title}){
     const { props } = usePage();
-    console.log(props.errors.error)
     return(
         <MainLayout>
             <Head title={title}/>

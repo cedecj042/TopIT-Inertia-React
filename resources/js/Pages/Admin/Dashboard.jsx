@@ -8,7 +8,7 @@ import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
 import StudentFilters from "@/Components/Filter/StudentFilters";
 import { AdminContent } from "@/Components/Content/AdminContent";
 import { STUDENT_COLUMN, STUDENT_FILTER_COMPONENT } from "@/Library/constants";
-import { useColumnVisibility, useCombinedState } from "@/Library/hooks";
+import { useColumnVisibility, useCombinedState, useFilterState, useOtherState, useSortState } from "@/Library/hooks";
 import {
     INITIAL_STUDENT_FILTER_STATE,
     INITIAL_STUDENT_OTHER_STATE,
@@ -22,27 +22,12 @@ function Dashboard({
     filters,
     queryParams = {},
 }) {
-    const { visibleColumns, onColumnChange } =
-        useColumnVisibility(STUDENT_COLUMN);
-
-    const {
-        filterState,
-        sortState,
-        otherState,
-        handleFilterChange,
-        handleClearFilter,
-        changeSort,
-        handleClearSort,
-        handleOtherChange,
-        handleInputChange,
-        onKeyPress,
-    } = useCombinedState(
-        INITIAL_STUDENT_FILTER_STATE(queryParams),
-        INITIAL_STUDENT_SORT_STATE(queryParams),
-        INITIAL_STUDENT_OTHER_STATE(queryParams),
-        "admin.dashboard",
-        STUDENT_FILTER_COMPONENT
-    );
+    
+    const initialState = INITIAL_STUDENT_FILTER_STATE(queryParams)
+    const {visibleColumns, onColumnChange} = useColumnVisibility(STUDENT_COLUMN);
+    const {filterState,handleClearFilter,handleFilterChange} = useFilterState(initialState.filter);
+    const {sortState,handleClearSort} = useSortState(initialState.sort);
+    const {otherState,handleClearInput,handleInputChange,handleOtherChange,onKeyPress} = useOtherState(initialState.other);
 
     return (
         <>

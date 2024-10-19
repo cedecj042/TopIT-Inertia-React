@@ -1,11 +1,9 @@
-import { COURSE_COLUMN, COURSE_FILTER_COMPONENT } from "@/Library/constants";
-import { INITIAL_COURSE_OTHER_STATE } from "@/Library/filterState";
-import { useCombinedState } from "@/Library/hooks";
+import { INITIAL_COURSE_STATE } from "@/Library/filterState";
+import { useCombinedState, useOtherState } from "@/Library/hooks";
 import TextInputFilter from "./Filters/TextInputFilter";
-import SelectInput from "../SelectInput";
-import ColumnFilter from "./Filters/ColumnFilter";
 import "../../../css/filter.css";
 import OtherFilter from "./Filters/otherFilter";
+import { COURSE_FILTER_COMPONENT } from "@/Library/constants";
 
 export default function CourseFilters({
     visibleColumns,
@@ -13,22 +11,8 @@ export default function CourseFilters({
     queryParams = {},
 }){  
 
-    const {
-        otherState,
-        handleFilterChange,
-        handleInputChange,
-        handleOtherChange,
-        handleClearInput,
-        onKeyPress,
-    } = useCombinedState(
-        null,
-        null,
-        INITIAL_COURSE_OTHER_STATE(queryParams), 
-        "admin.course.index", 
-        COURSE_FILTER_COMPONENT
-    );
-    console.log(otherState)
-
+    const {state, setState,updateUrlWithAllStates} = useCombinedState(INITIAL_COURSE_STATE(queryParams),"admin.course.index",COURSE_FILTER_COMPONENT);
+    const{otherState,handleClearInput,handleInputChange,handleOtherChange,onKeyPress} = useOtherState(state.otherState,setState,updateUrlWithAllStates);
     return(
         <>
             <div className="filter col-lg-4 col-md-6 col-xs-4 px-0">

@@ -2,6 +2,7 @@
 
 use App\Events\UploadEvent;
 use App\Http\Controllers\Admin\CourseController;
+use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\PdfController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
@@ -40,35 +41,34 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 Route::post('/admin/store-processed-pdf', [ProcessedPdfController::class, 'store'])->name('store-pdf');
 
-Route::middleware(['auth','student'])->group(function () {
-    Route::redirect('','/dashboard');
-    Route::redirect('/','/dashboard');
-    Route::get('/welcome',[PretestController::class,'welcome'] )->name('welcome');
+Route::middleware(['auth', 'student'])->group(function () {
+    Route::redirect('', '/dashboard');
+    Route::redirect('/', '/dashboard');
+    Route::get('/welcome', [PretestController::class, 'welcome'])->name('welcome');
     Route::prefix('pretest')->name('pretest.')->group(function () {
         Route::get('/start', [PretestController::class, 'startPretest'])->name('start');
         Route::get('/questions/{courseIndex?}', [PretestController::class, 'showQuestions'])->name('questions');
-        
+
         Route::post('/submit', [PretestController::class, 'submitAnswers'])->name('submit');
         Route::get('/finish/{pretestId}', [PretestController::class, 'showFinishAttempt'])->name('finish');
         Route::get('/review/{pretestId}', [PretestController::class, 'reviewPretest'])->name('review');
     });
 
-    Route::get('/dashboard',[StudentDashboardController::class,'index'])->name('dashboard');
-    Route::get('/profile',[StudentProfileController::class,'index'] )->name('profile');
-    
+    Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/profile', [StudentProfileController::class, 'index'])->name('profile');
+
     Route::get('/course', [StudentCourseController::class, 'showStudentCourse'])->name('student-course');
     Route::get('/course/{id}', [StudentCourseController::class, 'showStudentCourseDetail'])->name('student-course-detail');
     Route::get('/course/module/{id}', [StudentCourseController::class, 'showModuleDetail'])->name('student-module-detail');
 
-    Route::get('/test', [TestController::class,'index'] )->name('test');
-
+    Route::get('/test', [TestController::class, 'index'])->name('test');
 });
 
 
-Route::middleware(['auth','admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::redirect('/', '/admin/dashboard');
-    Route::redirect('','/admin/dashboard');
-    Route::redirect('/admin','/admin/dashboard');
+    Route::redirect('', '/admin/dashboard');
+    Route::redirect('/admin', '/admin/dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Courses
@@ -81,8 +81,17 @@ Route::middleware(['auth','admin'])->prefix('admin')->name('admin.')->group(func
         Route::delete('/pdf/delete/{id}', [PdfController::class, 'delete'])->name('pdf.delete');
     });
 
+    Route::prefix('module')->name('module.')->group(function () {
+        Route::get('/', [ModuleController::class, 'index'])->name('index');
+        // Route::post('/update', [ModuleController::class, 'updateModule'])->name('update');
+        // Route::get('/{id}', [ModuleController::class, 'editModule'])->name('edit');
+        // Route::view('/store','admin.ui.course.module.vectorize');
+        // Route::get('/vector', [ModuleController::class, 'vectorShow'])->name('vector.show');
+        // Route::post('/vector/upload', [ModuleController::class, 'vectorStore'])->name('vector.upload');
+    });
+
     Route::get('/profile', [DashboardController::class, 'showProfile'])->name('profile');
     Route::get('/student/{student_id}', [DashboardController::class, 'showStudentDetails'])->name('student');
 });
 
-Route::get('/access-denied',[ErrorController::class,'index'])->name('access.denied');
+Route::get('/access-denied', [ErrorController::class, 'index'])->name('access.denied');

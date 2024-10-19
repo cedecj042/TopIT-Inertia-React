@@ -2,15 +2,13 @@ import "../../../css/filter.css";
 import SelectFilter from "./Filters/SelectFilter";
 import ClearFunction from "@/Components/Filter/Filters/ClearFunction";
 import TextInputFilter from "@/Components/Filter/Filters/TextInputFilter";
-import { INITIAL_STUDENT_FILTER_STATE, INITIAL_STUDENT_OTHER_STATE, INITIAL_STUDENT_SORT_STATE } from "@/Library/filterState";
+import { INITIAL_MODULE_FILTER_STATE } from "@/Library/filterState";
 import OtherFilter from "@/Components/Filter/Filters/OtherFilter";
 
-export default function StudentFilters({
+export default function ModuleFilters({
     filters,
     filterState,
-    sortState,
     handleClearFilter,
-    handleClearSort,
     handleFilterChange,
     otherState,
     handleOtherChange,
@@ -19,34 +17,11 @@ export default function StudentFilters({
     visibleColumns,
     onColumnChange
 }) {
-    const {
-        filterState,
-        sortState,
-        otherState,
-        handleFilterChange,
-        handleClearFilter,
-        changeSort,
-        handleClearSort,
-        handleOtherChange,
-        handleInputChange,
-        onKeyPress,
-    } = useCombinedState(
-        INITIAL_STUDENT_FILTER_STATE(queryParams),
-        INITIAL_STUDENT_SORT_STATE(queryParams),
-        INITIAL_STUDENT_OTHER_STATE(queryParams),
-        "admin.dashboard",
-        STUDENT_FILTER_COMPONENT
-    );
     const FILTER_DATA = [
         {
-            data: filters.years,
-            filterKey: "year",
-            keyValue: filterState.year,
-        },
-        {
-            data: filters.schools,
-            filterKey: "school",
-            keyValue: filterState.school,
+            data: filters.courses,
+            filterKey: "course",
+            keyValue: filterState.course,
         },
     ];
 
@@ -54,16 +29,9 @@ export default function StudentFilters({
         <div className="row justify-content-between">
             <ClearFunction
                 currentState={filterState}
-                initialState={INITIAL_STUDENT_FILTER_STATE()}
+                initialState={INITIAL_MODULE_FILTER_STATE()}
                 handleClearFunction={handleClearFilter}
                 label={"filter"}
-            />
-            <br />
-            <ClearFunction
-                currentState={sortState}
-                initialState={INITIAL_STUDENT_SORT_STATE()}
-                handleClearFunction={handleClearSort}
-                label={"sort"}
             />
             <div className="filter col-6 row">
                 <div className="col w-100 input-container">
