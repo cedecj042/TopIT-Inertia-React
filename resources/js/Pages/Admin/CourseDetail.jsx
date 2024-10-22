@@ -3,7 +3,7 @@ import { useState } from "react";
 import "../../../css/admin/dashboard.css";
 import PdfTable from "@/Components/Tables/PdfTable";
 import Pagination from "@/Components/Pagination";
-import { useColumnVisibility } from "@/Library/hooks";
+import { useColumnVisibility, useRequest } from "@/Library/hooks";
 import { PDF_COLUMN } from "@/Library/constants";
 import Modal from "@/Components/Modal";
 import PdfForm from "@/Components/Forms/PdfForm";
@@ -16,8 +16,10 @@ function CourseDetail({ title, course, pdfs, queryParams }) {
     const openModal = () => setShowModal(true);
     const closeModal = () => setShowModal(false);
     const { visibleColumns, onColumnChange } = useColumnVisibility(PDF_COLUMN);
-    const handleBackClick = () => {
-        router.get(route("admin.course.index", queryParams));
+    
+    const {isProcessing,getRequest} = useRequest();
+    const handleBackClick = async () => {
+        getRequest('admin.course.index',queryParams);
     };
 
     return (
@@ -27,6 +29,7 @@ function CourseDetail({ title, course, pdfs, queryParams }) {
                     <div className="col btn-toolbar mb-3">
                         <button
                             className="btn btn-transparent"
+                            disabled={isProcessing}
                             onClick={handleBackClick}
                         >
                             <i className="bi bi-arrow-left"></i>
@@ -53,8 +56,7 @@ function CourseDetail({ title, course, pdfs, queryParams }) {
                                 </button>
                             </div>
                             <div className="col-12 justify-content-between">
-                                <PdfTable
-                                    data={pdfs.data}
+                                <PdfTable data={pdfs.data}
                                     visibleColumns={visibleColumns}
                                 />
                                 <Pagination links={pdfs.meta.links} />

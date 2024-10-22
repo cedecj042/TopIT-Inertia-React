@@ -48,7 +48,7 @@ class PdfController extends Controller
                 $pdfFilePath = $fullPath;
                 ProcessPdfJob::dispatch($pdfFilePath, $fileName, $course->title, $course->course_id);
             
-                return redirect()->back()->with(['success'=>'PDF uploaded successfully! Processing will continue in the background.']);
+                return redirect()->back()->with(['message'=>'PDF uploaded successfully! Processing will continue in the background.']);
             } catch (\Exception $e) {
                 Log::error('Error dispatching PDF processing job: ' . $e->getMessage());
                 return redirect()->back()->withErrors(['error' => 'An error occurred while processing the PDF.']);
@@ -103,14 +103,19 @@ class PdfController extends Controller
      */
     public function delete($id)
     {
-        $pdf = Pdf::findOrFail($id);
+        try{
+            $pdf = Pdf::findOrFail($id);
 
-        $this->deletePdfFile($pdf);
-        $this->deleteImagesViaFastAPI($pdf);
+            $this->deletePdfFile($pdf);
+            $this->deleteImagesViaFastAPI($pdf);
 
-        $pdf->delete();
+            $pdf->delete();
+            return redirect()->back()->with(['success'=> 'PDF and associated images deleted successfully']);
 
-        return redirect()->back()->with('success', 'PDF and associated images deleted successfully');
+        }catch(Exception $e){
+            return redirect()->back()->withErrors(['error'=> 'Something went wrong during deletion of pdf.']);
+
+        }
     }
 
     public function process(ProcessContentRequest $request){

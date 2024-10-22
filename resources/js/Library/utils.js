@@ -11,9 +11,12 @@ export const areFiltersApplied = (initialState, currentState) => {
 };
 
 export const splitSortState = (sortState) => {
-    if (!sortState) {
-        return { field: null, direction: null }; // Default values if sortState is null
+    if (!sortState || typeof sortState !== 'string') {
+        // If sortState is null, undefined, or not a string, return default values
+        return { field: null, direction: null };
     }
-    const [field, direction] = sortState.split(':');
+
+    const [field = null, direction = null] = sortState.split(':');
+
     return { field, direction };
 };

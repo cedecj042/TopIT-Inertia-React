@@ -1,18 +1,16 @@
-import { INITIAL_COURSE_STATE } from "@/Library/filterState";
-import { useCombinedState, useOtherState } from "@/Library/hooks";
+import { useOtherState } from "@/Library/hooks";
 import TextInputFilter from "./Filters/TextInputFilter";
 import "../../../css/filter.css";
 import OtherFilter from "./Filters/otherFilter";
-import { COURSE_FILTER_COMPONENT } from "@/Library/constants";
+import { useContext, useEffect } from "react";
+import ContextProvider from "../Tables/TableContext";
 
-export default function CourseFilters({
-    visibleColumns,
-    onColumnChange,
-    queryParams = {},
-}){  
+export default function CourseFilters({}){  
 
-    const {state, setState,updateUrlWithAllStates} = useCombinedState(INITIAL_COURSE_STATE(queryParams),"admin.course.index",COURSE_FILTER_COMPONENT);
-    const{otherState,handleClearInput,handleInputChange,handleOtherChange,onKeyPress} = useOtherState(state.otherState,setState,updateUrlWithAllStates);
+    const {state,dispatch,visibleColumns,onColumnChange} = useContext(ContextProvider);
+    const { handleInputChange,handleOtherChange,onKeyPress } = useOtherState(dispatch);
+    const {otherState} = state;
+    
     return(
         <>
             <div className="filter col-lg-4 col-md-6 col-xs-4 px-0">
@@ -22,7 +20,7 @@ export default function CourseFilters({
                         value={otherState.title}
                         filterKey={'title'}
                         handleInputChange={handleInputChange}
-                        handleClearInput={handleClearInput}
+                        handleClearInput={handleOtherChange}
                     />
                 </div>
             </div>

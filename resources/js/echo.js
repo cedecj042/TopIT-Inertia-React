@@ -2,7 +2,7 @@ import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
-Pusher.logToConsole = true;
+Pusher.logToConsole = false;
 
 let echo = null;
 

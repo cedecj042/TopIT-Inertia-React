@@ -2,17 +2,18 @@ import { AdminContent } from "@/Components/Content/AdminContent";
 import ModuleFilters from "@/Components/Filter/ModuleFilters";
 import ModuleForm from "@/Components/Forms/ModuleForm";
 import Modal from "@/Components/Modal";
-import { useColumnVisibility } from "@/Library/hooks";
+import Pagination from "@/Components/Pagination";
+import ModuleTable from "@/Components/Tables/ModuleTable";
+import { TableContext } from "@/Components/Tables/TableContext";
+import { MODULE_COLUMN } from "@/Library/constants";
+import { INITIAL_MODULE_STATE } from "@/Library/filterState";
 import { useState } from "react";
 
-
-function Module({ title, modules, queryParams }) {
+function Module({ title, modules, queryParams,filters }) {
     const [showModal, setShowModal] = useState(false);
     const openModal = () => setShowModal(true);
     const closeModal = () => setShowModal(false);
-    const { visibleColumns, onColumnChange } =
-    useColumnVisibility(COURSE_COLUMN);
-
+    console.log(modules)
     return (
         <>
             {/* <div className="container">
@@ -45,20 +46,18 @@ function Module({ title, modules, queryParams }) {
                         <h5 className="fw-semibold mb-3 px-0 ">
                             List of Modules
                         </h5>
-                        <ModuleFilters
-                            queryParams={queryParams}
-                            visibleColumns={visibleColumns}
-                            onColumnChange={onColumnChange}
-                        />
-                        <CourseTable
-                            data={courses.data}
-                            visibleColumns={visibleColumns}
-                        />
-                        <Pagination links={courses.meta.links} />
+                        <TableContext 
+                            initialState={INITIAL_MODULE_STATE(queryParams)}
+                            column={MODULE_COLUMN}>
+                            <ModuleFilters filters={filters}/>
+                            <ModuleTable data={modules.data}/>
+                        </TableContext>
+                        {/* <Pagination links={modules.meta.links} /> */}
                     </div>
                 </div>
 
-                <Modal show={showModal}
+                <Modal
+                    show={showModal}
                     onClose={closeModal}
                     modalTitle={"Vectorize Module"}
                     modalSize={"modal-lg"}

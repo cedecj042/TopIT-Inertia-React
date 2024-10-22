@@ -2,21 +2,21 @@ import "../../../css/filter.css";
 import SelectFilter from "./Filters/SelectFilter";
 import ClearFunction from "@/Components/Filter/Filters/ClearFunction";
 import TextInputFilter from "@/Components/Filter/Filters/TextInputFilter";
-import { INITIAL_MODULE_FILTER_STATE } from "@/Library/filterState";
+import { INITIAL_MODULE_STATE } from "@/Library/filterState";
 import OtherFilter from "@/Components/Filter/Filters/OtherFilter";
+import { useContext } from "react";
+import ContextProvider from "../Tables/TableContext";
+import { useFilterState, useOtherState } from "@/Library/hooks";
 
 export default function ModuleFilters({
     filters,
-    filterState,
-    handleClearFilter,
-    handleFilterChange,
-    otherState,
-    handleOtherChange,
-    handleInputChange,
-    onKeyPress,
-    visibleColumns,
-    onColumnChange
+
 }) {
+    const {state,dispatch,visibleColumns,onColumnChange} = useContext(ContextProvider);
+    const {handleClearFilter,handleFilterChange}= useFilterState(dispatch);
+    const {handleInputChange,handleOtherChange,onKeyPress} = useOtherState(dispatch);
+    const {filterState,otherState} = state;
+
     const FILTER_DATA = [
         {
             data: filters.courses,
@@ -29,7 +29,7 @@ export default function ModuleFilters({
         <div className="row justify-content-between">
             <ClearFunction
                 currentState={filterState}
-                initialState={INITIAL_MODULE_FILTER_STATE()}
+                initialState={INITIAL_MODULE_STATE().filterState}
                 handleClearFunction={handleClearFilter}
                 label={"filter"}
             />

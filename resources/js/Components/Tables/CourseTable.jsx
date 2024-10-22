@@ -2,32 +2,30 @@ import { router } from "@inertiajs/react";
 import "../../../css/admin/tables.css";
 import { toast } from "sonner";
 import Table from "./Table";
+import { useContext, useState } from "react";
+import ContextProvider from "./TableContext";
+import { useRequest } from "@/Library/hooks";
 
 export default function CourseTable({
-    data,
-    visibleColumns
+    data
 }) {
-    const deleteCourse = (event, course_id) => {
+
+    const { visibleColumns} = useContext(ContextProvider);
+
+    // const [isProcessing,setProcessing] = useState(false);
+    const {isProcessing,deleteRequest} = useRequest();
+    const deleteCourse = async (event, course_id) => {
         event.stopPropagation();
-
-        router.delete(route("admin.course.delete", course_id), {
-            onSuccess: () => {
-                toast.success("Course deleted successfully", {
-                    duration: 3000,
-                });
-            },
-            onError: (error) => {
-                toast.error(error, { duration: 3000 });
-            },
-        });
+        deleteRequest("admin.course.delete",course_id,{});
     };
-
+    console.log('course table reloading')
     const renderActions = (rowData) => {
         return (
             <button
                 type="button"
                 onClick={(e) => deleteCourse(e, rowData.course_id)}
                 className="btn btn-outline-danger d-flex justify-content-center align-items-left"
+                disabled={isProcessing}
             >
                 <span className="material-symbols-outlined">delete</span> Delete
             </button>
@@ -42,6 +40,7 @@ export default function CourseTable({
             },
         })
     }
+
     return (
         <Table
             data={data}

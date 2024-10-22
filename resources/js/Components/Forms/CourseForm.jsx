@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { router } from "@inertiajs/react";
 import { useForm } from "react-hook-form";
 import "../../../css/modal.css";
 import { toast } from "sonner";
+import { useRequest } from "@/Library/hooks";
 
 export default function CourseForm({ onClose }) {
     const {
@@ -11,26 +12,14 @@ export default function CourseForm({ onClose }) {
         formState: { errors, isSubmitting },
         handleSubmit,
     } = useForm();
-    const [isProcessing,setIsProcessing] = useState(false);
 
+    const {isProcessing,postRequest} = useRequest();
     const onSubmit = async (data) => {
-        setIsProcessing(true);
-
-        await router.post(route("admin.course.add"), data, {
-            onSuccess: (page) => {
-                toast.success("Course Added successfully!");
-                reset();
+        postRequest("admin.course.add", data, {
+            onSuccess: () => {
                 onClose();
+                toast.success("Course added successfully!", { duration: 3000 });
             },
-            onError: (formErrors) => {
-                console.error("Form errors:", formErrors); // This will now get triggered for non-200 responses
-                alert(
-                    "Failed to add course. Please check the form and try again."
-                );
-            },
-            onFinish: () => {
-                setIsProcessing(false);  
-            }
         });
     };
 

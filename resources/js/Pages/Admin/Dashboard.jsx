@@ -1,19 +1,13 @@
-import AdminLayout from "@/Layouts/AdminLayout";
 import "../../../css/admin/dashboard.css";
-import { usePage } from "@inertiajs/react";
 import Pagination from "@/Components/Pagination";
 import StudentsTable from "@/Components/Tables/StudentsTable";
 import StudentsLineChart from "@/Components/Chart/StudentsLineChart";
 import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
-import StudentFilters from "@/Components/Filter/StudentFilters";
 import { AdminContent } from "@/Components/Content/AdminContent";
-import { STUDENT_COLUMN, STUDENT_FILTER_COMPONENT } from "@/Library/constants";
-import { useColumnVisibility, useCombinedState, useFilterState, useOtherState, useSortState } from "@/Library/hooks";
-import {
-    INITIAL_STUDENT_FILTER_STATE,
-    INITIAL_STUDENT_OTHER_STATE,
-    INITIAL_STUDENT_SORT_STATE,
-} from "@/Library/filterState";
+import { INITIAL_STUDENT_STATE } from "@/Library/filterState";
+import { COURSE_COLUMN, STUDENT_COLUMN, STUDENT_FILTER_COMPONENT } from "@/Library/constants";
+import { TableContext } from "@/Components/Tables/TableContext";
+import StudentFilters from "@/Components/Filter/StudentFilters";
 
 function Dashboard({
     students,
@@ -22,13 +16,6 @@ function Dashboard({
     filters,
     queryParams = {},
 }) {
-    
-    const initialState = INITIAL_STUDENT_FILTER_STATE(queryParams)
-    const {visibleColumns, onColumnChange} = useColumnVisibility(STUDENT_COLUMN);
-    const {filterState,handleClearFilter,handleFilterChange} = useFilterState(initialState.filter);
-    const {sortState,handleClearSort} = useSortState(initialState.sort);
-    const {otherState,handleClearInput,handleInputChange,handleOtherChange,onKeyPress} = useOtherState(initialState.other);
-
     return (
         <>
             <div className="row p-3">
@@ -37,28 +24,23 @@ function Dashboard({
                     <div className="row mt-2 p-0">
                         <div className="d-flex flex-column col-12">
                             <h5 className="fw-bolder mb-3">List of Students</h5>
-                            <StudentFilters
-                                filterState={filterState}
-                                sortState={sortState}
-                                handleClearFilter={handleClearFilter}
-                                handleClearSort={handleClearSort}
-                                filters={filters}
-                                handleFilterChange={handleFilterChange}
-                                otherState={otherState}
-                                handleOtherChange={handleOtherChange}
-                                handleInputChange={handleInputChange}
-                                onKeyPress={onKeyPress}
-                                visibleColumns={visibleColumns}
-                                onColumnChange={onColumnChange}
-                            />
-                            <StudentsTable
-                                data={students.data}
-                                sortState={sortState}
-                                visibleColumns={visibleColumns}
-                                changeSort={changeSort}
-                                keyField={"student_id"}
-                                queryParams={queryParams}
-                            />
+                            <TableContext
+                                initialState={INITIAL_STUDENT_STATE(
+                                    queryParams
+                                )}
+                                routeName={"admin.dashboard"}
+                                components={STUDENT_FILTER_COMPONENT}
+                                column={STUDENT_COLUMN}
+                            >
+                                <StudentFilters
+                                    filters={filters}
+                                />
+                                <StudentsTable
+                                    data={students.data}
+                                    filters={filters}
+                                    queryParams={queryParams}
+                                />
+                            </TableContext>
                             <Pagination links={students.meta.links} />
                         </div>
                     </div>

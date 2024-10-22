@@ -4,11 +4,11 @@ import { useContext, useEffect } from "react";
 import ContextProvider from "./TableContext";
 import { useSortState } from "@/Library/hooks";
 
-export default function StudentsTable({
+export default function ModuleTable({
     data,
     queryParams,
 }) {
-    const keyField="student_id";
+    const keyField="module_id";
     const { state, dispatch,visibleColumns} = useContext(ContextProvider);
     const { changeSort} = useSortState(dispatch);
 
@@ -18,10 +18,10 @@ export default function StudentsTable({
                 onClick={(e) => onClick(e, rowData)}
                 className="btn btn-outline-primary d-flex justify-content-center align-items-left"
             >
-                <span className="material-symbols-outlined align-self-center">
+                {/* <span className="material-symbols-outlined align-self-center">
                     person
                 </span>{" "}
-                View Student
+                View Student */}
             </button>
         );
     };
@@ -29,7 +29,7 @@ export default function StudentsTable({
     const onClick = (e, rowData) => {
         e.preventDefault();
         router.get(
-            route("admin.student", {
+            route("admin.module.detail", {
                 student_id: rowData[keyField],
                 ...queryParams,
             }),
@@ -43,8 +43,6 @@ export default function StudentsTable({
             <Table
                 data={data}
                 visibleColumns={visibleColumns}
-                sortState={state.sortState}
-                changeSort={changeSort}
                 renderActions={renderActions}
                 keyField={keyField}
             />

@@ -4,19 +4,15 @@ import CourseForm from "@/Components/Forms/CourseForm";
 import Modal from "@/Components/Modal";
 import Pagination from "@/Components/Pagination";
 import CourseTable from "@/Components/Tables/CourseTable";
-import AdminLayout from "@/Layouts/AdminLayout";
-import AdminListener from "@/Components/Content/AdminListener";
-import MainLayout from "@/Layouts/MainLayout";
-import { COURSE_COLUMN } from "@/Library/constants";
-import { useColumnVisibility } from "@/Library/hooks";
+import { TableContext } from "@/Components/Tables/TableContext";
+import { COURSE_COLUMN, COURSE_FILTER_COMPONENT } from "@/Library/constants";
+import { INITIAL_COURSE_STATE } from "@/Library/filterState";
 import { useState } from "react";
 
-function Course({ title, courses, queryParams }) {
+function Course({ title, courses, queryParams}) {
     const [showModal, setShowModal] = useState(false);
     const openModal = () => setShowModal(true);
     const closeModal = () => setShowModal(false);
-    const { visibleColumns, onColumnChange } =
-        useColumnVisibility(COURSE_COLUMN);
     return (
         <>
             <div className="container-fluid p-5">
@@ -35,15 +31,16 @@ function Course({ title, courses, queryParams }) {
                         <h5 className="fw-semibold mb-3 px-0 ">
                             List of Courses
                         </h5>
-                        <CourseFilters
-                            queryParams={queryParams}
-                            visibleColumns={visibleColumns}
-                            onColumnChange={onColumnChange}
-                        />
-                        <CourseTable
-                            data={courses.data}
-                            visibleColumns={visibleColumns}
-                        />
+                        
+                        <TableContext 
+                            initialState={INITIAL_COURSE_STATE(queryParams)}
+                            routeName={"admin.course.index"}
+                            components={COURSE_FILTER_COMPONENT}
+                            column={COURSE_COLUMN}
+                            >
+                            <CourseFilters queryParams={queryParams}/>
+                            <CourseTable data={courses.data}/>
+                        </TableContext>
                         <Pagination links={courses.meta.links} />
                     </div>
                 </div>

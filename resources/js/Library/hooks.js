@@ -1,5 +1,6 @@
-import { useRef, useState } from "react";
 import { router } from "@inertiajs/react";
+import { useCallback, useRef, useState } from "react";
+import { toast } from "sonner";
 
 export const useColumnVisibility = (initialColumns) => {
     const [visibleColumns, setVisibleColumns] = useState(initialColumns);
@@ -18,150 +19,175 @@ export const useColumnVisibility = (initialColumns) => {
         onColumnChange,
     };
 };
-
-export const useCombinedState = (initialState = {}, routeName, components) => {
-    const [state, setState] = useState(initialState);
-
-    const updateUrlWithAllStates = () => {
-        const combinedState = {
-            ...state.filterState,
-            ...state.otherState,
-        };
-
-        if (state.sortState !== ":") {
-            combinedState.sort = state.sortState;
-        }
-
-        const filteredParams = Object.fromEntries(
-            Object.entries(combinedState).filter(([key, value]) => value !== "")
-        );
-
-        router.get(route(routeName), filteredParams, {
-            preserveScroll: true,
-            preserveState: true,
-            replace: true,
-            only: components,
-        });
-    };
-
-    return {
-        state,
-        setState,
-        updateUrlWithAllStates,
-    };
-};
-
-export const useFilterState = (initialState = {}) => {
-    const [filterState, setFilterState] = useState(initialState);
-
+export const useFilterState = (dispatch) => {
     // Handle filter changes
     const handleFilterChange = (key, value) => {
-        const updatedFilters = {
-            ...filterState,
-            [key]: value || "",
-        };
-        setFilterState(updatedFilters);
+        dispatch({
+            type: 'SET_FILTER',
+            payload: {
+                [key]: value || "", // Only update the specific filter key
+            },
+        });
     };
+
     // Handle clearing filters
     const handleClearFilter = (filterKeys = []) => {
-        const clearedFilters = { ...filterState };
-        filterKeys.forEach((key) => {
-            clearedFilters[key] = "";
+        dispatch({
+            type: 'SET_FILTER',
+            payload: filterKeys.reduce((acc, key) => {
+                acc[key] = ""; // Clear each specified key
+                return acc;
+            }, {}),
         });
-        setFilterState(clearedFilters);
     };
+
     return {
-        filterState,
         handleFilterChange,
         handleClearFilter,
     };
 };
 
-export const useSortState = (initialState = ":", updateUrlWithAllStates) => {
-    const [sortState, setSortState] = useState(initialState);
-
+export const useSortState = (dispatch) => {
     // Handle sorting changes (field:direction)
     const changeSort = (field) => {
-        const [currentField, currentDirection] = sortState.split(":");
-
-        const newDirection =
-            currentField === field
-                ? currentDirection === "asc"
-                    ? "desc"
-                    : "asc"
-                : "asc";
-
-        const updatedSort = `${field}:${newDirection}`;
-        setSortState(updatedSort);
-        updateUrlWithAllStates();
+        dispatch({
+            type: 'SET_SORT',
+            payload: (prevSortState) => {
+                const [currentField, currentDirection] = prevSortState.split(":");
+                const newDirection =
+                    currentField === field
+                        ? currentDirection === "asc"
+                            ? "desc"
+                            : "asc"
+                        : "asc";
+                return `${field}:${newDirection}`;
+            },
+        });
     };
 
-    // Handle clearing the sort state (reset to empty ":")
+    // Handle clearing the sort state
     const handleClearSort = () => {
-        const clearedSort = ":"; // Reset to empty sort (no field, no direction)
-        setSortState(clearedSort);
-        updateUrlWithAllStates();
+        dispatch({ type: 'SET_SORT', payload: ":" }); // Reset to empty state
     };
 
     return {
-        sortState,
         changeSort,
         handleClearSort,
     };
 };
 
-export const useOtherState = (initialOtherState = {}, setState,updateUrlWithAllStates) => {
-    const [otherState, setOtherState] = useState(initialOtherState);
-
+export const useOtherState = (dispatch) => {
     const handleOtherChange = (key, value) => {
-        const updatedOther = {
-            ...otherState,
-            [key]: value || "",
-        };
-        setOtherState(updatedOther);
-
-        // Update the combined state with the new otherState
-        setState((prevState) => ({
-            ...prevState,
-            otherState: updatedOther,
-        }));
-
-        // Optionally call updateUrlWithAllStates to reflect changes in the URL
-        updateUrlWithAllStates();
+        dispatch({
+            type: 'SET_OTHER',
+            payload: {
+                [key]: value || ""  // Clear the input if value is empty
+            },
+        });
     };
 
     const handleInputChange = (e) => {
-        handleOtherChange(e.target.name, e.target.value);
-    };
+        const { name, value } = e.target;
+        handleOtherChange(name, value);
 
+    };
     const onKeyPress = (key, e) => {
         if (e.key === "Enter") {
             handleOtherChange(key, e.target.value);
+
         }
     };
 
-    const handleClearInput = (key) => {
-        const clearedOtherState = {
-            ...otherState,
-            [key]: "",
-        };
-        setOtherState(clearedOtherState);
-
-        // Update the combined state with the cleared otherState
-        setState((prevState) => ({
-            ...prevState,
-            otherState: clearedOtherState,
-        }));
-
-        updateUrlWithAllStates();
-    };
-
     return {
-        otherState,
-        handleOtherChange,
         handleInputChange,
-        handleClearInput,
-        onKeyPress,
+        handleOtherChange,
+        onKeyPress
     };
 };
 
+export const useRequest = () => {
+    const [isProcessing, setIsProcessing] = useState(false);
+
+     // Predefined default callbacks
+     const defaultCallbacks = {
+        onSuccess: (page) => {
+            // console.log(page.props.flash.success)
+            toast.success(page.props.flash.success, { duration: 3000 });
+        },
+        onError: (page) => {
+            // console.log(page.props.flash.error);
+            toast.error(page.props.flash.error, { duration: 3000 });
+        },
+        onFinish: () => {
+            setIsProcessing(false);
+        },
+    };
+
+    // POST request handler
+    const postRequest = async (routeName, data, customCallbacks = {}) => {
+        setIsProcessing(true);
+        try {
+            await router.post(route(routeName), data, {
+                onSuccess: (page) => {
+                    // Merge default onSuccess with custom onSuccess (if provided)
+                    (customCallbacks.onSuccess || defaultCallbacks.onSuccess)(page);
+                },
+                onError: (page) => {
+                    // Merge default onError with custom onError (if provided)
+                    (customCallbacks.onError || defaultCallbacks.onError)(page);
+                },
+                onFinish: () => {
+                    // Merge default onFinish with custom onFinish (if provided)
+                    (customCallbacks.onFinish || defaultCallbacks.onFinish)();
+                },
+            });
+        } catch (error) {
+            defaultCallbacks.onError(error); // Handle unexpected errors
+            setIsProcessing(false);
+        }
+    };
+
+    // GET request handler
+    const getRequest = async (routeName, customCallbacks = {}) => {
+        setIsProcessing(true);
+        try {
+            await router.get(route(routeName), {
+                onSuccess: (page) => {
+                    (customCallbacks.onSuccess || defaultCallbacks.onSuccess)(page);
+                },
+                onError: (page) => {
+                    (customCallbacks.onError || defaultCallbacks.onError)(page);
+                },
+                onFinish: () => {
+                    (customCallbacks.onFinish || defaultCallbacks.onFinish)();
+                },
+            });
+        } catch (error) {
+            defaultCallbacks.onError(error);
+            setIsProcessing(false);
+        }
+    };
+
+    // DELETE request handler
+    const deleteRequest = async (routeName, data, customCallbacks = {}) => {
+        setIsProcessing(true);
+        try {
+            await router.delete(route(routeName,data) , {
+                onSuccess: (page) => {
+                    (customCallbacks.onSuccess || defaultCallbacks.onSuccess)(page);
+                },
+                onError: (page) => {
+                    (customCallbacks.onError || defaultCallbacks.onError)(page);
+                },
+                onFinish: () => {
+                    (customCallbacks.onFinish || defaultCallbacks.onFinish)();
+                },
+            });
+        } catch (error) {
+            defaultCallbacks.onError(error);
+            setIsProcessing(false);
+        }
+    };
+
+    return { isProcessing, postRequest, getRequest, deleteRequest };
+};

@@ -21,7 +21,6 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        Log::info(request()->query());
         // $query = User::query();
         $query = Student::query()
             ->select(['student_id', 'firstname', 'lastname', 'year', 'school', 'created_at', DB::raw("CONCAT(students.firstname, ' ', students.lastname) AS name")]);
@@ -52,7 +51,7 @@ class DashboardController extends Controller
             $year = request('year');
             $query->where('year', $year);
         }
-        
+
         if (request('school')) {
             $school = request('school');
             $query->where('school', $school);
@@ -92,7 +91,6 @@ class DashboardController extends Controller
         ];
 
         $chartData = $this->prepareChartData($monthlyCounts);
-        $successMessage = session('success');
 
         return Inertia::render(
             'Admin/Dashboard',
@@ -104,9 +102,6 @@ class DashboardController extends Controller
                 'chartData' => $chartData,
                 'thetaScoreData' => $averageTheta,
                 'filters' => $filters,
-                'flash' => [
-                    'success' => $successMessage,
-                ],
             ]
         );
     }
@@ -147,6 +142,54 @@ class DashboardController extends Controller
             'averageThetaScore' => $averageTheta,
             'student' => new StudentResource($student),
             'queryParams' => request()->query() ?: null,
+        ]);
+    }
+    public function getStudents()
+    {
+        $query = Student::query()
+            ->select(['student_id', 'firstname', 'lastname', 'year', 'school', 'created_at', DB::raw("CONCAT(students.firstname, ' ', students.lastname) AS name")]);
+
+        $sort = request()->query('sort', ''); // Default empty
+        $sortField = $sortDirection = null;
+
+        // Only split if $sort is not empty
+        if (!empty($sort)) {
+            [$sortField, $sortDirection] = explode(':', $sort);
+
+            // Ensure sortDirection is valid
+            if (!in_array($sortDirection, ['asc', 'desc'])) {
+                $sortDirection = null;
+            }
+        }
+
+        // Apply filters
+        if ($name = request('name')) {
+            $query->where(function ($q) use ($name) {
+                $q->where('firstname', 'like', '%' . $name . '%')
+                    ->orWhere('lastname', 'like', '%' . $name . '%')
+                    ->orWhere(DB::raw("CONCAT(firstname, ' ', lastname)"), 'like', '%' . $name . '%');
+            });
+        }
+
+        if ($year = request('year')) {
+            $query->where('year', $year);
+        }
+
+        if ($school = request('school')) {
+            $query->where('school', $school);
+        }
+
+        if (!empty($sortField) && !empty($sortDirection)) {
+            $query->orderBy($sortField, $sortDirection);
+        }
+
+        $perPage = request('items', 5);
+
+        $students = $query->paginate($perPage);
+
+        return response()->json([
+            'students' => $students,
+            'queryParams' => request()->query(),
         ]);
     }
 }

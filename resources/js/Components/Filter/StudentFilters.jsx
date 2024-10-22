@@ -2,41 +2,19 @@ import "../../../css/filter.css";
 import SelectFilter from "./Filters/SelectFilter";
 import ClearFunction from "@/Components/Filter/Filters/ClearFunction";
 import TextInputFilter from "@/Components/Filter/Filters/TextInputFilter";
-import { INITIAL_STUDENT_FILTER_STATE, INITIAL_STUDENT_OTHER_STATE, INITIAL_STUDENT_SORT_STATE } from "@/Library/filterState";
+import { INITIAL_STUDENT_STATE } from "@/Library/filterState";
 import OtherFilter from "@/Components/Filter/Filters/OtherFilter";
+import { useFilterState, useOtherState, useSortState } from "@/Library/hooks";
+import { useContext } from "react";
+import ContextProvider from "../Tables/TableContext";
 
-export default function StudentFilters({
-    filters,
-    filterState,
-    sortState,
-    handleClearFilter,
-    handleClearSort,
-    handleFilterChange,
-    otherState,
-    handleOtherChange,
-    handleInputChange,
-    onKeyPress,
-    visibleColumns,
-    onColumnChange
-}) {
-    const {
-        filterState,
-        sortState,
-        otherState,
-        handleFilterChange,
-        handleClearFilter,
-        changeSort,
-        handleClearSort,
-        handleOtherChange,
-        handleInputChange,
-        onKeyPress,
-    } = useCombinedState(
-        INITIAL_STUDENT_FILTER_STATE(queryParams),
-        INITIAL_STUDENT_SORT_STATE(queryParams),
-        INITIAL_STUDENT_OTHER_STATE(queryParams),
-        "admin.dashboard",
-        STUDENT_FILTER_COMPONENT
-    );
+export default function StudentFilters({filters}) {
+    const {state,dispatch,visibleColumns,onColumnChange} = useContext(ContextProvider);
+    const { handleClearSort } = useSortState(dispatch);
+    const { handleClearFilter,handleFilterChange} = useFilterState(dispatch);
+    const { handleInputChange,handleOtherChange,onKeyPress } = useOtherState(dispatch);
+    const {filterState,otherState,sortState} = state;
+
     const FILTER_DATA = [
         {
             data: filters.years,
@@ -48,20 +26,20 @@ export default function StudentFilters({
             filterKey: "school",
             keyValue: filterState.school,
         },
-    ];
-
+    ];  
+    
     return (
         <div className="row justify-content-between">
             <ClearFunction
                 currentState={filterState}
-                initialState={INITIAL_STUDENT_FILTER_STATE()}
+                initialState={INITIAL_STUDENT_STATE().filterState}
                 handleClearFunction={handleClearFilter}
                 label={"filter"}
             />
             <br />
             <ClearFunction
                 currentState={sortState}
-                initialState={INITIAL_STUDENT_SORT_STATE()}
+                initialState={INITIAL_STUDENT_STATE().sortState}
                 handleClearFunction={handleClearSort}
                 label={"sort"}
             />

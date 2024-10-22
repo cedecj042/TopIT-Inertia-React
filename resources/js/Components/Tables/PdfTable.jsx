@@ -1,32 +1,18 @@
-import { router } from "@inertiajs/react";
 import Table from "./Table";
-import { toast } from "sonner";
-import { useState } from "react";
+import { useRequest } from "@/Library/hooks";
 
 export default function PdfTable({
     data,
     visibleColumns
 }){
-    const [isProcessing,setIsProcessing] = useState(false);
+    const {isProcessing,deleteRequest} = useRequest();
 
     const deletePdf = async (event, pdf_id) => {
-        setIsProcessing(true);
         event.stopPropagation();
 
-        await router.delete(route("admin.course.pdf.delete", pdf_id), {
-            onSuccess: () => {
-                toast.success("Pdf deleted successfully", {
-                    duration: 3000,
-                });
-            },
-            onError: (error) => {
-                toast.error(error, { duration: 3000 });
-            },
-            onFinish: () => {
-                setIsProcessing(false)
-            }
-        });
+        await deleteRequest("admin.course.pdf.delete", pdf_id, {});
     };
+    
     
     const renderActions = (rowData) => {
         return (

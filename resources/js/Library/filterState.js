@@ -1,13 +1,13 @@
 export const INITIAL_STUDENT_STATE = (queryParams = {}) => ({
-    filter: {
+    filterState: {
         year: queryParams?.year || "",
         school: queryParams?.school || "",
     },
-    other: {
+    otherState: {
         name: queryParams?.name || "",
         items: queryParams?.items || "",
     },
-    sort: (() => {
+    sortState: (() => {
         const field = queryParams?.field || "";
         const direction = queryParams?.direction || "";
         return `${field}:${direction}`;
@@ -21,15 +21,29 @@ export const INITIAL_COURSE_STATE = (queryParams = {}) => ({
         title: queryParams?.title || "",
         items: queryParams?.items || "",
     },
-    sortState:null
+    sortState:(() => {
+        const field = queryParams?.field || "";
+        const direction = queryParams?.direction || "";
+        return `${field}:${direction}`;
+    })()
+});
+
+export const INITIAL_MODULE_STATE = (queryParams = {}) => ({
+    filterState: {
+        year: queryParams?.course || "",
+    },
+    otherState: {
+        title: queryParams?.title || "",
+        items: queryParams?.items || "",
+    },
+    sortState:(() => {
+        const field = queryParams?.field || "";
+        const direction = queryParams?.direction || "";
+        return `${field}:${direction}`;
+    })()
 });
 
 
-
-export const INITIAL_COURSE_OTHER_STATE = (queryParams = {}) => ({
-    title: queryParams?.title || "",
-    items: queryParams?.items || "",
-});
 
 
 export const INITIAL_MODULE_FILTER_STATE = (queryParams = {}) => ({

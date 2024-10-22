@@ -3,6 +3,7 @@ import { gsap } from 'gsap';
 import { useEffect, useRef, useState } from 'react';
 import { router } from "@inertiajs/react";
 import { toast } from "sonner";
+import { useRequest } from "@/Library/hooks";
 
 export default function LoginForm({routeName,btn}) {
     const {
@@ -12,28 +13,18 @@ export default function LoginForm({routeName,btn}) {
         reset,
     } = useForm();
 
-    const [isProcessing,setIsProcessing] = useState(false);
-
+    const {isProcessing,postRequest} = useRequest();
     const onSubmit = async (data) => {
-        console.log('clicked')
-        setIsProcessing(true); 
-
-        await router.post(route(routeName), data, {
-            onSuccess: (page) => {
-                toast.success('Login successful!', { duration: 3000 });
+        postRequest(routeName, data, {
+            onSuccess: (success) => {
+                toast.success("Login Successfully", { duration: 3000 });
                 reset();
-            },
-            onError: (formErrors) => {
-                if (formErrors.username || formErrors.password) {
-                    toast.error("Wrong username or password. Please try again.", { duration: 3000 });
-                }
-            },
-            onFinish: () => {
-                setIsProcessing(false);  
+            },onError:(error)=>{
+                toast.error(error.error, { duration: 3000 });
             }
         });
     };
-
+    
     const formRef = useRef(null);
     useEffect(() => {
         const elements = formRef.current.querySelectorAll('.stagger-item');

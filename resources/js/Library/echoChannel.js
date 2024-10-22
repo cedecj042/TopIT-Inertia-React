@@ -15,7 +15,8 @@ export const useAdminChannel = () => {
         return () => {
             adminChannel.stopListening('.upload-pdf');
             adminChannel.stopListening('.vectorize');
-            adminChannel.stopListening('upload-question');
+            adminChannel.stopListening('.upload-question');
+            adminChannel.stopListening('.upload');
             echoInstance.leave('admin');
             disconnectEcho();  // Clean up Echo when component unmounts
         };

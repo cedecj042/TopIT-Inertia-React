@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Course;
+use App\Models\Module;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ModuleController extends Controller
@@ -13,8 +16,19 @@ class ModuleController extends Controller
      */
     public function index()
     {
+        $query = Module::with(['course:course_id,title']);
+        $perPage = request('items', 5);
+        $modules = $query->paginate($perPage)->onEachSide(1);
+
+        $title =  DB::table('courses')->distinct()->pluck('title');
+        $filters =[
+            'courses'=>$title
+        ];
         return Inertia::render('Admin/Module',[
-            'title'=>'Admin Modules'
+            'title'=>'Admin Modules',
+            'modules'=>$modules,
+            'filters'=>$filters,
+            'queryParams'=>request()->query() ? :null,
         ]);
     }
 

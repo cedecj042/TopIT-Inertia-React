@@ -54,10 +54,10 @@ class CourseController extends Controller
 
             Log::info('Course saved successfully:', ['course_id' => $course->course_id]);
             // ProcessCourse::dispatch($course->course_id);
-            return redirect()->back()->with(['success'=>'Course added successfully!']);
+            return back()->with('success', 'Course added successfully!');
         } catch (\Exception $e) {
             Log::error('Error saving course:', ['exception' => $e->getMessage()]);
-            return redirect()->back()->withErrors(['error'=>'Failed to add course. Please try again.']);
+            return back()->withErrors(['error' => 'Your custom error message']);
         }
     }
 
@@ -92,6 +92,6 @@ class CourseController extends Controller
         //
         $course = Course::findOrFail($course_id);
         $course->delete();
-        return redirect()->back()->with('success', 'Course removed successfully!');
+        return back()->with('success', 'Course removed successfully!');
     }
 }

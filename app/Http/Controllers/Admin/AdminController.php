@@ -19,7 +19,7 @@ class AdminController extends Controller
     }
     public function loginAdmin(LoginRequest $request)
     {
-        
+        Log::info('Logging in admin',$request->query());
         $validated = $request->validated();
 
         if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
@@ -29,17 +29,14 @@ class AdminController extends Controller
 
             if ($user->userable_type === 'App\Models\Admin') {
                 Log::info('Authenticated user is an Admin.', ['user_id' => $user->user_id]);
-                return redirect()->route('admin.dashboard')->with(['success' => 'Login Successfully!']);
+                return redirect()->route('admin.dashboard')->with(['message' => 'Login Successfully!']);
             } else {
                 Auth::logout();
-                Log::info('Access restricted. User is not an Admin.', ['user_id' => $user->user_id]);
-                return redirect()->route('admin.login')->withErrors(['username' => 'Access restricted to admins only.']);
+                return redirect()->back()->withErrors(['error' => 'Access restricted to admins only.']);
             }
         }
         Log::warning('Admin authentication failed for username.', ['username' => $validated['username']]);
-        return back()->withErrors([
-            'username' => 'The provided credentials do not match our records.'
-        ])->withInput();
+        return redirect()->back()->withErrors( ['error'=>'The provided credentials do not match our records.']);
     }
 
 }

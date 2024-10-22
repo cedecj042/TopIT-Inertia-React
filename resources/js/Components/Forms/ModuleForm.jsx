@@ -3,6 +3,7 @@ import { router } from "@inertiajs/react";
 import { useForm } from "react-hook-form";
 import "../../../css/modal.css";
 import { toast } from "sonner";
+import { useRequest } from "@/Library/hooks";
 
 export default function ModuleForm({ onClose }) {
     const {
@@ -11,26 +12,19 @@ export default function ModuleForm({ onClose }) {
         formState: { errors, isSubmitting },
         handleSubmit,
     } = useForm();
-    const [isProcessing,setIsProcessing] = useState(false);
 
+    const { isProcessing, postRequest } = useRequest();
+    
     const onSubmit = async (data) => {
-        setIsProcessing(true);
-
-        await router.post(route("admin.module.vectorize"), data, {
-            onSuccess: (page) => {
-                toast.success("Module is processing");
+        postRequest("admin.module.vectorize", data, {
+            onSuccess: (success) => {
+                toast.success(success, { duration: 3000 });
                 reset();
-                onClose();
             },
-            onError: (formErrors) => {
-                console.error("Form errors:", formErrors); // This will now get triggered for non-200 responses
-                alert(
-                    "Failed to process module. Please check the form and try again."
-                );
+            onError: (error) => {
+                toast.error(error, { duration: 3000 });
             },
-            onFinish: () => {
-                setIsProcessing(false);  
-            }
+            onFinish: () => {},
         });
     };
 

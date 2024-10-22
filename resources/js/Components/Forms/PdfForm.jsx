@@ -2,7 +2,7 @@ import { router } from "@inertiajs/react";
 import { useForm } from "react-hook-form"
 import { toast } from "sonner";
 import "../../../css/modal.css";
-import { useState } from "react";
+import { useRequest } from "@/Library/hooks";
 
 export default function PdfForm({id,onClose}){
     const {
@@ -11,29 +11,24 @@ export default function PdfForm({id,onClose}){
         formState: { errors, isSubmitting },
         handleSubmit,
     } = useForm();
-    const [isProcessing,setIsProcessing] = useState(false);
+
+    const { isProcessing, postRequest } = useRequest();
+
     const onSubmit = async (data) => {
-        setIsProcessing(false)
         const formData = new FormData();
         formData.append("course_id", data.course_id);
         formData.append("pdf_file", data.pdf_file[0]);
 
-        await router.post(route("admin.course.pdf.upload"), formData, {
-            forceFormData: true, // Ensures that the FormData is sent properly
-            onSuccess: () => {
-                // toast.info("uploading");
+        postRequest("admin.course.pdf.upload", formData, {
+            forceFormData: true,
+            onSuccess: () => {                
+                toast.info("Uploading pdf...", { duration: 3000 });
                 reset();
                 onClose();
             },
-            onError: (formErrors) => {
-                console.error("Form errors:", formErrors);
-                toast.error("Error occurred while uploading the PDF.");
-            },
-            onFinish: () => {
-                setIsProcessing(false);  
-            }
         });
     };
+    
     return(
         <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
             <div className="modal-body">
