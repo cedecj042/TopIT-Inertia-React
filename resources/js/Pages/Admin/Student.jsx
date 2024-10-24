@@ -1,15 +1,15 @@
 import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
 import StudentProfile from "@/Components/Profile/StudentProfile";
-import AdminLayout from "@/Layouts/AdminLayout";
 import "../../../css/admin/dashboard.css";
 import { router } from "@inertiajs/react";
+import { AdminContent } from "@/Components/Content/AdminContent";
 
-export default function Student({ student, averageThetaScore ,title,queryParams}) {
+function Student({ student, averageThetaScore ,title,queryParams}) {
     const handleBackClick = () => {
         router.get(route('admin.dashboard', queryParams));
     };
     return (
-        <AdminLayout title={title}>
+        <>
             <div className="row p-3 mt-2">
                 <div className="row mt-4 px-5">
                     <div className="d-flex justify-content-between flex-column">
@@ -34,6 +34,7 @@ export default function Student({ student, averageThetaScore ,title,queryParams}
                     </div>
                 </div>
             </div>
-        </AdminLayout>
+        </>
     );
 }
+export default AdminContent(Student);

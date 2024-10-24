@@ -1,33 +1,17 @@
-import { useState } from "react";
 import { router } from "@inertiajs/react";
+import { useCallback, useRef, useState } from "react";
+import { toast } from "sonner";
 
 export const useColumnVisibility = (initialColumns) => {
     const [visibleColumns, setVisibleColumns] = useState(initialColumns);
 
     const onColumnChange = (columnName, isVisible) => {
-        if (columnName === "all") {
-            // Update visibility for all columns
-            const updatedColumns = Object.keys(visibleColumns).reduce((columns, key) => {
-                columns[key] = isVisible;
-                return columns;
-            }, {});
-            setVisibleColumns(updatedColumns);
-        } else {
-            // Update visibility for specific column
-            const updatedColumns = {
-                ...visibleColumns,
-                [columnName]: isVisible,
-            };
-    
-            // Automatically update the "all" checkbox based on other columns
-            const allChecked = Object.keys(initialColumns)
-                .filter((key) => key !== "all")
-                .every((key) => updatedColumns[key]); // Check if all other columns are true
-    
-            updatedColumns["all"] = allChecked; // Update "all" checkbox
-    
-            setVisibleColumns(updatedColumns);
-        }
+        const updatedColumns = visibleColumns.map((column) =>
+            column.key === columnName
+                ? { ...column, visible: isVisible }
+                : column
+        );
+        setVisibleColumns(updatedColumns);
     };
 
     return {
@@ -35,77 +19,175 @@ export const useColumnVisibility = (initialColumns) => {
         onColumnChange,
     };
 };
-
-
-export const useFilters = (filterState,setFilterState,routeName, components) => {
-    const updateUrlWithFilters = (filters) => {
-        const filteredParams = Object.fromEntries(
-            Object.entries(filters).filter(([k, v]) => v !== "")
-        );
-
-        router.get(route(routeName), filteredParams, {
-            preserveScroll: true,
-            preserveState: true,
-            replace: true,
-            only: components,
-        });
-    };
-
+export const useFilterState = (dispatch) => {
+    // Handle filter changes
     const handleFilterChange = (key, value) => {
-        const updatedFilters = {
-            ...filterState,
-            [key]: value || "",
-        };
-
-        setFilterState(updatedFilters);
-        updateUrlWithFilters(updatedFilters);
-    };
-
-    const handleClearInput = (key) => {
-        handleFilterChange(key, "");
-    };
-
-    const handleInputChange = (e) => {
-        handleFilterChange(e.target.name, e.target.value);
-    };
-
-    const onKeyPress = (key, e) => {
-        if (e.key === "Enter") {
-            handleFilterChange(key, e.target.value);
-        }
-    };
-    const handleClearFilter = (filterKeys = []) => {
-        const clearedFilters = { ...filterState };
-
-        filterKeys.forEach((key) => {
-            clearedFilters[key] = "";
+        dispatch({
+            type: 'SET_FILTER',
+            payload: {
+                [key]: value || "", // Only update the specific filter key
+            },
         });
-    
-        setFilterState(clearedFilters);
-        updateUrlWithFilters(clearedFilters);
     };
 
-    const changeSort = (field) => {
-        const updatedFilters = {
-            ...filterState,
-            field,
-            direction: filterState.field === field
-                ? (filterState.direction === "asc" ? "desc" : "asc")
-                : "asc",
-        };
-
-        setFilterState(updatedFilters);
-        updateUrlWithFilters(updatedFilters);
+    // Handle clearing filters
+    const handleClearFilter = (filterKeys = []) => {
+        dispatch({
+            type: 'SET_FILTER',
+            payload: filterKeys.reduce((acc, key) => {
+                acc[key] = ""; // Clear each specified key
+                return acc;
+            }, {}),
+        });
     };
 
     return {
-        filterState,
         handleFilterChange,
-        handleClearInput,
-        handleInputChange,
-        onKeyPress,
         handleClearFilter,
-        changeSort
     };
 };
 
+export const useSortState = (dispatch) => {
+    // Handle sorting changes (field:direction)
+    const changeSort = (field) => {
+        dispatch({
+            type: 'SET_SORT',
+            payload: (prevSortState) => {
+                const [currentField, currentDirection] = prevSortState.split(":");
+                const newDirection =
+                    currentField === field
+                        ? currentDirection === "asc"
+                            ? "desc"
+                            : "asc"
+                        : "asc";
+                return `${field}:${newDirection}`;
+            },
+        });
+    };
+
+    // Handle clearing the sort state
+    const handleClearSort = () => {
+        dispatch({ type: 'SET_SORT', payload: ":" }); // Reset to empty state
+    };
+
+    return {
+        changeSort,
+        handleClearSort,
+    };
+};
+
+export const useOtherState = (dispatch) => {
+    const handleOtherChange = (key, value) => {
+        dispatch({
+            type: 'SET_OTHER',
+            payload: {
+                [key]: value || ""  // Clear the input if value is empty
+            },
+        });
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        handleOtherChange(name, value);
+
+    };
+    const onKeyPress = (key, e) => {
+        if (e.key === "Enter") {
+            handleOtherChange(key, e.target.value);
+
+        }
+    };
+
+    return {
+        handleInputChange,
+        handleOtherChange,
+        onKeyPress
+    };
+};
+
+export const useRequest = () => {
+    const [isProcessing, setIsProcessing] = useState(false);
+
+     // Predefined default callbacks
+     const defaultCallbacks = {
+        onSuccess: (page) => {
+            // console.log(page.props.flash.success)
+            toast.success(page.props.flash.success, { duration: 3000 });
+        },
+        onError: (page) => {
+            // console.log(page.props.flash.error);
+            toast.error(page.props.flash.error, { duration: 3000 });
+        },
+        onFinish: () => {
+            setIsProcessing(false);
+        },
+    };
+
+    // POST request handler
+    const postRequest = async (routeName, data, customCallbacks = {}) => {
+        setIsProcessing(true);
+        try {
+            await router.post(route(routeName), data, {
+                onSuccess: (page) => {
+                    // Merge default onSuccess with custom onSuccess (if provided)
+                    (customCallbacks.onSuccess || defaultCallbacks.onSuccess)(page);
+                },
+                onError: (page) => {
+                    // Merge default onError with custom onError (if provided)
+                    (customCallbacks.onError || defaultCallbacks.onError)(page);
+                },
+                onFinish: () => {
+                    // Merge default onFinish with custom onFinish (if provided)
+                    (customCallbacks.onFinish || defaultCallbacks.onFinish)();
+                },
+            });
+        } catch (error) {
+            defaultCallbacks.onError(error); // Handle unexpected errors
+            setIsProcessing(false);
+        }
+    };
+
+    // GET request handler
+    const getRequest = async (routeName, customCallbacks = {}) => {
+        setIsProcessing(true);
+        try {
+            await router.get(route(routeName), {
+                onSuccess: (page) => {
+                    (customCallbacks.onSuccess || defaultCallbacks.onSuccess)(page);
+                },
+                onError: (page) => {
+                    (customCallbacks.onError || defaultCallbacks.onError)(page);
+                },
+                onFinish: () => {
+                    (customCallbacks.onFinish || defaultCallbacks.onFinish)();
+                },
+            });
+        } catch (error) {
+            defaultCallbacks.onError(error);
+            setIsProcessing(false);
+        }
+    };
+
+    // DELETE request handler
+    const deleteRequest = async (routeName, data, customCallbacks = {}) => {
+        setIsProcessing(true);
+        try {
+            await router.delete(route(routeName,data) , {
+                onSuccess: (page) => {
+                    (customCallbacks.onSuccess || defaultCallbacks.onSuccess)(page);
+                },
+                onError: (page) => {
+                    (customCallbacks.onError || defaultCallbacks.onError)(page);
+                },
+                onFinish: () => {
+                    (customCallbacks.onFinish || defaultCallbacks.onFinish)();
+                },
+            });
+        } catch (error) {
+            defaultCallbacks.onError(error);
+            setIsProcessing(false);
+        }
+    };
+
+    return { isProcessing, postRequest, getRequest, deleteRequest };
+};

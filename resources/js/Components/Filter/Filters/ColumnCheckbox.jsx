@@ -1,6 +1,4 @@
-import { capitalizeFirstLetter } from "@/Library/utils";
-
-export default function ColumnCheckbox({ columnKey, visibleColumns, onColumnChange }) {
+export default function ColumnCheckbox({ columnKey,label, visible, onColumnChange }) {
     return (
         <div className="form-check">
             <input
@@ -8,11 +6,11 @@ export default function ColumnCheckbox({ columnKey, visibleColumns, onColumnChan
                 className="form-check-input"
                 id={`${columnKey}Check`}
                 name={columnKey}
-                checked={visibleColumns[columnKey]}
+                checked={visible}
                 onChange={(e) => onColumnChange(columnKey, e.target.checked)}
             />
             <label className="form-check-label" htmlFor={`${columnKey}Check`}>
-                {capitalizeFirstLetter(columnKey)}
+                {label}
             </label>
         </div>
     );

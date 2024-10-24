@@ -63,13 +63,14 @@ export default function AdminNavbar({ title }) {
                         >
                             <li className="w-100">
                                 <Link href={route('admin.course.index')} 
-                                className={` nav-link text-white py-3 ps-5 d-flex align-items-center gap-1  ${title === 'Admin Course' ? 'active' : ''}`}>
+                                className={` nav-link text-white py-3 ps-5 d-flex align-items-center gap-1 ${title === 'Admin Course' ? 'active' : ''}`}>
                                     <span className="material-symbols-outlined">book</span>
                                     <span className="ms-1 d-none d-sm-inline fs-6">Courses</span>
                                 </Link>
                             </li>
                             <li className="w-100">
-                                <Link href="{route('admin.modules.index')}" className="nav-link text-white py-3 ps-5 d-flex align-items-center gap-1 ">
+                                <Link href={route('admin.module.index')} 
+                                    className={`nav-link text-white py-3 ps-5 d-flex align-items-center gap-1 ${title === 'Admin Module' ? 'active' : ''} `}>
                                     <span className="material-symbols-outlined">view_module</span>
                                     <span className="ms-1 d-none d-sm-inline fs-6">Modules</span>
                                 </Link>

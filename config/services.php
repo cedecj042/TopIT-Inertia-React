@@ -34,7 +34,7 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-    'fast_api'=>[
+    'fastapi'=>[
         'url'=> env('FASTAPI_URL','http://localhost:8001')
     ],
 

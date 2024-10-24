@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { router } from "@inertiajs/react";
 import { useForm } from "react-hook-form";
 import "../../../css/modal.css";
 import { toast } from "sonner";
+import { useRequest } from "@/Library/hooks";
 
-export default function AddCourse({ onClose }) {
+export default function CourseForm({ onClose }) {
     const {
         register,
         reset,
@@ -12,18 +13,12 @@ export default function AddCourse({ onClose }) {
         handleSubmit,
     } = useForm();
 
-    const onSubmit = (data) => {
-        router.post(route("admin.course.add"), data, {
-            onSuccess: (page) => {
-                toast.success("Course Added successfully!");
-                reset();
+    const {isProcessing,postRequest} = useRequest();
+    const onSubmit = async (data) => {
+        postRequest("admin.course.add", data, {
+            onSuccess: () => {
                 onClose();
-            },
-            onError: (formErrors) => {
-                console.error("Form errors:", formErrors); // This will now get triggered for non-200 responses
-                alert(
-                    "Failed to add course. Please check the form and try again."
-                );
+                toast.success("Course added successfully!", { duration: 3000 });
             },
         });
     };
@@ -79,7 +74,7 @@ export default function AddCourse({ onClose }) {
                 <button
                     type="submit"
                     className="btn btn-primary"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isProcessing}
                 >
                     Add
                 </button>

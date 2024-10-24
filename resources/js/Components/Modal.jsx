@@ -1,4 +1,4 @@
-export default function Modal({modalTitle,onClose,show,children}) {
+export default function Modal({modalTitle,modalSize=null,onClose,show,children}) {
     if (!show) return null;
     return (
         <div
@@ -7,7 +7,7 @@ export default function Modal({modalTitle,onClose,show,children}) {
             aria-labelledby="modalLabel"
             role="dialog"
         >
-            <div className="modal-dialog modal-dialog-centered">
+            <div className={`modal-dialog modal-dialog-centered modal-dialog-scrollable ${modalSize}`}>
                 <div className="modal-content">
                     <div className="modal-header">
                         <h5 className="modal-title" id="modalLabel">

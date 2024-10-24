@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
 import "../../../css/student/welcome.css"; // Import the CSS for background and styles

@@ -3,8 +3,8 @@ import MainLayout from "@/Layouts/MainLayout";
 import Navbar from "@/Components/Navigation/Navbar";
 import Sidebar from "@/Components/Pretest/Sidebar";
 import QuestionForm from "@/Components/Pretest/QuestionForm";
-import { Inertia } from '@inertiajs/inertia';
-import { usePage } from '@inertiajs/react';
+import { Inertia } from '@inertiajs/inertia'; 
+import { usePage } from '@inertiajs/react'; 
 import "../../../../css/student/students.css";
 import "../../../../css/student/pretest.css";
 

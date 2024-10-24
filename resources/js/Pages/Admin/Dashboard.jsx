@@ -1,72 +1,46 @@
-import AdminLayout from "@/Layouts/AdminLayout";
 import "../../../css/admin/dashboard.css";
-import { Head, router, usePage } from "@inertiajs/react";
 import Pagination from "@/Components/Pagination";
 import StudentsTable from "@/Components/Tables/StudentsTable";
 import StudentsLineChart from "@/Components/Chart/StudentsLineChart";
 import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
+import { AdminContent } from "@/Components/Content/AdminContent";
+import { INITIAL_STUDENT_STATE } from "@/Library/filterState";
+import { COURSE_COLUMN, STUDENT_COLUMN, STUDENT_FILTER_COMPONENT } from "@/Library/constants";
+import { TableContext } from "@/Components/Tables/TableContext";
 import StudentFilters from "@/Components/Filter/StudentFilters";
-import { STUDENT_COLUMN, STUDENT_FILTER_COMPONENT } from "@/Library/constants";
-import { useColumnVisibility, useFilters } from "@/Library/hooks";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { INITIAL_STUDENT_FILTER_STATE } from "@/Library/filterState";
-export default function Dashboard({
+
+function Dashboard({
     students,
     chartData,
-    title,
     thetaScoreData,
     filters,
-    queryParams ={}
+    queryParams = {},
 }) {
-    const { visibleColumns, onColumnChange } = useColumnVisibility(STUDENT_COLUMN);
-
-    const { props } = usePage();
-    useEffect(() => {
-        if (props.flash.success) {
-            toast.success(props.flash.success, { duration: 3000 });
-        }
-    }, [props.flash.success]);
-
-    const [filterState, setFilterState] = useState(INITIAL_STUDENT_FILTER_STATE(queryParams));  
-    const {
-        handleFilterChange,
-        handleInputChange,
-        handleClearInput,
-        handleClearFilter,
-        onKeyPress,
-        changeSort
-    } = useFilters(filterState,setFilterState, "admin.dashboard", STUDENT_FILTER_COMPONENT);
-
     return (
-        
-        <AdminLayout title={title}> 
-            <Head title={title}/>
+        <>
             <div className="row p-3">
                 <div className="row justify-content-center mt-5 px-5">
                     <h3 className="fw-bold">Dashboard</h3>
                     <div className="row mt-2 p-0">
                         <div className="d-flex flex-column col-12">
                             <h5 className="fw-bolder mb-3">List of Students</h5>
-                            <StudentFilters
-                                queryParams={queryParams}
-                                filters={filters}
-                                visibleColumns={visibleColumns}
-                                onColumnChange={onColumnChange}
-                                handleClearFilter={handleClearFilter}
-                                handleClearInput={handleClearInput}
-                                handleFilterChange={handleFilterChange}
-                                handleInputChange={handleInputChange}
-                                onKeyPress={onKeyPress}
-                                queryParams={queryParams}
-                                filterState={filterState}
-                            />
-                            <StudentsTable
-                                students={students.data}
-                                visibleColumns={visibleColumns}
-                                queryParams={queryParams}
-                                changeSort={changeSort}
-                            />
+                            <TableContext
+                                initialState={INITIAL_STUDENT_STATE(
+                                    queryParams
+                                )}
+                                routeName={"admin.dashboard"}
+                                components={STUDENT_FILTER_COMPONENT}
+                                column={STUDENT_COLUMN}
+                            >
+                                <StudentFilters
+                                    filters={filters}
+                                />
+                                <StudentsTable
+                                    data={students.data}
+                                    filters={filters}
+                                    queryParams={queryParams}
+                                />
+                            </TableContext>
                             <Pagination links={students.meta.links} />
                         </div>
                     </div>
@@ -79,11 +53,15 @@ export default function Dashboard({
                 </div>
             </div>
             <div className="row w-100 px-5 mb-3">
-                <h5 className="fw-semibold">Total Number of Students Registered</h5>
+                <h5 className="fw-semibold">
+                    Total Number of Students Registered
+                </h5>
                 <div className="chart-container d-flex justify-content-center">
                     <StudentsLineChart chartData={chartData} />
                 </div>
             </div>
-        </AdminLayout>
+        </>
     );
 }
+
+export default AdminContent(Dashboard);

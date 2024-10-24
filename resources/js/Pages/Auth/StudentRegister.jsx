@@ -4,7 +4,7 @@ import axios from "axios";
 import "../../../css/student/students.css";
 import MainLayout from "@/Layouts/MainLayout";
 
-export default function StudentRegister(){
+function StudentRegister(){
     const [formData, setFormData] = useState({
         profile_image: null,
         firstname: "",
@@ -60,7 +60,7 @@ export default function StudentRegister(){
     };
 
     return (
-        <MainLayout>
+        <>
             <div className="row d-flex justify-content-start mb-5">
                 <div className="col">
                     <img
@@ -318,6 +318,8 @@ export default function StudentRegister(){
                     )}
                 </div>
             </div>
-        </MainLayout>
+        </>
     );
 };
+
+StudentRegister.layout = (page) => <MainLayout>{page}</MainLayout>

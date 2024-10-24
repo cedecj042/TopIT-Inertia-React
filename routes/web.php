@@ -1,9 +1,14 @@
 <?php
 
+use App\Events\UploadEvent;
 use App\Http\Controllers\Admin\CourseController;
+use App\Http\Controllers\Admin\ModuleController;
+use App\Http\Controllers\Admin\PdfController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ProcessedPdfController;
+use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\StudentCourseController;
@@ -15,49 +20,55 @@ use App\Http\Controllers\Student\TestController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
-// Route::redirect('/','/dashboard');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [StudentController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [StudentController::class, 'loginStudent'])->name('student.login');
     Route::get('/register', [StudentController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [StudentController::class, 'registerStudent'])->name('student.register');
-    Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.loginform');
+    Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
     Route::post('/admin/login', [AdminController::class, 'loginAdmin'])->name('admin.login');
 });
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    // Route::get('/logout', [AuthController::class, 'logout'])->name(name: 'logout');
 });
 
-Route::middleware(['student', 'auth'])->group(function () {
-    Route::get('/welcome',[PretestController::class,'welcome'] )->name('welcome');
+// Admin
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Route::post('/store-questions', [ProcessQuestionController::class, 'storeQuestions'])->name('store-questions');
+});
+Route::post('/admin/store-processed-pdf', [ProcessedPdfController::class, 'store'])->name('store-pdf');
+
+Route::middleware(['auth', 'student'])->group(function () {
+    Route::redirect('', '/dashboard');
+    Route::redirect('/', '/dashboard');
+    Route::get('/welcome', [PretestController::class, 'welcome'])->name('welcome');
     Route::prefix('pretest')->name('pretest.')->group(function () {
         Route::get('/start', [PretestController::class, 'startPretest'])->name('start');
         Route::get('/questions/{courseIndex?}', [PretestController::class, 'showQuestions'])->name('questions');
-        
+
         Route::post('/submit', [PretestController::class, 'submitAnswers'])->name('submit');
         Route::get('/finish/{pretestId}', [PretestController::class, 'showFinishAttempt'])->name('finish');
         Route::get('/review/{pretestId}', [PretestController::class, 'reviewPretest'])->name('review');
     });
 
-    Route::get('/dashboard',[StudentDashboardController::class,'index'])->name('dashboard');
-    Route::get('/profile',[StudentProfileController::class,'index'] )->name('profile');
-    
+    Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/profile', [StudentProfileController::class, 'index'])->name('profile');
+
     Route::get('/course', [StudentCourseController::class, 'showStudentCourse'])->name('student-course');
     Route::get('/course/{id}', [StudentCourseController::class, 'showStudentCourseDetail'])->name('student-course-detail');
     Route::get('/course/module/{id}', [StudentCourseController::class, 'showModuleDetail'])->name('student-module-detail');
 
-    Route::get('/test',action: [TestController::class,'index'] )->name('test');
-
+    Route::get('/test', [TestController::class, 'index'])->name('test');
 });
 
 
-Route::middleware(['admin', 'auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::redirect('/','/admin/dashboard');
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::redirect('/', '/admin/dashboard');
+    Route::redirect('', '/admin/dashboard');
+    Route::redirect('/admin', '/admin/dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Courses
@@ -66,10 +77,21 @@ Route::middleware(['admin', 'auth'])->prefix('admin')->name('admin.')->group(fun
         Route::post('/add', [CourseController::class, 'add'])->name('add');
         Route::get('/{course_id}', [CourseController::class, 'show'])->name('detail');
         Route::delete('/delete/{course_id}', [CourseController::class, 'delete'])->name('delete');
-        // Route::post('/pdf/upload', [PdfController::class, 'uploadPdf'])->name('pdf.upload');
-        // Route::delete('/pdf/delete/{id}', [PdfController::class, 'deletePdf'])->name('pdf.delete');
+        Route::post('/pdf/upload', [PdfController::class, 'store'])->name('pdf.upload');
+        Route::delete('/pdf/delete/{id}', [PdfController::class, 'delete'])->name('pdf.delete');
+    });
+
+    Route::prefix('module')->name('module.')->group(function () {
+        Route::get('/', [ModuleController::class, 'index'])->name('index');
+        // Route::post('/update', [ModuleController::class, 'updateModule'])->name('update');
+        // Route::get('/{id}', [ModuleController::class, 'editModule'])->name('edit');
+        // Route::view('/store','admin.ui.course.module.vectorize');
+        // Route::get('/vector', [ModuleController::class, 'vectorShow'])->name('vector.show');
+        // Route::post('/vector/upload', [ModuleController::class, 'vectorStore'])->name('vector.upload');
     });
 
     Route::get('/profile', [DashboardController::class, 'showProfile'])->name('profile');
     Route::get('/student/{student_id}', [DashboardController::class, 'showStudentDetails'])->name('student');
 });
+
+Route::get('/access-denied', [ErrorController::class, 'index'])->name('access.denied');

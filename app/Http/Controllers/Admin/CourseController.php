@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseRequest;
 use App\Http\Resources\CourseResource;
+use App\Http\Resources\PdfResource;
 use App\Jobs\ProcessCourse;
 use App\Models\Course;
+use App\Models\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -20,6 +22,10 @@ class CourseController extends Controller
     public function index()
     {
         $query = Course::query();
+        
+        if($title = request('title')){
+            $query->where('title', 'like', '%' . $title . '%');
+        }
 
         $perPage = request('items', 5);
 
@@ -33,20 +39,8 @@ class CourseController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function add(CourseRequest $request)
     {
-        Log::info('running');
         $validatedData = $request->validated();
 
         Log::info('Validated data:', $validatedData);
@@ -60,53 +54,44 @@ class CourseController extends Controller
 
             Log::info('Course saved successfully:', ['course_id' => $course->course_id]);
             // ProcessCourse::dispatch($course->course_id);
-            return redirect()->back()->with(['success'=>'Course added successfully!']);
+            return back()->with('success', 'Course added successfully!');
         } catch (\Exception $e) {
             Log::error('Error saving course:', ['exception' => $e->getMessage()]);
-            return redirect()->back()->withErrors(['error'=>'Failed to add course. Please try again.']);
+            return back()->withErrors(['error' => 'Your custom error message']);
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
+
     public function show(string $course_id)
     {
         //
-        $course = Course::with('pdfs')->findOrFail($course_id);
+        $course = Course::findOrFail($course_id);
+        $pdfs = $course->pdfs()->paginate(5)->onEachSide(1);
         
         return Inertia::render('Admin/CourseDetail',[
             'title' => 'Admin Course',
             'auth'=> Auth::user(),
             'course'=> new CourseResource($course),
+            'pdfs' => PdfResource::collection($pdfs),
             'queryParams'=>request()->query() ? :null,
         ]);
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
+    
     public function edit(string $id)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function delete(string $course_id)
     {
         //
         $course = Course::findOrFail($course_id);
         $course->delete();
-        return redirect()->back()->with('success', 'Course removed successfully!');
+        return back()->with('success', 'Course removed successfully!');
     }
 }

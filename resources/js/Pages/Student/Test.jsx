@@ -2,12 +2,13 @@ import React from "react";
 import StudentLayout from "@/Layouts/StudentLayout";
 import TestHistory from "@/Components/Test/TestHistory";
 import "../../../css/student/students.css";
+import { StudentContent } from "@/Components/Content/StudentContent";
 
-const TestPage = (props) => {
+function TestPage(props){
 
     const testsData = props.tests && props.tests.data ? props.tests.data : [];
     return (
-        <StudentLayout title="Student Test">
+        <>
             <main className="row p-3 mt-4">
                 <div className="row align-items-center mb-4">
                     <div className="col-md-4 offset-md-2">
@@ -28,7 +29,8 @@ const TestPage = (props) => {
                 <TestHistory tests={testsData } />
                 </div>
             </main>
-        </StudentLayout>
+        </>
     );
 };
-export default TestPage;
+
+export default StudentContent(TestPage);

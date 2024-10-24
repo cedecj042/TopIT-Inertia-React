@@ -16,7 +16,6 @@ class Student extends Model
     protected $fillable = [
         'firstname',
         'lastname',
-        'theta_score',
         'profile_image',
         'birthdate',
         'gender',
@@ -24,7 +23,9 @@ class Student extends Model
         'address',
         'course',
         'school',
-        'year'
+        'year',
+        'created_at',
+        'updated_at'
     ];
 
     public function user(){

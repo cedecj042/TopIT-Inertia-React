@@ -15,14 +15,18 @@ class StudentAccess
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle($request, Closure $next)
     {
-        $user = Auth::user();
-
-        if(!$user || !$user->userable instanceof Student){
-            Auth::logout();
-            return redirect()->route('login')->withErrors('You do not have access to this page.');
+        if (Auth::check()) {
+            $user = Auth::user();
+            if ($user->userable instanceof Student) {
+                return $next($request);
+            } else {
+                Auth::logout();
+                return redirect()->route('login')->withErrors(['error' => 'You do not have access to this page.']);
+            }
+        } else {
+            return redirect()->route('login');
         }
-        return $next($request);
     }
 }
