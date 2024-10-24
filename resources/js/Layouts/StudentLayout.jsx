@@ -3,6 +3,8 @@ import StudentSideBar from "@/Components/Navigation/StudentSideBar";
 import { Head, usePage } from "@inertiajs/react";
 import MainLayout from "./MainLayout";
 import '../../css/student/students.css';
+import { InertiaApp } from '@inertiajs/inertia-react';
+
 
 export default function StudentLayout({ children, title }) {
     return (

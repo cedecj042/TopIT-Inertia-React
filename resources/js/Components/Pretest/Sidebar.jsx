@@ -14,7 +14,7 @@ const Sidebar = ({ coursesData, currentCourseIndex, onCourseSelect }) => {
                     className={`nav-link ${currentCourseIndex === index ? "active" : ""}`} // Adjusted active class condition
                     onClick={() => onCourseSelect(index)}
                 >
-                    {course.title} {/* Display the course title */}
+                    {course.title} 
                 </a>
             ))}
         </nav>

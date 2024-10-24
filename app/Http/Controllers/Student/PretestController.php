@@ -56,18 +56,19 @@ class PretestController extends Controller
         }
 
         $currentCourseId = $progress['courses'][$progress['current_course_index']];
+        
         $course = Course::findOrFail($currentCourseId);
+        $coursesData = Course::all();
 
         $questions = PretestQuestion::whereHas('questions.courses', function ($query) use ($currentCourseId) {
             $query->where('course_id', $currentCourseId);
         })
             ->with(['questions.questionable', 'questions.difficulty'])
-            ->take(5)
+            // ->take(5)
             ->get();
 
         $isLastCourse = $progress['current_course_index'] == count($progress['courses']) - 1;
 
-        $coursesData = Course::all();
 
         return Inertia::render('Student/Pretest/Pretest', [
             'course' => $course,
@@ -170,11 +171,16 @@ class PretestController extends Controller
 
     public function showFinishAttempt($pretestId)
     {
-        $pretest = Pretest::with('pretest_courses.courses', 'pretest_courses.pretest_answers.pretest_question.questions')
-            ->findOrFail($pretestId);
+        $studentId = Auth::id();
 
-        return Inertia::render('Student/Pretest/PretestFinish', [
-            'pretest' => new PretestResource($pretest),
+        $pretest = Pretest::findOrFail($pretestId);
+        $totalScore = $pretest->totalScore ?? 0;
+        $totalQuestions = $pretest->totalItems ?? 0;
+
+        return Inertia::render('Pretest/FinishAttempt', [
+            'score' => $totalScore,
+            'totalQuestions' => $totalQuestions,
+            'pretestId' => $pretestId
         ]);
     }
 
