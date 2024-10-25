@@ -1,8 +1,8 @@
-import React from "react";
 import { usePage } from "@inertiajs/react";
 import StudentLayout from "@/Layouts/StudentLayout";
+import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 
-const CourseDetail = () => {
+function CourseDetail () {
     const { course } = usePage().props;
 
     return (
@@ -66,4 +66,4 @@ const CourseDetail = () => {
     );
 };
 
-export default CourseDetail;
+export default StudentContent(CourseDetail);

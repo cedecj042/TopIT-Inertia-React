@@ -1,6 +1,7 @@
 import React from "react";
 import ColumnSortable from "../Filter/Filters/ColumnSortable";
 import '../../../css/admin/tables.css';
+import { getColumnValue } from "@/Library/utils";
 
 export default function Table({
     data, // Array of table data
@@ -58,7 +59,7 @@ export default function Table({
                                     (column) =>
                                         column.visible && (
                                             <td key={column.key} className="align-content-center">
-                                                {rowData[column.key]}
+                                                {getColumnValue(rowData,column.key)}
                                             </td>
                                         )
                                 )}

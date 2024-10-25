@@ -1,8 +1,7 @@
-import React from "react";
-import { usePage } from "@inertiajs/react";
+import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 import StudentLayout from "@/Layouts/StudentLayout";
 
-const Courses = ({courses}) => {
+function Courses ({courses}) {
 
     return (
         <StudentLayout title="Student Course">
@@ -54,4 +53,4 @@ const Courses = ({courses}) => {
     );
 };
 
-export default Courses;
+export default StudentContent(Courses);

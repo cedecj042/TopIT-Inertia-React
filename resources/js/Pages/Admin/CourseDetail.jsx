@@ -7,7 +7,7 @@ import { useColumnVisibility, useRequest } from "@/Library/hooks";
 import { PDF_COLUMN } from "@/Library/constants";
 import Modal from "@/Components/Modal";
 import PdfForm from "@/Components/Forms/PdfForm";
-import { AdminContent } from "@/Components/Content/AdminContent";
+import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 
 
 function CourseDetail({ title, course, pdfs, queryParams }) {

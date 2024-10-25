@@ -1,4 +1,4 @@
-import { StudentContent } from "@/Components/Content/StudentContent";
+import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 import StudentProfile from "@/Components/Profile/StudentProfile";
 import StudentLayout from "@/Layouts/StudentLayout";
 

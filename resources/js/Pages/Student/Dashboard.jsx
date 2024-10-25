@@ -3,7 +3,7 @@ import { Head } from "@inertiajs/react";
 import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
 import TestHistory from "@/Components/Test/TestHistory";
 import "../../../css/student/dashboard.css";
-import { StudentContent } from "@/Components/Content/StudentContent";
+import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 
 function Dashboard({ title, averageThetaScore, tests }) {
     const testsData = tests && tests.data ? tests.data : [];

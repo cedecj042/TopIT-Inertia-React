@@ -1,10 +1,11 @@
 import React from "react";
 import { usePage } from "@inertiajs/react";
 import StudentLayout from "@/Layouts/StudentLayout";
+import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 
 // gi convert tani since wla koy data for modules
 
-const ModuleDetail = () => {
+function ModuleDetail(){
     const { module, moduleContent } = usePage().props;
 
     return (
@@ -183,4 +184,4 @@ const ModuleDetail = () => {
     );
 };
 
-export default ModuleDetail;
+export default StudentContent(ModuleDetail);

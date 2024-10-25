@@ -1,4 +1,4 @@
-import { AdminContent } from "@/Components/Content/AdminContent";
+import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import CourseFilters from "@/Components/Filter/CourseFilters";
 import CourseForm from "@/Components/Forms/CourseForm";
 import Modal from "@/Components/Modal";

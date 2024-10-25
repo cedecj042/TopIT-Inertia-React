@@ -24,7 +24,7 @@ export default function ModuleFilters({
             keyValue: filterState.course,
         },
     ];
-
+    
     return (
         <div className="row justify-content-between">
             <ClearFunction
@@ -34,11 +34,11 @@ export default function ModuleFilters({
                 label={"filter"}
             />
             <div className="filter col-6 row">
-                <div className="col w-100 input-container">
+                <div className="col px-0 w-100 input-container">
                     <TextInputFilter
                         onKeyPress={onKeyPress}
-                        value={otherState.name}
-                        filterKey={"name"}
+                        value={otherState.title}
+                        filterKey={"title"}
                         handleInputChange={handleInputChange}
                         handleClearInput={handleOtherChange}
                     />
@@ -70,7 +70,7 @@ export default function ModuleFilters({
                             <button
                                 className="btn btn-light w-100"
                                 onClick={() =>
-                                    handleClearFilter(["year", "school"])
+                                    handleClearFilter(["course"])
                                 }
                             >
                                 Clear Filters

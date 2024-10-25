@@ -84,7 +84,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::prefix('module')->name('module.')->group(function () {
         Route::get('/', [ModuleController::class, 'index'])->name('index');
         // Route::post('/update', [ModuleController::class, 'updateModule'])->name('update');
-        // Route::get('/{id}', [ModuleController::class, 'editModule'])->name('edit');
+        Route::get('/{id}', [ModuleController::class, 'show'])->name('detail');
         // Route::view('/store','admin.ui.course.module.vectorize');
         // Route::get('/vector', [ModuleController::class, 'vectorShow'])->name('vector.show');
         // Route::post('/vector/upload', [ModuleController::class, 'vectorStore'])->name('vector.upload');

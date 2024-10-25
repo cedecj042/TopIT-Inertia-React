@@ -1,5 +1,5 @@
 import AdminLayout from "@/Layouts/AdminLayout";
-import AdminListener from "@/Components/Content/AdminListener";
+import AdminListener from "@/Components/LayoutContent/AdminListener";
 import MainLayout from "@/Layouts/MainLayout";
 
 export const AdminContent = (Component) => {

@@ -11,14 +11,11 @@ export default function CourseTable({
 }) {
 
     const { visibleColumns} = useContext(ContextProvider);
-
-    // const [isProcessing,setProcessing] = useState(false);
-    const {isProcessing,deleteRequest} = useRequest();
+    const {isProcessing,deleteRequest,getRequest} = useRequest();
     const deleteCourse = async (event, course_id) => {
         event.stopPropagation();
         deleteRequest("admin.course.delete",course_id,{});
     };
-    console.log('course table reloading')
     const renderActions = (rowData) => {
         return (
             <button
@@ -34,9 +31,13 @@ export default function CourseTable({
     
     const viewCourse = (e,course_id) =>{
         e.preventDefault();
-        router.get(route("admin.course.detail",course_id),{
+        getRequest("admin.course.detail",course_id,{
+            onSuccess:(success)=>{
+                console.log(success);
+            },
             onError: (error) => {
-                toast.error(error, { duration: 3000 });
+                console.log(error)
+                // toast.error(error, { duration: 3000 });
             },
         })
     }
