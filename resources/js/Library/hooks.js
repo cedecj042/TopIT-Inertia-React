@@ -110,11 +110,11 @@ export const useRequest = () => {
 
      // Predefined default callbacks
      const defaultCallbacks = {
-        onSuccess: (page) => {
-            toast.success(page.props.flash.success, { duration: 3000 });
+        onSuccess: () => {
+            toast.success("Request successful", { duration: 3000 });
         },
-        onError: (page) => {
-            toast.error(page.props.flash.error, { duration: 3000 });
+        onError: () => {
+            toast.error("Unexpected error", { duration: 3000 });
         },
         onFinish: () => {
             setIsProcessing(false);

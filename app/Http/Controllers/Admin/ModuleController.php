@@ -29,7 +29,7 @@ class ModuleController extends Controller
         if ($courseTitle = request('course')) {
             // Query the course table to get the course_id based on the course title
             $course = DB::table('courses')->where('title', 'like', '%' . $courseTitle . '%')->first();
-    
+
             if ($course) {
                 $query->where('course_id', $course->course_id);
             } else {
@@ -108,9 +108,34 @@ class ModuleController extends Controller
      */
     public function edit(string $id)
     {
-        //
-        return Inertia::render('Admin/ModuleDetail', [
-            'title' => 'Admin Modules'
+        // Eager load lessons, sections, subsections, tables, figures, codes, and their related images
+        $module = Module::with([
+            'course:course_id,title', // Load course details
+            'lessons' => function ($query) {
+                $query->with([
+                    'sections' => function ($query) {
+                        $query->with([
+                            'subsections' => function ($query) {
+                                $query->with([
+                                    'tables.images',  // Eager load images for tables
+                                    'figures.images', // Eager load images for figures
+                                    'codes.images'    // Eager load images for codes
+                                ]);
+                            },
+                            'tables.images',  // Eager load images for tables
+                            'figures.images', // Eager load images for figures
+                            'codes.images'    // Eager load images for codes
+                        ]);
+                    }
+                ]);
+            }
+        ])->findOrFail($id);
+
+        // Return the Inertia render with the module details
+        return Inertia::render('Admin/ModuleEdit', [
+            'title' => 'Admin Module',
+            'auth' => Auth::user(),
+            'module' => new ModuleResource($module), // Use ModuleResource for formatting
         ]);
     }
 
@@ -125,8 +150,8 @@ class ModuleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function delete(string $id)
     {
-        //
+        
     }
 }

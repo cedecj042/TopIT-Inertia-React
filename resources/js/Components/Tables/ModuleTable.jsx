@@ -8,14 +8,14 @@ export default function ModuleTable({ data, queryParams }) {
     const keyField = "module_id";
     const { state, dispatch, visibleColumns } = useContext(ContextProvider);
     const { changeSort } = useSortState(dispatch);
-    const { isProcessing, getRequest } = useRequest();
+    const { isProcessing, getRequest,deleteRequest } = useRequest();
 
     const renderActions = (rowData) => {
         return (
             <>
                 <div className="d-inline-flex gap-2">
                     <button
-                        onClick={(e) => onClick(e, rowData)}
+                        onClick={(e) => editModule(e, rowData.module_id)}
                         className="btn btn-outline-primary d-flex justify-content-center align-items-left"
                     >
                         <span className="material-symbols-outlined align-self-center">
@@ -24,7 +24,7 @@ export default function ModuleTable({ data, queryParams }) {
                         Edit
                     </button>
                     <button
-                        onClick={(e) => removeModule(e, rowData)}
+                        onClick={(e) => deleteModule(e, rowData.module_id)}
                         className="btn btn-outline-danger d-flex justify-content-center align-items-left"
                     >
                         <span className="material-symbols-outlined align-self-center">
@@ -35,6 +35,24 @@ export default function ModuleTable({ data, queryParams }) {
                 </div>
             </>
         );
+    };
+
+    const editModule = (e,module_id) =>{
+        e.stopPropagation();
+        console.log("Edit button clicked with module_id:", module_id);
+        getRequest("admin.module.edit",module_id,{ 
+            onSuccess: (success) => {
+                console.log(success);
+            },
+            onError: (error) => {
+                console.log(error);
+            },
+        });
+    }
+
+    const deleteModule = (event, module_id) => {
+        event.stopPropagation();
+        deleteRequest("admin.module.delete",module_id,{});
     };
 
     
