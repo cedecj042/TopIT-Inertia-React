@@ -46,3 +46,6 @@
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#e8f5ff",endColorstr="#edeff6",GradientType=1); */
 }
 
+.content-label{
+    font-size: 12px;
+}

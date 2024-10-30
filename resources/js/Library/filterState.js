@@ -30,7 +30,7 @@ export const INITIAL_COURSE_STATE = (queryParams = {}) => ({
 
 export const INITIAL_MODULE_STATE = (queryParams = {}) => ({
     filterState: {
-        year: queryParams?.course || "",
+        course: queryParams?.course || "",
     },
     otherState: {
         title: queryParams?.title || "",
@@ -43,14 +43,3 @@ export const INITIAL_MODULE_STATE = (queryParams = {}) => ({
     })()
 });
 
-
-
-
-export const INITIAL_MODULE_FILTER_STATE = (queryParams = {}) => ({
-    course: queryParams?.course || "",
-});
-
-export const INITIAL_MODULE_OTHER_STATE = (queryParams= {}) =>({
-    name: queryParams?.title || "",
-    items: queryParams?.items || "",
-})

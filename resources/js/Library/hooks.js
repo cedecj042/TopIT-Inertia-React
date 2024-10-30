@@ -89,8 +89,8 @@ export const useOtherState = (dispatch) => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         handleOtherChange(name, value);
-
     };
+
     const onKeyPress = (key, e) => {
         if (e.key === "Enter") {
             handleOtherChange(key, e.target.value);
@@ -110,13 +110,11 @@ export const useRequest = () => {
 
      // Predefined default callbacks
      const defaultCallbacks = {
-        onSuccess: (page) => {
-            // console.log(page.props.flash.success)
-            toast.success(page.props.flash.success, { duration: 3000 });
+        onSuccess: () => {
+            toast.success("Request successful", { duration: 3000 });
         },
-        onError: (page) => {
-            // console.log(page.props.flash.error);
-            toast.error(page.props.flash.error, { duration: 3000 });
+        onError: () => {
+            toast.error("Unexpected error", { duration: 3000 });
         },
         onFinish: () => {
             setIsProcessing(false);
@@ -148,10 +146,13 @@ export const useRequest = () => {
     };
 
     // GET request handler
-    const getRequest = async (routeName, customCallbacks = {}) => {
+    const getRequest = async (routeName, params = null, customCallbacks = {}) => {
         setIsProcessing(true);
         try {
-            await router.get(route(routeName), {
+            // Use params only if they are not null or undefined
+            const url = params ? route(routeName, {id:params}) : route(routeName);
+    
+            await router.get(url, {
                 onSuccess: (page) => {
                     (customCallbacks.onSuccess || defaultCallbacks.onSuccess)(page);
                 },
@@ -167,7 +168,6 @@ export const useRequest = () => {
             setIsProcessing(false);
         }
     };
-
     // DELETE request handler
     const deleteRequest = async (routeName, data, customCallbacks = {}) => {
         setIsProcessing(true);

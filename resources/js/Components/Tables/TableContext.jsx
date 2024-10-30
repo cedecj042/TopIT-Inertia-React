@@ -13,14 +13,14 @@ const reducer = (state, action) => {
                 ...state,
                 filterState: {
                     ...state.filterState,
-                    ...action.payload, // Merging the new payload with the existing filterState
+                    ...action.payload, 
                 },
             };
         case "SET_SORT":
             const newSortState =
                 typeof action.payload === 'function'
-                    ? action.payload(state.sortState) // Invoke the function with current sortState
-                    : action.payload;  // If it's not a function, just use it as-is
+                    ? action.payload(state.sortState) 
+                    : action.payload; 
 
             return {
                 ...state,
@@ -48,9 +48,7 @@ export const TableContext = ({
 }) => {
     const {visibleColumns, onColumnChange} = useColumnVisibility(column);
     const [state, dispatch] = useReducer(reducer, initialState);
-    
-    const prevStateRef = useRef(state); // Ref to hold previous state
-
+    const prevStateRef = useRef(state);
     const updateUrl = useCallback(() => {
         const combinedState = {
             ...state.filterState,
@@ -61,6 +59,7 @@ export const TableContext = ({
             combinedState.sort = state.sortState;
         }
 
+        console.log(combinedState)
         // Compare with previous state before updating URL
         if (JSON.stringify(state) !== JSON.stringify(prevStateRef.current)) {
             const filteredParams = Object.fromEntries(

@@ -14,7 +14,7 @@ export const COURSE_COLUMN = [
 ]
 export const MODULE_COLUMN = [
     {key:'module_id',label:'ID', sortable:false,visible:true},
-    {key:'course_title',label:'Course', sortable:false,visible:true},
+    {key:'course.title',label:'Course', sortable:false,visible:true},
     {key:'title',label:'Title', sortable:false,visible:true},
     {key:'created_at',label:'Created At', sortable:false,visible:true}
 ]
@@ -30,3 +30,4 @@ export const PDF_COLUMN = [
 
 export const STUDENT_FILTER_COMPONENT = ["students","filters","queryParams"]
 export const COURSE_FILTER_COMPONENT = ["courses","courses.meta","queryParams"]
+export const MODULE_FILTER_COMPONENT = ["modules","modules.meta","filters","queryParams"]

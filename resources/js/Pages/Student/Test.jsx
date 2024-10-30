@@ -2,7 +2,7 @@ import React from "react";
 import StudentLayout from "@/Layouts/StudentLayout";
 import TestHistory from "@/Components/Test/TestHistory";
 import "../../../css/student/students.css";
-import { StudentContent } from "@/Components/Content/StudentContent";
+import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 
 function TestPage(props){
 

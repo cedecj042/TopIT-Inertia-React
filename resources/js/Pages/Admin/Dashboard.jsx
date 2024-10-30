@@ -3,7 +3,7 @@ import Pagination from "@/Components/Pagination";
 import StudentsTable from "@/Components/Tables/StudentsTable";
 import StudentsLineChart from "@/Components/Chart/StudentsLineChart";
 import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
-import { AdminContent } from "@/Components/Content/AdminContent";
+import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import { INITIAL_STUDENT_STATE } from "@/Library/filterState";
 import { COURSE_COLUMN, STUDENT_COLUMN, STUDENT_FILTER_COMPONENT } from "@/Library/constants";
 import { TableContext } from "@/Components/Tables/TableContext";

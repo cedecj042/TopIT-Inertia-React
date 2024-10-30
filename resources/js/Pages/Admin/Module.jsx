@@ -1,11 +1,11 @@
-import { AdminContent } from "@/Components/Content/AdminContent";
+import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import ModuleFilters from "@/Components/Filter/ModuleFilters";
 import ModuleForm from "@/Components/Forms/ModuleForm";
 import Modal from "@/Components/Modal";
 import Pagination from "@/Components/Pagination";
 import ModuleTable from "@/Components/Tables/ModuleTable";
 import { TableContext } from "@/Components/Tables/TableContext";
-import { MODULE_COLUMN } from "@/Library/constants";
+import { MODULE_COLUMN, MODULE_FILTER_COMPONENT } from "@/Library/constants";
 import { INITIAL_MODULE_STATE } from "@/Library/filterState";
 import { useState } from "react";
 
@@ -13,7 +13,6 @@ function Module({ title, modules, queryParams,filters }) {
     const [showModal, setShowModal] = useState(false);
     const openModal = () => setShowModal(true);
     const closeModal = () => setShowModal(false);
-    console.log(modules)
     return (
         <>
             {/* <div className="container">
@@ -48,11 +47,14 @@ function Module({ title, modules, queryParams,filters }) {
                         </h5>
                         <TableContext 
                             initialState={INITIAL_MODULE_STATE(queryParams)}
-                            column={MODULE_COLUMN}>
+                            routeName={"admin.module.index"}
+                            components={MODULE_FILTER_COMPONENT}
+                            column={MODULE_COLUMN}
+                            >
                             <ModuleFilters filters={filters}/>
                             <ModuleTable data={modules.data}/>
                         </TableContext>
-                        {/* <Pagination links={modules.meta.links} /> */}
+                        <Pagination links={modules.meta.links} />
                     </div>
                 </div>
 
