@@ -1,78 +1,86 @@
 <?php
 
 namespace Database\Seeders;
-
 use App\Models\Student;
-use App\Models\Test;
-use App\Models\TestCourse;
 use App\Models\Course;
+use App\Models\Question;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Faker\Factory as Faker;
+use App\Enums\AssessmentType;
+use App\Enums\AssessmentStatus;
 
 class TestSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run()
     {
         $faker = Faker::create();
 
-        // Get all students and courses
+        // Get all students, courses, and questions
         $students = Student::all();
         $courses = Course::all();
+        $questions = Question::all();
 
-        // Loop through each student and create test entries
         foreach ($students as $student) {
-            // Create a test for the student
-            $test = Test::create([
+            // Create an assessment for each student
+            $assessmentId = DB::table('assessments')->insertGetId([
                 'student_id' => $student->student_id,
+                'type' => AssessmentType::TEST->value,  // Using enum for type
                 'start_time' => $faker->time(),
                 'end_time' => $faker->time(),
-                'totalItems' => $faker->numberBetween(20, 50),
-                'totalScore' => $faker->numberBetween(50, 100),
+                'total_items' => $faker->numberBetween(20, 50),
+                'total_score' => $faker->numberBetween(50, 100),
                 'percentage' => $faker->randomFloat(2, 60, 100),
-                'status' => $faker->randomElement(['completed', 'incomplete']),
+                'status' => $faker->randomElement([
+                    AssessmentStatus::COMPLETED->value,
+                    AssessmentStatus::IN_PROGRESS->value,
+                    AssessmentStatus::NOT_STARTED->value,
+                ]),  // Using enum for status
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
-            // Create test_courses entries for each course
+            // Create assessment_courses entries for each course
             foreach ($courses as $course) {
-                TestCourse::create([
-                    'test_id' => $test->test_id,
+                $totalItems = $faker->numberBetween(5, 10);
+                $totalScore = $faker->numberBetween(10, 20);
+                $percentage = $faker->randomFloat(2, 50, 100);
+
+                $assessmentCourseId = DB::table('assessment_courses')->insertGetId([
+                    'assessment_id' => $assessmentId,
                     'course_id' => $course->course_id,
-                    'theta_score' => $faker->randomFloat(2, -5, 5), // Example theta score range (-3 to +3)
+                    'total_items' => $totalItems,
+                    'total_score' => $totalScore,
+                    'percentage' => $percentage,
+                    'theta_score' => $faker->randomFloat(2, -5, 5), 
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-            }
-            foreach ($courses as $course) {
-                TestCourse::create([
-                    'test_id' => $test->test_id,
-                    'course_id' => $course->course_id,
-                    'theta_score' => $faker->randomFloat(2, -5, -3), // Example theta score range (-3 to +3)
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
-            foreach ($courses as $course) {
-                TestCourse::create([
-                    'test_id' => $test->test_id,
-                    'course_id' => $course->course_id,
-                    'theta_score' => $faker->randomFloat(2, -1, 3), // Example theta score range (-3 to +3)
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
-            foreach ($courses as $course) {
-                TestCourse::create([
-                    'test_id' => $test->test_id,
-                    'course_id' => $course->course_id,
-                    'theta_score' => $faker->randomFloat(2, 2, 5), // Example theta score range (-3 to +3)
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+
+                // Select random questions for the course
+                $courseQuestions = $questions->where('course_id', $course->course_id);
+                $availableQuestionsCount = $courseQuestions->count();
+
+                // Check if there are enough questions available
+                if ($availableQuestionsCount < $totalItems) {
+                    // Use all available questions if not enough
+                    $selectedQuestions = $courseQuestions;
+                } else {
+                    // Select the specified number of random questions
+                    $selectedQuestions = $courseQuestions->random($totalItems);
+                }
+
+                // Create assessment_items entries for each selected question
+                foreach ($selectedQuestions as $question) {
+                    DB::table('assessment_items')->insert([
+                        'assessment_course_id' => $assessmentCourseId,
+                        'question_id' => $question->question_id,
+                        'participants_answer' => json_encode([$faker->word]),  // Sample participant's answer
+                        'score' => $faker->numberBetween(0, 1),  // Assuming binary score for correct/incorrect answers
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
             }
         }
     }

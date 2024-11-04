@@ -11,27 +11,37 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('identifications',function (Blueprint $table){
-            $table->id('identification_id');
-            $table->string('name');
-            $table->string('answer');
-            $table->timestamps();
-        });
-        Schema::create('multichoice_single',function (Blueprint $table){
-            $table->id('multichoice_single_id');
-            $table->string('name');
-            $table->string('answer');
-            $table->json('choices');
-            $table->timestamps();
-        });
-        Schema::create('multichoice_many',function (Blueprint $table){
-            $table->id('multichoice_many_id');
-            $table->string('name');
+        // Schema::create('',function (Blueprint $table){
+        //     $table->id('identification_id');
+        //     $table->string('name');
+        //     $table->string('answer');
+        //     $table->timestamps();
+        // });
+        // Schema::create('multichoice_single',function (Blueprint $table){
+        //     $table->id('multichoice_single_id');
+        //     $table->string('name');
+        //     $table->string('answer');
+        //     $table->json('choices');
+        //     $table->timestamps();
+        // });
+        // Schema::create('multichoice_many',function (Blueprint $table){
+        //     $table->id('multichoice_many_id');
+        //     $table->string('name');
+        //     $table->json('answer');
+        //     $table->json('choices');
+        //     $table->timestamps();
+        // });
+
+
+        Schema::create('question_details',function (Blueprint $table){
+            $table->id('question_detail_id');
+            $table->enum('type',['Identification','Multiple Choice - Single','Multiple Choice - Many']);
             $table->json('answer');
-            $table->json('choices');
+            $table->json('choices')->nullable();
             $table->timestamps();
         });
-        Schema::create('difficulty', function(Blueprint $table){
+
+        Schema::create('difficulty', function (Blueprint $table) {
             $table->id('difficulty_id');
             $table->string('name');
             $table->float('numeric');
@@ -41,9 +51,9 @@ return new class extends Migration
         Schema::create('questions', function (Blueprint $table) {
             $table->id('question_id');
             $table->foreignID('course_id')->references('course_id')->on('courses')->cascadeOnDelete();
-            $table->unsignedBigInteger('questionable_id'); // Standard naming for polymorphic ID
-            $table->string('questionable_type'); // Standard naming for polymorphic type
-            $table->foreignID('difficulty_id')->references('difficulty_id')->on('difficulty')->cascadeOnDelete();
+            $table->foreignID(column: 'question_detail_id')->references('question_detail_id')->on('question_details')->cascadeOnDelete();
+            $table->foreignID(column: 'difficulty_id')->references('difficulty_id')->on('difficulty')->cascadeOnDelete();
+            $table->enum('type',['Pretest','Test']);
             $table->string('question');
             $table->float('discrimination_index');
             $table->timestamps();
@@ -58,8 +68,9 @@ return new class extends Migration
     {
         Schema::dropIfExists('questions');
         Schema::dropIfExists('difficulty');
-        Schema::dropIfExists('identifications');
-        Schema::dropIfExists('multichoice_single');
-        Schema::dropIfExists('multichoice_many');
+        // Schema::dropIfExists('identifications');
+        // Schema::dropIfExists('multichoice_single');
+        // Schema::dropIfExists('multichoice_many');
+        Schema::dropIfExists('question_details');
     }
 };

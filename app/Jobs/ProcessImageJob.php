@@ -15,13 +15,13 @@ class ProcessImageJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $imagePath;
+    protected $imageName;
     protected $parentModel;
     protected $type;
 
-    public function __construct($imagePath,$type, $parentModel)
+    public function __construct($imageName,$type, $parentModel)
     {
-        $this->imagePath = $imagePath;
+        $this->imageName = $imageName;
         $this->parentModel = $parentModel;
         $this->type = $type;
     }
@@ -30,7 +30,7 @@ class ProcessImageJob implements ShouldQueue
     {
         try {
             // // Get the full path to the image file
-            $imageFullPath = Storage::path("public/{$this->type}/{$this->imagePath}");
+            $imageFullPath = Storage::path("public/{$this->type}/{$this->imageName}");
 
             // Call the FastAPI service to process the image
             $response = $fastApiService->getDescriptionFromImage($imageFullPath);

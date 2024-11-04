@@ -69,6 +69,7 @@ class StudentSeeder extends Seeder
             'course'=>'BSCS',
             'year' => '2',
             'profile_image' => '',
+            'pretest_completed'=>false
         ]);
 
         User::create([
@@ -90,6 +91,7 @@ class StudentSeeder extends Seeder
             'course'=>'BSIT',
             'year' => '5',
             'profile_image' => '',
+            'pretest_completed'=>false
         ]);
 
         User::create([
@@ -111,6 +113,7 @@ class StudentSeeder extends Seeder
             'course'=>'BSCS',
             'year' => '4',
             'profile_image' => '',
+            'pretest_completed'=>false
         ]);
 
         User::create([
@@ -132,6 +135,7 @@ class StudentSeeder extends Seeder
             'course'=>'BSIT',
             'year' => '4',
             'profile_image' => '',
+            'pretest_completed'=>false
         ]);
 
         User::create([

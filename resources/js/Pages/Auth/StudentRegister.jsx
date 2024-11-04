@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import "../../../css/student/students.css";
 import MainLayout from "@/Layouts/MainLayout";
+import { Head } from "@inertiajs/react";
 
 export default function StudentRegister(){
     const [formData, setFormData] = useState({
@@ -61,6 +62,7 @@ export default function StudentRegister(){
 
     return (
         <>
+            <Head title="Student Register" />
             <div className="row d-flex justify-content-start mb-5">
                 <div className="col">
                     <img

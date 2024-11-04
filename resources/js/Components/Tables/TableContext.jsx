@@ -59,7 +59,6 @@ export const TableContext = ({
             combinedState.sort = state.sortState;
         }
 
-        console.log(combinedState)
         // Compare with previous state before updating URL
         if (JSON.stringify(state) !== JSON.stringify(prevStateRef.current)) {
             const filteredParams = Object.fromEntries(

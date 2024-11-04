@@ -20,7 +20,9 @@ class StudentController extends Controller
 {
     public function showRegisterForm()
     {
-        return Inertia::render('Auth/StudentRegister');
+        return Inertia::render('Auth/StudentRegister',[
+            'title'=>'Student Register'
+        ]);
     }
 
     public function registerStudent(RegisterStudentRequest $request)

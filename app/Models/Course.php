@@ -18,11 +18,11 @@ class Course extends Model
         'description'
     ];
 
-    public function tests(){
-        return $this->belongsTo(Test::class,'course_id');
+    public function assessment_courses(){
+        return $this->hasMany(AssessmentCourse::class,'course_id','course_id');
     }
     public function pdfs(){
-        return $this->hasMany(Pdf::class,'course_id','course_id');
+        return $this->hasMany(Pdf::class, 'course_id','course_id');
     }
 
     public function modules(){
@@ -32,10 +32,7 @@ class Course extends Model
     public function questions(){
         return $this->hasMany(Question::class,'course_id','course_id');
     }
-    public function pretest_courses(){
-        return $this->hasMany(PretestCourse::class,'course_id','course_id');
-    }
-    public function test_courses(){
-        return $this->hasMany(TestCourse::class,'course_id','course_id');
+    public function student_course_thetas(){
+        return $this->hasMany(StudentCourseTheta::class,'course_id','course_id');
     }
 }

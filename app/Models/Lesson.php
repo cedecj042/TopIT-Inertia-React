@@ -15,14 +15,16 @@ class Lesson extends Model
     protected $fillable = [
         'module_id',
         'title',
-        'content',
     ];
     
-    public function modules(){
+    public function module(){
         return $this->belongsTo(Module::class,'module_id','module_id');
     }
 
     public function sections(){
         return $this->hasMany(Section::class,'lesson_id');
+    }
+    public function attachments(){
+        return $this->morphMany(Attachment::class,'attachmentable');
     }
 }

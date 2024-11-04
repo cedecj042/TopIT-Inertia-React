@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Student;
 
+use App\Enums\AttachmentType;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ModuleResource;
 use App\Models\Course;
 use App\Models\Module;
 use Illuminate\Http\Request;
@@ -15,6 +17,7 @@ class StudentCourseController extends Controller
     {
         $courses = Course::all(); 
         return Inertia::render('Student/Courses/Courses', [
+            'title'=>'Student Course',
             'courses' => $courses,
         ]);
     }
@@ -23,6 +26,7 @@ class StudentCourseController extends Controller
     {
         $course = Course::with('modules')->findOrFail($id); 
         return Inertia::render('Student/Courses/CoursesDetail', [
+            'title' => 'Student Course',
             'course' => $course,
         ]);
     }
@@ -31,30 +35,38 @@ class StudentCourseController extends Controller
     public function showModuleDetail($id)
     {
         $module = Module::with([
-            'lessons' => function ($query) {
-                $query->with([
-                    'sections' => function ($query) {
-                        $query->with([
-                            'subsections' => function ($query) {
-                                $query->with([
-                                    'tables.images',
-                                    'figures.images',
-                                    'codes.images'
-                                ]);
-                            },
-                            'tables.images',
-                            'figures.images',
-                            'codes.images'
-                        ]);
-                    }
-                ]);
+            'course:course_id,title', // Load only necessary columns from course
+            'lessons.sections.subsections.attachments' => function ($query) {
+                // Filter specific attachment types across all levels
+                $query->whereIn('type', [
+                    AttachmentType::FIGURE->value,
+                    AttachmentType::TABLE->value,
+                    AttachmentType::CODE->value,
+                    AttachmentType::TEXT->value,
+                ])->orderBy('order');
+            },
+            'lessons.sections.attachments' => function ($query) {
+                // Filter specific attachment types for sections
+                $query->whereIn('type', [
+                    AttachmentType::FIGURE->value,
+                    AttachmentType::TABLE->value,
+                    AttachmentType::CODE->value,
+                    AttachmentType::TEXT->value,
+                ])->orderBy('order');
+            },
+            'lessons.attachments' => function ($query) {
+                // Filter specific attachment types for lessons
+                $query->whereIn('type', [
+                    AttachmentType::FIGURE->value,
+                    AttachmentType::TABLE->value,
+                    AttachmentType::CODE->value,
+                    AttachmentType::TEXT->value,
+                ])->orderBy('order');
             }
         ])->findOrFail($id);
-
-        $moduleContent = json_decode($module->content, true); 
         return Inertia::render('Student/Courses/Module', [
-            'module' => $module,
-            'moduleContent' => $moduleContent,
+            'title' => 'Student Course',
+            'module' => new ModuleResource($module), // Use ModuleResource for formatting
         ]);
     }
 }

@@ -39,7 +39,6 @@ export default function ModuleTable({ data, queryParams }) {
 
     const editModule = (e,module_id) =>{
         e.stopPropagation();
-        console.log("Edit button clicked with module_id:", module_id);
         getRequest("admin.module.edit",module_id,{ 
             onSuccess: (success) => {
                 console.log(success);

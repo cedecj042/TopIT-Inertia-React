@@ -13,6 +13,10 @@ class Student extends Model
 {
     use HasFactory;
     protected $primaryKey = 'student_id';
+    protected $attributes = [
+        'pretest_completed' => false,
+    ];
+    
     protected $fillable = [
         'firstname',
         'lastname',
@@ -24,6 +28,7 @@ class Student extends Model
         'course',
         'school',
         'year',
+        'pretest_completed',
         'created_at',
         'updated_at'
     ];
@@ -31,10 +36,10 @@ class Student extends Model
     public function user(){
         return $this->morphOne(User::class,'userable');
     }
-    public function pretests(){
-        return $this->hasOne(Pretest::class,'student_id','student_id');
-    }
     public function tests(){
-        return $this->hasMany(Test::class,'student_id','student_id');
+        return $this->hasMany(Assessment::class,'student_id','student_id');
+    }
+    public function student_course_thetas(){
+        return $this->hasMany(StudentCourseTheta::class,'student_id','student_id');
     }
 }

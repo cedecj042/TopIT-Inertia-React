@@ -2,19 +2,18 @@ import { extractList, replaceSemicolonsWithCommas, textToArray } from "@/Library
 import CollapseContent from "./CollapseContent";
 
 
-export default function ModuleContent({ content }) {
-    const sortedContent = content.sort((a, b) => a.order - b.order);
-
+export default function ModuleContent({ data }) {
     // Group headers with corresponding text
     const groupedContent = [];
     let currentHeader = null;
     let headerCounter = 1; // To create unique headers when needed
 
-    sortedContent.forEach((item) => {
+    data.attachments.forEach((item) => {
         if (item.type === "Header") {
             // When a header is found, store it temporarily
-            currentHeader = { header: item.text, text: null };
-        } else if (item.type === "Text") {
+            currentHeader = { header: item.description, text: null };
+        } 
+        else if (item.type === "Text") {
             // If a text is found but no current header exists, create a sample header
             if (!currentHeader) {
                 currentHeader = {
@@ -24,13 +23,13 @@ export default function ModuleContent({ content }) {
                 headerCounter++; // Increment to create unique sample headers
             }
             if(currentHeader.header === "Keywords"){
-                const keywords = textToArray(item.text);
+                const keywords = textToArray(item.description);
                 currentHeader.text= keywords;
             }else if (currentHeader.header.toLowerCase() === "learning objectives"){
-                const objectives = extractList(item.text);
+                const objectives = extractList(item.description);
                 currentHeader.text = objectives;
             }else {
-                currentHeader.text = replaceSemicolonsWithCommas(item.text);
+                currentHeader.text = replaceSemicolonsWithCommas(item.description);
             }
             
             groupedContent.push(currentHeader);
@@ -38,7 +37,10 @@ export default function ModuleContent({ content }) {
             // Reset current header after pairing
             currentHeader = null;
         }
+        console.log(item)
     });
+
+    console.log(groupedContent)
 
     return (
         <>
@@ -57,13 +59,13 @@ export default function ModuleContent({ content }) {
                             ) : pair.header.toLowerCase() === "keywords" ? (
                                 <div>
                                     {pair.text.map((keyword, i) => (
-                                        <span key={i} className="badge rounded-pill bg-light text-dark  m-1 fw-regular p-2">
+                                        <span key={i} className="badge rounded-pill bg-dark-subtle text-dark   m-1 fw-regular p-2">
                                             {keyword}
                                         </span>
                                     ))}
                                 </div>
                             ) : (
-                                <p>{pair.text}</p>
+                                <p className="text-content">{pair.text}</p>
                             )}
                         </CollapseContent>
                         

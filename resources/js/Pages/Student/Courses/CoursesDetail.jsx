@@ -1,12 +1,9 @@
-import { usePage } from "@inertiajs/react";
-import StudentLayout from "@/Layouts/StudentLayout";
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 
-function CourseDetail () {
-    const { course } = usePage().props;
-
+function CourseDetail ({course}) {
+    
     return (
-        <StudentLayout title="Student Course">
+        <>
             <div className="row p-3">
                 <div className="row mt-4 px-5">
                     <h3 className="fw-semibold">{course.title}</h3>
@@ -62,7 +59,7 @@ function CourseDetail () {
                 Back to Courses
             </a>
             </div>
-        </StudentLayout>
+        </>
     );
 };
 

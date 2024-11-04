@@ -22,9 +22,7 @@ class SectionResource extends JsonResource
             'created_at' => (new Carbon($this->created_at))->format('F d, Y'),
             'lesson' => new LessonResource($this->whenLoaded('lesson')),
             'subsections' => SubsectionResource::collection($this->whenLoaded('subsections')),
-            'tables' => TableResource::collection($this->whenLoaded('tables')),
-            'figures' => FigureResource::collection($this->whenLoaded('figures')),
-            'codes' => CodeResource::collection($this->whenLoaded('codes')),
+            'attachments' => AttachmentResource::collection($this->whenLoaded('attachments'))
         ];
     }
 }

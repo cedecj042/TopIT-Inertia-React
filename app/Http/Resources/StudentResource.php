@@ -26,6 +26,7 @@ class StudentResource extends JsonResource
             'school' => $this->school,
             'year' => $this->year,
             'age' => $this->age,
+            'pretest_completed'=> $this->pretest_completed,
             'created_at'=> (new Carbon($this->created_at))->format('F j, Y ')
             
         ], function ($value) {

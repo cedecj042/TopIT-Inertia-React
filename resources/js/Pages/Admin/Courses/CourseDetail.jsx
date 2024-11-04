@@ -1,6 +1,5 @@
-import { router } from "@inertiajs/react";
 import { useState } from "react";
-import "../../../css/admin/dashboard.css";
+import "../../../../css/admin/dashboard.css";
 import PdfTable from "@/Components/Tables/PdfTable";
 import Pagination from "@/Components/Pagination";
 import { useColumnVisibility, useRequest } from "@/Library/hooks";

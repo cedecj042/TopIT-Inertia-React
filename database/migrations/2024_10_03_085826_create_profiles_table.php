@@ -22,8 +22,8 @@ return new class extends Migration
             $table->string('address')->nullable();
             $table->string('school');
             $table->string('course');
-            $table->string('year');
-            // $table->boolean('pretest_completed')->default(false);
+            $table->integer('year');
+            $table->boolean('pretest_completed')->default(false);
             $table->timestamps();
         });
         Schema::create('admins', function (Blueprint $table) {

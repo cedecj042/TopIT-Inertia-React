@@ -64,7 +64,6 @@ class PdfController extends Controller
             'course_id' => $request->course_id,
             'file_name' => $fileName,
             'file_path' => $filePath,
-            'status' => 'Uploading',
             'uploaded_by' => Auth::user()->userable->firstname . ' ' . Auth::user()->userable->lastname,
         ]);
 

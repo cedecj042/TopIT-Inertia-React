@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\AttachmentType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ModuleResource;
 use App\Models\Course;
@@ -44,7 +45,7 @@ class ModuleController extends Controller
         $filters = [
             'courses' => $title
         ];
-        return Inertia::render('Admin/Module', [
+        return Inertia::render('Admin/Modules/Module', [
             'title' => 'Admin Module',
             'auth' => Auth::user(),
             'modules' => ModuleResource::collection($modules),
@@ -71,31 +72,22 @@ class ModuleController extends Controller
      */
     public function show(string $id)
     {
-        // Eager load lessons, sections, subsections, tables, figures, codes, and their related images
+        // Define a closure to apply ordering by 'order' column
+        $orderAttachments = function ($query) {
+            $query->orderBy('order');
+        };
+
+        // Eager load relationships with ordered attachments
         $module = Module::with([
-            'course:course_id,title', // Load course details
-            'lessons' => function ($query) {
-                $query->with([
-                    'sections' => function ($query) {
-                        $query->with([
-                            'subsections' => function ($query) {
-                                $query->with([
-                                    'tables.images',  // Eager load images for tables
-                                    'figures.images', // Eager load images for figures
-                                    'codes.images'    // Eager load images for codes
-                                ]);
-                            },
-                            'tables.images',  // Eager load images for tables
-                            'figures.images', // Eager load images for figures
-                            'codes.images'    // Eager load images for codes
-                        ]);
-                    }
-                ]);
-            }
+            'course:course_id,title', // Load only necessary columns from course
+            'attachments' => $orderAttachments,
+            'lessons.attachments' => $orderAttachments,
+            'lessons.sections.attachments' => $orderAttachments,
+            'lessons.sections.subsections.attachments' => $orderAttachments,
         ])->findOrFail($id);
 
         // Return the Inertia render with the module details
-        return Inertia::render('Admin/ModuleDetail', [
+        return Inertia::render('Admin/Modules/ModuleDetail', [
             'title' => 'Admin Module',
             'auth' => Auth::user(),
             'module' => new ModuleResource($module), // Use ModuleResource for formatting
@@ -103,36 +95,23 @@ class ModuleController extends Controller
     }
 
 
+
     /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
     {
-        // Eager load lessons, sections, subsections, tables, figures, codes, and their related images
+        // Eager load all attachments at each level without filtering by type
         $module = Module::with([
-            'course:course_id,title', // Load course details
-            'lessons' => function ($query) {
-                $query->with([
-                    'sections' => function ($query) {
-                        $query->with([
-                            'subsections' => function ($query) {
-                                $query->with([
-                                    'tables.images',  // Eager load images for tables
-                                    'figures.images', // Eager load images for figures
-                                    'codes.images'    // Eager load images for codes
-                                ]);
-                            },
-                            'tables.images',  // Eager load images for tables
-                            'figures.images', // Eager load images for figures
-                            'codes.images'    // Eager load images for codes
-                        ]);
-                    }
-                ]);
-            }
+            'course:course_id,title', // Load only necessary columns from course
+            'attachments',
+            'lessons.attachments',
+            'lessons.sections.attachments',
+            'lessons.sections.subsections.attachments',
         ])->findOrFail($id);
 
         // Return the Inertia render with the module details
-        return Inertia::render('Admin/ModuleEdit', [
+        return Inertia::render('Admin/Modules/ModuleEdit', [
             'title' => 'Admin Module',
             'auth' => Auth::user(),
             'module' => new ModuleResource($module), // Use ModuleResource for formatting
@@ -150,8 +129,5 @@ class ModuleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function delete(string $id)
-    {
-        
-    }
+    public function delete(string $id) {}
 }
