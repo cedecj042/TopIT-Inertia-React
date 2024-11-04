@@ -11,31 +11,43 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tests',function (Blueprint $table){
-            $table->id('test_id');
+        Schema::create('assessments',function (Blueprint $table){
+            $table->id('assessment_id');
             $table->foreignID('student_id')->references('student_id')->on('students')->cascadeOnDelete();
+            $table->enum('type',['Pretest','Test']);
             $table->time('start_time');
             $table->time('end_time');
-            $table->integer('totalItems');
-            $table->integer('totalScore');
+            $table->integer('total_items');
+            $table->integer('total_score');
             $table->float('percentage');
-            $table->string('status');
+            $table->enum('status',['Not Started','In Progress','Completed']);
             $table->timestamps();
         });
-        Schema::create('test_courses',function(Blueprint $table){
-            $table->id('test_course_id');
-            $table->foreignID('test_id')->references('test_id')->on('tests')->cascadeOnDelete();
+        Schema::create('assessment_courses',function(Blueprint $table){
+            $table->id('assessment_course_id');
+            $table->foreignID('assessment_id')->references('assessment_id')->on('assessments')->cascadeOnDelete();
             $table->foreignID('course_id')->references('course_id')->on('courses')->cascadeOnDelete();
+            $table->integer('total_items');
+            $table->integer('total_score');
+            $table->float('percentage');
             $table->float('theta_score');
             $table->timestamps();
         });
-
-        Schema::create('test_answers',function (Blueprint $table){
-            $table->id('test_answer_id');
-            $table->foreignID('test_course_id')->references('test_id')->on('tests')->cascadeOnDelete();
+        Schema::create('assessment_items',function (Blueprint $table){
+            $table->id('assessment_item_id');
+            $table->foreignID('assessment_course_id')->references('assessment_course_id')->on('assessment_courses')->cascadeOnDelete();
             $table->foreignID('question_id')->references('question_id')->on('questions')->cascadeOnDelete();
             $table->json('participants_answer');
             $table->integer(column: 'score');
+            $table->timestamps();
+        });
+        
+        Schema::create('theta_score_logs',function (Blueprint $table){
+            $table->id('theta_score_log_id');
+            $table->foreignID('assessment_item_id')->references('assessment_item_id')->on('assessment_items')->cascadeOnDelete();
+            $table->foreignID('student_course_theta_id')->references('student_course_theta_id')->on('student_course_thetas')->cascadeOnDelete();
+            $table->float('previous_theta_score');
+            $table->float('new_theta_score');
             $table->timestamps();
         });
         
@@ -46,6 +58,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tests');
+        Schema::dropIfExists('assessments');
+        Schema::dropIfExists('assessment_courses');
+        Schema::dropIfExists('assessment_items');
+        Schema::dropIfExists('theta_score_logs');
     }
 };

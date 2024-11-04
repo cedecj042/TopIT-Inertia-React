@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\PdfController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AttachmentController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProcessedPdfController;
 use App\Http\Controllers\ErrorController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\Student\PretestController;
 use App\Http\Controllers\Student\TestController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 
@@ -85,12 +87,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/', [ModuleController::class, 'index'])->name('index');
         Route::get('/{id}', [ModuleController::class, 'show'])->name('detail');
         Route::get('/edit/{id}', [ModuleController::class, 'edit'])->name('edit');
-        Route::post('/update', [ModuleController::class, 'update'])->name('update');
+        Route::post('/update/module', [ModuleController::class, 'updateModule'])->name('update.module');
         Route::post('/delete', [ModuleController::class, 'delete'])->name('delete');
 
         // Route::view('/store','admin.ui.course.module.vectorize');
         // Route::get('/vector', [ModuleController::class, 'vectorShow'])->name('vector.show');
         // Route::post('/vector/upload', [ModuleController::class, 'vectorStore'])->name('vector.upload');
+    });
+    Route::prefix('attachment')->name('attachment.')->group(function(){
+        Route::put('/{id}', [AttachmentController::class, 'update'])->name('update');
+        Route::post('/add', [AttachmentController::class, 'create'])->name('create');
+        Route::delete('/delete/{id}', [AttachmentController::class, 'destroy'])->name('delete');
+
     });
 
     Route::get('/profile', [DashboardController::class, 'showProfile'])->name('profile');

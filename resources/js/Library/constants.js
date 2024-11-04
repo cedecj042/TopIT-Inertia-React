@@ -31,3 +31,12 @@ export const PDF_COLUMN = [
 export const STUDENT_FILTER_COMPONENT = ["students","filters","queryParams"]
 export const COURSE_FILTER_COMPONENT = ["courses","courses.meta","queryParams"]
 export const MODULE_FILTER_COMPONENT = ["modules","modules.meta","filters","queryParams"]
+
+
+export const AttachmentTypes = {
+    TABLE: "Table",
+    CODE: "Code",
+    FIGURE: "Figure",
+    TEXT: "Text",
+    HEADER: "Header",
+};

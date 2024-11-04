@@ -4,7 +4,7 @@ import StudentLayout from "@/Layouts/StudentLayout";
 function Courses ({courses}) {
 
     return (
-        <StudentLayout title="Student Course">
+        <>
             <div className="row p-3">
                 <div className="row mt-4 px-5">
                     <h3 className="fw-bold">Courses</h3>
@@ -49,7 +49,7 @@ function Courses ({courses}) {
                     ))}
                 </div>
             </div>
-        </StudentLayout>
+        </>
     );
 };
 

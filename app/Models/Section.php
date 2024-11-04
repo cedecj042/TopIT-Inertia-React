@@ -19,26 +19,15 @@ class Section extends Model
     protected $fillable = [
         'lesson_id',
         'title',
-        'content',
     ];
-    public function lessons(){
+    public function lesson(){
         return $this->belongsTo(Lesson::class,'lesson_id','lesson_id');
     }
     public function subsections(){
         return $this->hasMany(Subsection::class,'section_id');
     }
-
-    public function tables(){
-        return $this->morphMany(Table::class,'tableable');
-    }
-    public function codes(){
-        return $this->morphMany(Code::class,'codeable');
-    }
-    public function figures(){
-        return $this->morphMany(Figure::class,'figureable');
-    }
-    public function questions(){
-        return $this->hasMany(Question::class,'section_id');
+    public function attachments(){
+        return $this->morphMany(Attachment::class,'attachmentable');
     }
     
 }

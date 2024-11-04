@@ -2,7 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Enums\AttachmentType;
+use App\Enums\PdfStatus;
 use App\Events\UploadEvent;
+use App\Models\Attachment;
 use App\Models\Lesson;
 use App\Models\Module;
 use App\Models\Pdf;
@@ -18,6 +21,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
 
 class ProcessContentJob implements ShouldQueue
 {
@@ -26,34 +30,37 @@ class ProcessContentJob implements ShouldQueue
     protected $processed_data;
     protected $course_id;
     protected $file_name;
-    /**
-     * Create a new job instance.
-     */
-    public function __construct($course_id,$processed_data,$file_name)
+
+    public function __construct($course_id, $processed_data, $file_name)
     {
         $this->processed_data = $processed_data;
-        $this->course_id=$course_id;
-        $this->file_name=$file_name;
+        $this->course_id = $course_id;
+        $this->file_name = $file_name;
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle()
     {
-
         DB::beginTransaction();
 
+        $contentTypes = ['Tables', 'Figures', 'Codes', 'Content'];
         try {
-            
             foreach ($this->processed_data['Modules'] as $moduleData) {
                 Log::info('Processing module', ['module_title' => $moduleData['Title']]);
 
                 $module = Module::create([
                     'course_id' => $this->course_id,
                     'title' => $moduleData['Title'],
-                    'content' => json_encode($moduleData['Content'])
                 ]);
+
+                foreach ($contentTypes as $contentType) {
+                    if (isset($moduleData[$contentType]) && is_array($moduleData[$contentType])) {
+                        foreach ($moduleData[$contentType] as $item) {
+                            if (is_array($item) && isset($item['type'])) {
+                                $this->processContent($item, $module);
+                            }
+                        }
+                    }
+                }
 
                 foreach ($moduleData['Lessons'] as $lessonData) {
                     Log::info('Processing lesson', ['lesson_title' => $lessonData['Title']]);
@@ -61,8 +68,17 @@ class ProcessContentJob implements ShouldQueue
                     $lesson = Lesson::create([
                         'module_id' => $module->module_id,
                         'title' => $lessonData['Title'],
-                        'content' => json_encode($lessonData['Content'])
                     ]);
+
+                    foreach ($contentTypes as $contentType) {
+                        if (isset($lessonData[$contentType]) && is_array($lessonData[$contentType])) {
+                            foreach ($lessonData[$contentType] as $item) {
+                                if (is_array($item) && isset($item['type'])) {
+                                    $this->processContent($item, $lesson);
+                                }
+                            }
+                        }
+                    }
 
                     foreach ($lessonData['Sections'] as $sectionData) {
                         $sectionTitle = $sectionData['Title'];
@@ -74,10 +90,7 @@ class ProcessContentJob implements ShouldQueue
                         $section = Section::create([
                             'lesson_id' => $lesson->lesson_id,
                             'title' => $sectionTitle,
-                            'content' => json_encode($sectionData['Content']),
                         ]);
-
-                        $contentTypes = ['Tables', 'Figures', 'Codes'];
 
                         foreach ($contentTypes as $contentType) {
                             // Check if the content type exists in the current section and is an array
@@ -100,10 +113,7 @@ class ProcessContentJob implements ShouldQueue
                             $subsection = Subsection::create([
                                 'section_id' => $section->section_id,
                                 'title' => $subsectionTitle,
-                                'content' => json_encode($subsectionData['Content'])
                             ]);
-
-                            $contentTypes = ['Tables', 'Figures', 'Codes'];
 
                             foreach ($contentTypes as $contentType) {
                                 // Check if the content type exists in the current section and is an array
@@ -119,119 +129,117 @@ class ProcessContentJob implements ShouldQueue
                     }
                 }
             }
-
-            DB::commit();
-
+            Log::info("done with processing content");
             $pdf = Pdf::where('course_id', $this->course_id)
                 ->where('file_name', $this->file_name)
                 ->firstOrFail();
-            $pdf->status = 'Done';
+            $pdf->status = PdfStatus::SUCCESS->value;
             $pdf->save();
-            $this->broadcastEvent(null,"Successfully processed the PDF",null);
+            DB::commit();
+
+            $this->broadcastEvent(null, "Successfully processed the PDF", null);
             Log::info('Successfully stored processed PDF data');
             return response()->json(['message' => 'Processed PDF data stored successfully'], 201);
         } catch (Exception $e) {
             DB::rollBack();
-            $this->broadcastEvent(null,null,"Failed to process PDF data");
+
+            // Handle the failure case
+            try {
+                // Set status to FAILED if an error occurs
+                $pdf = Pdf::where('course_id', $this->course_id)
+                    ->where('file_name', $this->file_name)
+                    ->firstOrFail();
+                $pdf->status = PdfStatus::FAILED->value;
+                $pdf->save();
+
+                DB::commit();  // Commit the FAILED status update
+
+            } catch (Exception $innerException) {
+                Log::error('Failed to update PDF status to FAILED', ['error' => $innerException->getMessage()]);
+            }
+
+            $this->broadcastEvent(null, null, "Failed to process PDF data");
             Log::error('Failed to store processed PDF data', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'Failed to store processed PDF data', 'error' => $e->getMessage()], 500);
         }
     }
 
+
     private function processContent($contentItem, $parent)
     {
-        // Check if the content type is Figures, Tables, or Code
-        $contentData = [
+        // Prepare attachment data
+        $attachmentData = [
+            'type' => match ($contentItem['type']) {
+                'Figures' => AttachmentType::FIGURE->value,
+                'Tables' => AttachmentType::TABLE->value,
+                'Code' => AttachmentType::CODE->value,
+                'Text' => AttachmentType::TEXT->value,
+                'Header' => AttachmentType::HEADER->value,
+                default => throw new InvalidArgumentException("Invalid content type"),
+            },
+            'text' => $contentItem['text'] ?? null,
             'image_base64' => $contentItem['image_base64'] ?? null,
-            'coordinates' => $contentItem['coordinates'] ?? null,
             'caption' => $contentItem['before_caption'] ?? $contentItem['after_caption'] ?? "",
             'order' => isset($contentItem['order']) ? (int) $contentItem['order'] : null,
         ];
-        Log::info('Processing content item', ['contentData' => $contentData['caption']]);
-        // Call the appropriate processing function
-        switch ($contentItem['type']) {
-            case 'Figures':
-                $this->processFigures($contentData, $parent);
-                break;
-            case 'Tables':
-                $this->processTables($contentData, $parent);
-                break;
-            case 'Code':
-                $this->processCode($contentData, $parent);
-                break;
-        }
 
+        Log::info('Processing content item', ['contentData' => $attachmentData['caption']]);
+
+        // Process attachment
+        $this->processAttachment($attachmentData, $parent);
     }
 
-    private function processTables($data, $parent)
+    private function processAttachment($data, $parent)
     {
+        // Prepare attachment data with manual setting of attachmentable_id and attachmentable_type
+        $attachmentData = [
+            'type' => $data['type'],
+            'description' => $data['text'] ?? '',
+            'caption' => $data['caption'],
+            'order' => $data['order'],
+            'file_name' => '',  // Will be updated if image is saved
+            'file_path' => '',  // Will be updated if image is saved
+            'attachmentable_id' => $parent->id,
+            'attachmentable_type' => class_basename($parent), // Use only the class name without namespace
+        ];
 
-        $table = $parent->tables()->create($data);
+        // Create attachment manually without relying on polymorphic relationship
+        $attachment = Attachment::create($attachmentData);
 
+        // Store image if available
         if (isset($data['image_base64'])) {
-            $imagePath = $this->storeBase64Image($data['image_base64'], 'tables/', $table);
-            ProcessImageJob::dispatch($imagePath, 'tables', $table);
+            $imageName = $this->storeBase64Image($data['image_base64'], $data['type'], $attachment);
+            ProcessImageJob::dispatch($imageName, strtolower($data['type']), $attachment);
         }
 
-        return $table;
+        return $attachment;
     }
 
-    private function processFigures($data, $parent)
-    {
 
-        $figure = $parent->figures()->create($data);
-
-        if (isset($data['image_base64'])) {
-            $imagePath = $this->storeBase64Image($data['image_base64'], 'figures/', $figure);
-            ProcessImageJob::dispatch($imagePath, 'figures', $figure);
-        }
-
-        return $figure;
-    }
-
-    private function processCode($data, $parent)
-    {
-
-        $code = $parent->codes()->create($data);
-
-        if (isset($data['image_base64'])) {
-            $imagePath = $this->storeBase64Image($data['image_base64'], 'code/', $code);
-
-            // Dispatch the ProcessImageJob to generate the description asynchronously
-            ProcessImageJob::dispatch($imagePath, 'code', $code);
-        }
-
-        return $code;
-    }
-
-    private function storeBase64Image($base64Image, $folder, $parentModel)
+    private function storeBase64Image($base64Image, $type, $attachment)
     {
         $image = base64_decode($base64Image);
         $imageName = uniqid() . '.png';
 
-        $disk = match ($folder) {
-            'figures/' => 'figures',
-            'tables/' => 'tables',
-            'code/' => 'code',
-            default => 'public',
-        };
+        // Use the lowercase version of the enum value directly as the folder name
+        $folder = strtolower($type);
 
-        // Store the image in the file system
-        Storage::disk($disk)->put($imageName, $image);
+        Storage::disk($folder)->put($imageName, $image);
 
-        // Save the image details in the database
-        $imagePath = Storage::disk($disk)->url($imageName);
-        $parentModel->images()->create([
+        $imagePath = Storage::disk($folder)->url($imageName);
+
+        // Update attachment with file name and path
+        $attachment->update([
             'file_name' => $imageName,
             'file_path' => $imagePath,
         ]);
 
-        return $imageName;
+        return $imageName;  // Return full image path for consistency
     }
-    public function broadcastEvent($info=null,$success=null,$error=null)
+    public function broadcastEvent($info = null, $success = null, $error = null)
     {
         Log::info('starting the event');
-        broadcast(new UploadEvent($info,$success,$error));
+        broadcast(new UploadEvent($info, $success, $error));
         Log::info('Event broadcasted');
     }
 }

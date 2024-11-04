@@ -21,9 +21,7 @@ class SubsectionResource extends JsonResource
             'content' => $this->content,
             'created_at' => (new Carbon($this->created_at))->format('F d, Y'),
             'section' => new SectionResource($this->whenLoaded('section')),
-            'tables' => TableResource::collection($this->whenLoaded('tables')),
-            'figures' => FigureResource::collection($this->whenLoaded('figures')),
-            'codes' => CodeResource::collection($this->whenLoaded('codes')),
+            'attachments' => AttachmentResource::collection($this->whenLoaded('attachments'))
         ];
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Enums\QuestionDetailType;
+use App\Enums\QuestionType;
 use App\Models\Identification;
 use App\Models\MultiChoiceMany;
 use App\Models\MultiChoiceSingle;
@@ -12,10 +14,8 @@ class QuestionSeeder extends Seeder
 {
     public function run()
     {
-        // Fetch all courses
+        // Fetch all courses and difficulty levels
         $courses = DB::table('courses')->get();
-
-        // Fetch all difficulty levels
         $difficulties = DB::table('difficulty')->get()->keyBy('name');
 
         $questions = [
@@ -68,83 +68,41 @@ class QuestionSeeder extends Seeder
         foreach ($courses as $course) {
             if (isset($questions[$course->title])) {
                 $courseQuestions = $questions[$course->title];
-        
-                // Loop through questions for the current course
+                
                 foreach (['Very Easy', 'Easy', 'Average', 'Hard', 'Very Hard'] as $index => $difficultyName) {
                     $questionData = $courseQuestions[$index];
         
-                    // Insert identification or multiple choice questions
-                    if (empty($questionData[2])) {
-                        // Insert identification type
-                        DB::table('identifications')->insert([
-                            'name' => "Identification",
-                            'answer' => $questionData[1],
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-                        $identification_id = DB::getPdo()->lastInsertId();
+                    // Determine question detail type based on data structure
+                    $type = empty($questionData[2])
+                        ? QuestionDetailType::IDENTIFICATION->value
+                        : (is_array(json_decode($questionData[1], true))
+                            ? QuestionDetailType::MULTIPLE_CHOICE_MANY->value
+                            : QuestionDetailType::MULTIPLE_CHOICE_SINGLE->value);
         
-                        DB::table('questions')->insert([
-                            'course_id' => $course->course_id,
-                            'questionable_id' => $identification_id,
-                            'questionable_type' => Identification::class,
-                            'difficulty_id' => $difficulties[$difficultyName]->difficulty_id,
-                            'question' => $questionData[0],
-                            'discrimination_index' => rand(-1, 1),
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-                    } else {
-                        // Insert multiple choice single or many
-                        $choices = json_encode($questionData[2]);
+                    $difficulty_id = $difficulties[$difficultyName]->difficulty_id;
         
-                        // If the answer is not an array, assume it's a single-choice question
-                        if (!is_array(json_decode($questionData[1], true))) {
-                            // Single choice
-                            DB::table('multichoice_single')->insert([
-                                'name' => "Multiple Choice Single",
-                                'answer' => $questionData[1],
-                                'choices' => $choices,
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ]);
-                            $multichoice_single_id = DB::getPdo()->lastInsertId();
+                    // Insert question details
+                    $question_detail_id = DB::table('question_details')->insertGetId([
+                        'type' => $type,
+                        'answer' => json_encode($questionData[1]),
+                        'choices' => !empty($questionData[2]) ? json_encode($questionData[2]) : null,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
         
-                            DB::table('questions')->insert([
-                                'course_id' => $course->course_id,
-                                'questionable_id' => $multichoice_single_id,
-                                'questionable_type' => MultiChoiceSingle::class,
-                                'difficulty_id' => $difficulties[$difficultyName]->difficulty_id,
-                                'question' => $questionData[0],
-                                'discrimination_index' => rand(-1, 1),
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ]);
-                        } else {
-                            // Multiple choice many (answer is an array)
-                            DB::table('multichoice_many')->insert([
-                                'name' => "Multiple Choice Many",
-                                'answer' => $questionData[1], // answers are already encoded
-                                'choices' => $choices,
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ]);
-                            $multichoice_many_id = DB::getPdo()->lastInsertId();
-        
-                            DB::table('questions')->insert([
-                                'course_id' => $course->course_id,
-                                'questionable_id' => $multichoice_many_id,
-                                'questionable_type' => MultiChoiceMany::class,
-                                'difficulty_id' => $difficulties[$difficultyName]->difficulty_id,
-                                'question' => $questionData[0],
-                                'discrimination_index' => rand(-1, 1),
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ]);
-                        }
-                    }
+                    // Insert question with QuestionType enum
+                    DB::table('questions')->insert([
+                        'course_id' => $course->course_id,
+                        'question_detail_id' => $question_detail_id,
+                        'difficulty_id' => $difficulty_id,
+                        'type' => QuestionType::TEST->value,  // Use enum here for question type
+                        'question' => $questionData[0],
+                        'discrimination_index' => rand(-1, 1),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
                 }
             }
-        }        
+        } 
     }
 }

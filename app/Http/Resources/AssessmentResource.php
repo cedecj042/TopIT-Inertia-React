@@ -2,12 +2,13 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Assessment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Carbon\Carbon;
 
 
-class TestResource extends JsonResource
+class AssessmentResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,7 +18,7 @@ class TestResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'test_id' => $this->test_id,
+            'assessment_id' => $this->assessment_id,
             'student_id' => $this->student_id,
             'start_time' => Carbon::parse($this->start_time)->format('g:i A'), 
             'end_time' => Carbon::parse($this->end_time)->format('g:i A'), 
@@ -25,8 +26,9 @@ class TestResource extends JsonResource
             'total_score' => $this->totalScore,
             'percentage' => $this->percentage,
             'status' => $this->status,
-            'created_at' => Carbon::parse($this->created_at)->format('F j, Y g:i A'), 
-            'updated_at' => Carbon::parse($this->updated_at)->format('F j, Y '), 
+            'created_at' => Carbon::parse($this->created_at)->format('F j, Y'), 
+            'updated_at' => Carbon::parse($this->updated_at)->format('F j, Y'), 
+            'assessment_courses'=> AssessmentCourseResource::collection($this->whenLoaded('assessment_courses')),
         ];
     }
 }

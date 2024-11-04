@@ -1,0 +1,45 @@
+.text-content{
+    text-align: justify;
+}
+.sticky-nav {
+    position: sticky;
+    top: 20px; /* Adjust to control how far from the top it should stick */
+    align-self: start;
+    max-height: calc(100vh - 20px); /* To keep it within the viewport height */
+    overflow-y: auto; /* Allows scrolling within the nav if content exceeds viewport height */
+    padding: 1rem; /* Optional padding for better spacing */
+    background-color: #fff; /* Optional: background to make it stand out */
+    border: 1px solid #ddd; /* Optional: border to distinguish it visually */
+    border-radius: 8px; /* Optional: rounded corners */
+}
+.sticky-nav ul{
+    padding-left: 1.25rem;
+}
+.sticky-nav ul li {
+    list-style-type: none;
+    /* margin: 0.2rem 0; */
+}
+.sticky-nav a {
+    text-decoration: none;
+    display: block;        /* Set maximum width to control truncation */
+    white-space: nowrap;     /* Prevents the text from wrapping onto multiple lines */
+    overflow: hidden;        /* Hides any overflow */
+    text-overflow: ellipsis; /* Shows ellipsis (...) for truncated text */
+    color: #3a3a3a;
+    padding: .5rem 0.15rem;
+    opacity: 0.5;
+}
+.sticky-nav a.active {
+    font-weight: bold;
+    color: #007bff !important;
+    opacity: 1;
+}
+.code img ,.figure img ,.table img {
+    max-width: 85%;
+    margin: auto;
+}
+
+
+.btn-hover:hover{
+    color:white !important;
+}

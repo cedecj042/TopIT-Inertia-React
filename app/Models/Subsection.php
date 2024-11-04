@@ -17,26 +17,13 @@ class Subsection extends Model
     protected $fillable = [
         'section_id',
         'title',
-        'content',
     ];
 
-    public function sections(){
+    public function section(){
         return $this->belongsTo(Section::class,'section_id','section_id');
     }
-    public function tables(){
-        return $this->morphMany(Table::class,'tableable');
-    }
-    public function codes(){
-        return $this->morphMany(Code::class,'codeable');
-    }
-    public function figures(){
-        return $this->morphMany(Figure::class,'figureable');
-    }
-    public function questions(){
-        return $this->hasMany(Question::class,'section_id');
-    }
-    public function images()
-    {
-        return $this->morphMany(Image::class, 'imageable');
+
+    public function attachments(){
+        return $this->morphMany(Attachment::class,'attachmentable');
     }
 }

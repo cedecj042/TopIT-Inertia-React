@@ -5,20 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Image extends Model
+class Attachment extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'image_id';
+    protected $primaryKey='attachment_id';
     protected $fillable = [
-        'imageable_id',
-        'imageable_type',
+        'attachmentable_id', 
+        'attachmentable_type', 
+        'type',
+        'description',
+        'order',
+        'caption',
         'file_name',
         'file_path',
     ];
-
-    public function imageable(){
+    public function attachmentable(){
         return $this->morphTo();
     }
-    
 }

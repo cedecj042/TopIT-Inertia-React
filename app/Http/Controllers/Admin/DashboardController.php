@@ -65,9 +65,9 @@ class DashboardController extends Controller
         $students = $query->paginate($perPage)->onEachSide(1);
 
 
-        $averageScores = DB::table('test_courses')
-            ->join('courses', 'test_courses.course_id', '=', 'courses.course_id')
-            ->select('courses.title as course_title', DB::raw('AVG(test_courses.theta_score) as avg_theta_score'))
+        $averageScores = DB::table('assessment_courses')
+            ->join('courses', 'assessment_courses.course_id', '=', 'courses.course_id')
+            ->select('courses.title as course_title', DB::raw('AVG(assessment_courses.theta_score) as avg_theta_score'))
             ->groupBy('courses.title')
             ->get();
 
@@ -122,11 +122,11 @@ class DashboardController extends Controller
     public function showStudentDetails($studentId)
     {
         $student = Student::find($studentId);
-        $averageThetaScore = DB::table('test_courses')
-            ->select('courses.title as course_title', DB::raw('AVG(test_courses.theta_score) as avg_theta_score'))
-            ->join('tests', 'test_courses.test_id', '=', 'tests.test_id')
-            ->join('students', 'tests.student_id', '=', 'students.student_id')
-            ->join('courses', 'test_courses.course_id', '=', 'courses.course_id')
+        $averageThetaScore = DB::table('assessment_courses')
+            ->select('courses.title as course_title', DB::raw('AVG(assessment_courses.theta_score) as avg_theta_score'))
+            ->join('assessments', 'assessment_courses.assessment_id', '=', 'assessments.assessment_id')
+            ->join('students', 'assessments.student_id', '=', 'students.student_id')
+            ->join('courses', 'assessment_courses.course_id', '=', 'courses.course_id')
             ->where('students.student_id', $studentId)
             ->groupBy('courses.title')
             ->get();

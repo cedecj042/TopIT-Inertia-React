@@ -31,7 +31,7 @@ class CourseController extends Controller
 
         $courses = $query->paginate($perPage)->onEachSide(1);
         //
-        return Inertia::render('Admin/Course',[
+        return Inertia::render('Admin/Courses/Course',[
             'title' => 'Admin Course',
             'auth'=> Auth::user(),
             'courses'=>CourseResource::collection($courses),
@@ -68,7 +68,7 @@ class CourseController extends Controller
         $course = Course::findOrFail($course_id);
         $pdfs = $course->pdfs()->paginate(5)->onEachSide(1);
         
-        return Inertia::render('Admin/CourseDetail',[
+        return Inertia::render('Admin/Courses/CourseDetail',[
             'title' => 'Admin Course',
             'auth'=> Auth::user(),
             'course'=> new CourseResource($course),
