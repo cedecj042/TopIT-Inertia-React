@@ -68,16 +68,17 @@ class StudentController extends Controller
                 Auth::login($user);
             });
 
-            return redirect()->route('welcomepage');
+            return Inertia::location(route('welcome'));
 
-            // return redirect()->route('login')->with(key: 'success', 'Registration successful. Please log in.');
         } catch (ValidationException $e) {
             Log::error('Validation failed: ' . $e->getMessage());
-            return response()->json(['errors' => $e->errors()], 422);
-        } catch (\Exception $e) {
-            Log::error('Registration error: ' . $e->getMessage());
-            return response()->json(['error' => 'An error occurred during registration.'], 500);
+            return redirect()->back()->withErrors($e->errors())->withInput();
         }
+         catch (\Exception $e) {
+            Log::error('Registration error: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'An error occurred during registration.'])->withInput();
+        }
+        
     }
 
 

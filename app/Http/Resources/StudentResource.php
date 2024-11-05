@@ -18,6 +18,8 @@ class StudentResource extends JsonResource
         return array_filter([
             'student_id' => $this->student_id,
             'name' => $this->name,
+            'firstname' => $this->firstname,
+            'lastname' => $this->lastname,
             'profile_image' => $this->profile_image,
             'birthdate' => $this->birthdate ? (new Carbon($this->birthdate))->format('Y-m-d') : null,
             'gender' => $this->gender,
