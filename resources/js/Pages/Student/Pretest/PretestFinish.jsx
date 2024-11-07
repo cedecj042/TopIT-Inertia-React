@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import MainLayout from '@/Layouts/MainLayout';
-import "../../../css/student/welcome.css"; // Import the CSS for background and styles
-import "../../../css/students.css"; // Import additional styles if needed
+import "../../../../css/student/students.css";
+import "../../../../css/student/welcome.css";
 
 const PretestFinish = ({ score, totalQuestions, pretestId }) => {
     return (

@@ -53,7 +53,7 @@ return new class extends Migration
             $table->foreignID('course_id')->references('course_id')->on('courses')->cascadeOnDelete();
             $table->foreignID(column: 'question_detail_id')->references('question_detail_id')->on('question_details')->cascadeOnDelete();
             $table->foreignID(column: 'difficulty_id')->references('difficulty_id')->on('difficulty')->cascadeOnDelete();
-            $table->enum('type',['Pretest','Test']);
+            $table->enum('question_type',['Pretest','Test']);
             $table->string('question');
             $table->float('discrimination_index');
             $table->timestamps();
