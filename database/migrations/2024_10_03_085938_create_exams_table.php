@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignID('student_id')->references('student_id')->on('students')->cascadeOnDelete();
             $table->enum('type',['Pretest','Test']);
             $table->time('start_time');
-            $table->time('end_time');
+            $table->time('end_time')->nullable();
             $table->integer('total_items');
             $table->integer('total_score');
             $table->float('percentage');

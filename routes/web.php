@@ -42,18 +42,20 @@ Route::middleware('auth')->group(function () {
 Route::post('/admin/store-processed-pdf', [ProcessedPdfController::class, 'store'])->name('store-pdf');
 
 Route::middleware(['auth', 'student'])->group(function () {
-    Route::redirect('', '/dashboard');
     Route::redirect('/', '/dashboard');
     Route::get('/welcome', [PretestController::class, 'welcome'])->name('welcome');
+    
     Route::prefix('pretest')->name('pretest.')->group(function () {
         Route::get('/start', [PretestController::class, 'startPretest'])->name('start');
-        Route::get('/questions/{courseIndex?}', [PretestController::class, 'showQuestions'])->name('questions');
+        Route::get('/questions/{courseIndex}', [PretestController::class, 'showQuestions'])->name('questions');
 
         Route::post('/submit', [PretestController::class, 'submitAnswers'])->name('submit');
         Route::get('/finish/{pretestId}', [PretestController::class, 'showFinishAttempt'])->name('finish');
         Route::get('/review/{pretestId}', [PretestController::class, 'reviewPretest'])->name('review');
     });
 
+    Route::redirect('', '/dashboard');
+    Route::redirect('/', '/dashboard');
     Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [StudentProfileController::class, 'index'])->name('profile');
 

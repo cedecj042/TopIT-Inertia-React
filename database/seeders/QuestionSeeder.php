@@ -95,7 +95,7 @@ class QuestionSeeder extends Seeder
                         'course_id' => $course->course_id,
                         'question_detail_id' => $question_detail_id,
                         'difficulty_id' => $difficulty_id,
-                        'type' => QuestionType::TEST->value,  // Use enum here for question type
+                        'question_type' => QuestionType::TEST->value,  // Use enum here for question type
                         'question' => $questionData[0],
                         'discrimination_index' => rand(-1, 1),
                         'created_at' => now(),
