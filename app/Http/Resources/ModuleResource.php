@@ -21,7 +21,7 @@ class ModuleResource extends JsonResource
             'created_at' => (new Carbon($this->created_at))->format('F d, Y'),
             'course' => new CourseResource($this->whenLoaded('course')),
             'lessons' => LessonResource::collection($this->whenLoaded('lessons')),
-            'attachments' => AttachmentResource::collection($this->whenLoaded('attachments'))
+            'contents' => ContentResource::collection($this->whenLoaded('contents'))
         ];
     }
 }

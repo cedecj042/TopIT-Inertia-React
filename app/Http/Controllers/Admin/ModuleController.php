@@ -5,8 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\AttachmentType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ModuleResource;
-use App\Models\Course;
+use App\Models\Content;
 use App\Models\Module;
+use App\Models\Lesson;
+use App\Models\Section;
+use App\Models\Subsection;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,9 +19,18 @@ use Inertia\Inertia;
 
 class ModuleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected function resolveModelClass($type)
+    {
+        $mapping = [
+            'Module' => \App\Models\Module::class,
+            'Lesson' => \App\Models\Lesson::class,
+            'Section' => \App\Models\Section::class,
+            'Subsection' => \App\Models\Subsection::class,
+        ];
+
+        return $mapping[$type] ?? null;
+    }
+
     public function index()
     {
         $query = Module::with(['course:course_id,title']);
@@ -54,22 +67,6 @@ class ModuleController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         // Define a closure to apply ordering by 'order' column
@@ -80,34 +77,33 @@ class ModuleController extends Controller
         // Eager load relationships with ordered attachments
         $module = Module::with([
             'course:course_id,title', // Load only necessary columns from course
-            'attachments' => $orderAttachments,
-            'lessons.attachments' => $orderAttachments,
-            'lessons.sections.attachments' => $orderAttachments,
-            'lessons.sections.subsections.attachments' => $orderAttachments,
+            'contents' => $orderAttachments,
+            'lessons.contents' => $orderAttachments,
+            'lessons.sections.contents' => $orderAttachments,
+            'lessons.sections.subsections.contents' => $orderAttachments,
         ])->findOrFail($id);
 
         // Return the Inertia render with the module details
         return Inertia::render('Admin/Modules/ModuleDetail', [
             'title' => 'Admin Module',
             'auth' => Auth::user(),
-            'module' => new ModuleResource($module), // Use ModuleResource for formatting
+            'module' => new ModuleResource($module)
         ]);
     }
 
-
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
-        // Eager load all attachments at each level without filtering by type
+        // Define a closure to apply ordering by 'order' column
+        $orderAttachments = function ($query) {
+            $query->orderBy('order');
+        };
+        // Eager load all contents at each level without filtering by type
         $module = Module::with([
             'course:course_id,title', // Load only necessary columns from course
-            'attachments',
-            'lessons.attachments',
-            'lessons.sections.attachments',
-            'lessons.sections.subsections.attachments',
+            'contents' => $orderAttachments,
+            'lessons.contents' => $orderAttachments,
+            'lessons.sections.contents' => $orderAttachments,
+            'lessons.sections.subsections.contents' => $orderAttachments,
         ])->findOrFail($id);
 
         // Return the Inertia render with the module details
@@ -121,13 +117,84 @@ class ModuleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+
+    public function update(Request $request, $contentableId)
     {
-        //
+        // Validate the request data, making 'contents' optional
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'contents' => 'nullable|array', // 'nullable' allows 'contents' to be empty
+            'contents.*.content_id' => 'required_with:contents|exists:contents,content_id', // only required if 'contents' is provided
+            'contents.*.order' => 'required_with:contents|integer', // only required if 'contents' is provided
+            'contentable_type' => 'required|string|in:Module,Lesson,Section,Subsection',
+        ]);
+
+        // Log the validated data to inspect what's being received
+        Log::info('Validated Data:', $validatedData);
+
+        // Use resolveModelClass to get the model class
+        $contentableClass = $this->resolveModelClass($validatedData['contentable_type']);
+
+        if (!$contentableClass) {
+            Log::error('Invalid contentable_type');
+            throw new Exception('Invalid contentable_type');
+        }
+
+        // Find the contentable model by ID
+        $contentable = $contentableClass::findOrFail($contentableId);
+
+        // Update the title
+        $contentable->title = $validatedData['title'];
+        $contentable->save();
+
+        // Log the title update
+        Log::info('Updated title:', ['title' => $validatedData['title']]);
+
+        // Update the order of contents only if contents are provided
+        if (!empty($validatedData['contents'])) {
+            foreach ($validatedData['contents'] as $contentData) {
+                Content::where('content_id', $contentData['content_id'])
+                    ->update(['order' => $contentData['order']]);
+                // Log each content update
+                Log::info('Updated content order:', $contentData);
+            }
+        } else {
+            Log::info('No contents to update.');
+        }
+
+        return redirect()->back()->with('success', 'Updated Successfully');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function delete(string $id) {}
+    public function deleteModule(int $id) {
+
+        $content = Module::findOrFail($id);
+        $content->delete();
+        
+        return redirect()->back()->with('success', 'Deleted Successfully');
+
+    }
+    public function deleteLesson(int $id) {
+
+        $content = Lesson::findOrFail($id);
+        $content->delete();
+        
+        return redirect()->back()->with('success', 'Deleted Successfully');
+
+    }
+    public function deleteSection(int $id) {
+
+        $content = Section::findOrFail($id);
+        $content->delete();
+        
+        return redirect()->back()->with('success', 'Deleted Successfully');
+
+    }
+    public function deleteSubsection(int $id) {
+
+        $content = Subsection::findOrFail($id);
+        $content->delete();
+        
+        return redirect()->back()->with('success', 'Deleted Successfully');
+
+    }
 }

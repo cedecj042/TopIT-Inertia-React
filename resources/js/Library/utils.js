@@ -46,9 +46,8 @@ export const dissectContent = (jsonString) => {
     }
 };
 export const extractList = (text) => {
-    // Use regular expressions to match numbers (1., 2., 3.) or alphabetized list (a., b., c.)
-    const regex = /\d+\.?\s+/;
-
+    // Adjust regex to match numbers with optional period and optional whitespace
+    const regex = /\d+\.\s*|[a-z]\.\s*/i;
 
     if (regex.test(text)) {
         const objectivesArray = text.split(regex).map(item => item.trim());
@@ -56,6 +55,7 @@ export const extractList = (text) => {
     }
     return null;
 };
+
 
 export const replaceSemicolonsWithCommas = (text) => {
     // Use the replace() function with a global regex to replace all semicolons with commas

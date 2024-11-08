@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-export default function Attachment({ id, attachment, openModal,openDeleteConfirmation }) {
+export default function Content({ id, content, openModal,openDeleteConfirmation }) {
     const { attributes, listeners, setNodeRef, transform, transition } =
         useSortable({ id });
 
@@ -36,11 +36,11 @@ export default function Attachment({ id, attachment, openModal,openDeleteConfirm
                 </span>
                 <div className="d-flex flex-column w-100">
                     <div className="d-inline-flex justify-content-between">
-                        <h5 className="card-title m-0 fw-semibold">{attachment.type}</h5>
+                        <label className="card-title m-0 fw-semibold">{content.type}</label>
                         <div className="form-group d-flex flex-row gap-2">
                         <button
                             className="btn btn-outline-light badge text-dark"
-                            onPointerDown={() => openModal(attachment)}
+                            onPointerDown={() => openModal(content)}
                         >
                             Edit
                         </button>
@@ -61,7 +61,7 @@ export default function Attachment({ id, attachment, openModal,openDeleteConfirm
                             whiteSpace: "wrap", // Prevent text from wrapping to the next line
                         }}
                     >
-                        {attachment.description}
+                        {content.description}
                     </p>
                 </div>
             </div>

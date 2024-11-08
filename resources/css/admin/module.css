@@ -39,7 +39,24 @@
     margin: auto;
 }
 
-
+.content-nav a.active{
+    color:#007bff !important;
+    font-weight: 600;
+}
+.content-nav .nav-link{
+    color: #414141 !important;
+}
+.content-nav a:hover{
+    color:#007bff !important;
+    background-color: #cee1f7 !important;
+}
+.content-nav{
+    border-radius: 20px;
+}
 .btn-hover:hover{
     color:white !important;
+}
+.content-list-wrapper{
+    max-height: 60vh;
+    padding:10px;
 }

@@ -26,8 +26,10 @@ class Section extends Model
     public function subsections(){
         return $this->hasMany(Subsection::class,'section_id');
     }
-    public function attachments(){
-        return $this->morphMany(Attachment::class,'attachmentable');
+    public function contents()
+    {
+        return $this->morphMany(Content::class, 'contentable');
     }
+    
     
 }

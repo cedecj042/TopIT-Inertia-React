@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
-class AttachmentRequest extends FormRequest
+class ContentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,8 +27,8 @@ class AttachmentRequest extends FormRequest
     {
         return [
         'type' => 'required|string',
-        'attachmentable_id' => 'required|integer',
-        'attachmentable_type' => 'required|string|in:Module,Lesson,Section,Subsection', // Ensure it's one of the allowed types
+        'contentable_id' => 'required|integer',
+        'contentable_type' => 'required|string|in:Module,Lesson,Section,Subsection', // Ensure it's one of the allowed types
         'description' => 'nullable|string',
         'caption' => 'nullable|string|max:255',
         'order' => 'nullable|integer',

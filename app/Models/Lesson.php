@@ -24,7 +24,9 @@ class Lesson extends Model
     public function sections(){
         return $this->hasMany(Section::class,'lesson_id');
     }
-    public function attachments(){
-        return $this->morphMany(Attachment::class,'attachmentable');
+    public function contents()
+    {
+        return $this->morphMany(Content::class, 'contentable');
     }
+    
 }

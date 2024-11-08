@@ -15,7 +15,7 @@ export default function SubsectionContent({ subsections }) {
                         </div>
 
                         {/* Render merged and sorted content */}
-                        {subsection.attachments.map((item, idx) => (
+                        {subsection.contents.map((item, idx) => (
                             <ContentItem key={idx} item={item} />
                         ))}
                     </div>

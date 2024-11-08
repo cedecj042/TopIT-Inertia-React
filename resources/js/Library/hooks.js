@@ -105,11 +105,14 @@ export const useOtherState = (dispatch) => {
     };
 };
 
+
+
+
 export const useRequest = () => {
     const [isProcessing, setIsProcessing] = useState(false);
 
-     // Predefined default callbacks
-     const defaultCallbacks = {
+    // Default callbacks
+    const defaultCallbacks = {
         onSuccess: () => {
             toast.success("Request successful", { duration: 3000 });
         },
@@ -121,21 +124,51 @@ export const useRequest = () => {
         },
     };
 
+    // Default Inertia options
+    const defaultOptions = {
+        preserveScroll: false,
+        preserveState: false,
+        replace: false,
+    };
+
     // POST request handler
-    const postRequest = async (routeName, data, customCallbacks = {}) => {
+    const postRequest = async (routeName, data, customCallbacks = {}, options = {}) => {
         setIsProcessing(true);
+        const requestOptions = { ...defaultOptions, ...options }; // Merge default options with custom options
+
         try {
             await router.post(route(routeName), data, {
+                ...requestOptions, // Spread merged options here
                 onSuccess: (page) => {
-                    // Merge default onSuccess with custom onSuccess (if provided)
                     (customCallbacks.onSuccess || defaultCallbacks.onSuccess)(page);
                 },
                 onError: (page) => {
-                    // Merge default onError with custom onError (if provided)
                     (customCallbacks.onError || defaultCallbacks.onError)(page);
                 },
                 onFinish: () => {
-                    // Merge default onFinish with custom onFinish (if provided)
+                    (customCallbacks.onFinish || defaultCallbacks.onFinish)();
+                },
+            });
+        } catch (error) {
+            defaultCallbacks.onError(error); // Handle unexpected errors
+            setIsProcessing(false);
+        }
+    };
+    // PUT request handler
+    const putRequest = async (routeName, id, data, customCallbacks = {}, options = {}) => {
+        setIsProcessing(true);
+        const requestOptions = { ...defaultOptions, ...options }; // Merge default options with custom options
+
+        try {
+            await router.put(route(routeName, { id }), data, { // Pass the id as a route parameter
+                ...requestOptions, // Spread merged options here
+                onSuccess: (page) => {
+                    (customCallbacks.onSuccess || defaultCallbacks.onSuccess)(page);
+                },
+                onError: (page) => {
+                    (customCallbacks.onError || defaultCallbacks.onError)(page);
+                },
+                onFinish: () => {
                     (customCallbacks.onFinish || defaultCallbacks.onFinish)();
                 },
             });
@@ -145,34 +178,16 @@ export const useRequest = () => {
         }
     };
 
+
     // GET request handler
-    const getRequest = async (routeName, params = null, customCallbacks = {}) => {
+    const getRequest = async (routeName, params = null, customCallbacks = {}, options = {}) => {
         setIsProcessing(true);
+        const requestOptions = { ...defaultOptions, ...options }; // Merge default options with custom options
+        const url = params ? route(routeName, { id: params }) : route(routeName);
+
         try {
-            // Use params only if they are not null or undefined
-            const url = params ? route(routeName, {id:params}) : route(routeName);
-    
             await router.get(url, {
-                onSuccess: (page) => {
-                    (customCallbacks.onSuccess || defaultCallbacks.onSuccess)(page);
-                },
-                onError: (page) => {
-                    (customCallbacks.onError || defaultCallbacks.onError)(page);
-                },
-                onFinish: () => {
-                    (customCallbacks.onFinish || defaultCallbacks.onFinish)();
-                },
-            });
-        } catch (error) {
-            defaultCallbacks.onError(error);
-            setIsProcessing(false);
-        }
-    };
-    // DELETE request handler
-    const deleteRequest = async (routeName, data, customCallbacks = {}) => {
-        setIsProcessing(true);
-        try {
-            await router.delete(route(routeName,data) , {
+                ...requestOptions, // Spread merged options here
                 onSuccess: (page) => {
                     (customCallbacks.onSuccess || defaultCallbacks.onSuccess)(page);
                 },
@@ -189,5 +204,29 @@ export const useRequest = () => {
         }
     };
 
-    return { isProcessing, postRequest, getRequest, deleteRequest };
+    // DELETE request handler
+    const deleteRequest = async (routeName, params, customCallbacks = {}, options = {}) => {
+        setIsProcessing(true);
+        const requestOptions = { ...defaultOptions, ...options }; // Merge default options with custom options
+
+        try {
+            await router.delete(route(routeName, params), {
+                ...requestOptions, // Spread merged options here
+                onSuccess: (page) => {
+                    (customCallbacks.onSuccess || defaultCallbacks.onSuccess)(page);
+                },
+                onError: (page) => {
+                    (customCallbacks.onError || defaultCallbacks.onError)(page);
+                },
+                onFinish: () => {
+                    (customCallbacks.onFinish || defaultCallbacks.onFinish)();
+                },
+            });
+        } catch (error) {
+            defaultCallbacks.onError(error);
+            setIsProcessing(false);
+        }
+    };
+
+    return { isProcessing, postRequest,putRequest, getRequest, deleteRequest };
 };

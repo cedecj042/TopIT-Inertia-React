@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Attachment extends Model
+class Content extends Model
 {
     use HasFactory;
 
-    protected $primaryKey='attachment_id';
+    protected $primaryKey='content_id';
     protected $fillable = [
-        'attachmentable_id', 
-        'attachmentable_type', 
+        'contentable_id', 
+        'contentable_type', 
         'type',
         'description',
         'order',
@@ -20,7 +21,8 @@ class Attachment extends Model
         'file_name',
         'file_path',
     ];
-    public function attachmentable(){
+
+    public function contentable(){
         return $this->morphTo();
     }
 }

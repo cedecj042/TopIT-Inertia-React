@@ -2,10 +2,10 @@
 
 namespace App\Jobs;
 
-use App\Enums\AttachmentType;
+use App\Enums\ContentType;
 use App\Enums\PdfStatus;
 use App\Events\UploadEvent;
-use App\Models\Attachment;
+use App\Models\Content;
 use App\Models\Lesson;
 use App\Models\Module;
 use App\Models\Pdf;
@@ -167,14 +167,14 @@ class ProcessContentJob implements ShouldQueue
 
     private function processContent($contentItem, $parent)
     {
-        // Prepare attachment data
-        $attachmentData = [
+        // Prepare content data
+        $contentData = [
             'type' => match ($contentItem['type']) {
-                'Figures' => AttachmentType::FIGURE->value,
-                'Tables' => AttachmentType::TABLE->value,
-                'Code' => AttachmentType::CODE->value,
-                'Text' => AttachmentType::TEXT->value,
-                'Header' => AttachmentType::HEADER->value,
+                'Figures' => ContentType::FIGURE->value,
+                'Tables' => ContentType::TABLE->value,
+                'Code' => ContentType::CODE->value,
+                'Text' => ContentType::TEXT->value,
+                'Header' => ContentType::HEADER->value,
                 default => throw new InvalidArgumentException("Invalid content type"),
             },
             'text' => $contentItem['text'] ?? null,
@@ -183,40 +183,38 @@ class ProcessContentJob implements ShouldQueue
             'order' => isset($contentItem['order']) ? (int) $contentItem['order'] : null,
         ];
 
-        Log::info('Processing content item', ['contentData' => $attachmentData['caption']]);
+        Log::info('Processing content item', ['contentData' => $contentData['caption']]);
 
-        // Process attachment
-        $this->processAttachment($attachmentData, $parent);
+        // Process content
+        $this->createContent($contentData, $parent);
     }
 
-    private function processAttachment($data, $parent)
+    private function createContent($data, $parent)
     {
-        // Prepare attachment data with manual setting of attachmentable_id and attachmentable_type
-        $attachmentData = [
+        // Prepare content data without manually setting contentable_id and contentable_type
+        $contentData = [
             'type' => $data['type'],
             'description' => $data['text'] ?? '',
             'caption' => $data['caption'],
             'order' => $data['order'],
             'file_name' => '',  // Will be updated if image is saved
             'file_path' => '',  // Will be updated if image is saved
-            'attachmentable_id' => $parent->id,
-            'attachmentable_type' => class_basename($parent), // Use only the class name without namespace
         ];
 
-        // Create attachment manually without relying on polymorphic relationship
-        $attachment = Attachment::create($attachmentData);
+        // Use polymorphic relationship to create content
+        $content = $parent->contents()->create($contentData);
 
         // Store image if available
         if (isset($data['image_base64'])) {
-            $imageName = $this->storeBase64Image($data['image_base64'], $data['type'], $attachment);
-            ProcessImageJob::dispatch($imageName, strtolower($data['type']), $attachment);
+            $imageName = $this->storeBase64Image($data['image_base64'], $data['type'], $content);
+            ProcessImageJob::dispatch($imageName, strtolower($data['type']), $content);
         }
 
-        return $attachment;
+        return $content;
     }
 
 
-    private function storeBase64Image($base64Image, $type, $attachment)
+    private function storeBase64Image($base64Image, $type, $content)
     {
         $image = base64_decode($base64Image);
         $imageName = uniqid() . '.png';
@@ -228,8 +226,8 @@ class ProcessContentJob implements ShouldQueue
 
         $imagePath = Storage::disk($folder)->url($imageName);
 
-        // Update attachment with file name and path
-        $attachment->update([
+        // Update content with file name and path
+        $content->update([
             'file_name' => $imageName,
             'file_path' => $imagePath,
         ]);

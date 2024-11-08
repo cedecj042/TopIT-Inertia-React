@@ -33,10 +33,10 @@ export const COURSE_FILTER_COMPONENT = ["courses","courses.meta","queryParams"]
 export const MODULE_FILTER_COMPONENT = ["modules","modules.meta","filters","queryParams"]
 
 
-export const AttachmentTypes = {
-    TABLE: "Table",
+export const ContentTypes = {
+    TABLE: "Tables",
     CODE: "Code",
-    FIGURE: "Figure",
+    FIGURE: "Figures",
     TEXT: "Text",
     HEADER: "Header",
 };

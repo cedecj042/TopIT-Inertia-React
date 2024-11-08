@@ -12,7 +12,7 @@ export default function SectionContent({ sections }) {
                             <h5 className="section-title fw-semibold">{section.title}</h5>
 
                             {/* Render merged and sorted content */}
-                            {section.attachments.map((item, idx) => {
+                            {section.contents.map((item, idx) => {
                                 // console.log(item);
                                 return <ContentItem key={idx} item={item} />;
                             })}

@@ -38,10 +38,10 @@ return new class extends Migration
     //     $table->timestamps();
     // });
 
-    Schema::create('attachments', function (Blueprint $table) {
-        $table->id('attachment_id');
-        $table->unsignedBigInteger('attachmentable_id')->nullable();
-        $table->string('attachmentable_type')->nullable();
+    Schema::create('contents', function (Blueprint $table) {
+        $table->id('content_id');
+        $table->unsignedBigInteger('contentable_id')->nullable();
+        $table->string('contentable_type')->nullable();
         $table->enum('type',['Code','Figures','Tables','Text','Header']);
         $table->longText('description')->nullable();
         $table->string('caption')->nullable();

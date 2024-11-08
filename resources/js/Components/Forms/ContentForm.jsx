@@ -1,204 +1,128 @@
-import { AttachmentTypes } from "@/Library/constants";
-import { useRequest } from "@/Library/hooks";
-import { closestCorners, DndContext } from "@dnd-kit/core";
-import { useState } from "react";
-import AttachmentList from "../Content/AttachmentList";
-import Modal from "../Modal";
-import AttachmentForm from "./AttachmentForm";
-import { arrayMove } from "@dnd-kit/sortable";
-import { toast } from "sonner";
+import { useForm, Controller } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { ContentTypes } from "@/Library/constants";
 
+export default function ContentForm({ contentData, onClose, handleFormSubmit, isProcessing }) {
+    const { register, handleSubmit, setValue, control, watch } = useForm({
+        defaultValues: contentData,
+    });
 
-export default function ContentForm({ content, attachmentableId, attachmentableType }) {
-    const { isProcessing, postRequest, deleteRequest } = useRequest();
-    const [title, setTitle] = useState(content.title);
-    const [attachments, setAttachments] = useState(
-        content.attachments.map((attachment, index) => ({
-            ...attachment,
-            order: index + 1, // initialize order based on current position
-        }))
-    );
-    const [selectedAttachment, setSelectedAttachment] = useState(null);
-    const [showModal, setShowModal] = useState(false);
-    const [deleteConfirmation, setDeleteConfirmation] = useState({ show: false, attachmentId: null });
+    const [previewFile, setPreviewFile] = useState(contentData.file_path || ""); // State for preview
+    const type = watch("type"); // Watch the type field to conditionally display fields
 
-    const openModal = (attachment = null) => {
-        setSelectedAttachment(attachment);
-        setShowModal(true);
-    };
-    const closeModal = () => {
-        setSelectedAttachment(null);
-        setShowModal(false);
-    };
-
-    const openDeleteConfirmation = (attachmentId) => {
-        setDeleteConfirmation({ show: true, attachmentId });
-    };
-
-    const closeDeleteConfirmation = () => {
-        setDeleteConfirmation({ show: false, attachmentId: null });
-    };
-
-    const handleDragEnd = (event) => {
-        const { active, over } = event;
-        if (active && over && active.id !== over.id) {
-            const oldIndex = attachments.findIndex(
-                (attachment) => attachment.attachment_id === active.id
-            );
-            const newIndex = attachments.findIndex(
-                (attachment) => attachment.attachment_id === over.id
-            );
-            const reorderedAttachments = arrayMove(
-                attachments,
-                oldIndex,
-                newIndex
-            ).map((attachment, index) => ({
-                ...attachment,
-                order: index + 1, // update order based on new index
-            }));
-           setAttachments(reorderedAttachments);
+    useEffect(() => {
+        if (contentData) {
+            Object.keys(contentData).forEach((key) => {
+                setValue(key, contentData[key]);
+            });
         }
-    };
-    const editAttachment = async (data) => {
-        const attachmentData = {
-            ...data,
-            attachmentable_id: attachmentableId,
-            attachmentable_type: attachmentableType,
-        };
+    }, [contentData, setValue]);
 
-        postRequest("admin.attachment.update", attachmentData, {
-            onSuccess: () => {
-                toast.success("Updated the attachment.", { duration: 3000 });
-            },
-            onError: () => {
-                toast.error("Failed to update the attachment.", { duration: 3000 });
-            },
-        });
-        closeModal();
-    };
+    useEffect(() => {
+        if (type === ContentTypes.TEXT || type === ContentTypes.HEADER) {
+            setValue("file_name", "");
+            setValue("file_path", "");
+            setValue("caption", "");
+            setPreviewFile(""); // Clear preview if type changes to text or header
+        }
+    }, [type, setValue]);
 
-    const addAttachment = async (data) => {
-        const attachmentData = {
-            ...data,
-            attachmentable_id: attachmentableId,
-            attachmentable_type: attachmentableType,
-        };
-        postRequest("admin.attachment.create", attachmentData, {
-            onSuccess: (id) => {
-                console.log(id)
-                toast.success("Attachment added successfully.");
-                closeModal();
-            },
-            onError: () => {
-                toast.error("Failed to add new attachment.");
-            },
-        });
-    };
-    
-    
-    
-    const deleteAttachment = async (attachmentId) => {
-        deleteRequest("admin.attachment.delete", attachmentId, {
-            preserveScroll: true,
-            preserveState: true,
-            replace: true,
-            onSuccess: () => {
-                toast.success("Attachment deleted successfully.");
-                setAttachments((prevAttachments) =>
-                    prevAttachments.filter((attachment) => attachment.attachment_id !== attachmentId)
-                );
-                closeDeleteConfirmation();
-            },
-            onError: () => {
-                toast.error("Failed to delete the attachment.");
-            },
-        });
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setPreviewFile(URL.createObjectURL(file)); // Set the preview to the new file
+        }
     };
 
     return (
-        <>
-            <form>
-                <div className="mb-3">
-                    <label htmlFor="moduleTitle" className="form-label">
-                        {attachmentableType} Title
-                    </label>
-                    <input
-                        type="text"
-                        id="moduleTitle"
-                        className="form-control"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                    />
-                </div>
-
-                <div className="d-inline-flex justify-content-between w-100">
-                    <div>
-                        <h5 className="m-0 fw-semibold">Attachments</h5>
-                        <label htmlFor="fw-light">Drag the attachment to sort them</label>
+        <form onSubmit={handleSubmit(handleFormSubmit)}>
+            {/* Conditionally render fields for file-based attachments */}
+            {(type === ContentTypes.FIGURE || type === ContentTypes.CODE || type === ContentTypes.TABLE) && (
+                <>
+                    <div className="mb-3">
+                        <label htmlFor="caption" className="form-label text-dark">Caption</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="caption"
+                            {...register("caption")}
+                        />
                     </div>
-                    <button type="button" onClick={() => openModal()} className="btn btn-outline-secondary">
-                        Add Attachment
-                    </button>
-                </div>
-                <DndContext
-                    collisionDetection={closestCorners}
-                    onDragEnd={handleDragEnd}
-                >
-                    <AttachmentList
-                        attachments={attachments}
-                        openModal={openModal} // Pass click handler
-                        openDeleteConfirmation={openDeleteConfirmation} // Pass delete confirmation handler
-                    />
-                </DndContext>
 
-                <button type="submit" className="btn btn-primary">
-                    Save {attachmentableType}
+                    {/* Display preview of existing file or newly selected file */}
+                {previewFile && (
+                    <div className="mb-2">
+                        <label className="form-label text-dark">Current File:</label>
+                        <div className="d-flex align-items-center">
+                            {/* Show thumbnail if the file is an image */}
+                            {contentData.file_path && /\.(jpg|jpeg|png|gif)$/i.test(contentData.file_path) ? (
+                                <img
+                                    src={previewFile}
+                                    alt="preview"
+                                    className="img-thumbnail me-2"
+                                    style={{ width: "80px", height: "80px", objectFit: "cover" }}
+                                />
+                            ) : (
+                                <small className="text-muted">{contentData.file_name || "Uploaded file"}</small>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+
+                    <div className="mb-3">
+                        <label htmlFor="file_path" className="form-label text-dark">Upload New File</label>
+                        <Controller
+                            name="file_path"
+                            control={control}
+                            render={({ field }) => (
+                                <input
+                                    type="file"
+                                    accept="image/*,.pdf,.doc,.docx" // Customize as needed
+                                    className="form-control"
+                                    id="file_path"
+                                    onChange={(e) => {
+                                        field.onChange(e.target.files[0]);
+                                        handleFileChange(e);
+                                    }}
+                                />
+                            )}
+                        />
+                    </div>
+                </>
+            )}
+
+            <div className="row g-3 mb-3">
+                <div className="col">
+                    <label htmlFor="type" className="form-label text-dark">Type</label>
+                    <select className="form-select" id="type" {...register("type")}>
+                        {Object.entries(ContentTypes).map(([key, value]) => (
+                            <option key={key} value={value}>
+                                {key.charAt(0).toUpperCase() + key.slice(1).toLowerCase()}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
+            <div className="mb-3">
+                <label htmlFor="description" className="form-label text-dark">Description</label>
+                <textarea
+                    className="form-control"
+                    id="description"
+                    rows={type === ContentTypes.HEADER ? 1 : 5}
+                    {...register("description")}
+                ></textarea>
+            </div>
+
+            <div className="d-flex gap-2 justify-content-end mb-3">
+                <button type="button" className="btn btn-secondary" onClick={onClose}>
+                    Close
                 </button>
-            </form>
-
-            {/* Add/Edit Modal */}
-            <Modal
-                show={showModal}
-                modalTitle={selectedAttachment ? "Edit Attachment" : "Add Attachment"}
-                onClose={closeModal}
-                modalSize={"modal-lg"}
-            >
-                <AttachmentForm
-                    attachmentData={
-                        selectedAttachment || {
-                            caption: "",
-                            description: "",
-                            file_name: "",
-                            file_path: "",
-                            order: attachments.length + 1, 
-                            type: AttachmentTypes.TEXT,
-                        }
-                    }
-                    onClose={closeModal}
-                    handleFormSubmit={selectedAttachment ? editAttachment : addAttachment}
-                />
-            </Modal>
-
-            {/* Delete Confirmation Modal */}
-            <Modal
-                show={deleteConfirmation.show}
-                modalTitle="Confirm Delete"
-                onClose={closeDeleteConfirmation}
-                modalSize={"modal-sm"}
-            >
-                <div className="p-3">
-                    <p>Are you sure you want to delete this attachment?</p>
-                    <div className="d-flex justify-content-end gap-2">
-                        <button className="btn btn-secondary" onClick={closeDeleteConfirmation}>
-                            Cancel
-                        </button>
-                        <button className="btn btn-danger" onClick={() => deleteAttachment(deleteConfirmation.attachmentId)}>
-                            Delete
-                        </button>
-                    </div>
-                </div>
-            </Modal>
-
-        </>
+                <button type="submit" className="btn btn-primary" disabled={isProcessing}>
+                    Save
+                </button>
+            </div>
+        </form>
     );
 }

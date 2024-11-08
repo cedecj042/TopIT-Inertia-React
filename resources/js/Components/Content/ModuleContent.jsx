@@ -8,7 +8,7 @@ export default function ModuleContent({ data }) {
     let currentHeader = null;
     let headerCounter = 1; // To create unique headers when needed
 
-    data.attachments.forEach((item) => {
+    data.contents.forEach((item) => {
         if (item.type === "Header") {
             // When a header is found, store it temporarily
             currentHeader = { header: item.description, text: null };
@@ -37,10 +37,8 @@ export default function ModuleContent({ data }) {
             // Reset current header after pairing
             currentHeader = null;
         }
-        console.log(item)
     });
 
-    console.log(groupedContent)
 
     return (
         <>

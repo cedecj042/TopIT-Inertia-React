@@ -23,7 +23,9 @@ class Subsection extends Model
         return $this->belongsTo(Section::class,'section_id','section_id');
     }
 
-    public function attachments(){
-        return $this->morphMany(Attachment::class,'attachmentable');
+    public function contents()
+    {
+        return $this->morphMany(Content::class, 'contentable');
     }
+    
 }

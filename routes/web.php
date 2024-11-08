@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\PdfController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AttachmentController;
+use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProcessedPdfController;
 use App\Http\Controllers\ErrorController;
@@ -38,9 +39,6 @@ Route::middleware('auth')->group(function () {
 });
 
 // Admin
-Route::prefix('admin')->name('admin.')->group(function () {
-    // Route::post('/store-questions', [ProcessQuestionController::class, 'storeQuestions'])->name('store-questions');
-});
 Route::post('/admin/store-processed-pdf', [ProcessedPdfController::class, 'store'])->name('store-pdf');
 
 Route::middleware(['auth', 'student'])->group(function () {
@@ -87,19 +85,23 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/', [ModuleController::class, 'index'])->name('index');
         Route::get('/{id}', [ModuleController::class, 'show'])->name('detail');
         Route::get('/edit/{id}', [ModuleController::class, 'edit'])->name('edit');
-        Route::post('/update/module', [ModuleController::class, 'updateModule'])->name('update.module');
-        Route::post('/delete', [ModuleController::class, 'delete'])->name('delete');
+        Route::put('/update/{id}', [ModuleController::class, 'update'])->name('update');
+        Route::delete('/delete/module/{id}', [ModuleController::class, 'deleteModule'])->name('delete');
+        Route::delete('/delete/lesson/{id}', [ModuleController::class, 'deleteLesson'])->name('delete.lesson');
+        Route::delete('/delete/section/{id}', [ModuleController::class, 'deleteSection'])->name('delete.section');
+        Route::delete('/delete/subsection/{id}', [ModuleController::class, 'deleteSubsection'])->name('delete.subsection');
 
         // Route::view('/store','admin.ui.course.module.vectorize');
         // Route::get('/vector', [ModuleController::class, 'vectorShow'])->name('vector.show');
         // Route::post('/vector/upload', [ModuleController::class, 'vectorStore'])->name('vector.upload');
     });
-    Route::prefix('attachment')->name('attachment.')->group(function(){
-        Route::put('/{id}', [AttachmentController::class, 'update'])->name('update');
-        Route::post('/add', [AttachmentController::class, 'create'])->name('create');
-        Route::delete('/delete/{id}', [AttachmentController::class, 'destroy'])->name('delete');
+    Route::prefix('content')->name('content.')->group(function(){
+        Route::put('/update/{id}', [ContentController::class, 'update'])->name('update');
+        Route::post('/add', [ContentController::class, 'create'])->name('create');
+        Route::delete('/delete/{id}', [ContentController::class, 'destroy'])->name('delete');
 
     });
+    
 
     Route::get('/profile', [DashboardController::class, 'showProfile'])->name('profile');
     Route::get('/student/{student_id}', [DashboardController::class, 'showStudentDetails'])->name('student');

@@ -10,6 +10,7 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 function ModuleDetail({ module, queryParams }) {
+    console.log(module.data)
     const { isProcessing, getRequest } = useRequest();
 
     useEffect(() => {
@@ -67,7 +68,7 @@ function ModuleDetail({ module, queryParams }) {
                                 {module.data.title}
                             </h2>
                             <div id="header">
-                                {module.data.attachments ? (
+                                {module.data.contents ? (
                                     <ModuleContent
                                         data={module.data}
                                     />
@@ -76,7 +77,6 @@ function ModuleDetail({ module, queryParams }) {
                                 )}
                             </div>
                         </div>
-                        {/* <hr /> */}
                         {module.data.lessons && (
                             <div className="row">
                                 <LessonContent data={module.data.lessons} />
@@ -84,19 +84,17 @@ function ModuleDetail({ module, queryParams }) {
                         )}
                     </div>
                     <div className="col-2 sticky-nav">
-                        <a href="#module-title w-100">
-                                {module.data.title}
+                        <a href="#module-title" className="w-100">
+                            {module.data.title}
                         </a>
                         <ul>
                             {module.data.lessons &&
                                 module.data.lessons.map((lesson, index) => (
-                                    lesson.title &&(
-                                        <li key={index}>
+                                    <li key={index}>
                                         <a href={`#lesson-${index}`}>
-                                            {lesson.title}
+                                            {lesson.title || "Untitled Lesson"}
                                         </a>
                                     </li>
-                                    ) 
                                 ))}
                         </ul>
                     </div>

@@ -6,7 +6,7 @@ export default function MainLayout({ children }) {
         <>
             <div className="background"></div>
             <Toaster
-                position="bottom-right"
+                position="top-right"
                 richColors
                 toastOptions={{
                     style: {

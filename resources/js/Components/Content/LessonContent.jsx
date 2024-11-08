@@ -1,4 +1,3 @@
-import { dissectContent } from "@/Library/utils";
 import SectionContent from "./SectionContent";
 import ContentItem from "./ContentItem";
 
@@ -14,7 +13,7 @@ export default function LessonContent({ data }) {
                         </h4>
 
                         {/* Render merged and sorted content */}
-                        {lesson.attachments.map((item, idx) => (
+                        {lesson.contents.map((item, idx) => (
                             <ContentItem key={idx} item={item} />
                         ))}
 

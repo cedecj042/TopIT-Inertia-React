@@ -10,7 +10,7 @@ export default function Modal({modalTitle,modalSize=null,onClose,show,children})
             <div className={`modal-dialog modal-dialog-centered modal-dialog-scrollable ${modalSize}`}>
                 <div className="modal-content">
                     <div className="modal-header">
-                        <h5 className="modal-title" id="modalLabel">
+                        <h5 className="modal-title text-dark" id="modalLabel">
                             {modalTitle}
                         </h5>
                         <button

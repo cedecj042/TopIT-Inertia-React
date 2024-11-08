@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum AttachmentType:string{
+enum ContentType:string{
     case TABLE = 'Tables';
     case FIGURE = 'Figures';
     case CODE = 'Code';
