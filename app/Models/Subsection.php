@@ -19,13 +19,17 @@ class Subsection extends Model
         'title',
     ];
 
-    public function section(){
-        return $this->belongsTo(Section::class,'section_id','section_id');
+    public function section()
+    {
+        return $this->belongsTo(Section::class, 'section_id', 'section_id');
     }
 
     public function contents()
     {
         return $this->morphMany(Content::class, 'contentable');
     }
-    
+    public function module()
+    {
+        return $this->section->lesson->module();
+    }
 }

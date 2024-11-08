@@ -24,21 +24,15 @@ export default function ContentTypeForm({
                 ...content,
                 order: index + 1,
             })),
+            contentableId: contentableId,
         },
     });
-    
+
     const contents = watch("contents"); // Watch the contents array
     const [initialContents, setInitialContents] = useState(contents);
 
     const { isProcessing, putRequest, postRequest, deleteRequest } = useRequest();
     
-    const defaultOptions = {
-        preserveScroll: true,
-        // preserveState: true,
-        replace: true,
-        only:["module","queryParams"]
-    };
-
     useEffect(() => {
         // Update form values when content changes
         setValue("title", content.title);
@@ -106,13 +100,12 @@ export default function ContentTypeForm({
             payload,
             {
                 onSuccess: () => {
-                    toast.success("Module saved successfully.");
+                    toast.success(`${contentableType} saved successfully`);
                 },
                 onError: (error) => {
                     toast.error("Failed to save module.");
                 },
-            },
-            {defaultOptions}
+            }
         );
     };
 
@@ -168,8 +161,7 @@ export default function ContentTypeForm({
                         duration: 3000,
                     });
                 },
-            },
-            { defaultOptions }
+            }
         );
         closeModal();
     };
@@ -180,7 +172,6 @@ export default function ContentTypeForm({
             contentable_id: contentableId,
             contentable_type: contentableType,
         };
-        console.log(contentData);
         postRequest(
             "admin.content.create",
             contentData,
@@ -193,8 +184,7 @@ export default function ContentTypeForm({
                     console.log(error);
                     toast.error("Failed to add new content.");
                 },
-            },
-            { defaultOptions }
+            }
         );
     };
 
@@ -210,8 +200,7 @@ export default function ContentTypeForm({
                 onError: () => {
                     toast.error("Failed to deleted content.");
                 },
-            },
-            { defaultOptions }
+            }
         );
     };
     const deleteTypes = async (contentId) => {
@@ -241,13 +230,21 @@ export default function ContentTypeForm({
             onError: () => {
                 toast.error("Failed to delete content.");
             },
-        }, defaultOptions);
+        });
     };
     
 
     return (
         <>
-            <form className="p-3" onSubmit={handleSubmit(onSubmit)}>
+            <h4 className="px-3 fw-semibold">{contentableType} Form</h4>
+
+            <form className="px-3" onSubmit={handleSubmit(onSubmit)}>
+            <input
+                    type="hidden"
+                    id="contentableId"
+                    {...register("id")}
+                    value={contentableId}
+                />
                 <div className="mb-3">
                     <label
                         htmlFor="moduleTitle"
@@ -263,21 +260,21 @@ export default function ContentTypeForm({
                     />
                 </div>
 
-                <div className="d-inline-flex justify-content-between w-100">
-                    <div>
-                        <h5 className="m-0 fw-semibold text-dark">Contents</h5>
-                        <label className="fw-regular text-dark">
-                            Drag the content to sort them
-                        </label>
-                    </div>
+                <div className="d-inline-flex justify-content-between align-items-center w-100">
+                    <h5 className="m-0 fw-semibold text-dark">Contents</h5>
+
                     <button
                         type="button"
                         onClick={() => openModal()}
-                        className="btn btn-primary"
+                        className="btn btn-outline-secondary"
                     >
                         Add Content
                     </button>
+                    
                 </div>
+                <label className="fw-regular text-dark">
+                            Drag the content to sort them
+                        </label>
                 <div className="content-list-wrapper overflow-auto my-2 bg-light-subtle">
                     <DndContext
                         collisionDetection={closestCorners}
@@ -292,10 +289,10 @@ export default function ContentTypeForm({
                 </div>
 
                 <div className="d-inline-flex w-100 justify-content-end gap-3">
-                    <button type="button" className="btn btn-danger my-2" onClick={() => showDeleteModal()}>
+                    <button type="button" className="btn btn-danger my-2" onClick={() => showDeleteModal()} disabled={isProcessing}>
                         Delete {contentableType}
                     </button>
-                    <button type="submit" className="btn btn-primary my-2">
+                    <button type="submit" className="btn btn-primary my-2" disabled={isProcessing}>
                         Save {contentableType}
                     </button>
                 </div>

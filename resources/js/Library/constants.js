@@ -14,8 +14,8 @@ export const COURSE_COLUMN = [
 ]
 export const MODULE_COLUMN = [
     {key:'module_id',label:'ID', sortable:false,visible:true},
-    {key:'course.title',label:'Course', sortable:false,visible:true},
     {key:'title',label:'Title', sortable:false,visible:true},
+    {key:'course.title',label:'Course', sortable:false,visible:true},
     {key:'created_at',label:'Created At', sortable:false,visible:true}
 ]
 

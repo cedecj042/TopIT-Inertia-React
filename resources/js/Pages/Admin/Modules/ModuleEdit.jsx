@@ -2,16 +2,23 @@ import "../../../../css/admin/module.css";
 import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import { useRequest } from "@/Library/hooks";
 import ContentTypeForm from "@/Components/Forms/ContentTypeForm";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Modal from "@/Components/Modal";
 import Changes from "@/Components/Forms/Changes";
 
-function ModuleEdit({ module, queryParams }) {
+function ModuleEdit({ module, queryParams = {} }) {
     const { isProcessing, getRequest } = useRequest();
-    const [isOrderChanged, setIsOrderChanged] = useState(false); // Track unsaved order changes
-    const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false); // Control warning modal
-    const [pendingTab, setPendingTab] = useState(null); // Track the tab to switch to after discarding changes
+    const [isOrderChanged, setIsOrderChanged] = useState(false);
+    const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
+    const [pendingTab, setPendingTab] = useState(null);
 
+    // Ensure queryParams is always an object and handle case where it might be null
+    const safeQueryParams = useMemo(() => ({
+        ...queryParams || {}, // Use an empty object if queryParams is null or undefined
+        contentableId: queryParams?.contentableId ? parseInt(queryParams.contentableId, 10) : module?.id, // Default to module.id if contentableId is null or not provided
+    }), [queryParams, module?.id]);
+    
+    // Function to get the content ID based on type
     const getContentId = (content, type) => {
         switch (type) {
             case "Module":
@@ -27,25 +34,64 @@ function ModuleEdit({ module, queryParams }) {
         }
     };
 
+    // Function to get content based on type and ID
+    const getContentByTypeAndId = (type, id) => {
+        if (type === "Module") return module.data;
+        if (type === "Lesson") return module.data.lessons.find(lesson => lesson.lesson_id === id);
+        if (type === "Section") {
+            for (const lesson of module.data.lessons) {
+                const section = lesson.sections.find(sec => sec.section_id === id);
+                if (section) return section;
+            }
+        }
+        if (type === "Subsection") {
+
+            for (const lesson of module.data.lessons) {
+                for (const section of lesson.sections) {
+                    const subsection = section.subsections.find(sub => sub.subsection_id === id);
+                    if (subsection) return subsection;
+                }
+            }
+        }
+        return null;
+    };
+
+    // Initialize activeContent based on queryParams or default to Module
     const [activeContent, setActiveContent] = useState(() => {
-        const initialType = "Module";
+        const initialType = safeQueryParams.contentableType || "Module";
+        const initialId = safeQueryParams.contentableId || getContentId(module.data, "Module");
+        const initialContent = getContentByTypeAndId(initialType, initialId);
         return {
-            content: module.data,
+            content: initialContent || module.data,
             type: initialType,
-            id: getContentId(module.data, initialType),
+            id: initialId,
         };
     });
 
+    // Automatically set activeContent based on queryParams when the component mounts or queryParams changes
+    useEffect(() => {
+        if (safeQueryParams.contentableType && safeQueryParams.contentableId) {
+            const contentData = getContentByTypeAndId(safeQueryParams.contentableType, safeQueryParams.contentableId);
+            if (contentData) {
+                setActiveContent({
+                    content: contentData,
+                    type: safeQueryParams.contentableType,
+                    id: safeQueryParams.contentableId,
+                });
+            }
+        }
+    }, [module, safeQueryParams]);
+
     const handleBackClick = async () => {
-        getRequest("admin.module.index", queryParams);
+        getRequest("admin.module.index", {});
     };
 
     const handleTabClick = (item, type) => {
         if (isOrderChanged) {
             setPendingTab({ item, type });
-            setShowUnsavedChangesModal(true); // Show the warning modal
+            setShowUnsavedChangesModal(true);
         } else {
-            setActiveItem(item, type); // Switch tab if no unsaved changes
+            setActiveItem(item, type);
         }
     };
 
@@ -57,16 +103,16 @@ function ModuleEdit({ module, queryParams }) {
         });
     };
 
-  
     const handleDiscardChanges = () => {
-        setIsOrderChanged(false); // Discard unsaved changes
+        setIsOrderChanged(false);
         setShowUnsavedChangesModal(false);
         if (pendingTab) {
-            setActiveItem(pendingTab.item, pendingTab.type); // Switch to the selected tab
+            setActiveItem(pendingTab.item, pendingTab.type);
             setPendingTab(null);
         }
     };
     
+
     return (
         <div className="container-fluid p-5">
             <div className="row">
@@ -84,68 +130,59 @@ function ModuleEdit({ module, queryParams }) {
                 </div>
 
                 <div className="col-12 d-flex align-items-start">
-                    {/* Sidebar Navigation Tabs */}
-                    <ul
-                        className="nav flex-column content-nav bg-light-subtle rounded m-2"
-                        id="v-pills-tab"
-                        role="tablist"
-                        aria-orientation="vertical"
-                    >
-                        <li className="list-item mb-2">
-                            <a
-                                className={`nav-link ${activeContent.type === "Module" ? "active" : ""}`}
-                                id="v-pills-module-tab"
-                                role="button"
-                                onClick={() => handleTabClick(module.data, "Module")}
-                            >
-                                Module
-                            </a>
-                        </li>
-
-                        {/* Lessons Tabs */}
-                        {module.data.lessons.map((lesson, lessonIndex) => (
-                            <li key={`lesson-${lessonIndex}`} className="list-item">
+                    <div>
+                        <h5 className="fw-semibold mb-3">Navigation</h5>
+                        <ul className="nav flex-column content-nav bg-light-subtle rounded m-2" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                            <li className="list-item mb-2">
                                 <a
-                                    className={`nav-link ms-1 ${activeContent.content === lesson ? "active" : ""}`}
+                                    className={`nav-link ${activeContent.type === "Module" ? "active" : ""}`}
                                     role="button"
-                                    onClick={() => handleTabClick(lesson, "Lesson")}
+                                    onClick={() => handleTabClick(module.data, "Module")}
                                 >
-                                    {lesson.title ? lesson.title : <em>No Lesson Title</em>}
+                                    Module
                                 </a>
-                                {/* Sections within each Lesson */}
-                                <ul className="nav flex-column ms-3">
-                                    {lesson.sections.map((section, sectionIndex) => (
-                                        <li key={`section-${sectionIndex}`} className="list-item">
-                                            <a
-                                                className={`nav-link ms-2 ${activeContent.content === section ? "active" : ""}`}
-                                                role="button"
-                                                onClick={() => handleTabClick(section, "Section")}
-                                            >
-                                                {section.title ? section.title : <em>No Section Title</em>}
-                                            </a>
-
-                                            {/* Subsections within each Section */}
-                                            <ul className="nav flex-column ms-4">
-                                                {section.subsections?.map((subsection, subsectionIndex) => (
-                                                    <li key={`subsection-${subsectionIndex}`} className="list-item">
-                                                        <a
-                                                            className={`nav-link ms-3 ${activeContent.content === subsection ? "active" : ""}`}
-                                                            role="button"
-                                                            onClick={() => handleTabClick(subsection, "Subsection")}
-                                                        >
-                                                            {subsection.title ? subsection.title : <em>No Subsection Title</em>}
-                                                        </a>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </li>
-                                    ))}
-                                </ul>
                             </li>
-                        ))}
-                    </ul>
 
-                    {/* Content Form Display */}
+                            {module.data.lessons.map((lesson, lessonIndex) => (
+                                <li key={`lesson-${lessonIndex}`} className="list-item">
+                                    <a
+                                        className={`nav-link ms-1 ${activeContent.content === lesson ? "active" : ""}`}
+                                        role="button"
+                                        onClick={() => handleTabClick(lesson, "Lesson")}
+                                    >
+                                        {lesson.title || <em>No Lesson Title</em>}
+                                    </a>
+                                    <ul className="nav flex-column ms-3">
+                                        {lesson.sections.map((section, sectionIndex) => (
+                                            <li key={`section-${sectionIndex}`} className="list-item">
+                                                <a
+                                                    className={`nav-link ms-2 ${activeContent.content === section ? "active" : ""}`}
+                                                    role="button"
+                                                    onClick={() => handleTabClick(section, "Section")}
+                                                >
+                                                    {section.title || <em>No Section Title</em>}
+                                                </a>
+                                                <ul className="nav flex-column ms-4">
+                                                    {section.subsections?.map((subsection, subsectionIndex) => (
+                                                        <li key={`subsection-${subsectionIndex}`} className="list-item">
+                                                            <a
+                                                                className={`nav-link ms-3 ${activeContent.content === subsection ? "active" : ""}`}
+                                                                role="button"
+                                                                onClick={() => handleTabClick(subsection, "Subsection")}
+                                                            >
+                                                                {subsection.title || <em>No Subsection Title</em>}
+                                                            </a>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
                     <div className="tab-content w-100" id="v-pills-tabContent">
                         <ContentTypeForm
                             content={activeContent.content}
@@ -157,16 +194,8 @@ function ModuleEdit({ module, queryParams }) {
                 </div>
             </div>
 
-            {/* Unsaved Changes Modal */}
-            <Modal 
-                show={showUnsavedChangesModal} 
-                onClose={() => setShowUnsavedChangesModal(false)}
-                modalTitle="Discard Changes"
-            >
-                <Changes 
-                    handleDiscardChanges={handleDiscardChanges} 
-                    setShowUnsavedChangesModal={()=>setShowUnsavedChangesModal(false)}
-                />
+            <Modal show={showUnsavedChangesModal} onClose={() => setShowUnsavedChangesModal(false)} modalTitle="Discard Changes">
+                <Changes handleDiscardChanges={handleDiscardChanges} setShowUnsavedChangesModal={() => setShowUnsavedChangesModal(false)} />
             </Modal>
         </div>
     );

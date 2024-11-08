@@ -30,6 +30,9 @@ class Section extends Model
     {
         return $this->morphMany(Content::class, 'contentable');
     }
-    
+    public function module()
+{
+    return $this->lesson->module();
+}
     
 }

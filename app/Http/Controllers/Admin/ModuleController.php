@@ -30,6 +30,20 @@ class ModuleController extends Controller
 
         return $mapping[$type] ?? null;
     }
+    protected function getModuleId($contentableType, $contentableId)
+    {
+        if ($contentableType === 'Module') {
+            return $contentableId;
+        }
+        
+        $modelClass = $this->resolveModelClass($contentableType);
+        if (!$modelClass) {
+            throw new Exception('Invalid contentable_type');
+        }
+
+        $parentModel = $modelClass::findOrFail($contentableId);
+        return $parentModel->module->module_id; // Assumes `module` relationship exists in each model
+    }
 
     public function index()
     {
@@ -110,7 +124,8 @@ class ModuleController extends Controller
         return Inertia::render('Admin/Modules/ModuleEdit', [
             'title' => 'Admin Module',
             'auth' => Auth::user(),
-            'module' => new ModuleResource($module), // Use ModuleResource for formatting
+            'module' => new ModuleResource($module),
+            'queryParams' => request()->query() ? : null,
         ]);
     }
 
@@ -129,12 +144,10 @@ class ModuleController extends Controller
             'contentable_type' => 'required|string|in:Module,Lesson,Section,Subsection',
         ]);
 
-        // Log the validated data to inspect what's being received
-        Log::info('Validated Data:', $validatedData);
 
         // Use resolveModelClass to get the model class
         $contentableClass = $this->resolveModelClass($validatedData['contentable_type']);
-
+        
         if (!$contentableClass) {
             Log::error('Invalid contentable_type');
             throw new Exception('Invalid contentable_type');
@@ -146,9 +159,6 @@ class ModuleController extends Controller
         // Update the title
         $contentable->title = $validatedData['title'];
         $contentable->save();
-
-        // Log the title update
-        Log::info('Updated title:', ['title' => $validatedData['title']]);
 
         // Update the order of contents only if contents are provided
         if (!empty($validatedData['contents'])) {
@@ -162,7 +172,14 @@ class ModuleController extends Controller
             Log::info('No contents to update.');
         }
 
-        return redirect()->back()->with('success', 'Updated Successfully');
+        $moduleId = $this->getModuleId($validatedData['contentable_type'],$contentableId);
+        Log::info($moduleId);
+
+        return redirect()->route('admin.module.edit', [
+            'id' => $moduleId,
+            'contentableId' => $contentableId,
+            'contentableType' => $validatedData['contentable_type'],
+        ])->with('success', 'Updated Successfully');
     }
 
     public function deleteModule(int $id) {
