@@ -1,14 +1,11 @@
-import { Head, Link } from "@inertiajs/react";
-import { useForm } from "react-hook-form";
+import { Head, Link, router } from "@inertiajs/react";
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { toast } from "sonner";
-import { useRequest } from "@/Library/hooks";
 import MainLayout from "@/Layouts/MainLayout";
 import Navbar from "@/Components/Navigation/Navbar";
 import "../../../../css/student/students.css";
 import "../../../../css/student/welcome.css";
-import { router } from "@inertiajs/react";
 
 const Welcome = ({ student, hasExistingPretest }) => {
     const studentData = student.data;
@@ -43,8 +40,7 @@ const Welcome = ({ student, hasExistingPretest }) => {
             <Head title="Welcome" />
             <Navbar isLight={false} />
             <div
-                className="container-fluid"
-                style={{ paddingTop: "60px", background: "transparent" }}
+                className="pretestb container-fluid"
             >
                 <div className="row align-items-center full-height custom-margin ">
                     <div className="col-md-4 left-column">
@@ -54,13 +50,6 @@ const Welcome = ({ student, hasExistingPretest }) => {
                             </h1>
                             {hasExistingPretest ? (
                                 <>
-                                    {toast.success(
-                                        "You have already completed the pretest assessment. You can proceed to explore other features of TopIT.",
-                                        {
-                                            duration: 5,
-                                            position: "top-center",
-                                        }
-                                    )}
                                     <p className="fs-5 mb-4">
                                         You've already completed the pre-test.
                                         Feel free to explore your dashboard and

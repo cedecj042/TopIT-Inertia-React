@@ -50,7 +50,9 @@ Route::middleware(['auth', 'student'])->group(function () {
         // Route::get('/questions/{courseIndex}', [PretestController::class, 'showQuestions'])->name('questions');
 
         Route::post('/submit', [PretestController::class, 'submit'])->name('submit');
-        Route::get('/finish/{pretestId}', [PretestController::class, 'showFinishAttempt'])->name('finish');
+        Route::get('finish/{assessmentId}', [PreTestController::class, 'finish'])->name('finish');
+
+        // Route::get('/finish/{pretestId}', [PretestController::class, 'showFinishAttempt'])->name('finish');
         Route::get('/review/{pretestId}', [PretestController::class, 'reviewPretest'])->name('review');
     });
 

@@ -43,6 +43,19 @@ class PretestController extends Controller
         ]);
     }
 
+
+    public function finish($assessmentId)
+    {
+        $assessment = Assessment::findOrFail($assessmentId);
+
+        return Inertia::render('Student/Pretest/PretestFinish', [
+            'score' => $assessment->total_score,
+            'totalQuestions' => $assessment->total_items,
+            'pretestId' => $assessment->assessment_id,
+            'title' => "Finish"
+        ]);
+    }
+
     public function startPretest()
     {
         $student = Student::find(Auth::user()->userable->student_id);
@@ -168,30 +181,30 @@ class PretestController extends Controller
     }
 
     private function calculateQuestionScore($questionType, $participantAnswer, $correctAnswer)
-{
-    $score = 0;
+    {
+        $score = 0;
 
-    switch ($questionType) {
-        case 'Identification':
-            $score = strtolower(trim($participantAnswer)) === strtolower(trim($correctAnswer[0])) ? 1 : 0;
-            break;
-        case 'Multiple Choice - Single':
-            $score = strtolower($participantAnswer) === strtolower($correctAnswer[0]) ? 1 : 0;
-            break;
-        case 'Multiple Choice - Many':
-            $participantAnswers = is_array($participantAnswer) ? $participantAnswer : [];
-            $correctAnswers = is_array($correctAnswer) ? $correctAnswer : json_decode($correctAnswer, true);
+        switch ($questionType) {
+            case 'Identification':
+                $score = strtolower(trim($participantAnswer)) === strtolower(trim($correctAnswer[0])) ? 1 : 0;
+                break;
+            case 'Multiple Choice - Single':
+                $score = strtolower($participantAnswer) === strtolower($correctAnswer[0]) ? 1 : 0;
+                break;
+            case 'Multiple Choice - Many':
+                $participantAnswers = is_array($participantAnswer) ? $participantAnswer : [];
+                $correctAnswers = is_array($correctAnswer) ? $correctAnswer : json_decode($correctAnswer, true);
 
-            // sort arrays for correct ans
-            sort($participantAnswers);
-            sort($correctAnswers);
+                // sort arrays for correct ans
+                sort($participantAnswers);
+                sort($correctAnswers);
 
-            $score = (json_encode($participantAnswers) === json_encode($correctAnswers)) ? 1 : 0;
-            break;
+                $score = (json_encode($participantAnswers) === json_encode($correctAnswers)) ? 1 : 0;
+                break;
+        }
+
+        return $score;
     }
-
-    return $score;
-}
 
     private function getAssessmentCourseId($assessmentId, $courseId)
     {
@@ -230,6 +243,8 @@ class PretestController extends Controller
             ]);
         }
     }
+
+
 
 
 

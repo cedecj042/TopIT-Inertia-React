@@ -7,6 +7,8 @@ import MainLayout from "@/Layouts/MainLayout";
 import Sidebar from "@/Components/Pretest/Sidebar";
 import Navbar from "@/Components/Navigation/Navbar";
 import QuestionForm from "@/Components/Pretest/QuestionForm";
+import "../../../../css/student/students.css";
+import "../../../../css/student/welcome.css";
 
 const Pretest = ({
     courses = { data: [], questions: [] },
@@ -80,12 +82,11 @@ const Pretest = ({
               }
           }
   
-          // Use Inertia's router instead of direct POST request
           router.post(route('pretest.submit'), formData, {
               onSuccess: (response) => {
                   toast.success("Assessment submitted successfully!");
-                  window.location.href = route('dashboard');
-              },
+                  router.visit(route('pretest.finish', { assessmentId: assessment?.assessment_id }));
+                },
               onError: (errors) => {
                   console.error('Submission errors:', errors);
                   toast.error(
@@ -108,9 +109,6 @@ const Pretest = ({
       }
   };
   
-  
-  
-
     const handleNextCourse = () => {
         const currentQuestions =
             courses.questions?.[currentCourseIndex]?.questions || [];
@@ -162,8 +160,7 @@ const Pretest = ({
             <Navbar isLight={true} />
 
             <div
-                className="container-fluid"
-                style={{ paddingTop: "60px", background: "transparent" }}
+                className="pretestb container-fluid"
             >
                 <div className="row min-vh-100">
                     {/* Sidebar */}
