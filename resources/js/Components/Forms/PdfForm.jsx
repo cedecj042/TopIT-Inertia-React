@@ -30,44 +30,45 @@ export default function PdfForm({id,onClose}){
     };
     
     return(
-        <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
+        <>
             <div className="modal-body">
-                <div className="mb-3">
-                    <label htmlFor="courseID" className="form-label fs-6">
-                        Course ID
-                    </label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        id="courseID"
-                        name="course_id"
-                        value={id}
-                        {...register("course_id", {
-                            required: "Course ID is required",
-                        })}
-                        readOnly={true}
-                    />
-                    {errors.course_id && (
-                        <p className="text-danger">{`${errors.course_id.message}`}</p>
-                    )}
-                </div>
-                <div className="mb-3">
-                    <label htmlFor="materialFile" className="form-label fs-6">Select file to upload</label>
-                    <input 
-                        type="file" 
-                        className="form-control" 
-                        id="materialFile" 
-                        name="pdf_file"
-                        accept="application/pdf" 
-                        {...register("pdf_file", {
-                            required: "PDF is required",
-                        })}
-                        required/>
-                        {errors.file_name && (
-                        <p className="text-danger">{`${errors.pdf_file.message}`}</p>
-                    )}
-                </div>
-                
+                <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
+                    <div className="mb-3">
+                        <label htmlFor="courseID" className="form-label fs-6">
+                            Course ID
+                        </label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="courseID"
+                            name="course_id"
+                            value={id}
+                            {...register("course_id", {
+                                required: "Course ID is required",
+                            })}
+                            readOnly={true}
+                        />
+                        {errors.course_id && (
+                            <p className="text-danger">{`${errors.course_id.message}`}</p>
+                        )}
+                    </div>
+                    <div className="mb-3">
+                        <label htmlFor="materialFile" className="form-label fs-6">Select file to upload</label>
+                        <input 
+                            type="file" 
+                            className="form-control" 
+                            id="materialFile" 
+                            name="pdf_file"
+                            accept="application/pdf" 
+                            {...register("pdf_file", {
+                                required: "PDF is required",
+                            })}
+                            required/>
+                            {errors.file_name && (
+                            <p className="text-danger">{`${errors.pdf_file.message}`}</p>
+                        )}
+                    </div>
+                </form>
             </div>
             <div className="modal-footer">
                 <button
@@ -79,13 +80,14 @@ export default function PdfForm({id,onClose}){
                     Close
                 </button>
                 <button
-                    type="submit"
+                    type="button"
                     className="btn btn-primary"
+                    onClick={handleSubmit(onSubmit)}
                     disabled={isSubmitting || isProcessing}
                 >
                     Add
                 </button>
             </div>
-        </form>
+        </>
     )
 }

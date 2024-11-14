@@ -3,7 +3,7 @@ import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import { useRequest } from "@/Library/hooks";
 import ContentTypeForm from "@/Components/Forms/ContentTypeForm";
 import { useState, useEffect, useMemo } from "react";
-import Modal from "@/Components/Modal";
+import Modal from "@/Components/Modal/Modal";
 import Changes from "@/Components/Forms/Changes";
 
 function ModuleEdit({ module, queryParams = {} }) {

@@ -84,7 +84,7 @@ class QuestionSeeder extends Seeder
                     // Insert question details
                     $question_detail_id = DB::table('question_details')->insertGetId([
                         'type' => $type,
-                        'answer' => json_encode($questionData[1]),
+                        'answer' => $questionData[1],
                         'choices' => !empty($questionData[2]) ? json_encode($questionData[2]) : null,
                         'created_at' => now(),
                         'updated_at' => now(),

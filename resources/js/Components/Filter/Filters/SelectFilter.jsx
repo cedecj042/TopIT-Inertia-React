@@ -15,9 +15,9 @@ export default function SelectFilter({keyValue,filterKey,data,handleFilterChange
                 id={`${filterKey}Select`}
             >
                 <option value="" disabled >Select {filterKey}</option>
-                {data.map((year) => (
-                    <option key={year} value={year}>
-                        {year}
+                {data.map((item) => (
+                    <option key={item} value={item}>
+                        {item}
                     </option>
                 ))}
             </SelectInput>

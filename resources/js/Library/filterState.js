@@ -43,3 +43,20 @@ export const INITIAL_MODULE_STATE = (queryParams = {}) => ({
     })()
 });
 
+
+export const INITIAL_QUESTION_STATE = (queryParams = {}) => ({
+    filterState: {
+        course: queryParams?.course || "",
+        difficulty: queryParams?.difficulty || "",
+        types: queryParams?.types || "",
+    },
+    otherState: {
+        question: queryParams?.question || "",
+        items: queryParams?.items || "",
+    },
+    sortState: (() => {
+        const field = queryParams?.field || "";
+        const direction = queryParams?.direction || "";
+        return `${field}:${direction}`;
+    })()
+});

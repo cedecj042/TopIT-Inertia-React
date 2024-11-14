@@ -39,7 +39,7 @@ class Question extends Model
         return $this->belongsTo(Difficulty::class, 'difficulty_id', 'difficulty_id');
     }
 
-    public function question_details()
+    public function question_detail()
     {
         return $this->belongsTo(QuestionDetail::class, 'question_detail_id', 'question_detail_id');
     }

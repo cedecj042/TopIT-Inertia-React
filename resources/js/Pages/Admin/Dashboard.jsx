@@ -5,7 +5,11 @@ import StudentsLineChart from "@/Components/Chart/StudentsLineChart";
 import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
 import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import { INITIAL_STUDENT_STATE } from "@/Library/filterState";
-import { COURSE_COLUMN, STUDENT_COLUMN, STUDENT_FILTER_COMPONENT } from "@/Library/constants";
+import {
+    COURSE_COLUMN,
+    STUDENT_COLUMN,
+    STUDENT_FILTER_COMPONENT,
+} from "@/Library/constants";
 import { TableContext } from "@/Components/Tables/TableContext";
 import StudentFilters from "@/Components/Filter/StudentFilters";
 
@@ -18,23 +22,21 @@ function Dashboard({
 }) {
     return (
         <>
-            <div className="row p-3">
-                <div className="row justify-content-center mt-5 px-5">
-                    <h3 className="fw-bold">Dashboard</h3>
+            <div className="container-fluid p-5">
+                <div className="row justify-content-center">
+                    <div className="col mb-3 btn-toolbar justify-content-between">
+                        <h3 className="fw-bold">Dashboard</h3>
+                    </div>
                     <div className="row mt-2 p-0">
                         <div className="d-flex flex-column col-12">
-                            <h5 className="fw-bolder mb-3">List of Students</h5>
+                            <h5 className="fw-semibold mb-3">List of Students</h5>
                             <TableContext
-                                initialState={INITIAL_STUDENT_STATE(
-                                    queryParams
-                                )}
+                                initialState={INITIAL_STUDENT_STATE(queryParams)}
                                 routeName={"admin.dashboard"}
                                 components={STUDENT_FILTER_COMPONENT}
                                 column={STUDENT_COLUMN}
                             >
-                                <StudentFilters
-                                    filters={filters}
-                                />
+                                <StudentFilters filters={filters} />
                                 <StudentsTable
                                     data={students.data}
                                     filters={filters}

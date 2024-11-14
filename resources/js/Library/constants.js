@@ -27,10 +27,21 @@ export const PDF_COLUMN = [
     {key:'created_at',label:'Created At', sortable:false,visible:true}
 ]
 
+export const QUESTION_COLUMN = [
+    {key:'question_id',label:'ID', sortable:false,visible:true},
+    // {key:'course.title',label:'Course', sortable:false,visible:true},
+    {key:'question',label:'Question', sortable:false,visible:true},
+    {key:'difficulty.name',label:'Difficulty', sortable:false,visible:true},
+    {key:'question_detail.type',label:'Type', sortable:false,visible:true},
+    {key:'question_detail.choices',label:'Choices', sortable:false,visible:true},
+    {key:'question_detail.answer',label:'Answer', sortable:false,visible:true}
+]
+
 
 export const STUDENT_FILTER_COMPONENT = ["students","filters","queryParams"]
 export const COURSE_FILTER_COMPONENT = ["courses","courses.meta","queryParams"]
 export const MODULE_FILTER_COMPONENT = ["modules","modules.meta","filters","queryParams"]
+export const QUESTION_FILTER_COMPONENT = ["questions","questions.meta","filters","queryParams"]
 
 
 export const ContentTypes = {

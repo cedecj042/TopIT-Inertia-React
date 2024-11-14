@@ -22,7 +22,7 @@ class PretestSeeder extends Seeder
         // Loop through each student to create a pretest
         foreach ($students as $student) {
             // Create a new pretest for the student
-            $pretest_id = DB::table('pretests')->insertGetId([
+            $pretest_id = DB::table('tests')->insertGetId([
                 'student_id' => $student->student_id,
                 'totalItems' => 0, // Will update after inserting questions
                 'totalScore' => 0, // Will update after calculating answers

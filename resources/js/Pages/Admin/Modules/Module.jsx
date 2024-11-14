@@ -1,34 +1,30 @@
 import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import ModuleFilters from "@/Components/Filter/ModuleFilters";
-import ModuleForm from "@/Components/Forms/ModuleForm";
-import Modal from "@/Components/Modal";
+import Modal from "@/Components/Modal/Modal";
 import Pagination from "@/Components/Pagination";
 import ModuleTable from "@/Components/Tables/ModuleTable";
 import { TableContext } from "@/Components/Tables/TableContext";
 import { MODULE_COLUMN, MODULE_FILTER_COMPONENT } from "@/Library/constants";
 import { INITIAL_MODULE_STATE } from "@/Library/filterState";
 import { useState } from "react";
+import axios from "axios";
+import VectorForm from "@/Components/Forms/VectorForm";
 
 function Module({ title, modules, queryParams,filters }) {
     const [showModal, setShowModal] = useState(false);
-    const openModal = () => setShowModal(true);
+    const [courses, setCourses] = useState([]);
+    const openModal = async () => {
+        setShowModal(true);
+        try {
+            const response = await axios.get(route('admin.module.courses')); // Fetch JSON data
+            setCourses(response.data.courses); // Store the data in state
+        } catch (error) {
+            console.error("Failed to fetch courses with modules:", error);
+        }
+    };
     const closeModal = () => setShowModal(false);
     return (
         <>
-            {/* <div className="container">
-                <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-5 pb-2 mt-3 mb-3">
-                    <h1 className="h3 fw-semibold m-0">Modules</h1>
-                    <div className="btn-toolbar mb-2 mb-md-0 ">
-                        <a
-                            href="{{route('admin.modules.vector.show')}}"
-                            className="btn btn-primary btn-md me-2"
-                        >
-                            Vectorize
-                        </a>
-                    </div>
-                </div>
-                <h4 className="fw-bold">List of Modules</h4>
-            </div> */}
             <div className="container-fluid p-5">
                 <div className="row justify-content-center">
                     <div className="col mb-4 btn-toolbar justify-content-between">
@@ -62,9 +58,9 @@ function Module({ title, modules, queryParams,filters }) {
                     show={showModal}
                     onClose={closeModal}
                     modalTitle={"Vectorize Module"}
-                    modalSize={"modal-lg"}
+                    modalSize={"modal-xl"}
                 >
-                    <ModuleForm onClose={closeModal} />
+                    <VectorForm courses={courses} closeModal={closeModal}/>
                 </Modal>
             </div>
         </>

@@ -1,14 +1,25 @@
 import { router } from "@inertiajs/react";
 import Table from "./Table";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import ContextProvider from "./TableContext";
 import { useRequest, useSortState } from "@/Library/hooks";
+import DeleteForm from "../Forms/DeleteForm";
+import Modal from "../Modal/Modal";
+import { toast } from "sonner";
 
 export default function ModuleTable({ data, queryParams }) {
     const keyField = "module_id";
     const { state, dispatch, visibleColumns } = useContext(ContextProvider);
     const { changeSort } = useSortState(dispatch);
-    const { isProcessing, getRequest,deleteRequest } = useRequest();
+    const { isProcessing, getRequest, deleteRequest } = useRequest();
+    const [selectedModule, setSelectedModule] = useState();
+
+    const [showModal, setShowModal] = useState(false);
+    const openModal = (module) => {
+        setSelectedModule(module); // Store the module ID to delete
+        setShowModal(true);
+    };
+    const closeModal = () => setShowModal(false);
 
     const renderActions = (rowData) => {
         return (
@@ -24,7 +35,10 @@ export default function ModuleTable({ data, queryParams }) {
                         Edit
                     </button>
                     <button
-                        onClick={(e) => deleteModule(e, rowData.module_id)}
+                        onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
+                            openModal(rowData);
+                        }}
                         className="btn btn-outline-danger d-flex justify-content-center align-items-left"
                     >
                         <span className="material-symbols-outlined align-self-center">
@@ -37,9 +51,9 @@ export default function ModuleTable({ data, queryParams }) {
         );
     };
 
-    const editModule = (e,module_id) =>{
+    const editModule = (e, module_id) => {
         e.stopPropagation();
-        getRequest("admin.module.edit",module_id,{ 
+        getRequest("admin.module.edit", module_id, {
             onSuccess: (success) => {
                 console.log(success);
             },
@@ -47,17 +61,23 @@ export default function ModuleTable({ data, queryParams }) {
                 console.log(error);
             },
         });
-    }
-
-    const deleteModule = (event, module_id) => {
-        event.stopPropagation();
-        deleteRequest("admin.module.delete",module_id,{});
     };
 
-    
-    const viewModule = (e, module_id) => {
+    const deleteModule = (module_id) => {
+        deleteRequest("admin.module.delete", module_id, {
+            onSuccess:()=>{
+                toast.success("Module deleted successfully.");
+                closeModal();
+            },
+            onError: (error) => {
+                toast.error("Error deleting module");
+            },
+        });
+    };
+
+    const viewModule = (e, module) => {
         e.preventDefault();
-        getRequest("admin.module.detail", module_id, {
+        getRequest("admin.module.detail", module.module_id, {
             onSuccess: (success) => {
                 console.log(success);
             },
@@ -78,6 +98,20 @@ export default function ModuleTable({ data, queryParams }) {
                 renderActions={renderActions}
                 keyField={keyField}
             />
+            <Modal
+                show={showModal}
+                onClose={closeModal}
+                modalTitle={"Delete Module"}
+            >
+                {selectedModule && (
+                    <DeleteForm
+                        title={selectedModule.title}
+                        onClose={closeModal}
+                        onDelete={() => deleteModule(selectedModule.module_id)}
+                        isProcessing={isProcessing}
+                    />
+                )}
+            </Modal>
         </>
     );
 }

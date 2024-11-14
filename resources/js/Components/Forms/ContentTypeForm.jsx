@@ -2,13 +2,13 @@ import { ContentTypes } from "@/Library/constants";
 import { useRequest } from "@/Library/hooks";
 import { closestCorners, DndContext } from "@dnd-kit/core";
 import { useEffect, useState } from "react";
-import Modal from "../Modal";
-import AttachmentForm from "./ContentForm";
+import Modal from "../Modal/Modal";
 import { arrayMove } from "@dnd-kit/sortable";
 import { toast } from "sonner";
 import ContentList from "../Content/ContentList";
 import DeleteForm from "./DeleteForm";
 import { useForm } from "react-hook-form";
+import ContentForm from "./ContentForm";
 
 export default function ContentTypeForm({
     content,
@@ -147,7 +147,7 @@ export default function ContentTypeForm({
             contentable_id: contentableId,
             contentable_type: contentableType,
         };
-
+        console.log(contentData)
         putRequest(
             "admin.content.update",
             data.content_id,
@@ -307,7 +307,7 @@ export default function ContentTypeForm({
                 onClose={closeModal}
                 modalSize={"modal-lg"}
             >
-                <AttachmentForm
+                <ContentForm
                     contentData={
                         selectedContent || {
                             caption: "",

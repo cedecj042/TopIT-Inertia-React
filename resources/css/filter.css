@@ -1,12 +1,13 @@
 .input-container{
     position:relative;
     display:inline-block;
+    padding: 0;
 }
 
 .input-container .input-icon{
     position: absolute;
     top: 0;
-    right: 25px;
+    right: 2.5%;
     transform: translateY(35%) scale(0.9);
     color: #7f7f7f;
     z-index: 0;

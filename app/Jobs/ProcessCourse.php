@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Events\UploadEvent;
 use App\Services\FastApiService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -48,12 +49,25 @@ class ProcessCourse implements ShouldQueue
             ];
 
             // Send the data to the FastAPI endpoint to create the course
-            $fastApiService->sendToFastAPI($courseData,'create_course/');
+            $result = $fastApiService->sendToFastAPI($courseData,'create_course/');
 
-            Log::info('Course processed successfully: ', ['course_id' => $course->course_id]);
+            if ($result) {
+                Log::info('Data was successfully sent to FastAPI.');
+                $this->broadcastEvent(null, "Successfully added a new course", null);
+            } else {
+                Log::warning('Data failed to send to FastAPI.');
+                $this->broadcastEvent(null, null, "Failed to save course.");
+            }
 
         } catch (\Exception $e) {
             Log::error('Error processing course: ' . $e->getMessage());
+            $this->broadcastEvent(null, null, "Failed to save course.");
         }
+    }
+    public function broadcastEvent($info = null, $success = null, $error = null)
+    {
+        Log::info('starting the event');
+        broadcast(new UploadEvent($info, $success, $error));
+        Log::info('Event broadcasted');
     }
 }

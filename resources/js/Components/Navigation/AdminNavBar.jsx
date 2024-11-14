@@ -91,7 +91,7 @@ export default function AdminNavbar({ title }) {
                         </Link>
                         <ul className={`collapse nav flex-column ms-0 ${isQuestionBankOpen ? 'show' : ''}`} id="questionBankSubmenu">
                             <li className="w-100">
-                                <Link href="{route('admin.questions.index')}" className="nav-link text-white py-3 ps-5 d-flex align-items-center gap-1 ">
+                                <Link href={route('admin.question.index')} className={`nav-link text-white py-3 ps-5 d-flex align-items-center gap-1 ${title === 'Admin Question' ? 'active' : ''}`}>
                                     <span className="material-symbols-outlined">quiz</span>
                                     <span className="ms-1 d-none d-sm-inline fs-6">Questions</span>
                                 </Link>

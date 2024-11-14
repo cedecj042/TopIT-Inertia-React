@@ -1,7 +1,8 @@
-export default function DeleteForm({ onClose, onDelete, isProcessing }) {
+export default function DeleteForm({ onClose, onDelete, isProcessing,title }) {
     return (
         <div className="p-3">
             <p className="text-dark">
+                You are about to delete {title}.
                 Are you sure you want to delete this?
             </p>
             <div className="d-flex justify-content-end gap-2">

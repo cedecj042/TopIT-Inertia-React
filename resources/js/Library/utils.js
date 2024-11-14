@@ -45,15 +45,16 @@ export const dissectContent = (jsonString) => {
         return [];
     }
 };
-export const extractList = (text) => {
-    // Adjust regex to match numbers with optional period and optional whitespace
-    const regex = /\d+\.\s*|[a-z]\.\s*/i;
 
-    if (regex.test(text)) {
-        const objectivesArray = text.split(regex).map(item => item.trim());
-        return objectivesArray.filter(item => item.length > 0);
-    }
-    return null;
+export const extractList = (text) => {
+    // Regex to split based on numbers followed by a period or space (e.g., "1.", "2", "3.")
+    const regex = /(?=\d+\.\s*|\b\d+\b\s*)/g;
+
+    // Split the text based on the regex and trim each item
+    const objectivesArray = text.split(regex).map(item => item.trim());
+
+    // Filter out any empty strings from the array
+    return objectivesArray.filter(item => item.length > 0);
 };
 
 

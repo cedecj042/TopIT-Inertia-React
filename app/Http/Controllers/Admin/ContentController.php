@@ -81,16 +81,15 @@ class ContentController extends Controller
     {
         try {
             $validated = $request->validated();
-            $content = Content::findOrFail($id);
 
-            $modelClass = $this->resolveModelClass($validated['contentable_type'] ?? '');
+            $content = Content::findOrFail($id);
+            $modelClass = $this->resolveModelClass(trim($validated['contentable_type']) ?? '');
             if (!$modelClass) {
                 throw new Exception('Invalid contentable_type');
             }
 
             $content->update($validated);
             $moduleId = $this->getModuleId($validated['contentable_type'], $validated['contentable_id']);
-            Log::info('Content updated successfully:', ['content_id' => $content->content_id]);
 
             return $this->redirectToModuleEdit($moduleId, $validated['contentable_id'], class_basename($modelClass), 'Content updated successfully!');
         } catch (Exception $e) {
@@ -100,24 +99,23 @@ class ContentController extends Controller
     }
 
     public function destroy(int $id)
-{
-    try {
-        $content = Content::findOrFail($id);
-        Log::info('Content', $content->toArray());
-        
-        // Extract the base type from contentable_type
-        $baseType = class_basename($content->contentable_type);
-        $contentableId = $content->contentable_id;
-        $moduleId = $this->getModuleId($baseType, $contentableId);
+    {
+        try {
+            $content = Content::findOrFail($id);
+            Log::info('Content', $content->toArray());
+            
+            // Extract the base type from contentable_type
+            $baseType = class_basename($content->contentable_type);
+            $contentableId = $content->contentable_id;
+            $moduleId = $this->getModuleId($baseType, $contentableId);
 
-        $content->delete();
-        Log::info('Content deleted successfully:', ['content_id' => $content->id]);
+            $content->delete();
+            Log::info('Content deleted successfully:', ['content_id' => $content->id]);
 
-        return $this->redirectToModuleEdit($moduleId, $contentableId, $baseType, 'Content deleted successfully!');
-    } catch (Exception $e) {
-        Log::error('Error deleting content:', ['exception' => $e->getMessage()]);
-        return back()->withErrors(['error' => 'Failed to delete the content']);
+            return $this->redirectToModuleEdit($moduleId, $contentableId, $baseType, 'Content deleted successfully!');
+        } catch (Exception $e) {
+            Log::error('Error deleting content:', ['exception' => $e->getMessage()]);
+            return back()->withErrors(['error' => 'Failed to delete the content']);
+        }
     }
-}
-
 }

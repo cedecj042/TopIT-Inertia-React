@@ -1,3 +1,5 @@
+import '../../../css/modal.css';
+
 export default function Modal({modalTitle,modalSize=null,onClose,show,children}) {
     if (!show) return null;
     return (
@@ -19,9 +21,7 @@ export default function Modal({modalTitle,modalSize=null,onClose,show,children})
                             onClick={onClose}
                         ></button>
                     </div>
-                    <div className="modal-body">
-                        {children}
-                    </div>
+                    {children}
                 </div>
             </div>
         </div>

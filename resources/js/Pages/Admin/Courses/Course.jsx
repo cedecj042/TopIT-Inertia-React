@@ -1,7 +1,7 @@
 import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import CourseFilters from "@/Components/Filter/CourseFilters";
 import CourseForm from "@/Components/Forms/CourseForm";
-import Modal from "@/Components/Modal";
+import Modal from "@/Components/Modal/Modal";
 import Pagination from "@/Components/Pagination";
 import CourseTable from "@/Components/Tables/CourseTable";
 import { TableContext } from "@/Components/Tables/TableContext";
@@ -17,7 +17,7 @@ function Course({ title, courses, queryParams}) {
         <>
             <div className="container-fluid p-5">
                 <div className="row justify-content-center">
-                    <div className="col mb-4 btn-toolbar justify-content-between">
+                    <div className="col mb-3 btn-toolbar justify-content-between">
                         <h2 className="fw-bolder m-0">Courses</h2>
                         <button
                             type="button"

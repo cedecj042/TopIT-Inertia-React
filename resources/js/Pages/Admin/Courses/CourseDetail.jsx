@@ -4,7 +4,7 @@ import PdfTable from "@/Components/Tables/PdfTable";
 import Pagination from "@/Components/Pagination";
 import { useColumnVisibility, useRequest } from "@/Library/hooks";
 import { PDF_COLUMN } from "@/Library/constants";
-import Modal from "@/Components/Modal";
+import Modal from "@/Components/Modal/Modal";
 import PdfForm from "@/Components/Forms/PdfForm";
 import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 

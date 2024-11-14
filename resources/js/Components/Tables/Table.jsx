@@ -53,19 +53,27 @@ export default function Table({
                             <tr
                                 key={rowData[keyField]}
                                 className={isRowClickable ? "clickable" : ""}
-                                onClick={isRowClickable ? (e) => handleClick(e, rowData[keyField]) : null}
+                                onClick={isRowClickable ? (e) => handleClick(e, rowData) : null}
                             >
-                                {visibleColumns.map(
-                                    (column) =>
-                                        column.visible && (
-                                            <td key={column.key} className="align-content-center">
-                                                {getColumnValue(rowData,column.key)}
-                                            </td>
-                                        )
+                                {visibleColumns.map((column) =>
+                                    column.visible && (
+                                        <td key={column.key} className="align-content-center">
+                                            {Array.isArray(getColumnValue(rowData, column.key)) ? (
+                                                <ol type="a">
+                                                    {getColumnValue(rowData, column.key).map((item, index) => (
+                                                        <li key={index}>{item}</li>
+                                                    ))}
+                                                </ol>
+                                            ) : (
+                                                getColumnValue(rowData, column.key)
+                                            )}
+                                        </td>
+                                    )
                                 )}
                                 <td className="align-content-center">{renderActions(rowData)}</td>
                             </tr>
                         ))
+                        
                     )}
                 </tbody>
             </table>

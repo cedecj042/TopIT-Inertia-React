@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\AttachmentType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\VectorRequest;
 use App\Http\Resources\ModuleResource;
+use App\Jobs\ProcessModule;
 use App\Models\Content;
+use App\Models\Course;
 use App\Models\Module;
 use App\Models\Lesson;
 use App\Models\Section;
@@ -22,10 +24,10 @@ class ModuleController extends Controller
     protected function resolveModelClass($type)
     {
         $mapping = [
-            'Module' => \App\Models\Module::class,
-            'Lesson' => \App\Models\Lesson::class,
-            'Section' => \App\Models\Section::class,
-            'Subsection' => \App\Models\Subsection::class,
+            'Module' => Module::class,
+            'Lesson' => Lesson::class,
+            'Section' => Section::class,
+            'Subsection' => Subsection::class,
         ];
 
         return $mapping[$type] ?? null;
@@ -213,5 +215,15 @@ class ModuleController extends Controller
         
         return redirect()->back()->with('success', 'Deleted Successfully');
 
+    }
+    public function courses(){
+        $courses = Course::with('modules')->get();
+        return response()->json(['courses' => $courses]);
+    }
+
+    public function vectorize(VectorRequest $request){
+        $validate = $request->validated();
+        Log::info($request);
+        ProcessModule::dispatch($validate);
     }
 }

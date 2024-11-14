@@ -53,7 +53,7 @@ class DatabaseSeeder extends Seeder
             TestSeeder::class,
             TestSeeder::class,
             TestSeeder::class,
-            PretestSeeder::class,
+            // PretestSeeder::class,
         ]);
     }
 }

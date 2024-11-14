@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\UploadEvent;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Log;
@@ -45,7 +46,6 @@ class FastApiService
             // Log success if the request succeeded
             Log::info('Successfully sent PDF to FastAPI');
             return $response;
-
         } catch (\Exception $e) {
             // Log any exception that occurs
             Log::error('Error during FastAPI request', [
@@ -99,20 +99,25 @@ class FastApiService
                     'response' => $response->body(),
                     'data_sent' => $data
                 ]);
-            } else {
-                Log::info('Successfully sent data to FastAPI', [
-                    'status_code' => $response->status(),
-                    'response' => $response->body()
-                ]);
+                return false; // Indicate failure
             }
+
+            Log::info('Successfully sent data to FastAPI', [
+                'status_code' => $response->status(),
+                'response' => $response->body()
+            ]);
+            return true; // Indicate success
+
         } catch (\Exception $e) {
             // Log any exception that occurs during the request
             Log::error('Exception occurred while sending data to FastAPI', [
                 'error' => $e->getMessage(),
                 'data_sent' => $data
             ]);
+            return false; // Indicate failure
         }
     }
+
 
     public function generateQuestions($jsonContent)
     {
@@ -141,5 +146,10 @@ class FastApiService
             ]);
         }
     }
-
+    public function broadcastEvent($info = null, $success = null, $error = null)
+    {
+        Log::info('starting the event');
+        broadcast(new UploadEvent($info, $success, $error));
+        Log::info('Event broadcasted');
+    }
 }
