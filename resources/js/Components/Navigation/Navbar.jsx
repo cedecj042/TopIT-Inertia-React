@@ -1,6 +1,6 @@
 export default function Navbar({ isLight = false }) {
     return (
-        <nav className={`navbar navbar-expand-lg ${isLight ? 'navbar-light bg-white shadow-sm' : ''}`} style={{ height: "60px" }}>
+        <nav className={`navbar navbar-expand-lg ${isLight ? 'navbar-light bg-white shadow-sm' : ''} fixed-top`} style={{ height: "60px" }}>
             <div className="container-fluid">
                 <a href="#">
                     <img

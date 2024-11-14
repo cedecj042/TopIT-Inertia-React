@@ -1,97 +1,105 @@
 import React from 'react';
 
-const QuestionForm = ({ course, onAnswerChange, savedAnswers }) => {
-  // Access the questions array correctly from the course prop
-  const questionsData = course.questions || [];
+const QuestionForm = ({ course, register, setValue, answers }) => {
+    const handleMultipleChoiceMany = (questionId, choice, checked) => {
+        const currentValues = answers[questionId] || [];
+        const newValues = checked
+            ? [...currentValues, choice]
+            : currentValues.filter(value => value !== choice);
+        
+        setValue(`answers.${questionId}`, newValues, { shouldDirty: true });
+    };
 
-  const renderQuestion = (question) => {
-    const questionDetail = question.question_detail || {};
+    const renderQuestion = (question) => {
+        const questionDetail = question.question_detail || {};
+        const questionName = `answers.${question.question_id}`;
 
-    switch (questionDetail.type) {
-      case 'Multiple Choice - Single':
-        return (
-          <div>
-            {JSON.parse(questionDetail.choices).map((choice, index) => (
-              <div key={index} className="mb-2">
-                <label>
-                  <input
-                    type="radio"
-                    name={`question_${question.question_id}`}
-                    value={choice}
-                    checked={savedAnswers[question.question_id] === choice}
-                    onChange={(e) => onAnswerChange(question.question_id, e.target.value)}
-                  />
-                  {choice}
-                </label>
-              </div>
-            ))}
-          </div>
-        );
+        switch (questionDetail.type) {
+            case 'Multiple Choice - Single':
+                return (
+                    <div>
+                        {JSON.parse(questionDetail.choices).map((choice, index) => (
+                            <div key={index} className="form-check mb-2">
+                                <input
+                                    {...register(questionName)}
+                                    className="form-check-input"
+                                    type="radio"
+                                    value={choice}
+                                    id={`${question.question_id}-${index}`}
+                                />
+                                <label 
+                                    className="form-check-label" 
+                                    htmlFor={`${question.question_id}-${index}`}
+                                >
+                                    {choice}
+                                </label>
+                            </div>
+                        ))}
+                    </div>
+                );
 
-      case 'Multiple Choice - Many':
-        return (
-          <div>
-            {JSON.parse(questionDetail.choices).map((choice, index) => (
-              <div key={index} className="mb-2">
-                <label>
-                  <input
-                    type="checkbox"
-                    name={`question_${question.question_id}`}
-                    value={choice}
-                    checked={savedAnswers[question.question_id]?.includes(choice)}
-                    onChange={(e) => {
-                      const currentAnswers = savedAnswers[question.question_id] || [];
-                      const newAnswers = e.target.checked
-                        ? [...currentAnswers, choice]
-                        : currentAnswers.filter((answer) => answer !== choice);
-                      onAnswerChange(question.question_id, newAnswers);
-                    }}
-                  />
-                  {choice}
-                </label>
-              </div>
-            ))}
-          </div>
-        );
+            case 'Multiple Choice - Many':
+                const currentValues = answers[question.question_id] || [];
+                return (
+                    <div>
+                        {JSON.parse(questionDetail.choices).map((choice, index) => (
+                            <div key={index} className="form-check mb-2">
+                                <input
+                                    type="checkbox"
+                                    className="form-check-input"
+                                    id={`${question.question_id}-${index}`}
+                                    checked={currentValues.includes(choice)}
+                                    onChange={(e) => handleMultipleChoiceMany(
+                                        question.question_id,
+                                        choice,
+                                        e.target.checked
+                                    )}
+                                />
+                                <label 
+                                    className="form-check-label"
+                                    htmlFor={`${question.question_id}-${index}`}
+                                >
+                                    {choice}
+                                </label>
+                            </div>
+                        ))}
+                    </div>
+                );
 
-      case 'Identification':
-        return (
-          <div>
-            <input
-              type="text"
-              className="w-full border p-2 rounded"
-              placeholder="Type your answer here"
-              value={savedAnswers[question.question_id] || ''}
-              onChange={(e) => onAnswerChange(question.question_id, e.target.value)}
-            />
-          </div>
-        );
+            case 'Identification':
+                return (
+                    <div className="mb-3">
+                        <input
+                            {...register(questionName)}
+                            type="text"
+                            className="form-control"
+                            placeholder="Type your answer here"
+                        />
+                    </div>
+                );
 
-      default:
-        return <div>Unknown question type</div>;
-    }
-  };
+            default:
+                return <div>Unknown question type</div>;
+        }
+    };
 
-  return (
-    <div className="space-y-8">
-      {questionsData.length > 0 ? (
-        questionsData.map((question, index) => (
-          <div key={question.question_id} className="bg-white p-6 rounded-lg shadow">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium">Question {index + 1}</h3>
-              <span className="text-sm text-gray-500">
-                {question.question_detail.type.replace('_', ' ').toUpperCase()}
-              </span>
-            </div>
-            <p className="mb-4">{question.question}</p>
-            {renderQuestion(question)}
-          </div>
-        ))
-      ) : (
-        <p>No questions found for this course.</p>
-      )}
-    </div>
-  );
+    return (
+        <div>
+            {course.questions?.length > 0 ? (
+                course.questions.map((question, index) => (
+                    <div key={question.question_id} className="card mb-4 shadow-sm">
+                        <div className="card-body">
+                            <h5 className="card-title">Question {index + 1}</h5>
+                            <p className="card-text">{question.question}</p>
+                            {renderQuestion(question)}
+                        </div>
+                    </div>
+                ))
+            ) : (
+                <p>No questions found for this course.</p>
+            )}
+        </div>
+    );
 };
 
 export default QuestionForm;
