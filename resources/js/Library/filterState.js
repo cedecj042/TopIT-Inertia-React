@@ -48,7 +48,8 @@ export const INITIAL_QUESTION_STATE = (queryParams = {}) => ({
     filterState: {
         course: queryParams?.course || "",
         difficulty: queryParams?.difficulty || "",
-        types: queryParams?.types || "",
+        detail_types: queryParams?.detail_types || "",
+        test_types: queryParams?.question_types || "",
     },
     otherState: {
         question: queryParams?.question || "",

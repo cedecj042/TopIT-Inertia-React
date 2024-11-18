@@ -18,7 +18,7 @@ class Question extends Model
         'course_id',
         'question_detail_id',
         'difficulty_id',
-        'question_type',
+        'test_type',
         'question',
         'discrimination_index',
         'created_at',

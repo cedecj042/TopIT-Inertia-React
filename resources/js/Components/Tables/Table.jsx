@@ -59,11 +59,11 @@ export default function Table({
                                     column.visible && (
                                         <td key={column.key} className="align-content-center">
                                             {Array.isArray(getColumnValue(rowData, column.key)) ? (
-                                                <ol type="a">
+                                                <ul>
                                                     {getColumnValue(rowData, column.key).map((item, index) => (
                                                         <li key={index}>{item}</li>
                                                     ))}
-                                                </ol>
+                                                </ul>
                                             ) : (
                                                 getColumnValue(rowData, column.key)
                                             )}

@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum QuestionType:string{
+enum TestType:string{
     case PRETEST = 'Pretest';
     case TEST = 'Test';
 }

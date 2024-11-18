@@ -70,3 +70,10 @@ export const textToArray = (text) => {
     // Then split the modified text by commas and trim each item
     return modifiedText.split(',').map(item => item.trim());
 };
+
+export const formatFilterKey = (filterKey) => {
+    return filterKey
+        .split('_') // Split the string by underscores
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
+        .join(' '); // Join the words with spaces
+}

@@ -1,11 +1,11 @@
 import SelectInput from "../../SelectInput";
-import {capitalizeFirstLetter} from '../../../Library/utils';
+import {capitalizeFirstLetter, formatFilterKey} from '../../../Library/utils';
 
 export default function SelectFilter({keyValue,filterKey,data,handleFilterChange}) {
     return (
         <div className="mb-3">
             <label htmlFor={`${filterKey}Select`} className="form-label">
-                {capitalizeFirstLetter(filterKey)}
+                {formatFilterKey(filterKey)}
             </label>
             <SelectInput
                 onChange={(e) => handleFilterChange(filterKey, e.target.value)}
@@ -14,7 +14,7 @@ export default function SelectFilter({keyValue,filterKey,data,handleFilterChange
                 className={` form-select ${keyValue === "" ? 'text-secondary' : ''}`}
                 id={`${filterKey}Select`}
             >
-                <option value="" disabled >Select {filterKey}</option>
+                <option value="" disabled >Select {formatFilterKey(filterKey)}</option>
                 {data.map((item) => (
                     <option key={item} value={item}>
                         {item}

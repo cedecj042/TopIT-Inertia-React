@@ -341,7 +341,7 @@ export default function ContentTypeForm({
             </Modal>
 
             {/* Delete Confirmation for types Modal */}
-            <Modal
+            {/* <Modal
                 show={deleteModal}
                 modalTitle="Confirm Delete"
                 onClose={closeDeleteModal}
@@ -352,7 +352,7 @@ export default function ContentTypeForm({
                     onDelete={() => deleteTypes(contentableId)}
                     isProcessing={isProcessing}
                 />
-            </Modal>
+            </Modal> */}
 
             
         </>

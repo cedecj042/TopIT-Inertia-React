@@ -3,11 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\QuestionDetailType;
+use App\Enums\QuestionTestType;
+use App\Enums\TestType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\EditQuestionRequest;
 use App\Http\Resources\QuestionResource;
+use App\Models\Course;
+use App\Models\Difficulty;
 use App\Models\Question;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class QuestionController extends Controller
@@ -44,10 +50,13 @@ class QuestionController extends Controller
                 $q->where('name', $difficulty); // Assuming 'name' is the field in difficulty table
             });
         }
-        if ($types = request('types')) {
-            $query->whereHas('question_detail', function ($q) use ($types) {
-                $q->where('type', $types); // Assuming 'name' is the field in difficulty table
+        if ($detail_types = request('detail_types')) {
+            $query->whereHas('question_detail', function ($q) use ($detail_types) {
+                $q->where('type', $detail_types); // Assuming 'name' is the field in difficulty table
             });
+        }
+        if ($test_types = request('test_types')) {
+            $query->where('test_type', $test_types); // Assuming 'test_type' is a column in the 'questions' table
         }
         
         $perPage = request('items', 5);
@@ -55,7 +64,10 @@ class QuestionController extends Controller
 
         $title =  DB::table('courses')->distinct()->pluck('title');
         $difficulty =  DB::table('difficulty')->distinct()->pluck('name');
-        $questionTypes = collect(QuestionDetailType::cases())->map(function ($case) {
+        $questionDetailTypes = collect(QuestionDetailType::cases())->map(function ($case) {
+            return $case->value;
+        })->toArray();
+        $testTypes = collect(TestType::cases())->map(function ($case) {
             return $case->value;
         })->toArray();
     
@@ -63,8 +75,10 @@ class QuestionController extends Controller
         $filters = [
             'courses' => $title,
             'difficulty' => $difficulty,
-            'types' => $questionTypes,
+            'detail_types' => $questionDetailTypes,
+            'test_types' => $testTypes,
         ];
+        
         return Inertia::render('Admin/Questions/Question',[
             'title' => 'Admin Question',
             'questions' => QuestionResource::collection($questions),
@@ -100,18 +114,68 @@ class QuestionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(string $id,EditQuestionRequest $request)
     {
         //
+        $validated = $request->validated();
+        Log::info($validated);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(EditQuestionRequest $request, string $id)
     {
-        //
+        $validated = $request->validated();
+
+        // Fetch the question with related data
+        $question = Question::with(['difficulty', 'course', 'question_detail'])->findOrFail($validated['question_id']);
+
+        // Update course if changed
+        if ($question->course->title !== $validated['course']) {
+            $course = Course::where('title', $validated['course'])->firstOrFail();
+            $question->course_id = $course->course_id;
+        }
+
+        // Update difficulty if changed
+        if ($question->difficulty->name !== $validated['difficulty']) {
+            $difficulty = Difficulty::where('name', $validated['difficulty'])->firstOrFail();
+            $question->difficulty_id = $difficulty->difficulty_id;
+        }
+
+        // Save relationship changes
+        if ($question->isDirty(['course_id', 'difficulty_id'])) {
+            $question->save();
+        }
+
+        // Prepare JSON-encoded values for answer and choices
+        $encodedAnswer = json_encode($validated['answer']);
+        $encodedChoices = json_encode($validated['choices'] ?? []);
+
+        // Update question_detail if any relevant field has changed
+        $questionDetail = $question->question_detail;
+        if (
+            $questionDetail->type !== $validated['question_detail_type'] ||
+            $questionDetail->answer !== $encodedAnswer ||
+            $questionDetail->choices !== $encodedChoices
+        ) {
+            $questionDetail->update([
+                'type' => $validated['question_detail_type'],
+                'answer' => $encodedAnswer,
+                'choices' => $encodedChoices,
+            ]);
+        }
+
+        // Update question attributes
+        $question->update([
+            'question' => $validated['question'],
+            'discrimination_index' => $validated['discrimination_index'],
+            'test_type' => $validated['test_type'],
+        ]);
+
+        return redirect()->back()->with('success', 'Successfully updated');
     }
+
 
     /**
      * Remove the specified resource from storage.

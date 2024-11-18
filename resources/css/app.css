@@ -34,3 +34,6 @@ body{
 .page-link{
     z-index: 1 !important;
 }
+.text-align-end{
+    text-align: end;
+}

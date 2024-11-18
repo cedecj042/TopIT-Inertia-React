@@ -1,5 +1,5 @@
-export default function QuestionModal({ question, onClose }) {
-    console.log(question)
+export default function ViewQuestionModal({ question }) {
+
     return (
         <>
             <div className="modal-body">

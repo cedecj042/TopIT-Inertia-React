@@ -101,6 +101,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     });
     Route::prefix('question')->name('question.')->group(function (){
         Route::get('/',[QuestionController::class,'index'])->name('index');
+        Route::put('/update/{id}',[QuestionController::class,'update'])->name('update');
     });
     
 

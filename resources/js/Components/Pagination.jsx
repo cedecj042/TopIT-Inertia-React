@@ -1,13 +1,12 @@
 import { Link } from "@inertiajs/react";
 import "../../css/admin/navigation.css";
 
-export default function Pagination({ links, queryParams={}}) {
+export default function Pagination({ links, queryParams = {} }) {
     return (
         <nav aria-label="Page navigation example" className="text-center mt-4 d-flex gap-2 justify-content-center">
             <ul className="pagination">
                 {links.map((link, index) => (
                     <li
-                    
                         key={index}
                         className={
                             `page-item ${link.active ? "active" : ""}` +
@@ -16,7 +15,14 @@ export default function Pagination({ links, queryParams={}}) {
                     >
                         <Link
                             preserveScroll={true}
-                            href={link.url ? `${link.url}&${new URLSearchParams(queryParams).toString()}` : ""}
+                            href={
+                                link.url
+                                    ? `${link.url.split('?')[0]}?${new URLSearchParams({
+                                          ...queryParams,
+                                          page: new URL(link.url).searchParams.get('page') || 1, // Add or replace the page parameter
+                                      }).toString()}`
+                                    : ""
+                            }
                             className="page-link"
                             dangerouslySetInnerHTML={{
                                 __html: link.label.includes("Previous")

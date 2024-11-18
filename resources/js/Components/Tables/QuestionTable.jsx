@@ -4,7 +4,8 @@ import Table from "./Table";
 import { useColumnVisibility, useRequest, useSortState } from "@/Library/hooks";
 import Modal from "../Modal/Modal";
 import DeleteForm from "../Forms/DeleteForm";
-import QuestionModal from "../Modal/QuestionModal";
+import ViewQuestionModal from "../Modal/ViewQuestionModal";
+import EditQuestionForm from "../Forms/EditQuestionForm";
 
 
 export default function QuestionTable({
@@ -105,14 +106,10 @@ export default function QuestionTable({
                 modalSize={'modal-lg'}
             >
                 {activeModal === "view" && selectedQuestion && (
-                    <QuestionModal onClose={closeModal} question={selectedQuestion} />
+                    <ViewQuestionModal onClose={closeModal} question={selectedQuestion}/>
                 )}
                 {activeModal === "edit" && selectedQuestion && (
-                    <div>
-                        <h4>Edit Question</h4>
-                        {/* Add form or components here to edit the question */}
-                        <p>Editing question with ID: {selectedQuestion.question_id}</p>
-                    </div>
+                    <EditQuestionForm onClose={closeModal} question={selectedQuestion} filters = {filters} />
                 )}
                 {activeModal === "delete" && selectedQuestion && (
                     <DeleteForm
