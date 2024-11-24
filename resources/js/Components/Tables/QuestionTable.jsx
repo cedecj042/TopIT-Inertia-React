@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import ContextProvider from "./TableContext";
+import ContextProvider from "../Context/TableContext";
 import Table from "./Table";
 import { useColumnVisibility, useRequest, useSortState } from "@/Library/hooks";
 import Modal from "../Modal/Modal";

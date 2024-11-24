@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import "../../../css/filter.css";
-import ContextProvider from "../Tables/TableContext";
+import ContextProvider from "../Context/TableContext";
 import { useFilterState, useOtherState, useSortState } from "@/Library/hooks";
 import ClearFunction from "./Filters/ClearFunction";
 import { INITIAL_QUESTION_STATE } from "@/Library/filterState";

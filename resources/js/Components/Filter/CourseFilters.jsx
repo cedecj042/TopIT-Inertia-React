@@ -3,7 +3,7 @@ import TextInputFilter from "./Filters/TextInputFilter";
 import "../../../css/filter.css";
 import OtherFilter from "./Filters/otherFilter";
 import { useContext, useEffect } from "react";
-import ContextProvider from "../Tables/TableContext";
+import ContextProvider from "../Context/TableContext";
 
 export default function CourseFilters({}){  
 

@@ -1,7 +1,7 @@
 import { router } from "@inertiajs/react";
 import Table from "./Table";
 import { useContext, useEffect } from "react";
-import ContextProvider from "./TableContext";
+import ContextProvider from "../Context/TableContext";
 import { useSortState } from "@/Library/hooks";
 
 export default function StudentsTable({

@@ -1,12 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
-import ContextProvider from "./TableContext";
+import { usePage } from "@inertiajs/react"; // To detect the current URL
 import Table from "./Table";
-import { useSortState } from "@/Library/hooks";
+import { useRequest, useSortState } from "@/Library/hooks";
+import { toast } from "sonner";
 
 export default function AddPretestTable({ data, filters, queryParams }) {
     const { state, dispatch, visibleColumns } = useContext(ContextProvider);
+    const { url } = usePage(); // Get the current URL
     const keyField = "question_id";
     const { changeSort } = useSortState(dispatch);
+    const { isProcessing, postRequest } = useRequest();
 
     const [selectedQuestions, setSelectedQuestions] = useState(() => {
         return localStorage.getItem("selectedQuestions")
@@ -18,6 +21,18 @@ export default function AddPretestTable({ data, filters, queryParams }) {
     useEffect(() => {
         localStorage.setItem("selectedQuestions", JSON.stringify(selectedQuestions));
     }, [selectedQuestions]);
+
+    // Clear localStorage when the URL changes outside `/pretest/add`
+    useEffect(() => {
+        const currentPath = window.location.pathname; // Use `window.location.pathname` for accuracy
+        console.log("Current Path:", currentPath); // Debugging
+
+        if (!currentPath.includes("/admin/pretest/add")) {
+            localStorage.removeItem("selectedQuestions");
+            setSelectedQuestions([]); // Clear the local state as well
+        }
+    }, [window.location.pathname]);
+    console.log(url)
 
     // Handle row click
     const handleRowClick = (e, rowData) => {
@@ -41,6 +56,19 @@ export default function AddPretestTable({ data, filters, queryParams }) {
         />
     );
 
+    const addToPretest = () => {
+        postRequest("admin.pretest.add", selectedQuestions, {
+            onSuccess: () => {
+                toast.success("Question added to Pretest successfully.", { duration: 3000 });
+                localStorage.removeItem("selectedQuestions"); // Clear localStorage on success
+                setSelectedQuestions([]); // Clear local state as well
+            },
+            onError: () => {
+                toast.error("Error saving the question.", { duration: 3000 });
+            },
+        });
+    };
+
     console.log("Selected Questions:", selectedQuestions);
 
     return (
@@ -59,7 +87,7 @@ export default function AddPretestTable({ data, filters, queryParams }) {
             <div className="mt-3">
                 <button
                     className="btn btn-success"
-                    onClick={() => console.log("Selected Question IDs:", selectedQuestions)}
+                    onClick={addToPretest} // Correctly invoke the function
                 >
                     Submit Selected
                 </button>

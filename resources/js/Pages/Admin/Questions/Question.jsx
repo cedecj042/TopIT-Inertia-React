@@ -4,7 +4,7 @@ import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import Modal from "@/Components/Modal/Modal";
 import Pagination from "@/Components/Pagination";
 import QuestionTable from "@/Components/Tables/QuestionTable";
-import { TableContext } from "@/Components/Tables/TableContext";
+import { TableContext } from "@/Components/Context/TableContext";
 import { QUESTION_COLUMN, QUESTION_FILTER_COMPONENT } from "@/Library/constants";
 import { INITIAL_QUESTION_STATE } from "@/Library/filterState";
 import { useRequest } from "@/Library/hooks";

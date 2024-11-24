@@ -10,7 +10,7 @@ import {
     STUDENT_COLUMN,
     STUDENT_FILTER_COMPONENT,
 } from "@/Library/constants";
-import { TableContext } from "@/Components/Tables/TableContext";
+import { TableContext } from "@/Components/Context/TableContext";
 import StudentFilters from "@/Components/Filter/StudentFilters";
 
 function Dashboard({

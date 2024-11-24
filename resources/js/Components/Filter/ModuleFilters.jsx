@@ -5,7 +5,7 @@ import TextInputFilter from "@/Components/Filter/Filters/TextInputFilter";
 import { INITIAL_MODULE_STATE } from "@/Library/filterState";
 import OtherFilter from "@/Components/Filter/Filters/OtherFilter";
 import { useContext } from "react";
-import ContextProvider from "../Tables/TableContext";
+import ContextProvider from "../Context/TableContext";
 import { useFilterState, useOtherState } from "@/Library/hooks";
 
 export default function ModuleFilters({ filters }) {

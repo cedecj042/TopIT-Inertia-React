@@ -2,7 +2,7 @@ import "../../../css/admin/tables.css";
 import { toast } from "sonner";
 import Table from "./Table";
 import { useContext, useState } from "react";
-import ContextProvider from "./TableContext";
+import ContextProvider from "../Context/TableContext";
 import { useRequest } from "@/Library/hooks";
 import Modal from "../Modal/Modal";
 import DeleteForm from "../Forms/DeleteForm";
