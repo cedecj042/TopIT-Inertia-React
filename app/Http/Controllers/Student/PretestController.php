@@ -63,7 +63,7 @@ class PretestController extends Controller
         $courses = Course::with([
             'questions' => function ($query) {
                 $query->where('question_type', 'Test')
-                    ->with('question_details');
+                    ->with('question_detail');
             }
         ])->get();
 
@@ -135,14 +135,20 @@ class PretestController extends Controller
             $totalItems = 0;
 
             foreach ($validated['answers'] as $questionId => $participantAnswer) {
-                $question = Question::with(['question_details', 'course'])
+                $question = Question::with(['question_detail', 'course'])
                     ->findOrFail($questionId);
 
+                if (!$question->question_detail) {
+                    \Log::info('Question detail not found for question ID: ' . $questionId);
+                    continue;
+                }
+
+
                 #get correct answer
-                $correctAnswer = json_decode($question->question_details->answer, true);
+                $correctAnswer = json_decode($question->question_detail->answer, true);
 
                 #scoring logic temp (no theta yet)
-                $score = $this->calculateQuestionScore($question->question_details->type, $participantAnswer, $correctAnswer);
+                $score = $this->calculateQuestionScore($question->question_detail->type, $participantAnswer, $correctAnswer);
 
                 #storing to assessmentitem
                 AssessmentItem::create([

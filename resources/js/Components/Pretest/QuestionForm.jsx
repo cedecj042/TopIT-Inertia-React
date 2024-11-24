@@ -12,13 +12,21 @@ const QuestionForm = ({ course, register, setValue, answers }) => {
 
     const renderQuestion = (question) => {
         const questionDetail = question.question_detail || {};
+        console.log('Question detail:', questionDetail);
+
         const questionName = `answers.${question.question_id}`;
+        const choices = questionDetail.choices;
+
+        // if (!choices) {
+        //     console.warn('Choices are not defined for question:', question);
+        //     return <div>No choices available for this question</div>;
+        // }
 
         switch (questionDetail.type) {
             case 'Multiple Choice - Single':
                 return (
                     <div>
-                        {JSON.parse(questionDetail.choices).map((choice, index) => (
+                        {choices.map((choice, index) => (
                             <div key={index} className="form-check mb-2">
                                 <input
                                     {...register(questionName)}
@@ -42,7 +50,7 @@ const QuestionForm = ({ course, register, setValue, answers }) => {
                 const currentValues = answers[question.question_id] || [];
                 return (
                     <div>
-                        {JSON.parse(questionDetail.choices).map((choice, index) => (
+                        {choices.map((choice, index) => (
                             <div key={index} className="form-check mb-2">
                                 <input
                                     type="checkbox"
