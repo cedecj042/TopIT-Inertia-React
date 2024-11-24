@@ -49,7 +49,7 @@ export const INITIAL_QUESTION_STATE = (queryParams = {}) => ({
         course: queryParams?.course || "",
         difficulty: queryParams?.difficulty || "",
         detail_types: queryParams?.detail_types || "",
-        test_types: queryParams?.question_types || "",
+        // test_types: queryParams?.question_types || "",
     },
     otherState: {
         question: queryParams?.question || "",

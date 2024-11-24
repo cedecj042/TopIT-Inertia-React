@@ -24,7 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->validateCsrfTokens(except:[
             '/admin/store-processed-pdf',
-            'admin/store-questions',
+            '/admin/store-questions',
         ]);
         
 

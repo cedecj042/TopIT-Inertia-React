@@ -7,11 +7,17 @@ use App\Enums\QuestionTestType;
 use App\Enums\TestType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EditQuestionRequest;
+use App\Http\Requests\GenerateQuestionRequest;
+use App\Http\Resources\CourseResource;
+use App\Http\Resources\DifficultyResource;
 use App\Http\Resources\QuestionResource;
+use App\Jobs\GenerateQuestionJob;
+use App\Jobs\ProcessQuestionsJob;
 use App\Models\Course;
 use App\Models\Difficulty;
 use App\Models\Question;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -24,7 +30,7 @@ class QuestionController extends Controller
     public function index()
     {
         //
-        $query = Question::query()->with(['difficulty','question_detail','course']);
+        $query = Question::query()->with(['difficulty','question_detail','course'])->where('test_type','Test');
 
         if ($search = request('question')) {
             $search = strtolower($search); // Convert the search term to lowercase
@@ -81,6 +87,7 @@ class QuestionController extends Controller
         
         return Inertia::render('Admin/Questions/Question',[
             'title' => 'Admin Question',
+            'auth' => Auth::user(),
             'questions' => QuestionResource::collection($questions),
             'filters' => $filters,
             'queryParams' => request()->query() ?: null,
@@ -88,27 +95,26 @@ class QuestionController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        //
+    public function generate(GenerateQuestionRequest $request){
+        $validatedData = $request->validated();
+        GenerateQuestionJob::dispatch($validatedData);
+        return redirect()->back()->with('message', 'Generating questions based on the selected courses.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+
+    public function show()
     {
         //
+        $courses = Course::with('modules')->get();
+        $difficulty =  DB::table('difficulty')->distinct()->get();
+        return Inertia::render('Admin/Questions/Generate',[
+            'title' => 'Admin Question',
+            'auth' => Auth::user(),
+            'courses' => CourseResource::collection($courses),
+            'difficulty' => DifficultyResource::collection($difficulty),
+        ]);
     }
 
     /**
@@ -180,8 +186,28 @@ class QuestionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function delete(string $id)
     {
         //
+        $question = Question::with('question_detail')->findOrFail($id);
+        $question->question_detail->delete();
+        $question->delete();
+        return redirect()->back()->with('success', 'Deleted Successfully');
     }
+    public function courses(){
+        $courses = Course::all();
+        $difficulty =  DB::table('difficulty')->distinct()->get();
+        $questionDetailTypes = collect(QuestionDetailType::cases())->map(function ($case) {
+            return $case->value;
+        })->toArray();
+        return response()->json(['courses' => $courses,'difficulty' =>$difficulty,'question_detail_types'=>$questionDetailTypes]);
+    }
+    public function store(Request $request)
+    {
+        $data = $request->json()->all();
+        // Dispatch the job
+        ProcessQuestionsJob::dispatch($data);
+        return redirect()->back()->with('success', 'Deleted Successfully');
+    }
+    
 }

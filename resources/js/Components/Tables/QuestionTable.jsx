@@ -6,6 +6,7 @@ import Modal from "../Modal/Modal";
 import DeleteForm from "../Forms/DeleteForm";
 import ViewQuestionModal from "../Modal/ViewQuestionModal";
 import EditQuestionForm from "../Forms/EditQuestionForm";
+import { toast } from "sonner";
 
 
 export default function QuestionTable({
@@ -63,10 +64,6 @@ export default function QuestionTable({
         );
     };
 
-    const editQuestion = () => {
-        e.stopPropagation();
-        
-    };
 
     const deleteQuestion = (question_id) => {
         deleteRequest("admin.question.delete", question_id, {
@@ -79,7 +76,7 @@ export default function QuestionTable({
             },
         });
     };
-    const viewCourse = (e,rowData) => {
+    const viewQuestion = (e,rowData) => {
         e.preventDefault();
         openModal("view", rowData); // Open view modal on row click
     };
@@ -93,10 +90,8 @@ export default function QuestionTable({
                 renderActions={renderActions}
                 keyField={keyField}
                 isRowClickable={true}
-                handleClick={viewCourse}
+                handleClick={viewQuestion}
             />
-
-            
         
             {/* Modal for View, Edit, and Delete */}
             <Modal 

@@ -8,13 +8,14 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PretestController as AdminPretestController;
+use App\Http\Controllers\Student\PretestController as StudentPretestController;
 use App\Http\Controllers\Admin\ProcessedPdfController;
 use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\StudentCourseController;
 use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\StudentProfileController;
-use App\Http\Controllers\Student\PretestController;
 use App\Http\Controllers\Student\TestController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,20 +35,21 @@ Route::middleware('auth')->group(function () {
 
 // Admin
 Route::post('/admin/store-processed-pdf', [ProcessedPdfController::class, 'store'])->name('store-pdf');
+Route::post('/admin/store-questions', [QuestionController::class, 'store'])->name('store-questions');
 
 Route::middleware(['auth', 'student'])->group(function () {
     Route::redirect('/', '/dashboard');
-    Route::get('/welcome', [PretestController::class, 'welcome'])->name('welcome');
+    Route::get('/welcome', [StudentPretestController::class, 'welcome'])->name('welcome');
     
     Route::prefix('pretest')->name('pretest.')->group(function () {
-        Route::get('/start', [PretestController::class, 'startPretest'])->name('start');
+        Route::get('/start', [StudentPretestController::class, 'startPretest'])->name('start');
         // Route::get('/questions/{courseIndex}', [PretestController::class, 'showQuestions'])->name('questions');
 
-        Route::post('/submit', [PretestController::class, 'submit'])->name('submit');
-        Route::get('finish/{assessmentId}', [PreTestController::class, 'finish'])->name('finish');
+        Route::post('/submit', [StudentPretestController::class, 'submit'])->name('submit');
+        Route::get('finish/{assessmentId}', [StudentPretestController::class, 'finish'])->name('finish');
 
         // Route::get('/finish/{pretestId}', [PretestController::class, 'showFinishAttempt'])->name('finish');
-        Route::get('/review/{pretestId}', [PretestController::class, 'reviewPretest'])->name('review');
+        Route::get('/review/{pretestId}', [StudentPretestController::class, 'reviewPretest'])->name('review');
     });
 
     Route::redirect('', '/dashboard');
@@ -102,6 +104,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::prefix('question')->name('question.')->group(function (){
         Route::get('/',[QuestionController::class,'index'])->name('index');
         Route::put('/update/{id}',[QuestionController::class,'update'])->name('update');
+        Route::delete('/delete/{id}',[QuestionController::class,'delete'])->name('delete');
+        Route::get('/generate/show',[QuestionController::class,'show'])->name('show');
+        Route::post('/generate',[QuestionController::class,'generate'])->name('generate');
+        Route::get('/courses',[QuestionController::class,'courses'])->name('courses');
+    });
+
+    Route::prefix('pretest')->name('pretest.')->group(function(){
+        Route::get('/',[AdminPretestController::class,'index'])->name('index');
+        Route::get('/add',[AdminPretestController::class,'show'])->name('add');
+        
     });
     
 

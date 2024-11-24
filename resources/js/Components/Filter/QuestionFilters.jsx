@@ -32,11 +32,11 @@ export default function QuestionFilters({filters}){
             filterKey: "detail_types",
             keyValue: filterState.detail_types,
         },
-        {
-            data: filters.test_types,
-            filterKey: "test_types",
-            keyValue: filterState.test_types,
-        },
+        // {
+        //     data: filters.test_types,
+        //     filterKey: "test_types",
+        //     keyValue: filterState.test_types,
+        // },
     ];
     return (
         <div className="row m-0 p-0 justify-content-between">
@@ -84,7 +84,7 @@ export default function QuestionFilters({filters}){
                                 <button
                                     className="btn btn-light w-100"
                                     onClick={() =>
-                                        handleClearFilter(["course","difficulty","detail_types","test_types"])
+                                        handleClearFilter(["course","difficulty","detail_types"])
                                     }
                                 >
                                     Clear Filters
