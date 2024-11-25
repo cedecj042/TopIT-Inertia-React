@@ -62,7 +62,7 @@ class PretestController extends Controller
 
         $courses = Course::with([
             'questions' => function ($query) {
-                $query->where('question_type', 'Test')
+                $query->where('test_type', 'Test')
                     ->with('question_detail');
             }
         ])->get();
@@ -115,22 +115,17 @@ class PretestController extends Controller
 
             DB::beginTransaction();
 
-            // 1. Fetch assessment and check status
             $assessment = Assessment::where('assessment_id', $validated['assessment_id'])
                 ->where('status', '!=', 'Completed')
                 ->firstOrFail();
 
             $student = Student::findOrFail($assessment->student_id);
 
-            // \Log::info('assessment and student found', [
+            // Log::debug('Processing answers for assessment:', [
             //     'assessment_id' => $assessment->assessment_id,
             //     'student_id' => $student->student_id
             // ]);
 
-            // 2. Received ans from post
-            Log::info('Submitted answers:', $validated['answers']);
-
-            // 3. Process answers and update assessment details
             $totalScore = 0;
             $totalItems = 0;
 
@@ -139,22 +134,46 @@ class PretestController extends Controller
                     ->findOrFail($questionId);
 
                 if (!$question->question_detail) {
-                    \Log::info('Question detail not found for question ID: ' . $questionId);
+                    Log::warning('Question detail not found for question ID: ' . $questionId);
                     continue;
                 }
 
+                // Log::debug('Processing question:', [
+                //     'question_id' => $questionId,
+                //     'type' => $question->question_detail->type,
+                //     'participant_answer_raw' => $participantAnswer,
+                //     'stored_answer_raw' => $question->question_detail->answer
+                // ]);
 
-                #get correct answer
-                $correctAnswer = json_decode($question->question_detail->answer, true);
+                // deocding correct answer
+                $correctAnswer = $question->question_detail->answer;
+                if (is_string($correctAnswer)) {
+                    $correctAnswer = json_decode($correctAnswer, true);
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        Log::error('JSON decode error for correct answer: ' . json_last_error_msg());
+                        continue;
+                    }
+                }
 
-                #scoring logic temp (no theta yet)
-                $score = $this->calculateQuestionScore($question->question_detail->type, $participantAnswer, $correctAnswer);
+                // calculate score with proper answer formats
+                $score = $this->calculateQuestionScore(
+                    $question->question_detail->type,
+                    $participantAnswer,
+                    $correctAnswer
+                );
 
-                #storing to assessmentitem
+                // Log::debug('Question scoring:', [
+                //     'type' => $question->question_detail->type,
+                //     'participant_answer' => $participantAnswer,
+                //     'correct_answer' => $correctAnswer,
+                //     'score' => $score
+                // ]);
+
+                // store and encode participant answer 
                 AssessmentItem::create([
                     'assessment_course_id' => $this->getAssessmentCourseId($assessment->assessment_id, $question->course_id),
                     'question_id' => $questionId,
-                    'participants_answer' => json_encode($participantAnswer),
+                    'participants_answer' => is_array($participantAnswer) ? json_encode($participantAnswer) : json_encode([$participantAnswer]),
                     'score' => $score
                 ]);
 
@@ -162,7 +181,7 @@ class PretestController extends Controller
                 $totalItems++;
             }
 
-            // 4. Update assessment and assessment course details
+            // assessment score
             $assessment->update([
                 'end_time' => now(),
                 'status' => 'Completed',
@@ -181,37 +200,83 @@ class PretestController extends Controller
             DB::rollBack();
             Log::error('Pretest submission error: ' . $e->getMessage());
             Log::error($e->getTraceAsString());
-
             return back()->with('error', 'An error occurred while submitting your pretest. Please try again.');
         }
     }
 
     private function calculateQuestionScore($questionType, $participantAnswer, $correctAnswer)
     {
-        $score = 0;
+        try {
+            Log::debug('calculateQuestionScore input:', [
+                'type' => $questionType,
+                'participant_answer' => $participantAnswer,
+                'correct_answer' => $correctAnswer
+            ]);
 
-        switch ($questionType) {
-            case 'Identification':
-                $score = strtolower(trim($participantAnswer)) === strtolower(trim($correctAnswer[0])) ? 1 : 0;
-                break;
-            case 'Multiple Choice - Single':
-                $score = strtolower($participantAnswer) === strtolower($correctAnswer[0]) ? 1 : 0;
-                break;
-            case 'Multiple Choice - Many':
-                $participantAnswers = is_array($participantAnswer) ? $participantAnswer : [];
-                $correctAnswers = is_array($correctAnswer) ? $correctAnswer : json_decode($correctAnswer, true);
+            switch ($questionType) {
+                case 'Identification':
+                    // Ensure we're comparing strings properly
+                    $participantText = is_array($participantAnswer) ? $participantAnswer[0] : $participantAnswer;
+                    $correctText = is_array($correctAnswer) ? $correctAnswer[0] : $correctAnswer;
 
-                // sort arrays for correct ans
-                sort($participantAnswers);
-                sort($correctAnswers);
+                    $participantText = strtolower(trim((string) $participantText));
+                    $correctText = strtolower(trim((string) $correctText));
 
-                $score = (json_encode($participantAnswers) === json_encode($correctAnswers)) ? 1 : 0;
-                break;
+                    // Remove extra spaces and special characters
+                    $participantText = preg_replace('/\s+/', ' ', $participantText);
+                    $correctText = preg_replace('/\s+/', ' ', $correctText);
+
+                    $score = $participantText === $correctText ? 1 : 0;
+                    break;
+
+                case 'Multiple Choice - Single':
+                    // Ensure we're comparing single values
+                    $participantChoice = is_array($participantAnswer) ? $participantAnswer[0] : $participantAnswer;
+                    $correctChoice = is_array($correctAnswer) ? $correctAnswer[0] : $correctAnswer;
+
+                    $participantChoice = strtolower(trim((string) $participantChoice));
+                    $correctChoice = strtolower(trim((string) $correctChoice));
+
+                    $score = $participantChoice === $correctChoice ? 1 : 0;
+                    break;
+
+                case 'Multiple Choice - Many':
+                    // Ensure we have arrays
+                    $participantAnswers = is_array($participantAnswer) ? $participantAnswer : [$participantAnswer];
+                    $correctAnswers = is_array($correctAnswer) ? $correctAnswer : [$correctAnswer];
+
+                    // Normalize each answer in both arrays
+                    $participantAnswers = array_map(function ($ans) {
+                        return strtolower(trim((string) $ans));
+                    }, $participantAnswers);
+
+                    $correctAnswers = array_map(function ($ans) {
+                        return strtolower(trim((string) $ans));
+                    }, $correctAnswers);
+
+                    sort($participantAnswers);
+                    sort($correctAnswers);
+
+                    $score = (json_encode($participantAnswers) === json_encode($correctAnswers)) ? 1 : 0;
+                    break;
+
+                default:
+                    Log::warning("Unknown question type: $questionType");
+                    $score = 0;
+            }
+
+            Log::debug('Score calculated:', [
+                'type' => $questionType,
+                'score' => $score
+            ]);
+
+            return $score;
+
+        } catch (\Exception $e) {
+            Log::error('Error in calculateQuestionScore: ' . $e->getMessage());
+            return 0;
         }
-
-        return $score;
     }
-
     private function getAssessmentCourseId($assessmentId, $courseId)
     {
         $assessmentCourse = AssessmentCourse::where('assessment_id', $assessmentId)
@@ -249,9 +314,5 @@ class PretestController extends Controller
             ]);
         }
     }
-
-
-
-
 
 }
