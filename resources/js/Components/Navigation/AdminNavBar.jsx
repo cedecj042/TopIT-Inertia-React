@@ -98,7 +98,7 @@ export default function AdminNavbar({ title }) {
                                 
                             </li>
                             <li className="w-100">
-                                <Link href="{route('admin.questions.pretest.index')}" className="nav-link text-white py-3 ps-5 d-flex align-items-center gap-1 ">
+                                <Link href={route('admin.pretest.index')} className={`nav-link text-white py-3 ps-5 d-flex align-items-center gap-1  ${title === 'Admin Pretest' ? 'active' : ''} `}>
                                     <span className="material-symbols-outlined">inventory</span>
                                     <span className="ms-1 d-none d-sm-inline fs-6">Pretest Items</span>
                                     

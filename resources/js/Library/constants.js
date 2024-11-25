@@ -28,7 +28,7 @@ export const PDF_COLUMN = [
 ]
 
 export const QUESTION_COLUMN = [
-    {key:'question_id',label:'ID', sortable:false,visible:true},
+    // {key:'question_id',label:'ID', sortable:false,visible:true},
     // {key:'course.title',label:'Course', sortable:false,visible:true},
     {key:'question',label:'Question', sortable:false,visible:true},
     {key:'difficulty.name',label:'Difficulty', sortable:false,visible:true},

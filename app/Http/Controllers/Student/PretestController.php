@@ -106,7 +106,7 @@ class PretestController extends Controller
     public function submit(Request $request)
     {
         try {
-            \Log::info('Pretest submission data: ', $request->all());
+            Log::info('Pretest submission data: ', $request->all());
 
             $validated = $request->validate([
                 'assessment_id' => 'required|exists:assessments,assessment_id',
@@ -128,7 +128,7 @@ class PretestController extends Controller
             // ]);
 
             // 2. Received ans from post
-            \Log::info('Submitted answers:', $validated['answers']);
+            Log::info('Submitted answers:', $validated['answers']);
 
             // 3. Process answers and update assessment details
             $totalScore = 0;
@@ -179,8 +179,8 @@ class PretestController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Pretest submission error: ' . $e->getMessage());
-            \Log::error($e->getTraceAsString());
+            Log::error('Pretest submission error: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
 
             return back()->with('error', 'An error occurred while submitting your pretest. Please try again.');
         }

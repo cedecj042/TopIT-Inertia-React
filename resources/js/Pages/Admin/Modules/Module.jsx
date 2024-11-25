@@ -3,7 +3,7 @@ import ModuleFilters from "@/Components/Filter/ModuleFilters";
 import Modal from "@/Components/Modal/Modal";
 import Pagination from "@/Components/Pagination";
 import ModuleTable from "@/Components/Tables/ModuleTable";
-import { TableContext } from "@/Components/Tables/TableContext";
+import { TableContext } from "@/Components/Context/TableContext";
 import { MODULE_COLUMN, MODULE_FILTER_COMPONENT } from "@/Library/constants";
 import { INITIAL_MODULE_STATE } from "@/Library/filterState";
 import { useState } from "react";

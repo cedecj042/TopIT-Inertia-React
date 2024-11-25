@@ -1,58 +1,40 @@
 import QuestionFilters from "@/Components/Filter/QuestionFilters";
-import GenerateQuestionForm from "@/Components/Forms/GenerateQuestionForm";
 import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import Modal from "@/Components/Modal/Modal";
 import Pagination from "@/Components/Pagination";
+import AddPretestTable from "@/Components/Tables/AddPretestTable";
 import QuestionTable from "@/Components/Tables/QuestionTable";
 import { TableContext } from "@/Components/Context/TableContext";
 import { QUESTION_COLUMN, QUESTION_FILTER_COMPONENT } from "@/Library/constants";
 import { INITIAL_QUESTION_STATE } from "@/Library/filterState";
 import { useRequest } from "@/Library/hooks";
-import axios from "axios";
-import { useState } from "react";
+import { SelectedQuestionsProvider } from "@/Components/Context/SelectedQuestionContext";
 
-function Question({ questions,filters,queryParams = {} }) {
-
+function AddPretest({questions,filters,queryParams = {}}){
     const {isProcessing,getRequest} = useRequest();
-    const [showModal, setShowModal] = useState(false);
-    const [data, setData] = useState([]);
-    const openModal = async () => {
-        try {
-            const response = await axios.get(route('admin.question.courses'));
-            setData(response.data);
-            setShowModal(true);
-
-        } catch (error) {
-            console.error("Failed to fetch courses with modules:", error);
-        }
-    };
-    const closeModal = () => setShowModal(false);
-
-    return (
+    
+    const addPretest = () =>{
+        getRequest('admin.pretest.add');
+    }
+    
+    return(
         <>
-            <div className="container-fluid p-5">
+        <div className="container-fluid p-5">
                 <div className="row justify-content-center">
-                <div className="col mb-3 btn-toolbar justify-content-between">
-                        <h2 className="fw-bolder m-0">Question Bank</h2>
-                        <button
-                            type="button"
-                            className="btn btn-primary btn-md btn-size"
-                            onClick={openModal}
-                        >
-                            Generate Question
-                        </button>
+                <div className="col mb-3 btn-toolbar justify-content-start">
+                        <h2 className="fw-bolder m-0">Add Pretest Question</h2>
                     </div>
                     <div className="row mt-2 p-0">
                         <div className="d-flex flex-column col-12">
                             <h5 className="fw-semibold mb-3">List of Questions</h5>
                             <TableContext
                                 initialState={INITIAL_QUESTION_STATE(queryParams)}
-                                routeName={"admin.question.index"}
+                                routeName={"admin.pretest.add"}
                                 components={QUESTION_FILTER_COMPONENT}
                                 column={QUESTION_COLUMN}
                             >
                                 <QuestionFilters filters={filters} />
-                                <QuestionTable
+                                <AddPretestTable
                                     data={questions.data}
                                     filters={filters}
                                     queryParams={queryParams}
@@ -63,17 +45,8 @@ function Question({ questions,filters,queryParams = {} }) {
                     </div>
                 </div>
             </div>
-            <Modal
-                show={showModal}
-                modalTitle={'Generate Question'}
-                modalSize={'modal-xl'}
-                onClose={closeModal}
-            >
-                <GenerateQuestionForm data={data} closeModal={closeModal} />
-
-            </Modal>
         </>
     );
 }
 
-export default AdminContent(Question);
+export default AdminContent(AddPretest);

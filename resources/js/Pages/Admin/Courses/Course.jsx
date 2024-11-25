@@ -4,7 +4,7 @@ import CourseForm from "@/Components/Forms/CourseForm";
 import Modal from "@/Components/Modal/Modal";
 import Pagination from "@/Components/Pagination";
 import CourseTable from "@/Components/Tables/CourseTable";
-import { TableContext } from "@/Components/Tables/TableContext";
+import { TableContext } from "@/Components/Context/TableContext";
 import { COURSE_COLUMN, COURSE_FILTER_COMPONENT } from "@/Library/constants";
 import { INITIAL_COURSE_STATE } from "@/Library/filterState";
 import { useState } from "react";

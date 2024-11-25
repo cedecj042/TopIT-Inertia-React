@@ -1,0 +1,42 @@
+.custom-checkbox {
+    /* background-color: #F3F7FF; */
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem 1.5rem;
+    margin-top: 20px;
+}
+
+.custom-label {
+    margin-left: 20px;
+}
+
+/* .custom-card {
+    margin-left: 30px;
+} */
+
+.rev-mat {
+    margin-left: 30px;
+    margin-right: -20px;
+}
+
+.quant-diff {
+    margin-left: -20px;
+}
+
+.card .form-label.bold {
+    font-weight: bold;
+}
+
+.materials-container .card {
+    background-color: #ffffff;
+    border-radius: 0.375rem;
+    border: 1px solid #dee2e6;
+}
+.custom-check{
+    margin-left: 0 !important;
+    float: left;
+}
+
+.selected-course {
+    background-color: #F3F7FF;
+}

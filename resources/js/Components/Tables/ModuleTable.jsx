@@ -1,7 +1,7 @@
 import { router } from "@inertiajs/react";
 import Table from "./Table";
 import { useContext, useEffect, useState } from "react";
-import ContextProvider from "./TableContext";
+import ContextProvider from "../Context/TableContext";
 import { useRequest, useSortState } from "@/Library/hooks";
 import DeleteForm from "../Forms/DeleteForm";
 import Modal from "../Modal/Modal";
