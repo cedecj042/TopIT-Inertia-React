@@ -3,6 +3,7 @@ import { usePage } from "@inertiajs/react"; // To detect the current URL
 import Table from "./Table";
 import { useRequest, useSortState } from "@/Library/hooks";
 import { toast } from "sonner";
+import ContextProvider from "../Context/TableContext";
 
 export default function AddPretestTable({ data, filters, queryParams }) {
     const { state, dispatch, visibleColumns } = useContext(ContextProvider);
