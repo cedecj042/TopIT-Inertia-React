@@ -1,6 +1,5 @@
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 import StudentProfile from "@/Components/Profile/StudentProfile";
-import StudentLayout from "@/Layouts/StudentLayout";
 
 function Profile({ title, student }) {
     return (

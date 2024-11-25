@@ -59,6 +59,8 @@ Route::middleware(['auth', 'student'])->group(function () {
     Route::get('/course/module/{id}', [StudentCourseController::class, 'showModuleDetail'])->name('student-module-detail');
 
     Route::get('/test', [TestController::class, 'index'])->name('test');
+    Route::get('/test/history', [TestController::class, 'testHistory'])->name('test.history');
+
 });
 
 

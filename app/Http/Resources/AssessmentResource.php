@@ -24,7 +24,7 @@ class AssessmentResource extends JsonResource
             'end_time' => Carbon::parse($this->end_time)->format('g:i A'), 
             'total_items' => $this->total_items,
             'total_score' => $this->total_score,
-            'percentage' => $this->percentage,
+            'percentage' => round($this->percentage,2),
             'status' => $this->status,
             'created_at' => Carbon::parse($this->created_at)->format('F j, Y'), 
             'updated_at' => Carbon::parse($this->updated_at)->format('F j, Y'), 
