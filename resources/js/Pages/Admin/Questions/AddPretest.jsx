@@ -8,9 +8,9 @@ import { TableContext } from "@/Components/Context/TableContext";
 import { QUESTION_COLUMN, QUESTION_FILTER_COMPONENT } from "@/Library/constants";
 import { INITIAL_QUESTION_STATE } from "@/Library/filterState";
 import { useRequest } from "@/Library/hooks";
-import { SelectedQuestionsProvider } from "@/Components/Context/SelectedQuestionContext";
 
 function AddPretest({questions,filters,queryParams = {}}){
+    console.log(questions.meta)
     const {isProcessing,getRequest} = useRequest();
     
     const addPretest = () =>{
