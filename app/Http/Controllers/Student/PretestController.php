@@ -101,7 +101,84 @@ class PretestController extends Controller
         ]);
     }
 
+    public function review($assessmentId)
+    {
+        $assessment = Assessment::with([
+            'assessment_courses.assessment_items.question.question_detail',
+            'assessment_courses.course',
+            'assessment_courses.assessment_items'
+        ])->findOrFail($assessmentId);
 
+        // dd($assessment->toArray());
+
+
+        $student = Student::find(Auth::user()->userable->student_id);
+
+        $courses = Course::with([
+            'questions' => function ($query) {
+                $query->where('test_type', 'Test')
+                    ->with('question_detail');
+            }
+        ])->get();
+
+        // Organize student answers by question ID for easy lookup
+        $studentAnswers = collect();
+        foreach ($assessment->assessment_courses as $assessmentCourse) {
+            foreach ($assessmentCourse->assessment_items as $item) {
+                $studentAnswers->put($item->question_id, [
+                    'participants_answer' => $item->participants_answer ?? null,
+                    'score' => $item->score,
+                    'course_id' => $assessmentCourse->course_id
+                ]);
+            }
+        }
+
+        // Add student answers and correctness to the questions
+        $coursesWithAnswers = $courses->map(function ($course) use ($studentAnswers) {
+            $course->questions->transform(function ($question) use ($studentAnswers) {
+                $studentAnswer = $studentAnswers->get($question->question_id);
+
+                $decodedAnswer = $studentAnswer && !is_null($studentAnswer['participants_answer'])
+                    ? json_decode($studentAnswer['participants_answer'], true)
+                    : null;
+
+                $question->student_answer = is_array($decodedAnswer)
+                    ? (count($decodedAnswer) > 1 ? $decodedAnswer : $decodedAnswer[0] ?? null)
+                    : null;
+
+                $question->is_multiple_answer = is_array($decodedAnswer) && count($decodedAnswer) > 1;
+
+                $question->is_correct = $studentAnswer ? $studentAnswer['score'] > 0 : false;
+
+                logger()->info("Question: {$question}", [
+
+                ]);
+                return $question;
+            });
+            return $course;
+        });
+
+        $coursesData = CourseResource::collection($coursesWithAnswers)->additional([
+            'questions' => $coursesWithAnswers->map(function ($course) {
+                return [
+                    'course_id' => $course->course_id,
+                    'questions' => QuestionResource::collection($course->questions)
+                ];
+            }),
+        ]);
+
+        return Inertia::render('Student/Pretest/PretestReview', [
+            'courses' => $coursesData,
+            'assessment' => [
+                'assessment_id' => $assessment->assessment_id,
+                'status' => $assessment->status,
+                'total_score' => $assessment->total_score,
+                'total_items' => $assessment->total_items,
+                'percentage' => round($assessment->percentage, 2)
+            ],
+            'student' => $student,
+        ]);
+    }
 
     public function submit(Request $request)
     {
@@ -119,13 +196,6 @@ class PretestController extends Controller
                 ->where('status', '!=', 'Completed')
                 ->firstOrFail();
 
-            $student = Student::findOrFail($assessment->student_id);
-
-            // Log::debug('Processing answers for assessment:', [
-            //     'assessment_id' => $assessment->assessment_id,
-            //     'student_id' => $student->student_id
-            // ]);
-
             $totalScore = 0;
             $totalItems = 0;
 
@@ -137,14 +207,6 @@ class PretestController extends Controller
                     Log::warning('Question detail not found for question ID: ' . $questionId);
                     continue;
                 }
-
-                // Log::debug('Processing question:', [
-                //     'question_id' => $questionId,
-                //     'type' => $question->question_detail->type,
-                //     'participant_answer_raw' => $participantAnswer,
-                //     'stored_answer_raw' => $question->question_detail->answer
-                // ]);
-
                 // deocding correct answer
                 $correctAnswer = $question->question_detail->answer;
                 if (is_string($correctAnswer)) {
@@ -161,13 +223,6 @@ class PretestController extends Controller
                     $participantAnswer,
                     $correctAnswer
                 );
-
-                // Log::debug('Question scoring:', [
-                //     'type' => $question->question_detail->type,
-                //     'participant_answer' => $participantAnswer,
-                //     'correct_answer' => $correctAnswer,
-                //     'score' => $score
-                // ]);
 
                 // store and encode participant answer 
                 AssessmentItem::create([
@@ -215,14 +270,13 @@ class PretestController extends Controller
 
             switch ($questionType) {
                 case 'Identification':
-                    // Ensure we're comparing strings properly
                     $participantText = is_array($participantAnswer) ? $participantAnswer[0] : $participantAnswer;
                     $correctText = is_array($correctAnswer) ? $correctAnswer[0] : $correctAnswer;
 
+                    #normalization
                     $participantText = strtolower(trim((string) $participantText));
                     $correctText = strtolower(trim((string) $correctText));
 
-                    // Remove extra spaces and special characters
                     $participantText = preg_replace('/\s+/', ' ', $participantText);
                     $correctText = preg_replace('/\s+/', ' ', $correctText);
 
@@ -230,7 +284,6 @@ class PretestController extends Controller
                     break;
 
                 case 'Multiple Choice - Single':
-                    // Ensure we're comparing single values
                     $participantChoice = is_array($participantAnswer) ? $participantAnswer[0] : $participantAnswer;
                     $correctChoice = is_array($correctAnswer) ? $correctAnswer[0] : $correctAnswer;
 
@@ -241,11 +294,9 @@ class PretestController extends Controller
                     break;
 
                 case 'Multiple Choice - Many':
-                    // Ensure we have arrays
                     $participantAnswers = is_array($participantAnswer) ? $participantAnswer : [$participantAnswer];
                     $correctAnswers = is_array($correctAnswer) ? $correctAnswer : [$correctAnswer];
 
-                    // Normalize each answer in both arrays
                     $participantAnswers = array_map(function ($ans) {
                         return strtolower(trim((string) $ans));
                     }, $participantAnswers);

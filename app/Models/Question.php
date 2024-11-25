@@ -43,4 +43,5 @@ class Question extends Model
     {
         return $this->belongsTo(QuestionDetail::class, 'question_detail_id', 'question_detail_id');
     }
+    
 }

@@ -34,7 +34,11 @@ class StudentDashboardController extends Controller
             'data' => $averageThetaScore->pluck('avg_theta_score')->toArray()
         ];
 
-        $tests = Assessment::where('student_id', $studentId)->get();
+        // Get 3 recent test history
+        $tests = Assessment::where('student_id', $studentId)
+            ->orderBy('updated_at', 'desc')
+            ->take(3)
+            ->get();
 
 
         return Inertia::render('Student/Dashboard', [

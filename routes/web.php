@@ -43,13 +43,10 @@ Route::middleware(['auth', 'student'])->group(function () {
     
     Route::prefix('pretest')->name('pretest.')->group(function () {
         Route::get('/start', [StudentPretestController::class, 'startPretest'])->name('start');
-        // Route::get('/questions/{courseIndex}', [PretestController::class, 'showQuestions'])->name('questions');
-
         Route::post('/submit', [StudentPretestController::class, 'submit'])->name('submit');
         Route::get('finish/{assessmentId}', [StudentPretestController::class, 'finish'])->name('finish');
 
-        // Route::get('/finish/{pretestId}', [PretestController::class, 'showFinishAttempt'])->name('finish');
-        Route::get('/review/{pretestId}', [StudentPretestController::class, 'reviewPretest'])->name('review');
+        Route::get('/review/{assessmentId}', [StudentPretestController::class, 'review'])->name('review');
     });
 
     Route::redirect('', '/dashboard');

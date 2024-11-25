@@ -1,4 +1,3 @@
-import { router } from "@inertiajs/react";
 import { Head, Link } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout";
 import Navbar from "@/Components/Navigation/Navbar";
@@ -6,18 +5,12 @@ import "../../../../css/student/students.css";
 import "../../../../css/student/welcome.css";
 
 const PretestFinish = ({ score, totalQuestions, pretestId }) => {
-    const handleRedirect = () => {
-        router.get(route("dashboard"));
-    };
-
     return (
         <>
             <Head title="Finish" />
             <Navbar isLight={false} />
 
-            <div
-                className="pretestb container-fluid"
-            >
+            <div className="pretestb container-fluid">
                 <div
                     className="row align-items-center"
                     style={{ height: "calc(100vh - 100px)" }}
@@ -44,17 +37,18 @@ const PretestFinish = ({ score, totalQuestions, pretestId }) => {
                                 <br />
                                 You may now proceed to TopIT. Happy reviewing!
                             </p>
-                            <button
-                                onClick={handleRedirect}
+                            <Link
+                                href={`/dashboard`}
                                 className="btn btn-primary w-50 p-2 mt-4"
                             >
                                 Proceed to Dashboard
-                            </button>
+                            </Link>
                         </div>
+
                         <div className="pe-md-5">
                             <Link
                                 href={`/pretest/review/${pretestId}`}
-                                className="btn btn-outline-primary w-50 p-2 mt-4 hover:bg-transparent"
+                                className="btn btn-outline-primary w-50 p-2 mt-3"
                             >
                                 Review Answers
                             </Link>

@@ -29,6 +29,11 @@ class QuestionResource extends JsonResource
             'question_detail' => new QuestionDetailResource($this->whenLoaded('question_detail')), 
             'difficulty'=> new DifficultyResource($this->whenLoaded('difficulty')),
             'course' => new CourseResource($this->whenLoaded('course')),
+
+            #added for review
+            'student_answer' => $this->student_answer,
+            'is_multiple_answer' => $this->is_multiple_answer,
+            'is_correct' => $this->is_correct,
         ];
     }
 }

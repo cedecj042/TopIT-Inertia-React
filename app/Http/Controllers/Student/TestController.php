@@ -16,10 +16,15 @@ class TestController extends Controller
 {
     public function index()
     {
-        $student_id = Auth::user()->userable->student_id;
+        $studentId = Auth::user()->userable->student_id;
 
-        $tests = Assessment::where('student_id', $student_id)->get();
-        Log::info('Tests retrieved:', ['count' => $tests->count(), 'tests' => $tests->toArray()]);
+        // Get 3 recent test history
+        $tests = Assessment::where('student_id', $studentId)
+            ->orderBy('updated_at', 'desc')
+            ->take(3)
+            ->get();
+            
+        // Log::info('Tests retrieved:', ['count' => $tests->count(), 'tests' => $tests->toArray()]);
 
         return Inertia::render('Student/Test', [
             'title' => 'Student Test',

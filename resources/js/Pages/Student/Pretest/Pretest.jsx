@@ -22,7 +22,7 @@ const Pretest = ({
         handleSubmit,
         watch,
         setValue,
-        formState: { isDirty },
+        // formState: { isDirty },
     } = useForm({
         defaultValues: {
             answers: {},
@@ -169,7 +169,6 @@ const Pretest = ({
                             courses={courses}
                             currentCourseIndex={currentCourseIndex}
                             setCurrentCourseIndex={setCurrentCourseIndex}
-                            answeredQuestions={answers}
                         />
                         <div className="p-3 mt-1">
                             <button
@@ -215,7 +214,7 @@ const Pretest = ({
                                     course={{
                                         questions: questionsForCurrentCourse,
                                     }}
-                                    register={register} // Pass register here
+                                    register={register} 
                                     setValue={setValue}
                                     watch={watch}
                                     answers={answers}

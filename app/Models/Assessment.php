@@ -33,4 +33,6 @@ class Assessment extends Model
     public function assessment_courses(){
         return $this->hasMany(AssessmentCourse::class,'assessment_id','assessment_id');
     }
+
+    
 }

@@ -10,8 +10,8 @@ const TestHistory = ({ tests = [] }) => {
     return (
         <div>
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5 className="fw-semibold fs-5">Test History</h5>
-                <a href="#" className="text-decoration-none">View all attempts</a>
+                <h5 className="fw-semibold fs-5">Recent Attempts</h5>
+                <a href="#" className="text-decoration-none">View test history</a>
             </div>
             <div className="row">
                 {tests.map((test, index) => {
