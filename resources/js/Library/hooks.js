@@ -126,8 +126,8 @@ export const useRequest = () => {
 
     // Default Inertia options
     const defaultOptions = {
-        // preserveScroll: false,
-        // preserveState: false,
+        preserveScroll: false,
+        preserveState: false,
         // replace: false,
     };
 

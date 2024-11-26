@@ -29,8 +29,9 @@ return new class extends Migration
             $table->foreignID('course_id')->references('course_id')->on('courses')->cascadeOnDelete();
             $table->integer('total_items');
             $table->integer('total_score');
+            $table->float('initial_theta_score');
+            $table->float('final_theta_score');
             $table->float('percentage');
-            $table->float('theta_score');
             $table->timestamps();
         });
         Schema::create('assessment_items',function (Blueprint $table){

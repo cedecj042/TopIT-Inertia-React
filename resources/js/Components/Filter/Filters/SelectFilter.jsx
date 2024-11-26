@@ -3,7 +3,7 @@ import {capitalizeFirstLetter, formatFilterKey} from '../../../Library/utils';
 
 export default function SelectFilter({keyValue,filterKey,data,handleFilterChange}) {
     return (
-        <div className="mb-3">
+        <>
             <label htmlFor={`${filterKey}Select`} className="form-label">
                 {formatFilterKey(filterKey)}
             </label>
@@ -21,6 +21,6 @@ export default function SelectFilter({keyValue,filterKey,data,handleFilterChange
                     </option>
                 ))}
             </SelectInput>
-        </div>
+        </>
     );
 }

@@ -61,9 +61,6 @@ class QuestionController extends Controller
                 $q->where('type', $detail_types); // Assuming 'name' is the field in difficulty table
             });
         }
-        if ($test_types = request('test_types')) {
-            $query->where('test_type', $test_types); // Assuming 'test_type' is a column in the 'questions' table
-        }
         
         $perPage = request('items', 5);
         $questions = $query->paginate($perPage)->onEachSide(1);
@@ -81,8 +78,7 @@ class QuestionController extends Controller
         $filters = [
             'courses' => $title,
             'difficulty' => $difficulty,
-            'detail_types' => $questionDetailTypes,
-            'test_types' => $testTypes,
+            'detail_types' => $questionDetailTypes
         ];
         
         return Inertia::render('Admin/Questions/Question',[

@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\QuestionDetailType;
 use App\Enums\TestType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PretestRequest;
 use App\Http\Resources\QuestionResource;
 use App\Models\Question;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Log;
 
 class PretestController extends Controller
 {
@@ -132,4 +134,22 @@ class PretestController extends Controller
         ]);
         
     }
+    public function add(PretestRequest $request)
+    {
+        $validated = $request->validated();
+
+        Log::info($validated);
+
+        foreach ($validated['questions'] as $id) { // Access the 'questions' array
+            $question = Question::find($id);
+
+            if ($question) {
+                $question->test_type = TestType::PRETEST->value;
+                $question->save(); // Save the updated model
+            }
+        }
+
+        return redirect()->route('admin.pretest.index');
+    }
+
 }

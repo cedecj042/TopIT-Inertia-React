@@ -37,11 +37,30 @@ export const QUESTION_COLUMN = [
     {key:'question_detail.answer',label:'Answer', sortable:false,visible:true}
 ]
 
+export const PRETEST_COLUMN = [
+    // {key:'question_id',label:'ID', sortable:false,visible:true},
+    {key:'question',label:'Question', sortable:false,visible:true},
+    {key:'difficulty.name',label:'Difficulty', sortable:false,visible:true},
+    {key:'question_detail.type',label:'Type', sortable:false,visible:true},
+    // {key:'question_detail.choices',label:'Choices', sortable:false,visible:true},
+    {key:'question_detail.answer',label:'Answer', sortable:false,visible:true},
+    {key:'course.title',label:'Course', sortable:false,visible:true},
+]
+
+export const ADMIN_COLUMN = [
+    {key:'admin_id',label:'ID', sortable:false,visible:true},
+    {key:'firstname',label:'First Name', sortable:false,visible:true},
+    {key:'lastname',label:'Last Name', sortable:false,visible:true},
+    {key:'last_login',label:'Last Login', sortable:false,visible:true},
+    {key:'created_at',label:'Created At', sortable:false,visible:true}
+]
+
 
 export const STUDENT_FILTER_COMPONENT = ["students","filters","queryParams"]
 export const COURSE_FILTER_COMPONENT = ["courses","courses.meta","queryParams"]
 export const MODULE_FILTER_COMPONENT = ["modules","modules.meta","filters","queryParams"]
 export const QUESTION_FILTER_COMPONENT = ["questions","questions.meta","filters","queryParams"]
+export const ADMIN_FILTER_COMPONENT = ["admins","admins.meta","queryParams"]
 
 
 export const ContentTypes = {

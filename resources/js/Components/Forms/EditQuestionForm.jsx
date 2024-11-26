@@ -18,7 +18,6 @@ export default function EditQuestionForm({ question, onClose, filters }) {
             choices: question?.question_detail?.choices?.map(choice => ({ value: choice })) || [],
             difficulty: question?.difficulty?.name || '',
             question_detail_type: question?.question_detail?.type || '',
-            test_type: question?.test_type || '',
             question_detail_id: question?.question_detail?.question_detail_id || '',
             discrimination_index: question?.discrimination_index || '',
             course: question?.course?.title || '',
@@ -181,9 +180,8 @@ export default function EditQuestionForm({ question, onClose, filters }) {
 
                     {/* Additional Details */}
                     <label htmlFor="" className="mb-2  form-label">Details</label>
-                    {/* Type Filter */}
-                    <div className="d-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem' }}>
-                
+
+                    <div className="d-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
                         <div className="mb-3">
                             <label className="form-label">Question Type</label>
                             <select className="form-select" {...register("question_detail_type")}>
@@ -192,18 +190,6 @@ export default function EditQuestionForm({ question, onClose, filters }) {
                                 ))}
                             </select>
                         </div>
-                        <div className="mb-3">
-                            <label className="form-label">Course</label>
-                            <select className="form-select" {...register("course")}>
-                                {filters.courses.map((type, index) => (
-                                    <option value={type} key={index}>{type}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="d-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-                        {/* Difficulty Filter */}
                         <div className="mb-2">
                             <label className="form-label">Difficulty</label>
                             <select className="form-select" {...register("difficulty")}>
@@ -217,16 +203,14 @@ export default function EditQuestionForm({ question, onClose, filters }) {
                             <label className="form-label">Discrimination Index</label>
                             <input className="form-control" {...register("discrimination_index")} />
                         </div>
-
-                        {/* Discrimination Index */}
-                        <div className="mb-2">
-                            <label className="form-label">Test Type</label>
-                            <select className="form-select" {...register("test_type")}>
-                                {filters.test_types.map((item, index) => (
-                                    <option value={item} key={index}>{item}</option>
-                                ))}
-                            </select>
-                        </div>
+                    </div>
+                    <div className="mb-3 col">
+                        <label className="form-label">Course</label>
+                        <select className="form-select" {...register("course")}>
+                            {filters.courses.map((type, index) => (
+                                <option value={type} key={index}>{type}</option>
+                            ))}
+                        </select>
                     </div>
                 </form>
             </div>

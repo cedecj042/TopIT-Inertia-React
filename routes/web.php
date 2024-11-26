@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\PdfController;
@@ -113,7 +114,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::prefix('pretest')->name('pretest.')->group(function(){
         Route::get('/',[AdminPretestController::class,'index'])->name('index');
         Route::get('/add',[AdminPretestController::class,'show'])->name('add');
+        Route::post('/add',[AdminPretestController::class,'add'])->name('add');
         
+    });
+    Route::prefix('users')->name('users.')->group(function (){
+        Route::get('/',[AdminUserController::class,'index'])->name('index');
+        Route::post('/create',[AdminUserController::class,'create'])->name('create');
     });
     
 

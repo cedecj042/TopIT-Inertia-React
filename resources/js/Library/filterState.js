@@ -61,3 +61,15 @@ export const INITIAL_QUESTION_STATE = (queryParams = {}) => ({
         return `${field}:${direction}`;
     })()
 });
+
+export const INITIAL_ADMIN_STATE = (queryParams = {}) => ({
+    filterState: {},
+    otherState: {
+        items: queryParams?.items || "",
+    },
+    sortState:(() => {
+        const field = queryParams?.field || "";
+        const direction = queryParams?.direction || "";
+        return `${field}:${direction}`;
+    })()
+});

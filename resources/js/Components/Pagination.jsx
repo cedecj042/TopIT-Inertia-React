@@ -14,6 +14,7 @@ export default function Pagination({ links, queryParams = {} }) {
                         }
                     >
                         <Link
+                            preserveState={true} 
                             preserveScroll={true}
                             href={
                                 link.url

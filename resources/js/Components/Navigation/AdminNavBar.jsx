@@ -30,11 +30,11 @@ export default function AdminNavbar({ title }) {
     };
 
     return (
-        <div className="col-auto col-sm-4 col-md-3 col-xl-2 py-4 px-0 side-bar d-flex flex-column justify-content-between h-100 navbar-bg">
+        <div className="col-auto col-sm-4 col-md-3 col-xl-2 py-3 px-0 side-bar d-flex flex-column justify-content-between h-100 navbar-bg">
             <div className="d-flex flex-column justify-space-between pt-2">
-                <h2 className="text-center py-5">
+                <div className="text-center py-4">
                     <img src="/assets/logo.svg" alt="TopIT Logo" width="100" height="40" />
-                </h2>
+                </div>
                 <ul className="nav nav-pills d-flex flex-column align-items-center" id="menu">
                     <li className="nav-item w-100">
                         <Link
@@ -108,8 +108,8 @@ export default function AdminNavbar({ title }) {
                     </li>
                     <li className="nav-item w-100">
                         <Link
-                            href="{{ route('admin.users.index') }}"
-                            className="nav-link text-white py-3 ps-4 d-flex align-items-center gap-1"
+                            href={route('admin.users.index')}
+                            className={`nav-link text-white py-3 ps-4 d-flex align-items-center gap-1 ${title === 'Admin Users' ? 'active' : ''} `}
                             id="users-link"
                             data-page="users"
                         >

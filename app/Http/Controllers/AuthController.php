@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,6 +15,7 @@ class AuthController extends Controller
         $user = Auth::user();
 
         if ($user && $user->userable_type === 'App\Models\Admin') {
+            $user->userable->update(['last_login' => Carbon::now()]);
             $redirectRoute = 'admin.login';
         } else {
             $redirectRoute = 'login';

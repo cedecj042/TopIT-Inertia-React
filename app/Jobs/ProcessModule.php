@@ -19,22 +19,12 @@ class ProcessModule implements ShouldQueue
 
     protected $selectedCourses;
 
-    /**
-     * Create a new job instance.
-     *
-     * @param array $selectedCourses
-     */
     public function __construct(array $selectedCourses)
     {
         $this->selectedCourses = $selectedCourses;
     }
 
-    /**
-     * Execute the job.
-     *
-     * @param FastApiService $fastApiService
-     * @return void
-     */
+
     public function handle(FastApiService $fastApiService)
     {
         try {
