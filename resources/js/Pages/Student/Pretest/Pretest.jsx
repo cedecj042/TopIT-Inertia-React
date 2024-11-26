@@ -7,6 +7,7 @@ import MainLayout from "@/Layouts/MainLayout";
 import Sidebar from "@/Components/Pretest/Sidebar";
 import Navbar from "@/Components/Navigation/Navbar";
 import QuestionForm from "@/Components/Pretest/QuestionForm";
+import Modal from "@/Components/Modal/Modal";
 import "../../../../css/student/students.css";
 import "../../../../css/student/welcome.css";
 
@@ -15,15 +16,15 @@ const Pretest = ({
     assessment = {},
 }) => {
     const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
+    const [confirmationModal, setConfirmationModal] = useState({
+        show: false,
+        title: "",
+        message: "",
+        onConfirm: null,
+    });
     const submissionInProgress = useRef(false);
 
-    const {
-        register,
-        handleSubmit,
-        watch,
-        setValue,
-        // formState: { isDirty },
-    } = useForm({
+    const { register, handleSubmit, watch, setValue } = useForm({
         defaultValues: {
             answers: {},
             assessment_id: assessment?.assessment_id,
@@ -33,7 +34,6 @@ const Pretest = ({
     const { postRequest, loading } = useRequest();
     const answers = watch("answers");
 
-    // Initialize answers
     useEffect(() => {
         if (!assessment?.assessment_id) {
             toast.error("No assessment ID found");
@@ -52,80 +52,80 @@ const Pretest = ({
         setValue("answers", initialAnswers);
     }, [courses.questions, setValue, assessment]);
 
-    const onSubmit = async (formData) => {
-      if (submissionInProgress.current) {
-          return;
-      }
-  
-      try {
-          submissionInProgress.current = true;
-  
-          const confirmed = window.confirm(
-              "Are you sure you want to submit your assessment?"
-          );
-          if (!confirmed) {
-              submissionInProgress.current = false;
-              return;
-          }
-  
-          const unansweredCount = Object.values(formData.answers).filter(
-              (answer) => !answer || (Array.isArray(answer) && answer.length === 0)
-          ).length;
-  
-          if (unansweredCount > 0) {
-              const proceed = window.confirm(
-                  `You have ${unansweredCount} unanswered question(s). Do you still want to proceed?`
-              );
-              if (!proceed) {
-                  submissionInProgress.current = false;
-                  return;
-              }
-          }
-  
-          router.post(route('pretest.submit'), formData, {
-              onSuccess: (response) => {
-                  toast.success("Assessment submitted successfully!");
-                  router.visit(route('pretest.finish', { assessmentId: assessment?.assessment_id }));
-                },
-              onError: (errors) => {
-                  console.error('Submission errors:', errors);
-                  toast.error(
-                      errors.message || 
-                      "An error occurred while submitting your assessment. Please try again later."
-                  );
-              },
-              onFinish: () => {
-                  submissionInProgress.current = false;
-              }
-          });
-  
-      } catch (error) {
-          console.error("Submission error:", error);
-          toast.error(
-              error.message ||
-              "An error occurred while submitting your assessment. Please try again later."
-          );
-          submissionInProgress.current = false;
-      }
-  };
-  
-    const handleNextCourse = () => {
-        const currentQuestions =
-            courses.questions?.[currentCourseIndex]?.questions || [];
-        const unansweredQuestions = currentQuestions.filter(
-            (question) =>
-                !answers[question.question_id] ||
-                (Array.isArray(answers[question.question_id]) &&
-                    answers[question.question_id].length === 0)
-        ).length;
+    const showConfirmationModal = (title, message, onConfirm) => {
+        setConfirmationModal({
+            show: true,
+            title,
+            message,
+            onConfirm,
+        });
+    };
 
-        if (unansweredQuestions > 0) {
-            const proceed = window.confirm(
-                `You have ${unansweredQuestions} unanswered question(s) in this course. Do you want to proceed?`
-            );
-            if (!proceed) return;
+    const hideConfirmationModal = () => {
+        setConfirmationModal({
+            show: false,
+            title: "",
+            message: "",
+            onConfirm: null,
+        });
+    };
+
+    const onSubmit = async (formData) => {
+        if (submissionInProgress.current) {
+            return;
         }
 
+        const unansweredCount = Object.values(formData.answers).filter(
+            (answer) =>
+                !answer || (Array.isArray(answer) && answer.length === 0)
+        ).length;
+
+        const handleSubmission = () => {
+            try {
+                submissionInProgress.current = true;
+
+                router.post(route("pretest.submit"), formData, {
+                    onSuccess: () => {
+                        router.visit(
+                            route("pretest.finish", {
+                                assessmentId: assessment?.assessment_id,
+                            })
+                        );
+                        toast.success("Assessment submitted successfully!");
+                    },
+                    onError: (errors) => {
+                        console.error("Submission errors:", errors);
+                        toast.error(
+                            errors.message ||
+                                "An error occurred while submitting your assessment. Please try again later."
+                        );
+                    },
+                    onFinish: () => {
+                        submissionInProgress.current = false;
+                        hideConfirmationModal();
+                    },
+                });
+            } catch (error) {
+                console.error("Submission error:", error);
+                toast.error(
+                    error.message ||
+                        "An error occurred while submitting your assessment. Please try again later."
+                );
+                submissionInProgress.current = false;
+                hideConfirmationModal();
+            }
+        };
+
+        showConfirmationModal(
+            "Submit Assessment",
+            unansweredCount > 0
+                ? `You have ${unansweredCount} unanswered question(s). Are you sure you want to submit?`
+                : "Are you sure you want to submit your assessment?",
+            handleSubmission
+        );
+    };
+
+    const handleNextCourse = () => {
         if (currentCourseIndex < courses.data.length - 1) {
             setCurrentCourseIndex((prev) => prev + 1);
             window.scrollTo(0, 0);
@@ -139,16 +139,6 @@ const Pretest = ({
         }
     };
 
-    if (!assessment?.assessment_id) {
-        return (
-            <div className="d-flex justify-content-center align-items-center min-vh-100">
-                <div className="spinner-border text-primary" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                </div>
-            </div>
-        );
-    }
-
     const coursesData = courses.data || [];
     const questionsForCurrentCourse =
         courses.questions?.[currentCourseIndex]?.questions || [];
@@ -159,9 +149,7 @@ const Pretest = ({
             <Head title="Pretest" />
             <Navbar isLight={true} />
 
-            <div
-                className="pretestb container-fluid"
-            >
+            <div className="pretestb container-fluid">
                 <div className="row min-vh-100">
                     {/* Sidebar */}
                     <div className="col-md-3 position-fixed border-end h-100">
@@ -174,16 +162,8 @@ const Pretest = ({
                             <button
                                 onClick={handleSubmit(onSubmit)}
                                 className="btn btn-success w-100"
-                                disabled={loading || !assessment?.assessment_id}
                             >
-                                {loading ? (
-                                    <>
-                                        <span className="spinner-border spinner-border-sm me-2" />
-                                        Submitting...
-                                    </>
-                                ) : (
-                                    "Finish Attempt"
-                                )}
+                                Finish Attempt
                             </button>
                         </div>
                     </div>
@@ -214,7 +194,7 @@ const Pretest = ({
                                     course={{
                                         questions: questionsForCurrentCourse,
                                     }}
-                                    register={register} 
+                                    register={register}
                                     setValue={setValue}
                                     watch={watch}
                                     answers={answers}
@@ -246,19 +226,8 @@ const Pretest = ({
                                         <button
                                             type="submit"
                                             className="btn btn-success"
-                                            disabled={
-                                                loading ||
-                                                !assessment?.assessment_id
-                                            }
                                         >
-                                            {loading ? (
-                                                <>
-                                                    <span className="spinner-border spinner-border-sm me-2" />
-                                                    Submitting...
-                                                </>
-                                            ) : (
-                                                "Finish Attempt"
-                                            )}
+                                            Finish Attempt
                                         </button>
                                     )}
                                 </div>
@@ -269,6 +238,32 @@ const Pretest = ({
                     </div>
                 </div>
             </div>
+
+            <Modal
+                show={confirmationModal.show}
+                modalTitle={confirmationModal.title}
+                onClose={hideConfirmationModal}
+            >
+                <div className="modal-body">{confirmationModal.message}</div>
+                <div className="modal-footer">
+                    <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={hideConfirmationModal}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => {
+                            confirmationModal.onConfirm();
+                        }}
+                    >
+                        Confirm
+                    </button>
+                </div>
+            </Modal>
         </>
     );
 };

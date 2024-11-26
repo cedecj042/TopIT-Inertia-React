@@ -94,7 +94,7 @@ function SelectModules({ courses }) {
                         onClick={handleStartTest}
                         disabled={selectedModules.length === 0}
                     >
-                        Start
+                        Start Test
                     </button>
                 </div>
 

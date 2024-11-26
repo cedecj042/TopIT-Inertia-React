@@ -11,12 +11,12 @@ export default function StudentRegister() {
             <Navbar isLight={false} />
             <div className="row d-flex justify-content-center mb-5">
                 <div className="col-6 mb-5 mt-5">
-                    <button
-                        onClick={() => window.history.back()}
-                        className="btn btn-link text-dark text-decoration-none mb-4"
+                    <Link
+                        href={`/login`}
+                        className="text-dark text-decoration-none d-flex align-items-center gap-2 neg mb-3"
                     >
                         <i className="bi bi-arrow-left"></i> Back
-                    </button>
+                    </Link>
                     <RegisterForm routeName={"register"} />
                 </div>
             </div>

@@ -44,6 +44,7 @@ class TestController extends Controller
         $testsArray = $tests->toArray();
 
         return Inertia::render('Student/TestHistory', [
+            'title'=>'Student Test',
             'tests' => AssessmentResource::collection($tests),
             'paginationLinks' => $testsArray['links'],
         ]);
@@ -54,7 +55,7 @@ class TestController extends Controller
         $courses = Course::all(); 
 
         return Inertia::render('Student/Test/SelectModules', [
-            'title'=>'Select Modules',
+            'title'=>'Student Test',
             'courses' => $courses,
         ]);
     }

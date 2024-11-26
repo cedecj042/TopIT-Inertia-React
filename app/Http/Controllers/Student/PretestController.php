@@ -249,8 +249,6 @@ class PretestController extends Controller
 
             DB::commit();
 
-            return redirect()->route('dashboard')->with('success', 'Pretest completed successfully!');
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Pretest submission error: ' . $e->getMessage());

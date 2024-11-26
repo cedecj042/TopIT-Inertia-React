@@ -33,9 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
-// Admin
-Route::post('/admin/store-processed-pdf', [ProcessedPdfController::class, 'store'])->name('store-pdf');
-Route::post('/admin/store-questions', [QuestionController::class, 'store'])->name('store-questions');
+
 
 Route::middleware(['auth', 'student'])->group(function () {
     Route::redirect('/', '/dashboard');
@@ -70,6 +68,9 @@ Route::middleware(['auth', 'student'])->group(function () {
 
 });
 
+// Admin
+Route::post('/admin/store-processed-pdf', [ProcessedPdfController::class, 'store'])->name('store-pdf');
+Route::post('/admin/store-questions', [QuestionController::class, 'store'])->name('store-questions');
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::redirect('/', '/admin/dashboard');
