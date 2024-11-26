@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "@inertiajs/react";
 import TestHistory from "@/Components/Test/TestHistory";
+import Pagination from "@/Components/Pagination";
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 import "../../../css/student/students.css";
 
@@ -33,34 +34,11 @@ const TestHistoryPage = ({ tests = [], paginationLinks = [] }) => {
                     <TestHistory tests={testsData} />
                 </div>
 
-                {/* Pagination Section */}
                 <div className="row mt-4">
-                    <div className="col-12 d-flex justify-content-center">
-                        {pagination.length > 0 &&
-                            pagination.map((link) =>
-                                link.url ? (
-                                    <Link
-                                        key={link.label}
-                                        dangerouslySetInnerHTML={{
-                                            __html: link.label,
-                                        }}
-                                        href={link.url || "#"}
-                                        className={`btn ${
-                                            link.active
-                                                ? "btn-primary"
-                                                : "btn-outline-primary"
-                                        } mx-1`}
-                                    ></Link>
-                                ) : (
-                                    <span
-                                        key={link.label}
-                                        dangerouslySetInnerHTML={{
-                                            __html: link.label,
-                                        }}
-                                        className="btn btn-outline-secondary disabled mx-1"
-                                    />
-                                )
-                            )}
+                    <div className="col-12">
+                        {pagination.length > 0 && (
+                            <Pagination links={pagination} />
+                        )}
                     </div>
                 </div>
             </main>
