@@ -52,7 +52,8 @@ Route::middleware(['auth', 'student'])->group(function () {
     Route::redirect('', '/dashboard');
     Route::redirect('/', '/dashboard');
     Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/profile', [StudentProfileController::class, 'index'])->name('profile');
+    Route::get('/profile', [StudentProfileController::class, 'showStudentDetails'])->name('profile');
+    Route::put('/profile', [StudentProfileController::class, 'editProfile'])->name('student.profile.edit');
 
     Route::get('/course', [StudentCourseController::class, 'showStudentCourse'])->name('student-course');
     Route::get('/course/{id}', [StudentCourseController::class, 'showStudentCourseDetail'])->name('student-course-detail');
