@@ -1,7 +1,7 @@
 import React from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const Sidebar = ({ courses, currentCourseIndex, setCurrentCourseIndex, answeredQuestions }) => {
+const Sidebar = ({ courses, currentCourseIndex, setCurrentCourseIndex }) => {
   const coursesData = courses.data || [];
 
   return (

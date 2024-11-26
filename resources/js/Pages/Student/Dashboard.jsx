@@ -1,7 +1,6 @@
-import StudentLayout from "@/Layouts/StudentLayout";
-import { Head } from "@inertiajs/react";
 import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
 import TestHistory from "@/Components/Test/TestHistory";
+import { Link } from "@inertiajs/react";
 import "../../../css/student/dashboard.css";
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 
@@ -21,6 +20,12 @@ function Dashboard({ title, averageThetaScore, tests }) {
                     </div>
                 </div>
                 <div className="row mt-4 px-5">
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                        <h5 className="fw-semibold fs-5">Recent Attempts</h5>
+                        <Link href={`/test/history`} className="text-decoration-none">
+                            View Test History
+                        </Link>
+                    </div>
                     <TestHistory tests={testsData} />
                 </div>
             </div>

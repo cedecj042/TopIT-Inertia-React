@@ -34,37 +34,45 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
-// Admin
-Route::post('/admin/store-processed-pdf', [ProcessedPdfController::class, 'store'])->name('store-pdf');
-Route::post('/admin/store-questions', [QuestionController::class, 'store'])->name('store-questions');
+
 
 Route::middleware(['auth', 'student'])->group(function () {
     Route::redirect('/', '/dashboard');
     Route::get('/welcome', [StudentPretestController::class, 'welcome'])->name('welcome');
-    
+
     Route::prefix('pretest')->name('pretest.')->group(function () {
-        Route::get('/start', [StudentPretestController::class, 'startPretest'])->name('start');
-        // Route::get('/questions/{courseIndex}', [PretestController::class, 'showQuestions'])->name('questions');
-
-        Route::post('/submit', [StudentPretestController::class, 'submit'])->name('submit');
-        Route::get('finish/{assessmentId}', [StudentPretestController::class, 'finish'])->name('finish');
-
-        // Route::get('/finish/{pretestId}', [PretestController::class, 'showFinishAttempt'])->name('finish');
-        Route::get('/review/{pretestId}', [StudentPretestController::class, 'reviewPretest'])->name('review');
+        Route::middleware(['auth', 'pretest.not_taken'])->group(function () {
+            Route::get('/start', [StudentPretestController::class, 'startPretest'])->name('start');
+            Route::post('/submit', [StudentPretestController::class, 'submit'])->name('submit');
+        });
+        Route::get('/finish/{assessmentId}', [StudentPretestController::class, 'finish'])->name('finish');
+        Route::get('/review/{assessmentId}', [StudentPretestController::class, 'review'])->name('review');
     });
+
 
     Route::redirect('', '/dashboard');
     Route::redirect('/', '/dashboard');
     Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/profile', [StudentProfileController::class, 'index'])->name('profile');
+    Route::get('/profile', [StudentProfileController::class, 'showStudentDetails'])->name('profile');
+    Route::put('/profile', [StudentProfileController::class, 'editProfile'])->name('student.profile.edit');
 
     Route::get('/course', [StudentCourseController::class, 'showStudentCourse'])->name('student-course');
     Route::get('/course/{id}', [StudentCourseController::class, 'showStudentCourseDetail'])->name('student-course-detail');
     Route::get('/course/module/{id}', [StudentCourseController::class, 'showModuleDetail'])->name('student-module-detail');
 
     Route::get('/test', [TestController::class, 'index'])->name('test');
+    Route::get('/test/history', [TestController::class, 'testHistory'])->name('test.history');
+
+
+    Route::get('/test/modules', [TestController::class, 'selectModules'])->name('test.modules');
+    // Route::get('/test/{assessmentId}/start', [StudentCourseController::class, 'startTest'])->name('assessment.start');
+
+
 });
 
+// Admin
+Route::post('/admin/store-processed-pdf', [ProcessedPdfController::class, 'store'])->name('store-pdf');
+Route::post('/admin/store-questions', [QuestionController::class, 'store'])->name('store-questions');
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::redirect('/', '/admin/dashboard');
@@ -96,19 +104,19 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::delete('/delete/subsection/{id}', [ModuleController::class, 'deleteSubsection'])->name('delete.subsection');
 
     });
-    Route::prefix('content')->name('content.')->group(function(){
+    Route::prefix('content')->name('content.')->group(function () {
         Route::put('/update/{id}', [ContentController::class, 'update'])->name('update');
         Route::post('/add', [ContentController::class, 'create'])->name('create');
         Route::delete('/delete/{id}', [ContentController::class, 'destroy'])->name('delete');
 
     });
-    Route::prefix('question')->name('question.')->group(function (){
-        Route::get('/',[QuestionController::class,'index'])->name('index');
-        Route::put('/update/{id}',[QuestionController::class,'update'])->name('update');
-        Route::delete('/delete/{id}',[QuestionController::class,'delete'])->name('delete');
-        Route::get('/generate/show',[QuestionController::class,'show'])->name('show');
-        Route::post('/generate',[QuestionController::class,'generate'])->name('generate');
-        Route::get('/courses',[QuestionController::class,'courses'])->name('courses');
+    Route::prefix('question')->name('question.')->group(function () {
+        Route::get('/', [QuestionController::class, 'index'])->name('index');
+        Route::put('/update/{id}', [QuestionController::class, 'update'])->name('update');
+        Route::delete('/delete/{id}', [QuestionController::class, 'delete'])->name('delete');
+        Route::get('/generate/show', [QuestionController::class, 'show'])->name('show');
+        Route::post('/generate', [QuestionController::class, 'generate'])->name('generate');
+        Route::get('/courses', [QuestionController::class, 'courses'])->name('courses');
     });
 
     Route::prefix('pretest')->name('pretest.')->group(function(){

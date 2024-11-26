@@ -4,24 +4,20 @@ import Navbar from "@/Components/Navigation/Navbar";
 import RegisterForm from "@/Components/Forms/RegisterForm";
 import "../../../css/student/students.css";
 
-
 export default function StudentRegister() {
     return (
         <>
             <Head title="Student Register" />
             <Navbar isLight={false} />
             <div className="row d-flex justify-content-center mb-5">
-                <div className="col-6 mb-5">
+                <div className="col-6 mb-5 mt-5">
                     <Link
-                        href="/login"
+                        href={`/login`}
                         className="text-dark text-decoration-none d-flex align-items-center gap-2 neg mb-3"
                     >
-                        <span className="material-symbols-outlined icons">
-                            arrow_back
-                        </span>
-                        Back
+                        <i className="bi bi-arrow-left"></i> Back
                     </Link>
-                    <RegisterForm routeName={"register"}/>
+                    <RegisterForm routeName={"register"} />
                 </div>
             </div>
         </>
