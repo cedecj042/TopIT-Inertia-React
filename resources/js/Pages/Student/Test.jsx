@@ -6,6 +6,9 @@ import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 
 function TestPage(props) {
     const testsData = props.tests && props.tests.data ? props.tests.data : [];
+    const assessmentId = props.assessmentId || null;
+
+    console.log("assessment id: ", assessmentId);
     return (
         <>
             <main className="row p-3 mt-4">
@@ -27,9 +30,9 @@ function TestPage(props) {
                             ability level from the different courses. Take a
                             test now!
                         </p>
-                        <button className="btn btn-primary p-3 pt-2 pb-2">
+                        <Link href={`/test/modules`} className="btn btn-primary p-3 pt-2 pb-2">
                             Take a Test
-                        </button>
+                        </Link>
                     </div>
                 </div>
                 <div className="row mt-4 px-5">

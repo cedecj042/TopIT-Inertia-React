@@ -62,7 +62,10 @@ Route::middleware(['auth', 'student'])->group(function () {
 
     Route::get('/test', [TestController::class, 'index'])->name('test');
     Route::get('/test/history', [TestController::class, 'testHistory'])->name('test.history');
-    // Route::get('/test/', [TestController::class, 'testHistory'])->name('test.history');
+
+
+    Route::get('/test/modules', [TestController::class, 'selectModules'])->name('test.modules');
+    // Route::get('/test/{assessmentId}/start', [StudentCourseController::class, 'startTest'])->name('assessment.start');
 
 
 });

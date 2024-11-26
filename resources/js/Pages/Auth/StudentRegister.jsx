@@ -11,16 +11,13 @@ export default function StudentRegister() {
             <Navbar isLight={false} />
             <div className="row d-flex justify-content-center mb-5">
                 <div className="col-6 mb-5 mt-5">
-                    <Link
-                        href={`/login`}
-                        className="text-dark text-decoration-none d-flex align-items-center gap-2 neg mb-3"
+                    <button
+                        onClick={() => window.history.back()}
+                        className="btn btn-link text-dark text-decoration-none mb-4"
                     >
-                        <span className="material-symbols-outlined icons">
-                            arrow_back
-                        </span>
-                        Back
-                    </Link>
-                    <RegisterForm routeName={"register"}/>
+                        <i className="bi bi-arrow-left"></i> Back
+                    </button>
+                    <RegisterForm routeName={"register"} />
                 </div>
             </div>
         </>

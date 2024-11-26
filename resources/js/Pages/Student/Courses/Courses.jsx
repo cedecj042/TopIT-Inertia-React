@@ -1,5 +1,4 @@
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
-import StudentLayout from "@/Layouts/StudentLayout";
 
 function Courses ({courses}) {
 

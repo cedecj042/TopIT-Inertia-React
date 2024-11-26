@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Resources\AssessmentResource;
 use App\Models\Test;
+use App\Models\Course;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TestResource;
 use App\Models\Assessment;
@@ -38,15 +39,43 @@ class TestController extends Controller
 
         $tests = Assessment::where('student_id', $studentId)
             ->orderBy('created_at', 'desc')
-            ->paginate(5);
+            ->paginate(4);
 
         $testsArray = $tests->toArray();
 
         return Inertia::render('Student/TestHistory', [
-            'tests' => AssessmentResource::collection($tests), 
+            'tests' => AssessmentResource::collection($tests),
             'paginationLinks' => $testsArray['links'],
         ]);
     }
+
+    public function selectModules()
+    {
+        $courses = Course::all(); 
+
+        return Inertia::render('Student/Test/SelectModules', [
+            'title'=>'Select Modules',
+            'courses' => $courses,
+        ]);
+    }
+
+    // public function startTest($assessmentId)
+    // {
+    //     $selectedModules = session()->get("assessment_{$assessmentId}_modules");
+
+    //     if (!$selectedModules) {
+    //         return redirect()->route('test.modules', $assessmentId)
+    //             ->with('error', 'Please select modules before starting the test.');
+    //     }
+
+    //     // Fetch modules and other test data based on the selection
+    //     $modules = Module::whereIn('module_id', $selectedModules)->get();
+
+    //     return Inertia::render('Student/Assessment/StartTest', [
+    //         'modules' => $modules,
+    //         'assessmentId' => $assessmentId,
+    //     ]);
+    // }
 
 
 }
