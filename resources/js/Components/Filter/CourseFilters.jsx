@@ -13,8 +13,8 @@ export default function CourseFilters({}){
     
     return(
         <>
-            <div className="filter col-lg-4 col-md-6 col-xs-4 px-0">
-                <div className="col w-100 input-container">
+            <div className="row g-0 w-100">
+                <div className="col-md-8 col-lg-5 input-container mb-3">
                     <TextInputFilter
                         onKeyPress={onKeyPress}
                         value={otherState.title}
@@ -23,13 +23,15 @@ export default function CourseFilters({}){
                         handleClearInput={handleOtherChange}
                     />
                 </div>
+                <div className="col-md-4 col-lg-3 offset-md-0 offset-lg-4 ps-2">
+                    <OtherFilter
+                        visibleColumns={visibleColumns}
+                        onColumnChange={onColumnChange}
+                        handleOtherChange={handleOtherChange}
+                        otherState={otherState}
+                    />
+                </div>
             </div>
-            <OtherFilter
-                visibleColumns={visibleColumns}
-                onColumnChange={onColumnChange}
-                handleOtherChange={handleOtherChange}
-                otherState={otherState}
-            />
         </>
     )
 }

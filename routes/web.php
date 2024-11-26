@@ -128,6 +128,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::prefix('users')->name('users.')->group(function (){
         Route::get('/',[AdminUserController::class,'index'])->name('index');
         Route::post('/create',[AdminUserController::class,'create'])->name('create');
+        Route::delete('/{id}', [AdminUserController::class, 'delete'])->name('delete');
+
     });
     
 

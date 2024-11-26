@@ -25,7 +25,7 @@ function CourseDetail({ title, course, pdfs, queryParams }) {
         <>
             <div className="container-fluid p-5">
                 <div className="row">
-                    <div className="col btn-toolbar mb-3">
+                    <div className="col-12 btn-toolbar mb-3">
                         <button
                             className="btn btn-transparent"
                             disabled={isProcessing}
@@ -37,14 +37,14 @@ function CourseDetail({ title, course, pdfs, queryParams }) {
                             Course Detail
                         </h5>
                     </div>
-                    <div className="row px-5 pt-3">
+                    <div className="col-12">
                         <div className="row">
                             
                             <div className="col-12 mb-3">
                                 <h2 className="fw-bolder">{course.data.title}</h2>
-                                <p className="">{course.data.description}</p>
+                                <p className="m-0">{course.data.description}</p>
                             </div>
-                            <div className="col-12 btn-toolbar justify-content-between">
+                            <div className="col-12 btn-toolbar justify-content-between mb-3">
                                 <h4 className="fw-semibold m-0 align-content-center">List of PDFs</h4>
                                 <button
                                     type="button"

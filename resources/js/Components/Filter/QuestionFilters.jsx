@@ -39,69 +39,67 @@ export default function QuestionFilters({filters}){
         // },
     ];
     return (
-        <div className="row m-0 p-0 justify-content-between">
+        <>
             <ClearFunction
                 currentState={filterState}
                 initialState={INITIAL_QUESTION_STATE().filterState}
                 handleClearFunction={handleClearFilter}
                 label={"filter"}
             />
-            <div className="filter col-6">
-                <div className="row">
-                    <div className="col-8 px-0 input-container">
-                        <TextInputFilter
-                            onKeyPress={onKeyPress}
-                            value={otherState.question}
-                            filterKey={"question"}
-                            handleInputChange={handleInputChange}
-                            handleClearInput={handleOtherChange}
-                        />
-                    </div>
-                    <div className="col-4 dropdown">
-                        <button
-                            className="btn btn-transparent dropdown-toggle"
-                            type="button"
-                            id="filterDropdown"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                        >
-                            Filters{" "}
-                        </button>
-                        <div
-                            className="dropdown-menu p-3"
-                            aria-labelledby="filterDropdown"
-                        >
-                            {FILTER_DATA.map((filter, index) => (
-                                <SelectFilter
-                                    key={index} // Use index as key
-                                    data={filter.data}
-                                    filterKey={filter.filterKey}
-                                    keyValue={filter.keyValue}
-                                    handleFilterChange={handleFilterChange}
-                                />
-                            ))}
-                            <div className="mb-3">
-                                <button
-                                    className="btn btn-light w-100"
-                                    onClick={() =>
-                                        handleClearFilter(["course","difficulty","detail_types"])
-                                    }
-                                >
-                                    Clear Filters
-                                </button>
-                            </div>
+            <div className="row g-0 w-100">
+                <div className="col-lg-5 col-md-12 input-container mb-3">
+                <TextInputFilter
+                    onKeyPress={onKeyPress}
+                    value={otherState.question}
+                    filterKey={"question"}
+                    handleInputChange={handleInputChange}
+                    handleClearInput={handleOtherChange}
+                />
+                </div>
+                <div className="col-md-4 col-lg-2 px-2 dropdown">
+                    <button
+                        className="btn btn-transparent dropdown-toggle"
+                        type="button"
+                        id="filterDropdown"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                    >
+                        Filters{" "}
+                    </button>
+                    <div
+                        className="dropdown-menu p-3"
+                        aria-labelledby="filterDropdown"
+                    >
+                        {FILTER_DATA.map((filter, index) => (
+                            <SelectFilter
+                                key={index} // Use index as key
+                                data={filter.data}
+                                filterKey={filter.filterKey}
+                                keyValue={filter.keyValue}
+                                handleFilterChange={handleFilterChange}
+                            />
+                        ))}
+                        <div className="mb-3">
+                            <button
+                                className="btn btn-light w-100"
+                                onClick={() =>
+                                    handleClearFilter(["course","difficulty","detail_types"])
+                                }
+                            >
+                                Clear Filters
+                            </button>
                         </div>
                     </div>
                 </div>
+                <div className="col-md-4 col-lg-3 offset-md-4 offset-lg-2">
+                    <OtherFilter
+                        visibleColumns={visibleColumns}
+                        onColumnChange={onColumnChange}
+                        handleOtherChange={handleOtherChange}
+                        otherState={otherState}
+                    />
+                </div>
             </div>
-            <div className="col-5">
-                <OtherFilter
-                    visibleColumns={visibleColumns}
-                    onColumnChange={onColumnChange}
-                    handleOtherChange={handleOtherChange}
-                    otherState={otherState}
-                />
-            </div>
-        </div>
+        </>
     );
 }
