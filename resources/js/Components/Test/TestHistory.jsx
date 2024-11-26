@@ -3,7 +3,15 @@ import { Link } from "@inertiajs/react"; // For Inertia.js links
 
 const TestHistory = ({ tests = [] }) => {
     if (!Array.isArray(tests) || tests.length === 0) {
-        return <p>No test history available.</p>;
+        <div
+            className="alert alert-light p-5 no-data d-flex flex-column"
+            role="alert"
+        >
+            <img src="/assets/sad-cloud.svg" alt="sad cloud" />
+            <label htmlFor="" className="text-secondary mt-3">
+                It seems like there is no data available.
+            </label>
+        </div>;
     }
 
     return (

@@ -38,12 +38,12 @@ class TestController extends Controller
 
         $tests = Assessment::where('student_id', $studentId)
             ->orderBy('created_at', 'desc')
-            ->paginate(4);
+            ->paginate(5);
 
         $testsArray = $tests->toArray();
 
         return Inertia::render('Student/TestHistory', [
-            'tests' => AssessmentResource::collection($tests),  // Apply resource transformation
+            'tests' => AssessmentResource::collection($tests), 
             'paginationLinks' => $testsArray['links'],
         ]);
     }

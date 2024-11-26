@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'student' => \App\Http\Middleware\StudentAccess::class,
             'admin' => \App\Http\Middleware\AdminAccess::class,
+            'pretest.not_taken' => \App\Http\Middleware\EnsurePretestNotTaken::class,
         ]);
         $middleware->validateCsrfTokens(except:[
             '/admin/store-processed-pdf',
