@@ -9,7 +9,7 @@ export default function AdminLogin() {
             <Head title="Admin Login" />
             <div className="container-fluid vh-100 admin-bg">
                 <div className="row h-100 justify-content-center align-items-center">
-                    <div className="col-md-3 col-lg-3">
+                    <div className="col-sm-6 col-md-4 col-lg-3">
                         <div className="card-body">
                             <h2 className="text-center mb-4">
                                 <img

@@ -43,7 +43,7 @@ export default function AdminUsersTable({ data, visibleColumns }) {
                 type="button"
                 onClick={() => openModal(rowData)}
                 disabled={isProcessing}
-                className="btn btn-outline-danger d-flex justify-content-center"
+                className="btn btn-outline-danger d-flex justify-content-center align-items-center"
             >
                 <span className="material-symbols-outlined">lock</span>Delete Admin
             </button>

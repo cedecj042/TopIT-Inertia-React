@@ -22,12 +22,12 @@ ChartJS.register(
 );
 
 
-export default function StudentsChart({ chartData }) {
+export default function MonthlyLineChart({ chartData,label,caption }) {
     const data = {
         labels: chartData.labels,
         datasets: [
             {
-                label: 'Number of Students Registered',
+                label: label,
                 data: chartData.data,
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 borderColor: 'rgba(75, 192, 192, 1)',
@@ -38,13 +38,14 @@ export default function StudentsChart({ chartData }) {
 
     const options = {
         responsive: true,
+        maintainAspectRatio:true,
         plugins: {
             legend: {
                 position: 'top',
             },
             title: {
                 display: true,
-                text: 'Students Registered by Month',
+                text: caption,
             },
         },
     };
