@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 export default function StudentProfileForm({ student, onSubmit, onClose }) {
     const [formData, setFormData] = useState({
+        profile_image: student.profile_image || null,
         firstname: student.firstname || "",
         lastname: student.lastname || "",
         birthdate: student.birthdate || "",
@@ -15,6 +16,7 @@ export default function StudentProfileForm({ student, onSubmit, onClose }) {
 
     useEffect(() => {
         setFormData({
+            profile_image: student.profile_image || null,
             firstname: student.firstname || "",
             lastname: student.lastname || "",
             birthdate: student.birthdate || "",
@@ -33,12 +35,40 @@ export default function StudentProfileForm({ student, onSubmit, onClose }) {
         }));
     };
 
+    const handleFileChange = (e) => {
+        if (e.target.files[0]) {
+            setFormData(prev => ({
+                ...prev,
+                profile_image: e.target.files[0]
+            }));
+            setProfileImageChanged(true);
+        }
+    };
+
+    const [profileImageChanged, setProfileImageChanged] = useState(false);
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("Submitting form data:", formData);
-        onSubmit(formData);
+        
+        const formDataToSubmit = new FormData();
+        
+        Object.keys(formData).forEach(key => {
+            if ((key !== 'profile_image' || profileImageChanged) && 
+                formData[key] !== null && formData[key] !== undefined && formData[key] !== '') {
+                formDataToSubmit.append(key, formData[key]);
+            }
+        });
+
+        for (let pair of formDataToSubmit.entries()) {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+
+        onSubmit(formDataToSubmit);
+    };
+
+    const handleCancel = () => {
         onClose();
     };
+    
 
     return (
         <form onSubmit={handleSubmit} className="p-4">
@@ -130,7 +160,20 @@ export default function StudentProfileForm({ student, onSubmit, onClose }) {
                     ))}
                 </select>
             </div>
-            <div className="d-flex justify-content-end mt-4">
+            <div className="mb-3">
+                <label className="form-label">Profile Image</label>
+                <input
+                    type="file"
+                    name="profile_image"
+                    onChange={handleFileChange}
+                    className="form-control"
+                    accept="image/*"
+                />
+            </div>
+            <div className="d-flex justify-content-between mt-4">
+                <button type="button" onClick={handleCancel} className="btn btn-secondary mr-2">
+                    Cancel
+                </button>
                 <button type="submit" className="btn btn-primary">
                     Save Changes
                 </button>

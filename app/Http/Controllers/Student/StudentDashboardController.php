@@ -20,7 +20,7 @@ class StudentDashboardController extends Controller
         $studentId = Auth::user()->userable->student_id;
 
         $averageThetaScore = DB::table('assessment_courses')
-            ->select('courses.title as course_title', DB::raw('AVG(assessment_courses.theta_score) as avg_theta_score'))
+            ->select('courses.title as course_title', DB::raw('AVG(assessment_courses.final_theta_score) as avg_theta_score'))
             ->join('assessments', 'assessment_courses.assessment_id', '=', 'assessments.assessment_id')
             ->join('students', 'assessments.student_id', '=', 'students.student_id')
             ->join('courses', 'assessment_courses.course_id', '=', 'courses.course_id')

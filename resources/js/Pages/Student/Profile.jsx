@@ -9,29 +9,28 @@ import { toast } from "sonner";
 import "../../../css/student/dashboard.css";
 import { router } from '@inertiajs/react'; 
 
-function Profile({ student, averageThetaScore }) {
+function Profile({ student }) {
     const [showModal, setShowModal] = useState(false);
     const [studentData, setStudentData] = useState(student.data);
 
     const openModal = () => setShowModal(true);
     const closeModal = () => setShowModal(false);
     
-    const handleProfileUpdate = (updatedProfile) => {
-        router.put(route('student.profile.edit'), updatedProfile, {
-            onStart: () => console.log("Starting PUT request"),
+    const handleProfileUpdate = (formData) => {
+        router.post(route('student.profile.edit'), formData, {
+            forceFormData: true, 
             onSuccess: (page) => {
                 setStudentData(page.props.student.data);
                 toast.success("Profile updated successfully!");
                 closeModal();
             },
             onError: (errors) => {
-                console.error("PUT request failed:", errors);
-                toast.error("Failed to update profile");
+                console.error("Validation errors:", errors);
+                toast.error("Failed to update profile. Please check the form.");
             },
             preserveScroll: true,
         });
     };
-    
     console.log("student", studentData);
 
     return (
@@ -51,14 +50,6 @@ function Profile({ student, averageThetaScore }) {
 
                     <div className="row w-100 px-5 mb-3">
                         <StudentProfile student={studentData} />
-                    </div>
-                    <div className="row w-100 px-5 mb-3">
-                        <h5 className="fw-semibold">
-                            Average Theta Scores per Course
-                        </h5>
-                        <div className="chart-container">
-                            <ThetaScoreBar thetaScoreData={averageThetaScore} />
-                        </div>
                     </div>
                 </div>
 

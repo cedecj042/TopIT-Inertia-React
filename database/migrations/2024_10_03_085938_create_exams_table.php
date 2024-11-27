@@ -29,8 +29,8 @@ return new class extends Migration
             $table->foreignID('course_id')->references('course_id')->on('courses')->cascadeOnDelete();
             $table->integer('total_items');
             $table->integer('total_score');
-            $table->float('initial_theta_score');
-            $table->float('final_theta_score');
+            $table->float('initial_theta_score')->nullable();
+            $table->float('final_theta_score')->nullable(); //or default(0)? getting this error Field 'final_theta_score' and 'initial_theta_score doesn't have a default value if wala
             $table->float('percentage');
             $table->timestamps();
         });

@@ -52,7 +52,8 @@ class TestSeeder extends Seeder
                     'total_items' => $totalItems,
                     'total_score' => $totalScore,
                     'percentage' => $percentage,
-                    'theta_score' => $faker->randomFloat(2, -5, 5), 
+                    'initial_theta_score' => $faker->randomFloat(2, -5, 5), 
+                    'final_theta_score' => $faker->randomFloat(2, -5, 5), 
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
