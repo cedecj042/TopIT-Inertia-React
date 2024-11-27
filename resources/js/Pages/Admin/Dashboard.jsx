@@ -1,8 +1,6 @@
 import "../../../css/admin/dashboard.css";
 import Pagination from "@/Components/Pagination";
 import StudentsTable from "@/Components/Tables/StudentsTable";
-import StudentsLineChart from "@/Components/Chart/StudentsLineChart";
-import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
 import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import { INITIAL_STUDENT_STATE } from "@/Library/filterState";
 import {
@@ -12,6 +10,8 @@ import {
 } from "@/Library/constants";
 import { TableContext } from "@/Components/Context/TableContext";
 import StudentFilters from "@/Components/Filter/StudentFilters";
+import MonthlyLineChart from "@/Components/Chart/MonthlyLineChart";
+import ThetaScoreBar from "@/Components/Chart/ThetaScoreBar";
 
 function Dashboard({
     students,
@@ -56,7 +56,11 @@ function Dashboard({
                     Total Number of Students Registered
                 </h5>
                 <div className="chart-container d-flex justify-content-center">
-                    <StudentsLineChart chartData={chartData} />
+                    <MonthlyLineChart
+                        chartData={chartData} 
+                        label={'Number of Students Registered'}
+                        caption= {'Students Registered by Month'} 
+                    />
                 </div>
             </div>
         </>

@@ -36,7 +36,7 @@ class Student extends Model
     public function user(){
         return $this->morphOne(User::class,'userable');
     }
-    public function tests(){
+    public function assessments(){
         return $this->hasMany(Assessment::class,'student_id','student_id');
     }
     public function student_course_thetas(){

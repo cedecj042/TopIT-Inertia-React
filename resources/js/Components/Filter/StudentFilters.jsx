@@ -54,7 +54,7 @@ export default function StudentFilters({ filters }) {
                         handleClearInput={handleOtherChange}
                     />
                 </div>
-                <div className="col-md-4 col-lg-2 px-2 dropdown">
+                <div className="col-md-4 col-lg-2 px-2 dropdown mb-3">
                     <button
                         className="btn btn-transparent dropdown-toggle"
                         type="button"
@@ -89,7 +89,7 @@ export default function StudentFilters({ filters }) {
                         </div>
                     </div>
                 </div>
-                <div className="col-md-4 col-lg-3 offset-md-4 offset-lg-2">
+                <div className="col-md-4 col-lg-3 offset-md-4 offset-lg-2 mb-3">
                     <OtherFilter
                         visibleColumns={visibleColumns}
                         onColumnChange={onColumnChange}

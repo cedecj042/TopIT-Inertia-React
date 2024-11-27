@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\PdfController;
 use App\Http\Controllers\Admin\QuestionController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ContentController;
@@ -132,7 +133,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     });
     
-
+    Route::get('/report',[ReportController::class,'index'])->name('report');
     Route::get('/profile', [DashboardController::class, 'showProfile'])->name('profile');
     Route::get('/student/{student_id}', [DashboardController::class, 'showStudentDetails'])->name('student');
 });

@@ -65,10 +65,10 @@ class DashboardController extends Controller
         $students = $query->paginate($perPage)->onEachSide(1);
 
 
-        $averageScores = DB::table('assessment_courses')
-            ->join('courses', 'assessment_courses.course_id', '=', 'courses.course_id')
-            ->select('courses.title as course_title', DB::raw('AVG(assessment_courses.theta_score) as avg_theta_score'))
-            ->groupBy('courses.title')
+        $averageScores = DB::table('student_course_thetas') // Correct table name
+            ->join('courses', 'student_course_thetas.course_id', '=', 'courses.course_id')
+            ->select('courses.title as course_title', DB::raw('AVG(student_course_thetas.theta_score) as avg_theta_score'))
+            ->groupBy('courses.course_id', 'courses.title')
             ->get();
 
         // Format the results into the desired array structure
