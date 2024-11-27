@@ -65,7 +65,8 @@ Route::middleware(['auth', 'student'])->group(function () {
 
 
     Route::get('/test/modules', [TestController::class, 'selectModules'])->name('test.modules');
-    // Route::get('/test/{assessmentId}/start', [StudentCourseController::class, 'startTest'])->name('assessment.start');
+    Route::post('/test/start', [TestController::class, 'startTest'])->name('test.start');
+    Route::get('/test/{assessmentId}', [TestController::class, 'showTestPage'])->name('test.page');
 
 
 });

@@ -116,8 +116,8 @@ class PretestController extends Controller
 
         $courses = Course::with([
             'questions' => function ($query) {
-                $query->where('test_type', 'Test')
-                    ->with('question_detail');
+                $query->
+                    with('question_detail');
             }
         ])->get();
 
@@ -249,6 +249,10 @@ class PretestController extends Controller
             ]);
 
             $this->updateAssessmentCourses($assessment->assessment_id);
+
+            //update student table 
+            $student = Student::findOrFail($assessment->student_id);
+            $student->update(['pretest_completed' => true]);
 
             DB::commit();
 

@@ -1,7 +1,14 @@
 import React from 'react';
 
 const MultipleChoiceMany = ({ question, answers, setValue }) => {
-    const choices = question.question_detail?.choices || [];
+    // const choices = question.question_detail?.choices || [];
+    const choices = Array.isArray(question.question_detail?.choices) 
+        ? question.question_detail.choices 
+        : (
+            typeof question.question_detail?.choices === 'string' 
+            ? JSON.parse(question.question_detail.choices) 
+            : []
+        );
     const currentValues = answers[question.question_id] || [];
 
     const handleMultipleChoiceMany = (questionId, choice, checked) => {
