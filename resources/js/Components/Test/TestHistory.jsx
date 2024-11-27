@@ -53,7 +53,7 @@ const TestHistory = ({ tests = [] }) => {
                                     <Link
                                         href={`/pretest/review/${test.assessment_id}`}
                                         className="btn btn-link p-3"
-                                        title="Review Test"
+                                        title="Student Test"
                                     >
                                         <i className="h3 bi bi-play-circle-fill"></i>
                                     </Link>
