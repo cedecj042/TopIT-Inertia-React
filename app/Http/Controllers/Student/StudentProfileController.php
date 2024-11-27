@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 
 class StudentProfileController extends Controller
@@ -21,23 +22,8 @@ class StudentProfileController extends Controller
     {
         $studentId = Student::find(Auth::user()->userable->student_id);
 
-        $averageThetaScore = DB::table('assessment_courses')
-            ->select('courses.title as course_title', DB::raw('AVG(assessment_courses.theta_score) as avg_theta_score'))
-            ->join('assessments', 'assessment_courses.assessment_id', '=', 'assessments.assessment_id')
-            ->join('students', 'assessments.student_id', '=', 'students.student_id')
-            ->join('courses', 'assessment_courses.course_id', '=', 'courses.course_id')
-            ->where('students.student_id', $studentId)
-            ->groupBy('courses.title')
-            ->get();
-
-        $averageTheta = [
-            'labels' => $averageThetaScore->pluck('course_title')->toArray(),
-            'data' => $averageThetaScore->pluck('avg_theta_score')->toArray()
-        ];
-
         return Inertia::render('Student/Profile', [
             'title' => 'Student Profile',
-            'averageThetaScore' => $averageTheta,
             'student' => new StudentResource($studentId),
         ]);
     }
@@ -48,32 +34,40 @@ class StudentProfileController extends Controller
             $student = Auth::user()->userable;
 
             $validatedData = $request->validate([
+                'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
                 'firstname' => 'required|string|max:255',
                 'lastname' => 'required|string|max:255',
                 'birthdate' => 'nullable|date',
                 'gender' => ['required', Rule::in(['Male', 'Female', 'Others'])],
                 'address' => 'nullable|string|max:500',
                 'school' => 'nullable|string|max:255',
-                'year' => 'nullable|string|max:50'
+                'year' => 'nullable|string|max:50',
             ]);
 
-            \Log::info('Validated data:', $validatedData);
+            DB::transaction(function () use ($student, $validatedData) {
+                if (isset($validatedData['profile_image'])) {
+                    $profileImage = $validatedData['profile_image'];
+                    $imageName = time() . '.' . $profileImage->extension();
+                    $profileImage->storeAs('', $imageName, 'profile_images');
 
-            $updated = $student->update($validatedData);
+                    if ($student->profile_image) {
+                        Storage::disk('profile_images')->delete($student->profile_image);
+                    }
 
-            if (!$updated) {
-                throw new \Exception('Failed to update profile');
-            }
+                    $validatedData['profile_image'] = $imageName;
+                }
 
-            return redirect()->route('profile')->with([
-                'success' => 'Profile updated successfully',
-                'student' => new StudentResource($student->fresh())
-            ]);
+                $student->update($validatedData);
+            });
 
+            return redirect()->route('profile')->with('success', 'Profile updated successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             \Log::error('Profile update error: ' . $e->getMessage());
-            return response()->json(['message' => $e->getMessage()], 422);
+            return back()->with('error', 'An error occurred while updating the profile. Please try again.');
         }
     }
+
 
 }

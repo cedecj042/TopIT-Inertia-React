@@ -242,7 +242,10 @@ class PretestController extends Controller
                 'status' => 'Completed',
                 'total_items' => $totalItems,
                 'total_score' => $totalScore,
-                'percentage' => ($totalItems > 0) ? ($totalScore / $totalItems) * 100 : 0
+                'percentage' => ($totalItems > 0) ? ($totalScore / $totalItems) * 100 : 0,
+                // to update
+                'initial_theta_score' => 0,
+                'final_theta_scoure' => 0
             ]);
 
             $this->updateAssessmentCourses($assessment->assessment_id);
@@ -332,6 +335,17 @@ class PretestController extends Controller
             ->where('course_id', $courseId)
             ->first();
 
+        Log::info('Creating assessment course:', [
+            'assessment_id' => $assessmentId,
+            'course_id' => $courseId,
+            'total_items' => 0,
+            'total_score' => 0,
+            'percentage' => 0,
+            'initial_theta_score' => 0,
+            'final_theta_score' => 0,
+        ]);
+
+
         if (!$assessmentCourse) {
             $assessmentCourse = AssessmentCourse::create([
                 'assessment_id' => $assessmentId,
@@ -339,7 +353,8 @@ class PretestController extends Controller
                 'total_items' => 0,
                 'total_score' => 0,
                 'percentage' => 0,
-                'theta_score' => 0,
+                'initial_theta_score' => 0, // Add this line
+                'final_theta_score' => 0,
             ]);
         }
 
@@ -359,8 +374,12 @@ class PretestController extends Controller
             $assessmentCourse->update([
                 'total_score' => $totalScore,
                 'total_items' => $totalItems,
-                'percentage' => ($totalItems > 0) ? ($totalScore / $totalItems) * 100 : 0
+                'percentage' => ($totalItems > 0) ? ($totalScore / $totalItems) * 100 : 0,
+                'initial_theta_score' => 0,
+                'final_theta_score' => 0
             ]);
+
+            //add student_courses_theta
         }
     }
 

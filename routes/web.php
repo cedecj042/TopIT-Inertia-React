@@ -42,10 +42,10 @@ Route::middleware(['auth', 'student'])->group(function () {
     Route::get('/welcome', [StudentPretestController::class, 'welcome'])->name('welcome');
 
     Route::prefix('pretest')->name('pretest.')->group(function () {
-        Route::middleware(['auth', 'pretest.not_taken'])->group(function () {
+        // Route::middleware(['auth', 'pretest.not_taken'])->group(function () {
             Route::get('/start', [StudentPretestController::class, 'startPretest'])->name('start');
             Route::post('/submit', [StudentPretestController::class, 'submit'])->name('submit');
-        });
+        // });
         Route::get('/finish/{assessmentId}', [StudentPretestController::class, 'finish'])->name('finish');
         Route::get('/review/{assessmentId}', [StudentPretestController::class, 'review'])->name('review');
     });
@@ -55,7 +55,7 @@ Route::middleware(['auth', 'student'])->group(function () {
     Route::redirect('/', '/dashboard');
     Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [StudentProfileController::class, 'showStudentDetails'])->name('profile');
-    Route::put('/profile', [StudentProfileController::class, 'editProfile'])->name('student.profile.edit');
+    Route::post('/profile', [StudentProfileController::class, 'editProfile'])->name('student.profile.edit');
 
     Route::get('/course', [StudentCourseController::class, 'showStudentCourse'])->name('student-course');
     Route::get('/course/{id}', [StudentCourseController::class, 'showStudentCourseDetail'])->name('student-course-detail');
