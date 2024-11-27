@@ -24,27 +24,24 @@ function Dashboard({
         <>
             <div className="container-fluid p-5">
                 <div className="row justify-content-center">
-                    <div className="col mb-3 btn-toolbar justify-content-between">
-                        <h3 className="fw-bold">Dashboard</h3>
-                    </div>
-                    <div className="row mt-2 p-0">
-                        <div className="d-flex flex-column col-12">
-                            <h5 className="fw-semibold mb-3">List of Students</h5>
-                            <TableContext
-                                initialState={INITIAL_STUDENT_STATE(queryParams)}
-                                routeName={"admin.dashboard"}
-                                components={STUDENT_FILTER_COMPONENT}
-                                column={STUDENT_COLUMN}
-                            >
-                                <StudentFilters filters={filters} />
-                                <StudentsTable
-                                    data={students.data}
-                                    filters={filters}
-                                    queryParams={queryParams}
-                                />
-                            </TableContext>
-                            <Pagination links={students.meta.links} />
-                        </div>
+                    <h3 className="fw-bold">Dashboard</h3>
+                    <div className="col-12 mt-2">
+                        <h5 className="fw-semibold mb-3">List of Students</h5>
+                        <TableContext
+                            initialState={INITIAL_STUDENT_STATE(queryParams)}
+                            routeName={"admin.dashboard"}
+                            components={STUDENT_FILTER_COMPONENT}
+                            column={STUDENT_COLUMN}
+                        >
+                            <StudentFilters filters={filters} />
+                            <StudentsTable
+                                data={students.data}
+                                filters={filters}
+                                queryParams={queryParams}
+                            />
+                        </TableContext>
+                        <Pagination links={students.meta.links} />
+                            
                     </div>
                 </div>
             </div>

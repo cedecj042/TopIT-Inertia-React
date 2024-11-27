@@ -82,11 +82,21 @@ class AdminUserController extends Controller
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function delete(int $id)
     {
-        //
+        $admin = Admin::find($id);
+        if (!$admin) {
+            return redirect()->back()->with('error', 'Admin not found!');
+        }
+        $user = User::where('userable_id', $id)
+            ->where('userable_type', Admin::class)
+            ->first();
+
+        if ($user) {
+            $user->delete(); // Delete the User record
+        }
+        $admin->delete();
+        return redirect()->back()->with('success', 'Coordinator deleted successfully!');
     }
+
 }

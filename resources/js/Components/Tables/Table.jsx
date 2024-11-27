@@ -16,7 +16,7 @@ export default function Table({
     renderCheckbox = null, // Function to render checkboxes for selection
 }) {
     return (
-        <div className="table-header mt-3">
+        <div className="table-header">
             <table className="table students-table">
                 <thead>
                     <tr>
