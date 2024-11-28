@@ -4,7 +4,6 @@ import Identification from "../../../Components/QuestionTypes/Identification";
 import MultipleChoiceSingle from "../../../Components/QuestionTypes/MultipleChoiceSingle";
 import MultipleChoiceMany from "../../../Components/QuestionTypes/MultipleChoiceMany";
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
-import "../../../../css/student/students.css";
 import MainLayout from "@/Layouts/MainLayout";
 import Navbar from "@/Components/Navigation/Navbar";
 import "../../../../css/student/students.css";
@@ -22,15 +21,15 @@ const Test = ({ assessment, question, thetaScores }) => {
                     <MultipleChoiceSingle
                         question={currentQuestion}
                         questionName={questionName}
-                        register={() => {}} // Implement later
+                        register={() => {}}
                     />
                 );
             case "Multiple Choice - Many":
                 return (
                     <MultipleChoiceMany
                         question={currentQuestion}
-                        answers={{}} 
-                        setValue={() => {}} 
+                        answers={{}}
+                        setValue={() => {}}
                     />
                 );
             case "Identification":
@@ -38,7 +37,7 @@ const Test = ({ assessment, question, thetaScores }) => {
                     <Identification
                         question={currentQuestion}
                         questionName={questionName}
-                        register={() => {}} 
+                        register={() => {}}
                     />
                 );
             default:
@@ -49,39 +48,40 @@ const Test = ({ assessment, question, thetaScores }) => {
     if (!currentQuestion) return <p>No more questions. Test completed!</p>;
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div>
             <Navbar isLight={true} />
-            <div className="pretestb container-fluid">
-            <div className="flex-grow flex items-center justify-center py-12">
-                <div className="w-full max-w-2xl px-4">
-                    <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-                        <div className="p-6">
-                            <h1 className="text-2xl font-bold text-center mb-6">Adaptive Test</h1>
-                            <div 
-                                key={currentQuestion.question_id}
-                                className="mb-4"
-                            >
-                                <h5 className="text-lg font-semibold mb-3">
-                                    Question
-                                </h5>
-                                <p className="text-gray-700 mb-4">
-                                    {currentQuestion.question}
-                                </p>
-                                {renderQuestion()}
+            <div className="min-vh-100 d-flex align-items-center">
+                <div className="container mb-6">
+                    <div className="row justify-content-center">
+                        <div className="col-12 col-md-8 col-lg-6">
+                            <h1 className="h3 mb-2">Assessment Test</h1>
+                            <p className="text-muted small mb-5">date here</p>
+
+                            <div className="card shadow-sm">
+                                <div className="card-body p-4">
+                                    <div className="mb-4">
+                                        <h5 className="card-title mb-3">
+                                            Question 1
+                                        </h5>
+                                        <p className="card-text mb-4">
+                                            {currentQuestion.question}
+                                        </p>
+                                        <div className="answer-options">
+                                            {renderQuestion()}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            
-                            <div className="text-center mt-6">
+                            <div className="text-end mt-5">
                                 <button
-                                    className="btn btn-primary px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                                    // onClick={handleSubmitAnswer}
+                                    className="btn btn-primary px-4"
                                     disabled={!currentAnswer}
                                 >
-                                    Submit Answer
+                                    Next
                                 </button>
                             </div>
                         </div>
                     </div>
-                </div>
                 </div>
             </div>
         </div>
@@ -90,18 +90,3 @@ const Test = ({ assessment, question, thetaScores }) => {
 
 Test.layout = (page) => <MainLayout children={page} />;
 export default Test;
-
-    // const handleSubmitAnswer = () => {
-    //     // Submit the current answer and fetch the next question
-    //     axios
-    //         .post(`/api/cat/${assessment.assessment_id}/submit`, {
-    //             question_id: currentQuestion.question_id,
-    //             answer: currentAnswer,
-    //         })
-    //         .then((response) => {
-    //             const { nextQuestion } = response.data;
-    //             setCurrentQuestion(nextQuestion);
-    //             setCurrentAnswer(null);
-    //         })
-    //         .catch((error) => console.error(error));
-    // };

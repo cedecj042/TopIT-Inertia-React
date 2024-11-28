@@ -23,6 +23,8 @@ const Pretest = ({
         onConfirm: null,
     });
     const submissionInProgress = useRef(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+
 
     const { register, handleSubmit, watch, setValue } = useForm({
         defaultValues: {
@@ -35,6 +37,8 @@ const Pretest = ({
     const answers = watch("answers");
 
     useEffect(() => {
+        if (isSubmitted) return;
+        console.log("Assessment initialization effect running");
         if (!assessment?.assessment_id) {
             toast.error("No assessment ID found");
             return;
@@ -49,6 +53,7 @@ const Pretest = ({
                         : "";
             });
         });
+        console.log("Setting initial answers:", initialAnswers);
         setValue("answers", initialAnswers);
     }, [courses.questions, setValue, assessment]);
 
@@ -86,6 +91,8 @@ const Pretest = ({
 
                 router.post(route("pretest.submit"), formData, {
                     onSuccess: () => {
+                        setIsSubmitted(true);
+                        console.log("submitted!!");
                         router.visit(
                             route("pretest.finish", {
                                 assessmentId: assessment?.assessment_id,

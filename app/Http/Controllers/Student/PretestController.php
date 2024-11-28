@@ -67,18 +67,26 @@ class PretestController extends Controller
             }
         ])->get();
 
-        $assessment = Assessment::create([
-            'student_id' => $student->student_id,
-            'type' => 'Pretest',
-            'status' => 'In Progress',
-            'start_time' => now(),
-            'end_time' => null,
-            'total_items' => $courses->sum(function ($course) {
-                return $course->questions->count();
-            }),
-            'total_score' => 0,
-            'percentage' => 0
-        ]);
+        // checking to avoid duplicate
+        $existingPretest = Assessment::where('student_id', $student->student_id)
+            ->where('type', 'Pretest')
+            ->where('status', 'In Progress')
+            ->first();
+
+        if (!$existingPretest) {
+            $existingPretest = Assessment::create([
+                'student_id' => $student->student_id,
+                'type' => 'Pretest',
+                'status' => 'In Progress',
+                'start_time' => now(),
+                'end_time' => null,
+                'total_items' => $courses->sum(function ($course) {
+                    return $course->questions->count();
+                }),
+                'total_score' => 0,
+                'percentage' => 0
+            ]);
+        }
 
         $coursesData = CourseResource::collection($courses)->additional([
             'questions' => $courses->map(function ($course) {
@@ -92,10 +100,10 @@ class PretestController extends Controller
         return Inertia::render('Student/Pretest/Pretest', [
             'courses' => $coursesData,
             'assessment' => [
-                'assessment_id' => $assessment->assessment_id,
-                'status' => $assessment->status,
-                'start_time' => $assessment->start_time,
-                'type' => $assessment->type
+                'assessment_id' => $existingPretest->assessment_id,
+                'status' => $existingPretest->status,
+                'start_time' => $existingPretest->start_time,
+                'type' => $existingPretest->type
             ],
             'student' => $student
         ]);
@@ -184,6 +192,10 @@ class PretestController extends Controller
     {
         try {
             Log::info('Pretest submission data: ', $request->all());
+            Log::info('Starting pretest submission', [
+                'student_id' => Auth::user()->userable->student_id,
+                'assessment_id' => $request->assessment_id
+            ]);
 
             $validated = $request->validate([
                 'assessment_id' => 'required|exists:assessments,assessment_id',
@@ -203,10 +215,6 @@ class PretestController extends Controller
                 $question = Question::with(['question_detail', 'course'])
                     ->findOrFail($questionId);
 
-                if (!$question->question_detail) {
-                    Log::warning('Question detail not found for question ID: ' . $questionId);
-                    continue;
-                }
                 // deocding correct answer
                 $correctAnswer = $question->question_detail->answer;
                 if (is_string($correctAnswer)) {
@@ -225,14 +233,18 @@ class PretestController extends Controller
                 );
 
                 // store and encode participant answer 
-                AssessmentItem::create([
-                    'assessment_course_id' => $this->getAssessmentCourseId($assessment->assessment_id, $question->course_id),
-                    'question_id' => $questionId,
-                    'participants_answer' => is_array($participantAnswer) ? json_encode($participantAnswer) : json_encode([$participantAnswer]),
-                    'score' => $score
-                ]);
-
-                $totalScore += $score;
+                $assessmentItem = AssessmentItem::updateOrCreate(
+                    [
+                        'assessment_course_id' => $this->getAssessmentCourseId($assessment->assessment_id, $question->course_id),
+                        'question_id' => $questionId
+                    ],
+                    [
+                        'participants_answer' => is_array($participantAnswer) ? json_encode($participantAnswer) : json_encode([$participantAnswer]),
+                        'score' => $score
+                    ]
+                );
+    
+                $totalScore += $assessmentItem->score;
                 $totalItems++;
             }
 
@@ -248,6 +260,13 @@ class PretestController extends Controller
                 'final_theta_scoure' => 0
             ]);
 
+            Log::info('Completed pretest submission after update', [
+                'student_id' => Auth::user()->userable->student_id,
+                'assessment_id' => $assessment->assessment_id,
+                'total_score' => $totalScore,
+                'total_items' => $totalItems
+            ]);
+
             $this->updateAssessmentCourses($assessment->assessment_id);
 
             //update student table 
@@ -255,6 +274,13 @@ class PretestController extends Controller
             $student->update(['pretest_completed' => true]);
 
             DB::commit();
+
+            // !!
+            return Inertia::render('Student/Pretest/PretestFinish', [
+                'score' => $assessment->total_score,
+                'totalQuestions' => $assessment->total_items,
+                'pretestId' => $assessment->assessment_id,
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
