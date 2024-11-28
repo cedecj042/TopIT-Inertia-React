@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useRequest } from "@/Library/hooks";
 import { Head, Link, router } from "@inertiajs/react";
 import Identification from "../../../Components/QuestionTypes/Identification";
 import MultipleChoiceSingle from "../../../Components/QuestionTypes/MultipleChoiceSingle";
@@ -10,8 +12,49 @@ import "../../../../css/student/students.css";
 import "../../../../css/student/welcome.css";
 
 const Test = ({ assessment, question, thetaScores }) => {
+    const { register, handleSubmit, setValue, watch } = useForm({
+        defaultValues: {
+            answers: {},
+        },
+    });
+
     const [currentQuestion, setCurrentQuestion] = useState(question);
-    const [currentAnswer, setCurrentAnswer] = useState(null);
+    const answers = watch("answers");
+
+    const onSubmit = (data) => {
+        // get the current question's answer
+        console.log("current answer: ", data);
+        const currentQuestionAnswer = data.answers[currentQuestion.question_id];
+
+        router.post(
+            route("test.next-question"),
+            {
+                assessment_id: assessment.assessment_id,
+                question_id: currentQuestion.question_id,
+                answer: currentQuestionAnswer,
+            },
+            {
+                onSuccess: (page) => {
+                    setValue("answers", {});
+                    setCurrentQuestion(page.props.question);
+                },
+            }
+        );
+    };
+
+    const isNextDisabled = () => {
+        const currentAnswer = answers[currentQuestion.question_id];
+        
+        switch (currentQuestion.question_detail.type) {
+            case "Multiple Choice - Single":
+            case "Identification":
+                return !currentAnswer;
+            case "Multiple Choice - Many":
+                return !currentAnswer || currentAnswer.length === 0;
+            default:
+                return true;
+        }
+    };
 
     const renderQuestion = () => {
         const questionName = `answers.${currentQuestion.question_id}`;
@@ -21,15 +64,15 @@ const Test = ({ assessment, question, thetaScores }) => {
                     <MultipleChoiceSingle
                         question={currentQuestion}
                         questionName={questionName}
-                        register={() => {}}
+                        register={register}
                     />
                 );
             case "Multiple Choice - Many":
                 return (
                     <MultipleChoiceMany
                         question={currentQuestion}
-                        answers={{}}
-                        setValue={() => {}}
+                        answers={answers}
+                        setValue={setValue}
                     />
                 );
             case "Identification":
@@ -37,7 +80,7 @@ const Test = ({ assessment, question, thetaScores }) => {
                     <Identification
                         question={currentQuestion}
                         questionName={questionName}
-                        register={() => {}}
+                        register={register}
                     />
                 );
             default:
@@ -55,31 +98,36 @@ const Test = ({ assessment, question, thetaScores }) => {
                     <div className="row justify-content-center">
                         <div className="col-12 col-md-8 col-lg-6">
                             <h1 className="h3 mb-2">Assessment Test</h1>
-                            <p className="text-muted small mb-5">date here</p>
+                            <p className="text-muted small mb-5">
+                                {assessment.updated_at} {assessment.start_time}
+                            </p>
 
-                            <div className="card shadow-sm">
-                                <div className="card-body p-4">
-                                    <div className="mb-4">
-                                        <h5 className="card-title mb-3">
-                                            Question 1
-                                        </h5>
-                                        <p className="card-text mb-4">
-                                            {currentQuestion.question}
-                                        </p>
-                                        <div className="answer-options">
-                                            {renderQuestion()}
+                            <form onSubmit={handleSubmit(onSubmit)}>
+                                <div className="card shadow-sm">
+                                    <div className="card-body p-4">
+                                        <div className="mb-4">
+                                            <h5 className="card-title mb-3">
+                                                Question {assessment.total_items + 1}
+                                            </h5>
+                                            <p className="card-text mb-4">
+                                                {currentQuestion.question}
+                                            </p>
+                                            <div className="answer-options">
+                                                {renderQuestion()}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="text-end mt-5">
-                                <button
-                                    className="btn btn-primary px-4"
-                                    disabled={!currentAnswer}
-                                >
-                                    Next
-                                </button>
-                            </div>
+                                <div className="text-end mt-5">
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary px-4"
+                                        disabled={isNextDisabled()}
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
