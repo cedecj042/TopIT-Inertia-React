@@ -4,7 +4,9 @@ import Table from "./Table";
 import { PRETEST_COLUMN, QUESTION_COLUMN } from "@/Library/constants";
 import { toast } from "sonner";
 
-export default function SelectedPretestTable(){
+export default function SelectedPretestTable(
+    closeModal,
+){
     const keyField = 'question_id';
     const {selectedQuestions, setSelectedQuestions} = useSelectedQuestions();
     const  {visibleColumns,onColumnChange} =  useColumnVisibility(PRETEST_COLUMN); 
@@ -24,19 +26,59 @@ export default function SelectedPretestTable(){
             },
         });
     };
+    // Handle row selection toggle
+    const handleRowClick = (e, rowData) => {
+        e.preventDefault();
+
+        const isSelected = selectedQuestions.some(
+            (question) => question[keyField] === rowData[keyField]
+        ); // Check if the rowData is already in selectedQuestions
+
+        const updatedSelection = isSelected
+            ? selectedQuestions.filter(
+                  (question) => question[keyField] !== rowData[keyField]
+              ) // Remove if already selected
+            : [...selectedQuestions, rowData]; // Add the full question object if not selected
+
+        setSelectedQuestions(updatedSelection); // Update context
+    };
+
+    // Render checkbox state
+    const renderCheckbox = (rowData) => (
+        <input
+            type="checkbox"
+            className="form-check-input align-content-center"
+            checked={selectedQuestions.some(
+                (question) => question[keyField] === rowData[keyField]
+            )} // Check if rowData is in selectedQuestions
+            onChange={(e) => handleRowClick(e, rowData)} // Sync checkbox click with row selection
+        />
+    );
+
+
     return(
         <>
-            <div className="d-inline-flex justify-content-between mt-3">
-                <h5 className="fw-semibold mb-3">Selected Questions</h5>
-                <button className="btn btn-primary" onClick={addToPretest}>
-                    Submit
-                </button>
+            <div className="modal-body">
+                <Table
+                    isSelectable={true}
+                    handleClick={handleRowClick}
+                    data={selectedQuestions}
+                    visibleColumns={visibleColumns}
+                    keyField={keyField}
+                    isRowClickable={true}
+                    renderCheckbox={renderCheckbox}
+                />
             </div>
-            <Table
-                data={selectedQuestions}
-                visibleColumns={visibleColumns}
-                keyField={keyField}
-            />
+            <div className="modal-footer">
+                <div className="d-inline-flex justify-content-end gap-2 mt-3">
+                    <button className="btn btn-secondary" onClick={closeModal}>
+                        Cancel
+                    </button>
+                    <button className="btn btn-primary" onClick={addToPretest}>
+                        Submit
+                    </button>
+                </div>
+            </div>
 
         </>
     )

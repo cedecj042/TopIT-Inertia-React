@@ -134,8 +134,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     });
     
     Route::get('/report',[ReportController::class,'index'])->name('report');
-    Route::get('/profile', [DashboardController::class, 'showProfile'])->name('profile');
-    Route::get('/student/{student_id}', [DashboardController::class, 'showStudentDetails'])->name('student');
+    Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
+    Route::get('/student/{student_id}', [ReportController::class, 'student'])->name('student');
 });
 
 Route::get('/access-denied', [ErrorController::class, 'index'])->name('access.denied');

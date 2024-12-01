@@ -29,10 +29,7 @@
     border-color: #C9C9C9;
     box-shadow: none;
 }
-.image-container{
-    background-color: rgba(0,0,0,0.15);
-    border-radius: 50%;
-}
+
 
 .background{
     position: fixed;

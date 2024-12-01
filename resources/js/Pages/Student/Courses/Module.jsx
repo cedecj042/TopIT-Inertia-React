@@ -1,4 +1,4 @@
-import "../../../../css/admin/module.css";
+import "../../../../css/module.css";
 import { useRequest } from "@/Library/hooks";
 import { dissectContent } from "@/Library/utils";
 import LessonContent from "@/Components/Content/LessonContent";

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AssessmentResource;
+use App\Models\StudentCourseTheta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,19 +20,15 @@ class StudentDashboardController extends Controller
 
         $studentId = Auth::user()->userable->student_id;
 
-        $averageThetaScore = DB::table('assessment_courses')
-            ->select('courses.title as course_title', DB::raw('AVG(assessment_courses.final_theta_score) as avg_theta_score'))
-            ->join('assessments', 'assessment_courses.assessment_id', '=', 'assessments.assessment_id')
-            ->join('students', 'assessments.student_id', '=', 'students.student_id')
-            ->join('courses', 'assessment_courses.course_id', '=', 'courses.course_id')
-            ->where('students.student_id', $studentId)
-            ->where('assessments.type', 'Test')  // Filter only "Test" assessments
-            ->groupBy('courses.title')
+        // Fetch StudentCourseTheta data with courses
+        $coursesTheta = StudentCourseTheta::where('student_id', $studentId)
+            ->with('course') // Eager load the course relationship
             ->get();
 
-        $averageTheta = [
-            'labels' => $averageThetaScore->pluck('course_title')->toArray(),
-            'data' => $averageThetaScore->pluck('avg_theta_score')->toArray()
+        // Prepare data for the ThetaScoreLine component
+        $thetaScoreData = [
+            'labels' => $coursesTheta->pluck('course.title')->toArray(), // Get course titles
+            'data' => $coursesTheta->pluck('theta_score')->toArray(), // Get theta scores
         ];
 
         // Get 3 recent test history
@@ -43,7 +40,7 @@ class StudentDashboardController extends Controller
 
         return Inertia::render('Student/Dashboard', [
             'title' => 'Student Dashboard',
-            'averageThetaScore' => $averageTheta,
+            'thetaScore' => $thetaScoreData,
             'tests' => AssessmentResource::collection($tests),
         ]);
     }

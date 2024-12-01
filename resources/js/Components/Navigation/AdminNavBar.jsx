@@ -123,8 +123,8 @@ export default function AdminNavbar({ title }) {
                     </li>
                     <li className="nav-item w-100">
                         <Link
-                            href="{{ route('admin.reports') }}"
-                            className="nav-link text-white py-3 ps-4 d-flex align-items-center gap-1"
+                            href={ route('admin.report') }
+                            className={`nav-link text-white py-3 ps-4 d-flex align-items-center gap-1 ${title === 'Admin Reports' ? 'active' : ''}`}
                             id="reports"
                             data-page="admin-reports"
                         >
@@ -143,7 +143,7 @@ export default function AdminNavbar({ title }) {
                 </Link>
                 <ul className="dropdown-menu dropdown-menu text-small shadow">
                     <li>
-                        <Link className="dropdown-item fs-6" href="{route('admin.profile')}">Profile</Link>
+                        <Link className="dropdown-item fs-6" href={route('admin.profile')}>Profile</Link>
                     </li>
                     <li>
                         <Link className="dropdown-item fs-6" href={route('logout')} method="post" as="button">Sign out</Link>

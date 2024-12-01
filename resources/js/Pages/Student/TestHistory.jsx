@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "@inertiajs/react";
 import TestHistory from "@/Components/Test/TestHistory";
 import Pagination from "@/Components/Pagination";
@@ -8,9 +7,6 @@ import "../../../css/student/students.css";
 const TestHistoryPage = ({ tests = [], paginationLinks = [] }) => {
     const testsData = tests.data || [];
     const pagination = paginationLinks || [];
-
-    // console.log("pagination", paginationLinks);
-    // console.log("tests", tests);
 
     return (
         <>

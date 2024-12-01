@@ -1,4 +1,4 @@
-import "../../../../css/admin/module.css";
+import "../../../../css/module.css";
 import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import { useRequest } from "@/Library/hooks";
 import ContentTypeForm from "@/Components/Forms/ContentTypeForm";

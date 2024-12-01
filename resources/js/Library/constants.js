@@ -55,6 +55,13 @@ export const ADMIN_COLUMN = [
     {key:'created_at',label:'Created At', sortable:false,visible:true}
 ]
 
+export const STUDENT_THETA_SCORE_COLUMN = [
+    {key:'course.title',label:'Course', sortable:false,visible:true},
+    {key:'theta_score',label:'Theta Score', sortable:false,visible:true},
+    {key:'created_at',label:'Created At', sortable:false,visible:true},
+    {key:'updated_at',label:'Updated At', sortable:false,visible:true}
+]
+
 
 export const STUDENT_FILTER_COMPONENT = ["students","filters","queryParams"]
 export const COURSE_FILTER_COMPONENT = ["courses","courses.meta","queryParams"]

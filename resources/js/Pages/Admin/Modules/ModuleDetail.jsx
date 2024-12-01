@@ -1,5 +1,5 @@
 import ModuleContent from "@/Components/Content/ModuleContent";
-import "../../../../css/admin/module.css";
+import "../../../../css/module.css";
 import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import { useRequest } from "@/Library/hooks";
 import LessonContent from "@/Components/Content/LessonContent";

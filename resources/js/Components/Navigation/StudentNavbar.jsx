@@ -3,8 +3,8 @@ import { usePage } from "@inertiajs/react";
 export default function StudentNavbar(){
     const {auth} = usePage().props;
 
-    const profileImageURL= auth.user && auth.user.profile_image
-    ? `/storage/profile_images/${auth.user.profile_image}`
+    const profileImageURL= auth.user && auth.user.userable.profile_image
+    ? `/storage/profile_images/${auth.user.userable.profile_image}`
     : '/assets/profile-circle.png';
 
     return (
@@ -14,6 +14,7 @@ export default function StudentNavbar(){
                     <span className="ms-2">
                         Hi, {auth.user && auth.user.username}
                     </span>
+                    <div className="bg-dark-subtle rounded-circle">
                     <img
                         src={profileImageURL}
                         alt="Profile Image"
@@ -21,6 +22,7 @@ export default function StudentNavbar(){
                         width="30"
                         height="30"
                     />
+                    </div>
                 </div>
             </nav>
         </div>

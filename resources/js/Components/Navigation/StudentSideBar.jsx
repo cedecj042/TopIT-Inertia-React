@@ -1,10 +1,8 @@
 import { Link, usePage } from "@inertiajs/react";
 import "../../../css/student/sidebar.css";
-import '../../../css/student/students.css';
 
 
 export default function StudentSideBar({title}){
-    const { url, component } = usePage();
     return (
         <div className="col-auto col-md-4 col-xl-2 py-4 px-0 side-bar d-flex flex-column justify-content-between h-100">
             <div className="d-flex flex-column justify-space-between pt-2">
@@ -65,8 +63,8 @@ export default function StudentSideBar({title}){
                 <Link
                     href={route('logout')}
                     method="post"
-                    // as="button"
-                    className="nav-link text-dark py-3 ps-4 d-flex align-items-center gap-1"
+                    as="button"
+                    className="nav-link text-dark py-3 ps-4 d-flex align-items-center gap-1 w-100"
                 >
                     <span className="material-symbols-outlined">logout</span>
                     Logout

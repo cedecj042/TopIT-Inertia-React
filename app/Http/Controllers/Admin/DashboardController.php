@@ -21,73 +21,24 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // $query = User::query();
-        $query = Student::query()
-            ->select(['student_id', 'firstname', 'lastname', 'year', 'school', 'created_at', DB::raw("CONCAT(students.firstname, ' ', students.lastname) AS name")]);
-
-        $sort = request()->query('sort', ''); // Empty by default
-        $sortField = $sortDirection = null;  // Initialize sortField and sortDirection as null
-
-        // Only split if $sort is not empty
-        if (!empty($sort)) {
-            [$sortField, $sortDirection] = explode(':', $sort);
-
-            // Ensure sortDirection is either 'asc' or 'desc', otherwise set it to null
-            if (!in_array($sortDirection, ['asc', 'desc'])) {
-                $sortDirection = null;
-            }
-        }
-        // Filter by name (firstname, lastname, or concatenated name)
-        if ($name = request('name')) {
-            $query->where(function ($q) use ($name) {
-                $q->where('firstname', 'like', '%' . $name . '%')
-                    ->orWhere('lastname', 'like', '%' . $name . '%')
-                    ->orWhere(DB::raw("CONCAT(firstname, ' ', lastname)"), 'like', '%' . $name . '%');
-            });
-        }
-
-        // Filter by year
-        if (request('year')) {
-            $year = request('year');
-            $query->where('year', $year);
-        }
-
-        if (request('school')) {
-            $school = request('school');
-            $query->where('school', $school);
-        }
-        if (!empty($sortField) && !empty($sortDirection)) {
-            $query->orderBy($sortField, $sortDirection);
-        }
-
-        $perPage = request('items', 5);
-
-        $students = $query->paginate($perPage)->onEachSide(1);
-
-
-        $averageScores = DB::table('student_course_thetas') // Correct table name
-            ->join('courses', 'student_course_thetas.course_id', '=', 'courses.course_id')
-            ->select('courses.title as course_title', DB::raw('AVG(student_course_thetas.theta_score) as avg_theta_score'))
-            ->groupBy('courses.course_id', 'courses.title')
-            ->get();
-
-        // Format the results into the desired array structure
-        $averageTheta = [
-            'labels' => $averageScores->pluck('course_title')->toArray(),
-            'data' => $averageScores->pluck('avg_theta_score')->toArray()
-        ];
-
         $monthlyCounts = User::where('userable_type', 'App\\Models\\Student')
             ->select(DB::raw('MONTH(created_at) as month'), DB::raw('COUNT(*) as count'))
             ->groupBy(DB::raw('MONTH(created_at)'))
             ->get()
             ->pluck('count', 'month');
 
-        $schools = DB::table('students')->distinct()->pluck('school');
-        $years = DB::table('students')->distinct()->orderBy('year', 'asc')->pluck('year');
-        $filters = [
-            'schools' => $schools,
-            'years' => $years,
+        
+        $questionCounts = DB::table('questions')
+            ->select('test_type', DB::raw('COUNT(*) as total'))
+            ->whereIn('test_type', ['Pretest', 'Test']) // Filter only for 'Pretest' and 'Test'
+            ->groupBy('test_type')
+            ->pluck('total', 'test_type');
+
+        $cards = [
+            'Total Students' => DB::table('students')->count(),
+            'Total Courses' => DB::table('courses')->count(),
+            'Test Questions' => $questionCounts['Test'] ?? 0, // Default to 0 if no test questions
+            'Pretest Questions' => $questionCounts['Pretest'] ?? 0, // Default to 0 if no pretest questions
         ];
 
         $chartData = $this->prepareChartData($monthlyCounts);
@@ -97,11 +48,8 @@ class DashboardController extends Controller
             [
                 'auth' => Auth::user(),
                 'title' => 'Admin Dashboard',
-                'students' => StudentResource::collection($students),
-                'queryParams' => request()->query() ?: null,
                 'chartData' => $chartData,
-                'thetaScoreData' => $averageTheta,
-                'filters' => $filters,
+                'cards'=> $cards,
             ]
         );
     }
@@ -119,77 +67,53 @@ class DashboardController extends Controller
         ];
     }
 
-    public function showStudentDetails($studentId)
-    {
-        $student = Student::find($studentId);
-        $averageThetaScore = DB::table('assessment_courses')
-            ->select('courses.title as course_title', DB::raw('AVG(assessment_courses.theta_score) as avg_theta_score'))
-            ->join('assessments', 'assessment_courses.assessment_id', '=', 'assessments.assessment_id')
-            ->join('students', 'assessments.student_id', '=', 'students.student_id')
-            ->join('courses', 'assessment_courses.course_id', '=', 'courses.course_id')
-            ->where('students.student_id', $studentId)
-            ->groupBy('courses.title')
-            ->get();
+    
+    // public function getStudents()
+    // {
+    //     $query = Student::query()
+    //         ->select(['student_id', 'firstname', 'lastname', 'year', 'school', 'created_at', DB::raw("CONCAT(students.firstname, ' ', students.lastname) AS name")]);
 
-        $averageTheta = [
-            'labels' => $averageThetaScore->pluck('course_title')->toArray(),
-            'data' => $averageThetaScore->pluck('avg_theta_score')->toArray()
-        ];
+    //     $sort = request()->query('sort', ''); // Default empty
+    //     $sortField = $sortDirection = null;
 
-        return Inertia::render('Admin/Student', [
-            'auth' => Auth::user(),
-            'title' => 'Admin Dashboard',
-            'averageThetaScore' => $averageTheta,
-            'student' => new StudentResource($student),
-            'queryParams' => request()->query() ?: null,
-        ]);
-    }
-    public function getStudents()
-    {
-        $query = Student::query()
-            ->select(['student_id', 'firstname', 'lastname', 'year', 'school', 'created_at', DB::raw("CONCAT(students.firstname, ' ', students.lastname) AS name")]);
+    //     // Only split if $sort is not empty
+    //     if (!empty($sort)) {
+    //         [$sortField, $sortDirection] = explode(':', $sort);
 
-        $sort = request()->query('sort', ''); // Default empty
-        $sortField = $sortDirection = null;
+    //         // Ensure sortDirection is valid
+    //         if (!in_array($sortDirection, ['asc', 'desc'])) {
+    //             $sortDirection = null;
+    //         }
+    //     }
 
-        // Only split if $sort is not empty
-        if (!empty($sort)) {
-            [$sortField, $sortDirection] = explode(':', $sort);
+    //     // Apply filters
+    //     if ($name = request('name')) {
+    //         $query->where(function ($q) use ($name) {
+    //             $q->where('firstname', 'like', '%' . $name . '%')
+    //                 ->orWhere('lastname', 'like', '%' . $name . '%')
+    //                 ->orWhere(DB::raw("CONCAT(firstname, ' ', lastname)"), 'like', '%' . $name . '%');
+    //         });
+    //     }
 
-            // Ensure sortDirection is valid
-            if (!in_array($sortDirection, ['asc', 'desc'])) {
-                $sortDirection = null;
-            }
-        }
+    //     if ($year = request('year')) {
+    //         $query->where('year', $year);
+    //     }
 
-        // Apply filters
-        if ($name = request('name')) {
-            $query->where(function ($q) use ($name) {
-                $q->where('firstname', 'like', '%' . $name . '%')
-                    ->orWhere('lastname', 'like', '%' . $name . '%')
-                    ->orWhere(DB::raw("CONCAT(firstname, ' ', lastname)"), 'like', '%' . $name . '%');
-            });
-        }
+    //     if ($school = request('school')) {
+    //         $query->where('school', $school);
+    //     }
 
-        if ($year = request('year')) {
-            $query->where('year', $year);
-        }
+    //     if (!empty($sortField) && !empty($sortDirection)) {
+    //         $query->orderBy($sortField, $sortDirection);
+    //     }
 
-        if ($school = request('school')) {
-            $query->where('school', $school);
-        }
+    //     $perPage = request('items', 5);
 
-        if (!empty($sortField) && !empty($sortDirection)) {
-            $query->orderBy($sortField, $sortDirection);
-        }
+    //     $students = $query->paginate($perPage);
 
-        $perPage = request('items', 5);
-
-        $students = $query->paginate($perPage);
-
-        return response()->json([
-            'students' => $students,
-            'queryParams' => request()->query(),
-        ]);
-    }
+    //     return response()->json([
+    //         'students' => $students,
+    //         'queryParams' => request()->query(),
+    //     ]);
+    // }
 }

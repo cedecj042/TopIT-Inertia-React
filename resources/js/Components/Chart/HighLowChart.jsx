@@ -4,49 +4,67 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
   Title,
   Tooltip,
   Legend,
+  PointElement,
 } from 'chart.js';
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  BarElement, 
-  Title, 
-  Tooltip, 
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
   Legend
 );
 
-export default function HighLowChart({ data }) {
+export default function HighLowChart({ chartData }) {
   const colors = [
-    'rgba(75, 192, 192, 0.5)', // Color for low segment
-    'rgba(255, 99, 132, 0.5)', // Color for high segment
+    'rgba(54, 162, 235, 0.4)', // Color for low segment
+    'rgba(255, 99, 132, 0.4)', // Color for high segment
   ];
 
   const borderColors = [
-    'rgba(75, 192, 192, 1)', // Border for low segment
+    'rgba(54, 162, 235, 1)', // Border for low segment
     'rgba(255, 99, 132, 1)', // Border for high segment
   ];
 
+  const lineColor = 'rgba(48, 180, 160, 1)'; // Line color for average
+
   const data = {
-    labels: data.labels.map(label =>
-      label.length > 20 ? label.slice(0, 20) + '...' : label
-    ), // Course labels
+    labels: chartData.labels.map(label =>
+      label.length > 15 ? label.slice(0, 15) + '...' : label
+    ), 
     datasets: [
       {
+        label: 'Average Score',
+        data: chartData.avg, // Average score per course
+        borderColor: lineColor,
+        borderWidth: 2,
+        pointBackgroundColor: lineColor,
+        tension: 0, 
+        type: 'line', 
+        fill: false,
+      },
+      {
         label: 'Low Score',
-        data: data.low, // Low score per course
+        data: chartData.low, // Low score per course
         backgroundColor: colors[0],
         borderColor: borderColors[0],
         borderWidth: 1,
+        type: 'bar', // Explicitly specify bar type
       },
       {
         label: 'High Score',
-        data: data.high.map((high, idx) => high - data.low[idx]), // Difference between high and low score
+        data: chartData.high.map((high, idx) => high - chartData.low[idx]), // Difference between high and low score
         backgroundColor: colors[1],
         borderColor: borderColors[1],
         borderWidth: 1,
+        type: 'bar', // Explicitly specify bar type
       },
     ],
   };
@@ -60,7 +78,7 @@ export default function HighLowChart({ data }) {
       },
       title: {
         display: true,
-        text: 'Theta Scores per Course (High and Low)',
+        text: 'Theta Scores per Course (High, Low, and Average)',
       },
     },
     scales: {
@@ -68,12 +86,12 @@ export default function HighLowChart({ data }) {
         beginAtZero: true,
         min: -5,
         max: 5,
+        ticks: {
+          stepSize: 1, 
+        },
       },
       x: {
-        stacked: true, // Enable stacking
-      },
-      y: {
-        stacked: true, // Enable stacking
+        stacked: true, 
       },
     },
   };

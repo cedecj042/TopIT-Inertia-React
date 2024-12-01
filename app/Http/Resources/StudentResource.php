@@ -29,7 +29,8 @@ class StudentResource extends JsonResource
             'year' => $this->year,
             'age' => $this->age,
             'pretest_completed'=> $this->pretest_completed,
-            'created_at'=> (new Carbon($this->created_at))->format('F j, Y ')
+            'created_at'=> (new Carbon($this->created_at))->format('F j, Y '),
+            'student_course_thetas' => StudentThetaScore::collection($this->whenLoaded('student_course_thetas'))
             
         ], function ($value) {
             return !is_null($value) && $value !== '';  // Remove null or empty string values

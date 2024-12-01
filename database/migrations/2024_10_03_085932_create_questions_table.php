@@ -54,7 +54,7 @@ return new class extends Migration
             $table->foreignID(column: 'question_detail_id')->references('question_detail_id')->on('question_details')->cascadeOnDelete();
             $table->foreignID(column: 'difficulty_id')->references('difficulty_id')->on('difficulty')->cascadeOnDelete();
             $table->enum('test_type',['Pretest','Test']);
-            $table->string('question');
+            $table->longText('question');
             $table->float('discrimination_index');
             $table->timestamps();
         });

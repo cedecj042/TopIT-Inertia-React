@@ -12,20 +12,6 @@ export default function StudentsTable({
     const { state, dispatch,visibleColumns} = useContext(ContextProvider);
     const { changeSort} = useSortState(dispatch);
 
-    const renderActions = (rowData) => {
-        return (
-            <button
-                onClick={(e) => onClick(e, rowData)}
-                className="btn btn-outline-primary d-flex justify-content-center align-items-left"
-            >
-                <span className="material-symbols-outlined align-self-center">
-                    person
-                </span>{" "}
-                View Student
-            </button>
-        );
-    };
-
     const onClick = (e, rowData) => {
         e.preventDefault();
         router.get(
@@ -39,16 +25,15 @@ export default function StudentsTable({
     
     return (
         <>
-            
             <Table
                 data={data}
                 visibleColumns={visibleColumns}
                 sortState={state.sortState}
                 changeSort={changeSort}
-                renderActions={renderActions}
+                isRowClickable={true}
+                handleClick={onClick}
                 keyField={keyField}
             />
-            
         </>
     );
 }

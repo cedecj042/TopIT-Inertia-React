@@ -28,7 +28,7 @@ function Pretest({questions,filters,queryParams = {}}){
                             Add Question
                         </button>
                     </div>
-                    <div className="row mt-2 p-0">
+                    <div className="row p-0">
                         <div className="d-flex flex-column col-12">
                             <h5 className="fw-semibold mb-3">List of Questions</h5>
                             <TableContext

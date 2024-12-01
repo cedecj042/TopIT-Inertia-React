@@ -118,9 +118,9 @@ export default function RegisterForm({ routeName }) {
                     })}
                 >
                     <option value="">Choose...</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="others">Others</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Others">Others</option>
                 </select>
                 <p className="text-danger">{errors.gender?.message}</p>
             </div>

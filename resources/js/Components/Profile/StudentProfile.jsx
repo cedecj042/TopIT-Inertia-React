@@ -1,13 +1,15 @@
-import '../../../css/admin/admin.css';
+import '../../../css/profile.css';
 
 export default function StudentProfile({ student }) {
-    const profileImageURL = student.profile_image
+
+    const profileImageURL= student.profile_image
         ? `/storage/profile_images/${student.profile_image}`
-        :  "/assets/profile-circle.png";
+        : '/assets/profile-circle.png';
 
     return (
-        <div className="d-flex flex-row align-items-start p-4 gap-4 w-100">
-            <div className="image-container">
+        <>
+            <div className="d-inline-flex gap-5">
+                <div className="image-container">
                 <img
                     src={profileImageURL}
                     alt="Profile"
@@ -15,8 +17,8 @@ export default function StudentProfile({ student }) {
                     width="150"
                     height="150"
                 />
-            </div>
-            <div className="py-3 w-100">
+                </div>
+            <div className="py-3 flex-grow-1">
                 <h2>
                     {student.firstname}{" "}
                     {student.lastname}
@@ -33,6 +35,7 @@ export default function StudentProfile({ student }) {
                     <p>Year: {student.year}</p>
                 </div>
             </div>
-        </div>
+            </div>
+        </>
     );
 }

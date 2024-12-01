@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Student;
 
+use App\Http\Requests\StudentProfileRequest;
 use App\Models\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StudentResource;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
+use Log;
 
 class StudentProfileController extends Controller
 {
@@ -20,29 +22,21 @@ class StudentProfileController extends Controller
      */
     public function showStudentDetails()
     {
-        $studentId = Student::find(Auth::user()->userable->student_id);
+        $student = Auth::user()->userable;
 
         return Inertia::render('Student/Profile', [
             'title' => 'Student Profile',
-            'student' => new StudentResource($studentId),
+            'student' => new StudentResource($student),
         ]);
     }
 
-    public function editProfile(Request $request)
+    public function editProfile(StudentProfileRequest $request)
     {
+        Log::info($request);
         try {
             $student = Auth::user()->userable;
 
-            $validatedData = $request->validate([
-                'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'firstname' => 'required|string|max:255',
-                'lastname' => 'required|string|max:255',
-                'birthdate' => 'nullable|date',
-                'gender' => ['required', Rule::in(['Male', 'Female', 'Others'])],
-                'address' => 'nullable|string|max:500',
-                'school' => 'nullable|string|max:255',
-                'year' => 'nullable|string|max:50',
-            ]);
+            $validatedData = $request->validated();
 
             DB::transaction(function () use ($student, $validatedData) {
                 if (isset($validatedData['profile_image'])) {

@@ -1,7 +1,6 @@
 import { useForm} from "react-hook-form";
 import { gsap } from 'gsap';
 import { useEffect, useRef, useState } from 'react';
-import { router } from "@inertiajs/react";
 import { toast } from "sonner";
 import { useRequest } from "@/Library/hooks";
 
