@@ -19,7 +19,8 @@ class AssessmentCourse extends Model
       'created_at',
       'updated_at',
       'percentage',
-      'theta_score'
+      'initial_theta_score',
+      'final_theta_score'
     ];
     public function assessment(){
         return $this->belongsTo(Assessment::class,'assessment_id','assessment_id');

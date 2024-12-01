@@ -3,6 +3,7 @@ import { Inertia } from "@inertiajs/inertia";
 import { Link } from "@inertiajs/react";
 import "../../../../css/student/students.css";
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
+import { router } from '@inertiajs/react'; 
 
 function SelectModules({ courses }) {
     const [selectedModules, setSelectedModules] = useState([]);
@@ -18,8 +19,13 @@ function SelectModules({ courses }) {
     console.log("selected modules:", selectedModules);
 
     const handleStartTest = () => {
-        // Inertia.post("/test/start", { modules: selectedModules });
+        if (selectedModules.length === 0) {
+            alert("Please select at least one module to proceed.");
+            return;
+        }
+        router.post('/test/start', { modules: selectedModules });
     };
+    
 
     return (
         <main className="row p-3 px-5">
