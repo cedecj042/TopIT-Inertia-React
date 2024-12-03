@@ -29,10 +29,28 @@ class ScoringService
         }
     }
 
+    //checking text array approach cuz di mugana ang katu
     private function scoreMultipleChoiceSingle($participantsAnswer, $correctAnswer): int
     {
-        return $participantsAnswer === $correctAnswer ? 1 : 0;
+        $participantText = is_array($participantsAnswer) ? $participantsAnswer[0] : $participantsAnswer;
+        $correctText = is_array($correctAnswer) ? $correctAnswer[0] : $correctAnswer;
+
+        $participantText = $this->normalizeAnswer($participantText);
+        $correctText = $this->normalizeAnswer($correctText);
+
+        return $participantText === $correctText ? 1 : 0;
     }
+
+    private function normalizeAnswer($answer): string
+    {
+        $answer = strtolower(trim((string) $answer));
+        return preg_replace('/\s+/', ' ', $answer); 
+    }
+
+    // private function scoreMultipleChoiceSingle($participantsAnswer, $correctAnswer): int
+    // {
+    //     return $participantsAnswer === $correctAnswer ? 1 : 0;
+    // }
 
     private function scoreMultipleChoiceMany(array $participantsAnswer, array $correctAnswer): int
     {
@@ -43,26 +61,38 @@ class ScoringService
         return $participantsAnswer === $correctAnswer ? 1 : 0;
     }
 
-    private function scoreIdentification(string $participantsAnswer, array $correctAnswer): int
+    //no strict rules
+    private function scoreIdentification($participantsAnswer, $correctAnswer): int
     {
-        // Normalize participant's answer and correct answers (case-insensitive)
-        $normalizedAnswer = strtolower(trim($participantsAnswer));
-        $normalizedCorrectAnswers = array_map('strtolower', array_map('trim', $correctAnswer));
+        $participantText = is_array($participantsAnswer) ? $participantsAnswer[0] : $participantsAnswer;
+        $correctText = is_array($correctAnswer) ? $correctAnswer[0] : $correctAnswer;
 
-        // Check for exact match
-        if (in_array($normalizedAnswer, $normalizedCorrectAnswers)) {
-            return 1;
-        }
+        $participantText = $this->normalizeAnswer($participantText);
+        $correctText = $this->normalizeAnswer($correctText);
 
-        // Singular/Plural Match
-        foreach ($normalizedCorrectAnswers as $correct) {
-            if ($this->areFormsEquivalent($normalizedAnswer, $correct)) {
-                return 1;
-            }
-        }
-
-        return 0; // No match
+        return $participantText === $correctText ? 1 : 0;
     }
+
+    // private function scoreIdentification(string $participantsAnswer, array $correctAnswer): int
+    // {
+    //     // Normalize participant's answer and correct answers (case-insensitive)
+    //     $normalizedAnswer = strtolower(trim($participantsAnswer));
+    //     $normalizedCorrectAnswers = array_map('strtolower', array_map('trim', $correctAnswer));
+
+    //     // Check for exact match
+    //     if (in_array($normalizedAnswer, $normalizedCorrectAnswers)) {
+    //         return 1;
+    //     }
+
+    //     // Singular/Plural Match
+    //     foreach ($normalizedCorrectAnswers as $correct) {
+    //         if ($this->areFormsEquivalent($normalizedAnswer, $correct)) {
+    //             return 1;
+    //         }
+    //     }
+
+    //     return 0; // No match
+    // }
     private function areFormsEquivalent(string $word1, string $word2): bool
     {
         // Compare singular and plural forms

@@ -19,8 +19,18 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
+use App\Services\ScoringService;
+
+
 class TestController extends Controller
 {
+
+    protected $scoringService;
+
+    public function __construct(ScoringService $scoringService)
+    {
+        $this->scoringService = $scoringService;
+    }
     public function selectModules()
     {
         $courses = Course::all();
@@ -135,14 +145,16 @@ class TestController extends Controller
         $assessment = Assessment::findOrFail($validated['assessment_id']);
         $question = Question::with(['question_detail', 'course'])->findOrFail($validated['question_id']);
 
-        // getting the correct answer from question_detail
-        $correctAnswer = $question->question_detail->answer;
+        $assessmentItem = new AssessmentItem([
+            'question_id' => $question->question_id,
+            'participants_answer' => is_array($validated['answer'])
+                ? json_encode($validated['answer'])
+                : json_encode([$validated['answer']])
+        ]);
 
-        $score = $this->calculateQuestionScore(
-            $question->question_detail->type,
-            $validated['answer'],
-            $correctAnswer
-        );
+        // getting the correct answer from question_detail
+        $score = $this->scoringService->checkAnswer($assessmentItem);
+        $assessmentItem->score = $score;
 
         $assessmentCourse = AssessmentCourse::firstOrCreate(
             [
@@ -157,18 +169,11 @@ class TestController extends Controller
             ]
         );
 
-        // create assessment item every question
-
         try {
-            $assessmentItem = AssessmentItem::create([
-                'assessment_course_id' => $assessmentCourse->assessment_course_id,
-                'question_id' => $question->question_id,
-                'participants_answer' => is_array($validated['answer'])
-                    ? json_encode($validated['answer'])
-                    : json_encode([$validated['answer']]),
-                'score' => $score
-            ]);
-        
+            // Save the AssessmentItem
+            $assessmentItem->assessment_course_id = $assessmentCourse->assessment_course_id;
+            $assessmentItem->save();
+
             Log::info('Assessment Item Created:', [
                 'assessment_item_id' => $assessmentItem->assessment_item_id,
                 'assessment_course_id' => $assessmentItem->assessment_course_id,
@@ -197,7 +202,6 @@ class TestController extends Controller
             'assessment' => $assessment,
             'question' => $nextQuestion,
         ]);
-
 
     }
 

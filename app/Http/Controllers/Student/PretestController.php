@@ -62,7 +62,7 @@ class PretestController extends Controller
 
         $courses = Course::with([
             'questions' => function ($query) {
-                $query->where('test_type', 'Test')
+                $query->where('test_type', 'Pretest')
                     ->with('question_detail');
             }
         ])->get();
