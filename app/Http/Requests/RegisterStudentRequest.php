@@ -27,7 +27,7 @@ class RegisterStudentRequest extends FormRequest
             'lastname' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
             'birthdate' => 'nullable|date',
-            'gender' => 'nullable|in:male,female,others',
+            'gender' => 'nullable|in:Male,Female,others',
             'address' => 'nullable|string|max:255',
             'school' => 'required|string|max:255',
             'course' => 'required|string|max:255',

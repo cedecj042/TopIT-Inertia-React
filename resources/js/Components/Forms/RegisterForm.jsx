@@ -32,6 +32,7 @@ export default function RegisterForm({ routeName }) {
             },
             onError: (error) => {
                 toast.error(error.error, { duration: 3000 });
+                console.log(error);
             }
         });
     };
