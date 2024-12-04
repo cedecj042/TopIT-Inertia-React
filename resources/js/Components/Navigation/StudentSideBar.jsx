@@ -1,10 +1,10 @@
-import { Link, usePage } from "@inertiajs/react";
+import { Link } from "@inertiajs/react";
 import "../../../css/student/sidebar.css";
 
 
 export default function StudentSideBar({title}){
     return (
-        <div className="col-auto col-md-4 col-xl-2 py-4 px-0 side-bar d-flex flex-column justify-content-between h-100">
+        <div className="col-auto col-md-3 col-xl-2 py-4 px-0 side-bar d-flex flex-column justify-content-between h-100">
             <div className="d-flex flex-column justify-space-between pt-2">
                 <h2 className="text-center py-5">
                     <img src="/assets/logo-2.svg" alt="TopIT Logo" width="100" height="40" />
@@ -36,7 +36,7 @@ export default function StudentSideBar({title}){
                     </li>
                     <li className="nav-item w-100">
                         <Link
-                            href={route('student-course')}
+                            href={route('course.index')}
                             className={`nav-link text-dark py-3 ps-4 d-flex align-items-center gap-1 ${
                                 title === 'Student Course' ? 'active' : 'dimmed'
                             }`}
@@ -48,7 +48,7 @@ export default function StudentSideBar({title}){
                     </li>
                     <li className="nav-item w-100">
                         <Link
-                            href={route('test')}
+                            href={route('test.index')}
                             className={`nav-link text-dark py-3 ps-4 d-flex align-items-center gap-1 ${
                                 title === 'Student Test' ? 'active' : 'dimmed'}`}
                             id="test-link"

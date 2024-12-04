@@ -3,8 +3,10 @@ import TestHistory from "@/Components/Test/TestHistory";
 import Pagination from "@/Components/Pagination";
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 import "../../../css/student/students.css";
+import { TableContext } from "@/Components/Context/TableContext";
+import { INITIAL_TEST_STATE } from "@/Library/filterState";
 
-const TestHistoryPage = ({ tests = [], paginationLinks = [] }) => {
+const TestHistoryPage = ({ tests = [], paginationLinks = [],queryParams={},filters}) => {
     const testsData = tests.data || [];
     const pagination = paginationLinks || [];
 
@@ -25,7 +27,17 @@ const TestHistoryPage = ({ tests = [], paginationLinks = [] }) => {
                         Review your past tests and track your progress.
                     </p>
                 </div>
+                <TableContext
+                    initialState={INITIAL_TEST_STATE(queryParams)}
+                    routeName={'student.test.history'}
+                    components={tests}
+                    column={null}
+                >
 
+
+
+
+                </TableContext>
                 <div className="row mt-4 px-5">
                     <TestHistory tests={testsData} />
                 </div>

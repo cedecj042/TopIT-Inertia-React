@@ -40,6 +40,7 @@ class StudentDashboardController extends Controller
 
         return Inertia::render('Student/Dashboard', [
             'title' => 'Student Dashboard',
+            'auth' => Auth::user(),
             'thetaScore' => $thetaScoreData,
             'tests' => AssessmentResource::collection($tests),
         ]);

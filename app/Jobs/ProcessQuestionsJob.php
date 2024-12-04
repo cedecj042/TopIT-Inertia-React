@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\QuestionDifficulty;
 use App\Events\UploadEvent;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -45,25 +46,17 @@ class ProcessQuestionsJob implements ShouldQueue
                 ]);
     
                 foreach ($courseData['questions'] as $qData) {
-                    Log::info('Processing question', $qData);
-    
-                    // Normalize difficulty name
-                    $difficultyName = ucwords($qData['difficulty']); // Convert "very easy" to "Very Easy"
-                    $difficulty = DB::table('difficulty')->where('name', $difficultyName)->first();
-                    if (!$difficulty) {
-                        Log::warning('Unknown difficulty level', ['difficulty' => $difficultyName]);
-                        continue;
-                    }
-    
-                    // Determine the type of the question detail using the enum
+                    // Normalize difficulty name and check difficulty
+                    $difficultyName = ucwords($qData['difficulty_type']); 
+                    $questionDifficulty= $this->determineQuestionDifficulty($difficultyName);
+
+                    // Determine the type of the question detail and difficulty using the enum
                     $questionDetailType = $this->determineQuestionDetailType($qData['questionType']);
-    
                     // Process `answer`
                     $answer = $this->normalizeArray($qData['answer'] ?? []);
-    
                     // Process `choices` only if present
                     $choices = $this->normalizeArray($qData['choices'] ?? []);
-    
+
                     // Insert into question_details table
                     $questionDetailId = DB::table('question_details')->insertGetId([
                         'type' => $questionDetailType,
@@ -77,10 +70,11 @@ class ProcessQuestionsJob implements ShouldQueue
                     DB::table('questions')->insert([
                         'course_id' => $courseData['course_id'],
                         'question_detail_id' => $questionDetailId,
-                        'difficulty_id' => $difficulty->difficulty_id,
                         'test_type' => TestType::TEST->value,
                         'question' => $qData['question'],
                         'discrimination_index' => $qData['discrimination'] ?? null,
+                        'difficulty_value'=> $qData['difficulty_value'] ?? null,
+                        'difficulty_type' => $questionDifficulty,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
@@ -92,10 +86,7 @@ class ProcessQuestionsJob implements ShouldQueue
         }catch(Exception $e){
             Log::info("Error processing question: " . $e->getMessage());
             $this->broadcastEvent(null, null , "Error processed the question");
-
         }
-
-        //
     }
 
     /**
@@ -130,6 +121,17 @@ class ProcessQuestionsJob implements ShouldQueue
             'Multiple Choice - Single' => QuestionDetailType::MULTIPLE_CHOICE_SINGLE->value,
             'Multiple Choice - Many' => QuestionDetailType::MULTIPLE_CHOICE_MANY->value,
             default => throw new \InvalidArgumentException("Unknown question type: $questionType"),
+        };
+    }
+    private function determineQuestionDifficulty(string $difficultyType): string
+    {
+        return match ($difficultyType) {
+            'Very Easy' => QuestionDifficulty::VERY_EASY->value,
+            'Easy' => QuestionDifficulty::EASY->value,
+            'Average' => QuestionDifficulty::AVERAGE->value,
+            'Hard' => QuestionDifficulty::HARD->value,
+            'Very Hard' => QuestionDifficulty::VERY_HARD->value,
+            default => throw new \InvalidArgumentException("Unknown difficulty type: $difficultyType"),
         };
     }
     public function broadcastEvent($info = null, $success = null, $error = null)

@@ -2,19 +2,18 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class QuestionResource extends JsonResource
+class QuestionReviewResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return array<string, mixed>
      */
-    public function toArray($request)
+    public function toArray(Request $request): array
     {
         return [
             'question_id' => $this->question_id,
@@ -27,8 +26,12 @@ class QuestionResource extends JsonResource
             'updated_at' => Carbon::parse(time: $this->updated_at)->format('F j, Y '), 
             'question_detail' => new QuestionDetailResource($this->whenLoaded('question_detail')), 
             'difficulty_type'=> $this->difficulty_type,
-            'difficulty_value'=> $this->difficulty_value,
+            'difficulty_value'=> $this->difficulty_type,
             'course' => new CourseResource($this->whenLoaded('course')),
+            #added for review
+            'student_answer' => $this->student_answer,
+            'is_multiple_answer' => $this->is_multiple_answer,
+            'is_correct' => $this->is_correct,
         ];
     }
 }

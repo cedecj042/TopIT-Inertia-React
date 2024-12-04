@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\QuestionDetailType;
+use App\Enums\QuestionDifficulty;
 use App\Enums\QuestionTestType;
 use App\Enums\TestType;
 use Illuminate\Database\Seeder;
@@ -14,7 +15,7 @@ class QuestionSeeder extends Seeder
     {
         // Fetch all courses and difficulty levels
         $courses = DB::table('courses')->get();
-        $difficulties = DB::table('difficulty')->get()->keyBy('name');
+        $difficulties = QuestionDifficulty::cases();
 
         $questions = [
             'Software Development' => [
@@ -57,50 +58,69 @@ class QuestionSeeder extends Seeder
                 ['Which of the following is NOT a project management tool?', 'Python', ['Gantt chart', 'Critical Path Method', 'PERT chart', 'Python']],
                 ['Select two common project management methodologies.', ['Agile', 'Waterfall'], ['Agile', 'Waterfall', 'Scrum', 'Test-driven development']],
                 ['What term describes the process of identifying and analyzing potential issues that could negatively impact a project?', ['Risk Management'], []],
-    ['What is the term for a visual representation of a project schedule that shows the start and finish dates of the various elements of a project?', ['Gantt Chart'], []],
+                ['What is the term for a visual representation of a project schedule that shows the start and finish dates of the various elements of a project?', ['Gantt Chart'], []],
             ]
         ];
 
 
-        // Loop over each course
+        // Define difficulty value ranges
+        $difficultyRanges = [
+            QuestionDifficulty::VERY_EASY->value => [-5, -3],
+            QuestionDifficulty::EASY->value => [-3, -1],
+            QuestionDifficulty::AVERAGE->value => [-1, 1],
+            QuestionDifficulty::HARD->value => [1, 3],
+            QuestionDifficulty::VERY_HARD->value => [3, 5],
+        ];
+
         foreach ($courses as $course) {
             if (isset($questions[$course->title])) {
                 $courseQuestions = $questions[$course->title];
-                
-                foreach (['Very Easy', 'Easy', 'Average', 'Hard', 'Very Hard'] as $index => $difficultyName) {
-                    $questionData = $courseQuestions[$index];
-        
-                    // Determine question detail type based on data structure
-                    $type = empty($questionData[2])
-                        ? QuestionDetailType::IDENTIFICATION->value
-                        : (is_array($questionData[1])
-                            ? QuestionDetailType::MULTIPLE_CHOICE_MANY->value
-                            : QuestionDetailType::MULTIPLE_CHOICE_SINGLE->value);
-        
-                    $difficulty_id = $difficulties[$difficultyName]->difficulty_id;
-        
-                    // Insert question details
-                    $question_detail_id = DB::table('question_details')->insertGetId([
-                        'type' => $type,
-                        'answer' => json_encode($questionData[1]),
-                        'choices' => !empty($questionData[2]) ? json_encode($questionData[2]) : null,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-        
-                    // Insert question with QuestionType enum
-                    DB::table('questions')->insert([
-                        'course_id' => $course->course_id,
-                        'question_detail_id' => $question_detail_id,
-                        'difficulty_id' => $difficulty_id,
-                        'test_type' => TestType::TEST->value,  // Use enum here for question type
-                        'question' => $questionData[0],
-                        'discrimination_index' => rand(-1, 1),
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
+
+                foreach ($difficulties as $index => $difficulty) {
+                    $difficultyName = $difficulty->value;
+
+                    // Ensure questions exist for the difficulty level
+                    if (isset($courseQuestions[$index])) {
+                        $questionData = $courseQuestions[$index];
+
+                        // Determine question detail type
+                        $type = empty($questionData[2])
+                            ? QuestionDetailType::IDENTIFICATION->value
+                            : (is_array($questionData[1])
+                                ? QuestionDetailType::MULTIPLE_CHOICE_MANY->value
+                                : QuestionDetailType::MULTIPLE_CHOICE_SINGLE->value);
+
+                        // Insert question details
+                        $question_detail_id = DB::table('question_details')->insertGetId([
+                            'type' => $type,
+                            'answer' => json_encode($questionData[1]),
+                            'choices' => !empty($questionData[2]) ? json_encode($questionData[2]) : null,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+
+                        // Generate difficulty value within the specified range
+                        $difficultyRange = $difficultyRanges[$difficultyName];
+                        $difficultyValue = mt_rand($difficultyRange[0] * 10, $difficultyRange[1] * 10) / 10;
+
+                        // Generate discrimination index (0.5 to 2.0)
+                        $discriminationIndex = mt_rand(50, 200) / 100;
+
+                        // Insert question
+                        DB::table('questions')->insert([
+                            'course_id' => $course->course_id,
+                            'question_detail_id' => $question_detail_id,
+                            'difficulty_type' => $difficultyName,
+                            'test_type' => TestType::TEST->value,
+                            'question' => $questionData[0],
+                            'discrimination_index' => $discriminationIndex,
+                            'difficulty_value' => $difficultyValue,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
                 }
             }
-        } 
+        }
     }
 }

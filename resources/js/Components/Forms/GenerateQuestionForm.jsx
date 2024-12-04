@@ -5,8 +5,7 @@ import "../../../css/admin/question.css";
 
 export default function GenerateQuestionForm({ data, closeModal }) {
     const courses = data.courses;
-    const difficulties = data.difficulty;
-
+    const difficulties = data.difficulty; // ['Very Easy', 'Easy', 'Average', 'Hard', 'Very Hard']
     const { isProcessing, postRequest } = useRequest();
     const [selectedCourses, setSelectedCourses] = useState([]);
 
@@ -38,12 +37,13 @@ export default function GenerateQuestionForm({ data, closeModal }) {
                 } else {
                     newTypes[questionType] = {
                         difficulties: difficulties.reduce((acc, difficulty) => {
-                            acc[difficulty.name] = 0;
+                            acc[difficulty] = 0; // Initialize difficulty count to 0
                             return acc;
                         }, {}),
                     };
                 }
 
+                // Update the state
                 return [
                     ...prevState.slice(0, courseIndex),
                     { ...course, types: newTypes },
@@ -145,7 +145,7 @@ export default function GenerateQuestionForm({ data, closeModal }) {
                                                 <tr>
                                                     <th>Question Type</th>
                                                     {difficulties.map((difficulty) => (
-                                                        <th key={difficulty.difficulty_id}>{difficulty.name}</th>
+                                                        <th key={difficulty}>{difficulty}</th>
                                                     ))}
                                                 </tr>
                                             </thead>
@@ -174,7 +174,7 @@ export default function GenerateQuestionForm({ data, closeModal }) {
                                                             </label>
                                                         </td>
                                                         {difficulties.map((difficulty) => (
-                                                            <td key={difficulty.difficulty_id}>
+                                                            <td key={difficulty}>
                                                                 <input
                                                                     type="number"
                                                                     className="form-control"
@@ -191,7 +191,7 @@ export default function GenerateQuestionForm({ data, closeModal }) {
                                                                         handleDifficultyInput(
                                                                             course.course_id,
                                                                             type,
-                                                                            difficulty.name,
+                                                                            difficulty,
                                                                             e.target.value
                                                                         )
                                                                     }

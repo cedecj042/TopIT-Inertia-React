@@ -39,4 +39,11 @@ class AdminController extends Controller
         return redirect()->back()->withErrors( ['error'=>'The provided credentials do not match our records.']);
     }
 
+    public function profile(){
+        return Inertia::render('Admin/Profile',[
+            'title' => 'Admin Profile',
+            'admin' => Auth::user(),
+        ]);
+    }
+
 }

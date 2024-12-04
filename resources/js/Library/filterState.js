@@ -73,3 +73,19 @@ export const INITIAL_ADMIN_STATE = (queryParams = {}) => ({
         return `${field}:${direction}`;
     })()
 });
+
+export const INITIAL_TEST_STATE = (queryParams = {}) => ({
+    filterState: {
+        course: queryParams?.course || "",
+        test_types: queryParams?.question_types || "",
+        month:queryParams?.month || "",
+    },
+    otherState: {
+        items: queryParams?.items || "",
+    },
+    sortState: (() => {
+        const field = queryParams?.field || "";
+        const direction = queryParams?.direction || "";
+        return `${field}:${direction}`;
+    })()
+});
