@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\QuestionDetailType;
+use App\Enums\QuestionDifficulty;
 use App\Enums\TestType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PretestRequest;
@@ -17,7 +18,7 @@ class PretestController extends Controller
 {
     //
     public function index(){
-        $query = Question::with(['difficulty', 'course', 'question_detail'])->where('test_type','Pretest');
+        $query = Question::with(['course', 'question_detail'])->where('test_type','Pretest');
 
         if ($search = request('question')) {
             $search = strtolower($search); // Convert the search term to lowercase
@@ -39,10 +40,9 @@ class PretestController extends Controller
         }
 
         if ($difficulty = request('difficulty')) {
-            $query->whereHas('difficulty', function ($q) use ($difficulty) {
-                $q->where('name', $difficulty); // Assuming 'name' is the field in difficulty table
-            });
+            $query->where('difficulty_type', $difficulty);
         }
+
         if ($detail_types = request('detail_types')) {
             $query->whereHas('question_detail', function ($q) use ($detail_types) {
                 $q->where('type', $detail_types); // Assuming 'name' is the field in difficulty table
@@ -54,7 +54,7 @@ class PretestController extends Controller
         $questions = $query->paginate($perPage)->onEachSide(1);
 
         $title =  DB::table('courses')->distinct()->pluck('title');
-        $difficulty =  DB::table('difficulty')->distinct()->pluck('name');
+        $difficulty = QuestionDifficulty::cases();
         $questionDetailTypes = collect(QuestionDetailType::cases())->map(function ($case) {
             return $case->value;
         })->toArray();
@@ -76,7 +76,7 @@ class PretestController extends Controller
     }
 
     public function show(){
-        $query = Question::with(['difficulty', 'course', 'question_detail'])->where('test_type','Test');
+        $query = Question::with(['course', 'question_detail'])->where('test_type','Test');
 
         if ($search = request('question')) {
             $search = strtolower($search); // Convert the search term to lowercase
@@ -98,9 +98,7 @@ class PretestController extends Controller
         }
 
         if ($difficulty = request('difficulty')) {
-            $query->whereHas('difficulty', function ($q) use ($difficulty) {
-                $q->where('name', $difficulty); // Assuming 'name' is the field in difficulty table
-            });
+            $query->where('difficulty_type', $difficulty);
         }
         if ($detail_types = request('detail_types')) {
             $query->whereHas('question_detail', function ($q) use ($detail_types) {
@@ -113,7 +111,7 @@ class PretestController extends Controller
         $questions = $query->paginate($perPage)->onEachSide(1);
 
         $title =  DB::table('courses')->distinct()->pluck('title');
-        $difficulty =  DB::table('difficulty')->distinct()->pluck('name');
+        $difficulty = array_map(fn($case) => $case->value, QuestionDifficulty::cases());
         $questionDetailTypes = collect(QuestionDetailType::cases())->map(function ($case) {
             return $case->value;
         })->toArray();

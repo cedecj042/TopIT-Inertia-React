@@ -20,6 +20,8 @@ class Question extends Model
         'difficulty_id',
         'test_type',
         'question',
+        'difficulty_type',
+        'difficulty_value',
         'discrimination_index',
         'created_at',
         'updated_at'
@@ -32,11 +34,6 @@ class Question extends Model
     public function assessment_items()
     {
         return $this->hasMany(AssessmentItem::class, 'question_id', 'question_id');
-    }
-    
-    public function difficulty()
-    {
-        return $this->belongsTo(Difficulty::class, 'difficulty_id', 'difficulty_id');
     }
 
     public function question_detail()

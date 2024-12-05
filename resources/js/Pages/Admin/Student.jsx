@@ -12,7 +12,7 @@ function Student({ student, theta_score, queryParams }) {
         <>
             <div className="row mt-4 p-3">
                 <div className="d-flex justify-content-between flex-column">
-                    <div className="d-flex flex-row align-items-center">
+                    <div className="d-flex flex-row align-items-center mb-3">
                         <button
                             className="btn btn-transparent"
                             onClick={handleBackClick}

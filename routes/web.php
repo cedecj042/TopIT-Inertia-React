@@ -57,18 +57,22 @@ Route::middleware(['auth', 'student'])->group(function () {
     Route::get('/profile', [StudentProfileController::class, 'showStudentDetails'])->name('profile');
     Route::post('/profile', [StudentProfileController::class, 'editProfile'])->name('student.profile.edit');
 
-    Route::get('/course', [StudentCourseController::class, 'showStudentCourse'])->name('student-course');
-    Route::get('/course/{id}', [StudentCourseController::class, 'showStudentCourseDetail'])->name('student-course-detail');
-    Route::get('/course/module/{id}', [StudentCourseController::class, 'showModuleDetail'])->name('student-module-detail');
-
-    Route::get('/test', [TestController::class, 'index'])->name('test');
-    Route::get('/test/history', [TestController::class, 'testHistory'])->name('test.history');
-
-
-    Route::get('/test/modules', [TestController::class, 'selectModules'])->name('test.modules');
-    Route::post('/test/start', [TestController::class, 'startTest'])->name('test.start');
-    Route::get('/test/{assessmentId}', [TestController::class, 'showTestPage'])->name('test.page');
-    Route::post('/test/next-question', [TestController::class, 'nextQuestion'])->name('test.next-question');
+    Route::prefix('course')->name('course.')->group(function (){
+        Route::get('/', [StudentCourseController::class, 'index'])->name(name: 'index');
+        Route::get('/{id}', [StudentCourseController::class, 'course'])->name('show');
+        Route::get('/module/{id}', [StudentCourseController::class, 'module'])->name('module');
+    });
+    
+    Route::prefix('test')->name('test.')->group(function (){
+        Route::get('/', [TestController::class, 'index'])->name('index');
+        Route::get('/history', [TestController::class, 'history'])->name('history');
+    
+        Route::get('/course', [TestController::class, 'select'])->name('course');
+        Route::post('/start', [TestController::class, 'start'])->name('start');
+        Route::get('/{assessmentId}', [TestController::class, 'show'])->name('page');
+        Route::post('/next-question', [TestController::class, 'nextQuestion'])->name('next-question');
+    });
+    
 
 
 });

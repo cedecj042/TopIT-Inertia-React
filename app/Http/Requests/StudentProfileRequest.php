@@ -26,7 +26,7 @@ class StudentProfileRequest extends FormRequest
     {
         return [
             'student_id'=> 'required',
-            'profile_image' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'profile_image' => 'nullable|image|mimes:jpeg,jpg,png|max:2048',
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
             'birthdate' => 'nullable|date',

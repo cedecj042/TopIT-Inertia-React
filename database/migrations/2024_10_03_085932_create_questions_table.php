@@ -32,6 +32,13 @@ return new class extends Migration
         //     $table->timestamps();
         // });
 
+        // Schema::create('difficulty', function (Blueprint $table) {
+        //     $table->id('difficulty_id');
+        //     $table->string('name');
+        //     $table->float('numeric');
+        //     $table->timestamps();
+        // });
+
 
         Schema::create('question_details',function (Blueprint $table){
             $table->id('question_detail_id');
@@ -41,21 +48,15 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('difficulty', function (Blueprint $table) {
-            $table->id('difficulty_id');
-            $table->string('name');
-            $table->float('numeric');
-            $table->timestamps();
-        });
-
         Schema::create('questions', function (Blueprint $table) {
             $table->id('question_id');
-            $table->foreignID('course_id')->references('course_id')->on('courses')->cascadeOnDelete();
-            $table->foreignID(column: 'question_detail_id')->references('question_detail_id')->on('question_details')->cascadeOnDelete();
-            $table->foreignID(column: 'difficulty_id')->references('difficulty_id')->on('difficulty')->cascadeOnDelete();
-            $table->enum('test_type',['Pretest','Test']);
+            $table->foreignId('course_id')->references('course_id')->on('courses')->cascadeOnDelete();
+            $table->foreignId('question_detail_id')->references('question_detail_id')->on('question_details')->cascadeOnDelete();
+            $table->enum('test_type', ['Pretest', 'Test']);
             $table->longText('question');
             $table->float('discrimination_index');
+            $table->float('difficulty_value');
+            $table->enum('difficulty_type', ['Very Easy', 'Easy', 'Average', 'Hard', 'Very Hard']);
             $table->timestamps();
         });
 

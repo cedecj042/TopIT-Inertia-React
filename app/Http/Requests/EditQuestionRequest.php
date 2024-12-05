@@ -26,9 +26,9 @@ class EditQuestionRequest extends FormRequest
             'question_id' => 'required|int',
             'question_detail_id' => 'required|int',
             'difficulty'=>'required|in:Very Easy,Easy,Average,Hard,Very Hard',
-            'discrimination_index' => 'required|int',
+            'difficulty_value'=>'required|numeric',
+            'discrimination_index' => 'required|numeric',
             'question' => 'required|string',
-            'test_type' => 'required|in:Pretest,Test',
             'question_detail_type'=> 'required|in:Multiple Choice - Single,Multiple Choice - Many,Identification',
             'answer' => ['required', function ($attribute, $value, $fail) {
                 if (!in_array(gettype($value), ['string', 'array'])) {

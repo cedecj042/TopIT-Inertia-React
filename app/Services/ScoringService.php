@@ -98,4 +98,8 @@ class ScoringService
         // Compare singular and plural forms
         return Str::singular($word1) === Str::singular($word2) || Str::plural($word1) === Str::plural($word2);
     }
+    private function validateAnswers($participantsAnswer, $correctAnswer): bool
+{
+    return isset($participantsAnswer, $correctAnswer) && is_array($correctAnswer);
+}
 }

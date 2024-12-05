@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Student;
 
+use App\Enums\TestType;
 use App\Http\Resources\AssessmentResource;
 use App\Models\Test;
 use App\Models\Course;
@@ -14,6 +15,7 @@ use App\Http\Resources\TestResource;
 use App\Models\Assessment;
 use App\Models\AssessmentCourse;
 use App\Models\AssessmentItem;
+use DB;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -31,7 +33,8 @@ class TestController extends Controller
     {
         $this->scoringService = $scoringService;
     }
-    public function selectModules()
+
+    public function select()
     {
         $courses = Course::all();
 
@@ -42,7 +45,7 @@ class TestController extends Controller
     }
 
 
-    public function startTest(Request $request)
+    public function start(Request $request)
     {
         $student = Student::find(Auth::user()->userable->student_id);
 
@@ -91,7 +94,7 @@ class TestController extends Controller
     }
 
     // for rendering the questions
-    public function showTestPage($assessmentId)
+    public function show($assessmentId)
     {
         $assessment = Assessment::with(['assessment_courses', 'student'])->findOrFail($assessmentId);
         $selectedModules = session()->get("assessment_selected_modules");
@@ -331,7 +334,7 @@ class TestController extends Controller
         ]);
     }
 
-    public function testHistory(Request $request)
+    public function history(Request $request)
     {
         $studentId = Auth::user()->userable->student_id;
 
@@ -341,10 +344,21 @@ class TestController extends Controller
 
         $testsArray = $tests->toArray();
 
+        $title =  DB::table('courses')->distinct()->pluck('title');
+        $testTypes = collect(TestType::cases())->map(function ($case) {
+            return $case->value;
+        })->toArray();
+
+        $filters = [
+            'course'=>$title,
+            'test_type'=>$testTypes,
+        ];
+
         return Inertia::render('Student/TestHistory', [
             'title' => 'Student Test',
             'tests' => AssessmentResource::collection($tests),
             'paginationLinks' => $testsArray['links'],
+            'queryParams' => request()->query() ? : null,
         ]);
     }
 

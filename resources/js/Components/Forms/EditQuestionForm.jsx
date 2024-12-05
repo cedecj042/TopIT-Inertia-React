@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { toast } from "sonner";
 export default function EditQuestionForm({ question, onClose, filters }) {
+    console.log(question.difficulty_value)
     const {
         register,
         handleSubmit,
@@ -16,25 +17,26 @@ export default function EditQuestionForm({ question, onClose, filters }) {
             question: question?.question || '',
             answer: question?.question_detail?.answer || [],
             choices: question?.question_detail?.choices?.map(choice => ({ value: choice })) || [],
-            difficulty: question?.difficulty?.name || '',
+            difficulty: question?.difficulty_type || '',
+            difficulty_value: question?.difficulty_value || '',
             question_detail_type: question?.question_detail?.type || '',
             question_detail_id: question?.question_detail?.question_detail_id || '',
             discrimination_index: question?.discrimination_index || '',
             course: question?.course?.title || '',
         },
     });
-    
+
     const { fields, append, remove } = useFieldArray({ control, name: "choices" });
     const type = watch("question_detail_type");
     const answer = watch("answer");
     const { isProcessing, putRequest } = useRequest();
 
     const canAddMoreChoices = fields.length < 4;
-    
+
     // Handle answer format based on question type
     useEffect(() => {
         const currentAnswer = watch("answer");
-        
+
         if (type === "Multiple Choice - Many") {
             // Ensure answer is array
             if (!Array.isArray(currentAnswer)) {
@@ -60,16 +62,15 @@ export default function EditQuestionForm({ question, onClose, filters }) {
     // Handle answer selection
     const handleAnswerChange = (choice, checked) => {
         const currentAnswer = watch("answer");
-        
+
         if (type === "Multiple Choice - Many") {
             let newAnswer = Array.isArray(currentAnswer) ? [...currentAnswer] : [];
-            
+
             if (checked) {
                 newAnswer.push(choice);
             } else {
                 newAnswer = newAnswer.filter(ans => ans !== choice);
             }
-            
             setValue("answer", newAnswer);
         } else {
             setValue("answer", checked ? choice : "");
@@ -87,7 +88,8 @@ export default function EditQuestionForm({ question, onClose, filters }) {
                 toast.success('Question updated successfully', { duration: 3000 });
                 onClose();
             },
-            onError: () => {
+            onError: (error) => {
+                console.log(error);
                 toast.error('Error updating question', { duration: 3000 });
             }
         });
@@ -108,7 +110,7 @@ export default function EditQuestionForm({ question, onClose, filters }) {
                         />
                         {errors.question && <p className="text-danger">{errors.question.message}</p>}
                     </div>
-                    
+
                     <input type="hidden" {...register("question_detail_id")} />
                     <input type="hidden" {...register("question_id")} />
 
@@ -180,16 +182,15 @@ export default function EditQuestionForm({ question, onClose, filters }) {
 
                     {/* Additional Details */}
                     <label htmlFor="" className="mb-2  form-label">Details</label>
-
-                    <div className="d-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-                        <div className="mb-3">
-                            <label className="form-label">Question Type</label>
-                            <select className="form-select" {...register("question_detail_type")}>
-                                {filters.detail_types.map((type, index) => (
-                                    <option value={type} key={index}>{type}</option>
-                                ))}
-                            </select>
-                        </div>
+                    <div className="mb-3">
+                        <label className="form-label">Question Type</label>
+                        <select className="form-select" {...register("question_detail_type")}>
+                            {filters.detail_types.map((type, index) => (
+                                <option value={type} key={index}>{type}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="d-grid grid-3">
                         <div className="mb-2">
                             <label className="form-label">Difficulty</label>
                             <select className="form-select" {...register("difficulty")}>
@@ -198,10 +199,42 @@ export default function EditQuestionForm({ question, onClose, filters }) {
                                 ))}
                             </select>
                         </div>
+                        {/* Difficulty Value */}
+                        <div className="mb-2">
+                            <label className="form-label">Difficulty Value</label>
+                            <input
+                                className="form-control"
+                                type="number"
+                                step="0.1" // Allows decimal values
+                                {...register("difficulty_value", {
+                                    required: "Difficulty value is required",
+                                    valueAsNumber: true, // Ensures it's converted to a number
+                                    validate: (value) =>
+                                        !isNaN(value) || "Difficulty value must be a valid number",
+                                })}
+                            />
+                            {errors.difficulty_value && (
+                                <p className="text-danger">{errors.difficulty_value.message}</p>
+                            )}
+                        </div>
+
                         {/* Discrimination Index */}
                         <div className="mb-2">
                             <label className="form-label">Discrimination Index</label>
-                            <input className="form-control" {...register("discrimination_index")} />
+                            <input
+                                className="form-control"
+                                type="number"
+                                step="0.01" // Allows finer decimal values like 0.01
+                                {...register("discrimination_index", {
+                                    required: "Discrimination index is required",
+                                    valueAsNumber: true, // Ensures it's converted to a number
+                                    validate: (value) =>
+                                        !isNaN(value) || "Discrimination index must be a valid number",
+                                })}
+                            />
+                            {errors.discrimination_index && (
+                                <p className="text-danger">{errors.discrimination_index.message}</p>
+                            )}
                         </div>
                     </div>
                     <div className="mb-3 col">

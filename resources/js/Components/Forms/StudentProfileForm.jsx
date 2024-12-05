@@ -12,7 +12,7 @@ export default function StudentProfileForm({ student, onClose }) {
     } = useForm({
         defaultValues: {
             student_id: student.student_id || "",
-            profile_image: null, // Default to null
+            profile_image: null,
             firstname: student.firstname || "",
             lastname: student.lastname || "",
             birthdate: student.birthdate || "",
@@ -30,44 +30,26 @@ export default function StudentProfileForm({ student, onClose }) {
     const { postRequest } = useRequest();
 
     const handleFileChange = (e) => {
-        const file = e.target.files[0];
+        const file = e.target.files[0]; // Get the first file
         if (file) {
-            // Validate the file type
-            if (!file.type.startsWith("image/")) {
-                toast.error("The selected file must be an image.");
-                return;
-            }
-
-            setValue("profile_image", file, { shouldValidate: true });
-
-            // Generate a preview for the selected image
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                setPreviewImage(event.target.result);
-            };
-            reader.readAsDataURL(file);
+            setValue("profile_image", file); // Set file in react-hook-form
         } else {
-            // Reset the image if no file is selected
-            setValue("profile_image", null);
-            setPreviewImage(
-                student.profile_image ? `/storage/profile_images/${student.profile_image}` : null
-            );
+            setValue("profile_image", null); // Reset file if none selected
         }
     };
+    
 
     const onSubmitForm = (data) => {
         const formData = new FormData();
-
-        // Add all form data to FormData object
+    
         Object.entries(data).forEach(([key, value]) => {
             if (key === "profile_image" && value instanceof File) {
-                formData.append(key, value);
+                formData.append(key, value); // Append the actual file
             } else if (value !== null && value !== undefined && value !== "") {
-                formData.append(key, value);
+                formData.append(key, value); // Append other fields
             }
         });
-
-        // Submit the form
+    
         postRequest("student.profile.edit", formData, {
             onSuccess: () => {
                 toast.success("Profile updated successfully!");
@@ -79,7 +61,8 @@ export default function StudentProfileForm({ student, onClose }) {
             },
         });
     };
-
+    
+    
     return (
         <>
             <div className="modal-body">
@@ -104,10 +87,11 @@ export default function StudentProfileForm({ student, onClose }) {
                         <label className="form-label">Profile Image</label>
                         <input
                             type="file"
-                            {...register("profile_image")}
-                            onChange={handleFileChange}
-                            className="form-control"
+                            name="profile_image"
+                            id="profile_image"
                             accept="image/*"
+                            onChange={handleFileChange} // Manually handle file changes
+                            className="form-control"
                         />
                     </div>
 

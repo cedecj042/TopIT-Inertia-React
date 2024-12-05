@@ -1,6 +1,7 @@
 import { Link, router, usePage } from "@inertiajs/react";
 import { useState, useEffect } from "react";
 import "../../../css/admin/navigation.css";
+import Modal from "../Modal/Modal";
 
 export default function AdminNavbar({ title }) {
     const { auth } = usePage().props;
@@ -30,6 +31,7 @@ export default function AdminNavbar({ title }) {
     };
 
     return (
+        <>
         <div className="col-auto col-sm-4 col-md-3 col-xl-2 py-3 px-0 side-bar d-flex flex-column justify-content-between h-100 navbar-bg">
             <div className="d-flex flex-column justify-space-between pt-2">
                 <div className="text-center py-4">
@@ -152,5 +154,6 @@ export default function AdminNavbar({ title }) {
                 </ul>
             </div>
         </div>
+        </>
     );
 }

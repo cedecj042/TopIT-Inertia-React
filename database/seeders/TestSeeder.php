@@ -30,11 +30,7 @@ class TestSeeder extends Seeder
                 'total_items' => $faker->numberBetween(20, 50),
                 'total_score' => $faker->numberBetween(50, 100),
                 'percentage' => $faker->randomFloat(2, 60, 100),
-                'status' => $faker->randomElement([
-                    AssessmentStatus::COMPLETED->value,
-                    AssessmentStatus::IN_PROGRESS->value,
-                    AssessmentStatus::NOT_STARTED->value,
-                ]),
+                'status' => AssessmentStatus::COMPLETED->value,
             ]);
 
             foreach ($courses as $course) {

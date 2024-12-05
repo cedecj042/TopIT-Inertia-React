@@ -46,14 +46,15 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call([
-            DifficultySeeder::class,
+            // DifficultySeeder::class,
             CourseSeeder::class,
-            PretestQuestionSeeder::class,
             QuestionSeeder::class,
             StudentSeeder::class,
             TestSeeder::class,
             TestSeeder::class,
             TestSeeder::class,
+            PretestQuestionSeeder::class,
+
         ]);
     }
 }
