@@ -116,5 +116,31 @@ class ItemSelectionService
             return null;
         }
     }
+
+    /**
+     * Selects the item with the maximum Fisher Information for a specific course.
+     *
+     * @param float $theta The examinee's ability level.
+     * @param string $course The course identifier.
+     * @param array $items An array of items with 'a', 'b', and 'course' parameters.
+     *                     Example: [['id' => 1, 'a' => 1.2, 'b' => 0.5, 'course' => 'math']]
+     * @return array|null The selected item with the maximum Fisher Information for the course.
+     */
+
+    public function getMaximumItemByCourse(float $theta, string $course, array $items): ?array
+    {
+        try {
+            // Filter items by the given course
+            $filteredItems = array_filter($items, function ($item) use ($course) {
+                return $item['course'] === $course;
+            });
+
+            // Use getMaximumItem to find the best item among the filtered ones
+            return $this->getMaximumItem($theta, $filteredItems);
+        } catch (\Exception $e) {
+            Log::error('Error in getMaximumItemByCourse: ' . $e->getMessage());
+            return null;
+        }
+    }
     
 }
