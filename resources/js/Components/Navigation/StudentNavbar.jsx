@@ -2,6 +2,7 @@ import { usePage } from "@inertiajs/react";
 
 export default function StudentNavbar(){
     const {auth} = usePage().props;
+    console.log('StudentNavbar Rendered', auth);
 
     const profileImageURL= auth.user && auth.user.userable.profile_image
     ? `/storage/profile_images/${auth.user.userable.profile_image}`

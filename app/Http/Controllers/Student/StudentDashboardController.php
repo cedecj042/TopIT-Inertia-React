@@ -40,9 +40,9 @@ class StudentDashboardController extends Controller
 
         return Inertia::render('Student/Dashboard', [
             'title' => 'Student Dashboard',
-            'auth' => Auth::user(),
+            // 'auth' => $studentId, removed since navbar wont display if naa ni
             'thetaScore' => $thetaScoreData,
-            'tests' => AssessmentResource::collection($tests),
+            'tests' => AssessmentResource::collection($tests)
         ]);
     }
 }
