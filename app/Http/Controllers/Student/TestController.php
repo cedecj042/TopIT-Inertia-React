@@ -38,7 +38,7 @@ class TestController extends Controller
     {
         $courses = Course::all();
 
-        return Inertia::render('Student/Test/SelectModules', [
+        return Inertia::render('Student/Test/SelectCourses', [
             'title' => 'Student Test',
             'courses' => $courses,
         ]);
@@ -49,19 +49,19 @@ class TestController extends Controller
     {
         $student = Student::find(Auth::user()->userable->student_id);
 
-        // first, fetch the selected modules
-        $selectedModules = $request->input('modules', []);
-        Log::info("selected modules:", $selectedModules);
+        // first, fetch the selected courses
+        $selectedCourses = $request->input('courses', []);
+        Log::info("selected courses:", $selectedCourses);
 
-        if (empty($selectedModules)) {
-            return redirect()->route('modules.select')
-                ->with('error', 'Please select modules before starting the test.');
+        if (empty($selectedCourses)) {
+            return redirect()->route('test.course')
+                ->with('error', 'Please select courses before starting the test.');
         }
 
-        // store student's selected modules in session
-        session()->put("assessment_selected_modules", $selectedModules);
+        // store student's selected courses in session
+        session()->put("assessment_selected_courses", $selectedCourses);
         Log::info('stored Modules in Session', [
-            'selected_modules' => session()->get("assessment_selected_modules")
+            'selected_courses' => session()->get("assessment_selected_courses")
         ]);
 
         // create new assessment record once test starts
@@ -76,7 +76,7 @@ class TestController extends Controller
         ]);
 
         // create assessmentCourse records for selected courses
-        foreach ($selectedModules as $courseId) {
+        foreach ($selectedCourses as $courseId) {
             AssessmentCourse::create([
                 'assessment_id' => $assessment->assessment_id,
                 'course_id' => $courseId,
@@ -97,17 +97,17 @@ class TestController extends Controller
     public function show($assessmentId)
     {
         $assessment = Assessment::with(['assessment_courses', 'student'])->findOrFail($assessmentId);
-        $selectedModules = session()->get("assessment_selected_modules");
+        $selectedCourses = session()->get("assessment_selected_courses");
 
-        Log::info('Retrieved Modules from Session', [
-            'selected_modules' => $selectedModules
+        Log::info('Retrieved Courses from Session', [
+            'selected_courses' => $selectedCourses
         ]);
 
-        $question = $this->selectInitialQuestion($selectedModules, $assessment->student);
+        $question = $this->selectInitialQuestion($selectedCourses, $assessment->student);
 
         // Log::info("Selected Question Details", [
         //     'question_course_id' => $question ? $question->course_id : 'No question found',
-        //     'selected_module_ids' => $selectedModules
+        //     'selected_course_ids' => $selectedCourses
         // ]);
 
         Log::info("Initial question details", [
@@ -212,7 +212,7 @@ class TestController extends Controller
     {
         // for testing only
 
-        $selectedModules = session()->get("assessment_selected_modules");
+        $selectedCourses = session()->get("assessment_selected_courses");
 
         // get the current question's difficulty
         $currentDifficulty = $currentQuestion->difficulty->numeric;
@@ -221,7 +221,7 @@ class TestController extends Controller
         // 1. Is in the selected courses
         // 2. Has not been used in this assessment
         // 3. Has a difficulty close to the current question
-        $nextQuestion = Question::whereIn('course_id', $selectedModules)
+        $nextQuestion = Question::whereIn('course_id', $selectedCourses)
             ->whereNotIn('question_id', function ($query) use ($assessment) {
                 $query->select('question_id')
                     ->from('assessment_items')
