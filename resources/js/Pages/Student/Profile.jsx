@@ -4,8 +4,9 @@ import StudentProfile from "@/Components/Profile/StudentProfile";
 import Modal from "@/Components/Modal/Modal";
 import StudentProfileForm from "@/Components/Forms/StudentProfileForm";
 import "../../../css/profile.css";
+import ProgressLineChart from "@/Components/Chart/ProgressLineChart";
 
-function Profile({ student }) {
+function Profile({ student, progressData }) {
     const [showModal, setShowModal] = useState(false);
     const studentData = student.data;
     const openModal = () => setShowModal(true);
@@ -25,8 +26,14 @@ function Profile({ student }) {
                             Edit Profile
                         </button>
                     </div>
-                    <StudentProfile student={student.data}/>
+                    <StudentProfile student={student.data} />
+                    <div className="row w-100 px-5 mb-3">
+                        <div className="chart-container">
+                            <ProgressLineChart progressData={progressData} />
+                        </div>
+                    </div>
                 </div>
+
                 <Modal
                     show={showModal}
                     onClose={closeModal}

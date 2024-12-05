@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Requests\StudentProfileRequest;
 use App\Models\Student;
+use App\Models\AssessmentCourse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StudentResource;
 use Illuminate\Http\Request;
@@ -23,11 +24,74 @@ class StudentProfileController extends Controller
     public function showStudentDetails()
     {
         $student = Auth::user()->userable;
+        $progressData = $this->getCourseProgressData($student->student_id);
 
         return Inertia::render('Student/Profile', [
             'title' => 'Student Profile',
             'student' => new StudentResource($student),
+            'progressData' => $progressData
         ]);
+    }
+
+    public function getCourseProgressData($studentId)
+    {
+        $thetaScores = AssessmentCourse::whereHas('assessment', function ($query) use ($studentId) {
+            $query->where('student_id', $studentId);
+        })
+            ->select('course_id', 'final_theta_score', 'updated_at')
+            ->with('course')
+            ->orderBy('updated_at', 'asc')
+            ->get();
+
+        // map `updated_at` to dates and group scores by course and date
+        $thetaScores = $thetaScores->map(function ($item) {
+            $item->date = $item->updated_at->format('Y-m-d'); 
+            return $item;
+        });
+
+        // 7 day range until current date
+        $currentDate = now();
+        $dateRange = [];
+        for ($i = 0; $i < 7; $i++) {
+            $dateRange[] = $currentDate->copy()->subDays($i)->format('Y-m-d');
+        }
+        $dateRange = array_reverse($dateRange); //reverse to start from earliest
+
+        $progressData = [
+            'labels' => $dateRange, 
+            'datasets' => [],
+        ];
+
+        // group scores by course title
+        $groupedScores = $thetaScores->groupBy('course.title');
+
+        foreach ($groupedScores as $courseTitle => $scores) {
+            $data = [];
+            foreach ($dateRange as $label) {
+                $dateScores = $scores->where('date', $label);
+                $data[] = $dateScores->isNotEmpty()
+                    ? $dateScores->avg('final_theta_score') // use average for multiple scores per date
+                    : null; // fill null for dates w/ missing score
+            }
+
+            $progressData['datasets'][] = [
+                'label' => $courseTitle,
+                'data' => $data,
+                'borderColor' => $this->generateRandomColor(),
+                'backgroundColor' => 'rgba(75, 192, 192, 0.2)',
+                'tension' => 0.4,
+            ];
+        }
+
+        Log::info('Progress Data: ', $progressData);
+
+        return response()->json($progressData);
+    }
+
+    public function generateRandomColor()
+    {
+        $randomColor = sprintf('rgba(%d, %d, %d, 1)', rand(0, 255), rand(0, 255), rand(0, 255));
+        return $randomColor;
     }
 
     public function editProfile(StudentProfileRequest $request)
