@@ -2,8 +2,10 @@
 
 namespace App\Observers;
 
+use App\Jobs\ProcessCourse;
 use App\Models\Course;
 use App\Services\ThetaService;
+use Illuminate\Support\Facades\Log as FacadesLog;
 use Log;
 
 class CourseObserver
@@ -18,13 +20,15 @@ class CourseObserver
     public function created(Course $course)
     {
         $this->thetaService->initializeThetaForCourse($course);
+        ProcessCourse::dispatch($course->course_id);
+
     }
 
     public function deleted(Course $course)
     {
         $this->thetaService->cleanupThetaForDeletedCourse($course);
 
-        Log::info('Course deleted and related records cleaned up', [
+        FacadesLog::info('Course deleted and related records cleaned up', [
             'course_id' => $course->course_id,
         ]);
     }

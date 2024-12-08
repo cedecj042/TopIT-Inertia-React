@@ -52,7 +52,6 @@ class CourseController extends Controller
 
             Log::info('Course saved successfully:', ['course_id' => $course->course_id]);
             //Save the course to vector
-            // ProcessCourse::dispatch($course->course_id);
             return back()->with('success', 'Course added successfully!');
         } catch (\Exception $e) {
             Log::error('Error saving course:', ['exception' => $e->getMessage()]);
