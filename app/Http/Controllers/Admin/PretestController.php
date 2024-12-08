@@ -9,7 +9,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PretestRequest;
 use App\Http\Resources\QuestionResource;
 use App\Models\Question;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Log;
@@ -68,7 +67,6 @@ class PretestController extends Controller
         
         return Inertia::render('Admin/Questions/Pretest', [
             'title' => 'Admin Pretest',
-            'auth' => Auth::user(),
             'questions' => QuestionResource::collection($questions), 
             'filters' => $filters,
             'queryParams' => request()->query() ?: null,
@@ -125,7 +123,6 @@ class PretestController extends Controller
         
         return Inertia::render('Admin/Questions/AddPretest',[
             'title' => 'Admin Pretest',
-            'auth' => Auth::user(),
             'questions' => QuestionResource::collection($questions),
             'filters' => $filters,
             'queryParams' => request()->query() ?: null,

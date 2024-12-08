@@ -14,7 +14,6 @@ use App\Models\Section;
 use App\Models\Subsection;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -76,7 +75,6 @@ class ModuleController extends Controller
         ];
         return Inertia::render('Admin/Modules/Module', [
             'title' => 'Admin Module',
-            'auth' => Auth::user(),
             'modules' => ModuleResource::collection($modules),
             'filters' => $filters,
             'queryParams' => request()->query() ?: null,
@@ -102,7 +100,6 @@ class ModuleController extends Controller
         // Return the Inertia render with the module details
         return Inertia::render('Admin/Modules/ModuleDetail', [
             'title' => 'Admin Module',
-            'auth' => Auth::user(),
             'module' => new ModuleResource($module)
         ]);
     }
@@ -125,7 +122,6 @@ class ModuleController extends Controller
         // Return the Inertia render with the module details
         return Inertia::render('Admin/Modules/ModuleEdit', [
             'title' => 'Admin Module',
-            'auth' => Auth::user(),
             'module' => new ModuleResource($module),
             'queryParams' => request()->query() ? : null,
         ]);

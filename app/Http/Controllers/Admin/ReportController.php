@@ -4,11 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StudentResource;
-use App\Http\Resources\StudentThetaScore;
 use App\Models\Student;
 use App\Models\StudentCourseTheta;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -88,7 +85,6 @@ class ReportController extends Controller
 
         return Inertia::render('Admin/Reports',[
             'title' => 'Admin Reports',
-            'auth' => Auth::user(),
             'highlowData' => $highlowData,
             'students' => StudentResource::collection($students),
             'queryParams' => request()->query() ?: null,
@@ -111,7 +107,6 @@ class ReportController extends Controller
         ];
 
         return Inertia::render('Admin/Student', [
-            'auth' => Auth::user(),
             'title' => 'Admin Reports',
             'student' => new StudentResource($student),
             'queryParams' => request()->query() ?: null,

@@ -140,7 +140,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     });
     
     Route::get('/report',[ReportController::class,'index'])->name('report');
-    Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
+    // Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
     Route::get('/student/{student_id}', [ReportController::class, 'student'])->name('student');
 });
 

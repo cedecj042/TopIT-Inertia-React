@@ -27,7 +27,6 @@ class AdminUserController extends Controller
         
         return Inertia::render('Admin/AdminUsers',[
             'title' => 'Admin Users',
-            'auth' => Auth::user(),
             'admins' => AdminResource::collection($admins),
         ]);
     }

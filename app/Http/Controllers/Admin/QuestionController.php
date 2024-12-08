@@ -4,30 +4,23 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\QuestionDetailType;
 use App\Enums\QuestionDifficulty;
-use App\Enums\QuestionTestType;
 use App\Enums\TestType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EditQuestionRequest;
 use App\Http\Requests\GenerateQuestionRequest;
 use App\Http\Resources\CourseResource;
-use App\Http\Resources\DifficultyResource;
 use App\Http\Resources\QuestionResource;
 use App\Jobs\GenerateQuestionJob;
 use App\Jobs\ProcessQuestionsJob;
 use App\Models\Course;
-use App\Models\Difficulty;
 use App\Models\Question;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class QuestionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         //
@@ -83,7 +76,6 @@ class QuestionController extends Controller
         
         return Inertia::render('Admin/Questions/Question',[
             'title' => 'Admin Question',
-            'auth' => Auth::user(),
             'questions' => QuestionResource::collection($questions),
             'filters' => $filters,
             'queryParams' => request()->query() ?: null,
@@ -102,12 +94,10 @@ class QuestionController extends Controller
 
     public function show()
     {
-        //
         $courses = Course::with('modules')->get();
         $difficulty = array_map(fn($case) => $case->value, QuestionDifficulty::cases());
         return Inertia::render('Admin/Questions/Generate',[
             'title' => 'Admin Question',
-            'auth' => Auth::user(),
             'courses' => CourseResource::collection($courses),
             'difficulty' => $difficulty,
         ]);

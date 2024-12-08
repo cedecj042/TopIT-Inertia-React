@@ -2,9 +2,12 @@ import { Link, router, usePage } from "@inertiajs/react";
 import { useState, useEffect } from "react";
 import "../../../css/admin/navigation.css";
 import Modal from "../Modal/Modal";
+import AdminProfile from "../Profile/AdminProfile";
+import AdminProfileForm from "../Forms/AdminProfileForm";
 
 export default function AdminNavbar({ title }) {
     const { auth } = usePage().props;
+
     const profileImageUrl = auth.user && auth.user.profile_image
         ? `/storage/profile_images/${auth.user.profile_image}`
         : "/assets/profile-circle.png";
@@ -29,6 +32,22 @@ export default function AdminNavbar({ title }) {
         setIsQuestionBankOpen(newState);
         localStorage.setItem('questionBankSubmenu', JSON.stringify(newState));
     };
+
+    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const openProfileModal = () => {
+        if (!showProfileModal) {
+            setShowEditModal(false); // Ensure edit modal is closed
+            setShowProfileModal(true); // Open profile modal
+        }
+    };
+    const closeProfileModal = () => setShowProfileModal(false);
+
+    const openEditModal = () => {
+        closeProfileModal(); // Close the profile modal before showing the edit modal
+        setShowEditModal(true);
+    };
+    const closeEditModal = () => setShowEditModal(false);
 
     return (
         <>
@@ -141,11 +160,11 @@ export default function AdminNavbar({ title }) {
             <div className="dropdown pb-4 px-4">
                 <Link href="#" className="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
                     <img src={profileImageUrl} alt="Profile Image" className="rounded-circle" width="30" height="30" />
-                    <span className="d-none d-sm-inline mx-1 fs-6">{auth.username}</span>
+                    <span className="d-none d-sm-inline mx-1 fs-6">{auth.user.username}</span>
                 </Link>
                 <ul className="dropdown-menu dropdown-menu text-small shadow">
                     <li>
-                        <Link className="dropdown-item fs-6" href={route('admin.profile')}>Profile</Link>
+                        <button className="dropdown-item fs-6 btn" onClick={openProfileModal}>Profile</button>
                     </li>
                     <li>
                         <Link className="dropdown-item fs-6" href={route('logout')} method="post" as="button">Sign out</Link>
@@ -154,6 +173,28 @@ export default function AdminNavbar({ title }) {
                 </ul>
             </div>
         </div>
+        <Modal
+            modalTitle={'Admin Profile'}
+            modalSize={'modal-lg'}
+            show={showProfileModal}
+            onClose={closeProfileModal}
+        >
+            <AdminProfile 
+                close={closeProfileModal}
+                openEditModal={openEditModal}  
+                auth={auth}
+            />
+        </Modal>
+        {/* Edit Modal */}
+        <Modal
+            modalTitle="Edit Profile"
+            modalSize="modal-lg"
+            show={showEditModal}
+            onClose={closeEditModal}
+        >
+            <AdminProfileForm onclose={openProfileModal} auth={auth}/>
+        </Modal>
+        
         </>
     );
 }

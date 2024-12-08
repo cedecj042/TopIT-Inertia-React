@@ -44,9 +44,7 @@ class DashboardController extends Controller
         $chartData = $this->prepareChartData($monthlyCounts);
 
         return Inertia::render(
-            'Admin/Dashboard',
-            [
-                'auth' => Auth::user(),
+            'Admin/Dashboard',[
                 'title' => 'Admin Dashboard',
                 'chartData' => $chartData,
                 'cards'=> $cards,

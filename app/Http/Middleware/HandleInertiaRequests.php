@@ -32,17 +32,20 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
-        // Determine the user role (Admin or Student)
         $userRole = null;
+        $userable = null;
+    
         if ($user) {
-            $userRole = $user->userable instanceof Admin ? 'admin' : ($user->userable instanceof Student ? 'student' : null);
+            $userable = $user->userable; // The polymorphic relation
+            $userRole = $userable instanceof Admin ? 'admin' : ($userable instanceof Student ? 'student' : null);
         }
-
+    
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $user,
                 'role' => $userRole, 
+                'userable' => $userable, // Share full Admin or Student instance
             ],
         ];
     }

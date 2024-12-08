@@ -10,7 +10,6 @@ use App\Jobs\ProcessCourse;
 use App\Models\Course;
 use App\Models\Pdf;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
@@ -33,7 +32,6 @@ class CourseController extends Controller
         //
         return Inertia::render('Admin/Courses/Course',[
             'title' => 'Admin Course',
-            'auth'=> Auth::user(),
             'courses'=>CourseResource::collection($courses),
             'queryParams'=>request()->query() ? :null,
         ]);
@@ -53,6 +51,7 @@ class CourseController extends Controller
             $course->save();
 
             Log::info('Course saved successfully:', ['course_id' => $course->course_id]);
+            //Save the course to vector
             // ProcessCourse::dispatch($course->course_id);
             return back()->with('success', 'Course added successfully!');
         } catch (\Exception $e) {
@@ -70,7 +69,6 @@ class CourseController extends Controller
         
         return Inertia::render('Admin/Courses/CourseDetail',[
             'title' => 'Admin Course',
-            'auth'=> Auth::user(),
             'course'=> new CourseResource($course),
             'pdfs' => PdfResource::collection($pdfs),
             'queryParams'=>request()->query() ? :null,
