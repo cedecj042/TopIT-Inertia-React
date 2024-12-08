@@ -30,7 +30,7 @@ function TestPage(props) {
                             ability level from the different courses. Take a
                             test now!
                         </p>
-                        <Link href={`/test/modules`} className="btn btn-primary p-3 pt-2 pb-2">
+                        <Link href={`/test/course`} className="btn btn-primary p-3 pt-2 pb-2">
                             Take a Test
                         </Link>
                     </div>

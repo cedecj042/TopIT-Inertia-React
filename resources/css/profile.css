@@ -4,3 +4,9 @@
     height: 150px;
     width: 150px;
 }
+
+.chart-container{
+    position: relative; 
+    height:500px !important; 
+    width:100%;
+}

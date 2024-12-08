@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 use App\Models\Course;
 use App\Models\Student;
@@ -13,13 +15,11 @@ use App\Models\Question;
 use App\Models\Assessment;
 use App\Models\AssessmentItem;
 use App\Models\AssessmentCourse;
+
 use App\Http\Resources\CourseResource;
-
 use App\Http\Resources\QuestionResource;
+use App\Http\Resources\QuestionReviewResource;
 use App\Http\Resources\StudentResource;
-
-use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
 
 
 class PretestController extends Controller
@@ -59,7 +59,7 @@ class PretestController extends Controller
 
         $courses = Course::with([
             'questions' => function ($query) {
-                $query->where('test_type', 'Test')
+                $query->where('test_type', 'Pretest')
                     ->with('question_detail');
             }
         ])->get();
@@ -167,7 +167,7 @@ class PretestController extends Controller
             'questions' => $coursesWithAnswers->map(function ($course) {
                 return [
                     'course_id' => $course->course_id,
-                    'questions' => QuestionResource::collection($course->questions)
+                    'questions' => QuestionReviewResource::collection($course->questions)
                 ];
             }),
         ]);

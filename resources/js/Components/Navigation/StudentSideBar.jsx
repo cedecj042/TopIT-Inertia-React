@@ -15,8 +15,8 @@ export default function StudentSideBar({title}){
                             href={route('dashboard')}
                             className={`nav-link text-dark py-3 ps-4 d-flex align-items-center gap-1 ${
                                 title === 'Student Dashboard' ? 'active' : 'dimmed'
-                            }`}
-                            
+                            }`} 
+                             id="dashboard-link"
                         >
                             <span className="material-symbols-outlined">home</span>
                             <span className="ms-1 d-none d-sm-inline fs-6">Dashboard</span>

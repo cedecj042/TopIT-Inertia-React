@@ -5,25 +5,25 @@ import "../../../../css/student/students.css";
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 import { router } from '@inertiajs/react'; 
 
-function SelectModules({ courses }) {
-    const [selectedModules, setSelectedModules] = useState([]);
+function SelectCourses({ courses }) {
+    const [selectedCourses, setSelectedCourses] = useState([]);
 
-    const handleModuleSelect = (moduleId) => {
-        setSelectedModules((prevSelected) =>
-            prevSelected.includes(moduleId)
-                ? prevSelected.filter((id) => id !== moduleId)
-                : [...prevSelected, moduleId]
+    const handleCourseSelect = (courseId) => {
+        setSelectedCourses((prevSelected) =>
+            prevSelected.includes(courseId)
+                ? prevSelected.filter((id) => id !== courseId)
+                : [...prevSelected, courseId]
         );
     };
 
-    console.log("selected modules:", selectedModules);
+    console.log("selected courses:", selectedCourses);
 
     const handleStartTest = () => {
-        if (selectedModules.length === 0) {
-            alert("Please select at least one module to proceed.");
+        if (selectedCourses.length === 0) {
+            alert("Please select at least one course to proceed.");
             return;
         }
-        router.post('/test/start', { modules: selectedModules });
+        router.post('/test/start', { courses: selectedCourses });
     };
     
 
@@ -42,7 +42,7 @@ function SelectModules({ courses }) {
                     We'll personalize your test with your selected topic.
                 </h3>
                 <p className="text-muted">
-                    Please select the modules you want to take.
+                    Please select the course you want to take.
                 </p>
             </div>
 
@@ -54,14 +54,14 @@ function SelectModules({ courses }) {
                             <div key={course.course_id} className="col-12 mb-3">
                                 <div
                                     className={`border rounded-4 p-3 ${
-                                        selectedModules.includes(
+                                        selectedCourses.includes(
                                             course.course_id
                                         )
                                             ? "bg-primary text-white"
                                             : "bg-light"
                                     }`}
                                     onClick={() =>
-                                        handleModuleSelect(course.course_id)
+                                        handleCourseSelect(course.course_id)
                                     }
                                     style={{ cursor: "pointer" }}
                                 >
@@ -69,11 +69,11 @@ function SelectModules({ courses }) {
                                         <input
                                             className="form-check-input"
                                             type="checkbox"
-                                            checked={selectedModules.includes(
+                                            checked={selectedCourses.includes(
                                                 course.course_id
                                             )}
                                             onChange={() =>
-                                                handleModuleSelect(
+                                                handleCourseSelect(
                                                     course.course_id
                                                 )
                                             }
@@ -98,7 +98,7 @@ function SelectModules({ courses }) {
                     <button
                         className="btn btn-primary p-3 pt-2 pb-2 mt-3"
                         onClick={handleStartTest}
-                        disabled={selectedModules.length === 0}
+                        disabled={selectedCourses.length === 0}
                     >
                         Start Test
                     </button>
@@ -116,4 +116,4 @@ function SelectModules({ courses }) {
     );
 }
 
-export default StudentContent(SelectModules);
+export default StudentContent(SelectCourses);
