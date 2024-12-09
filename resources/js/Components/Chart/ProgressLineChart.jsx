@@ -23,15 +23,21 @@ ChartJS.register(
 export default function ProgressLineChart({ progressData }) {
     console.log("Progress Data Received:", progressData);
     const originalData = progressData?.original;
-    if (!originalData || !originalData.labels || !originalData.datasets || originalData.labels.length === 0) {
+    if (!originalData || !originalData.labels || originalData.labels.length === 0) {
         return <p>Loading chart data...</p>;
     }
 
+    const formatDateLabel = (dateString) => {
+        const [year, month, day] = dateString.split('-');
+        return `${day}`;
+    };
+
     const data = {
-        labels: originalData.labels.map((label) =>
-            label.length > 20 ? label.slice(0, 20) + "..." : label
-        ),
-        datasets: originalData.datasets,
+        labels: originalData.labels.map(formatDateLabel),
+        datasets: originalData.datasets.map(dataset => ({
+            ...dataset,
+            data: dataset.data
+        })),
     };
 
     const options = {
@@ -43,7 +49,7 @@ export default function ProgressLineChart({ progressData }) {
             },
             title: {
                 display: true,
-                text: "Progress per Course",
+                text: "Course",
             },
         },
         scales: {

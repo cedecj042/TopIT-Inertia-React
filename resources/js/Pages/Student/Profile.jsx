@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { router } from "@inertiajs/react";
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 import StudentProfile from "@/Components/Profile/StudentProfile";
 import Modal from "@/Components/Modal/Modal";
@@ -6,11 +7,32 @@ import StudentProfileForm from "@/Components/Forms/StudentProfileForm";
 import "../../../css/profile.css";
 import ProgressLineChart from "@/Components/Chart/ProgressLineChart";
 
-function Profile({ student, progressData }) {
+function Profile({ student, progressData, availableMonths, selectedMonth }) {
     const [showModal, setShowModal] = useState(false);
     const studentData = student.data;
     const openModal = () => setShowModal(true);
     const closeModal = () => setShowModal(false);
+
+    const handleMonthChange = (month) => {
+        router.get(
+            route("student.profile"),
+            { month },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            }
+        );
+    };
+
+    // Format months to "Month Year" format
+    const formatMonthYear = (monthYear) => {
+        const [year, month] = monthYear.split("-");
+        const date = new Date(year, month - 1);
+        return date.toLocaleString("default", {
+            month: "long",
+            year: "numeric",
+        });
+    };
 
     return (
         <>
@@ -26,9 +48,28 @@ function Profile({ student, progressData }) {
                             Edit Profile
                         </button>
                     </div>
-                    <StudentProfile student={student.data} />
+                    <StudentProfile student={studentData} />
                     <div className="row w-100 px-5 mb-3">
-                        <div className="chart-container">
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                        <h5 className="fw-semibold fs-5">Monthly Progress</h5>
+                            <div>
+                                <select
+                                    className="form-select"
+                                    value={selectedMonth}
+                                    onChange={(e) =>
+                                        handleMonthChange(e.target.value)
+                                    }
+                                    style={{ width: "200px" }} 
+                                >
+                                    {availableMonths.map((month) => (
+                                        <option key={month} value={month}>
+                                            {formatMonthYear(month)}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="chart-container position-relative">
                             <ProgressLineChart progressData={progressData} />
                         </div>
                     </div>
