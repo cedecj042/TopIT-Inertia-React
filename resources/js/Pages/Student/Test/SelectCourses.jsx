@@ -6,24 +6,29 @@ import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 import { router } from '@inertiajs/react'; 
 
 function SelectCourses({ courses }) {
-    const [selectedCourses, setSelectedCourses] = useState([]);
+    const [selectedCourse, setSelectedCourse] = useState([]);
+    // const [selectedCourses, setSelectedCourses] = useState([]);
 
     const handleCourseSelect = (courseId) => {
-        setSelectedCourses((prevSelected) =>
-            prevSelected.includes(courseId)
-                ? prevSelected.filter((id) => id !== courseId)
-                : [...prevSelected, courseId]
+        // setSelectedCourses((prevSelected) =>
+        //     prevSelected.includes(courseId)
+        //         ? prevSelected.filter((id) => id !== courseId)
+        //         : [...prevSelected, courseId]
+        // ); //this is for selecting an array of courses
+
+        setSelectedCourse((prevSelected) =>
+            prevSelected === courseId ? null : courseId
         );
     };
 
-    console.log("selected courses:", selectedCourses);
+    console.log("selected courses:", selectedCourse);
 
     const handleStartTest = () => {
-        if (selectedCourses.length === 0) {
-            alert("Please select at least one course to proceed.");
+        if (selectedCourse.length === 0) {
+            alert("Please select a course to proceed.");
             return;
         }
-        router.post('/test/start', { courses: selectedCourses });
+        router.post('/test/start', { courses: selectedCourse });
     };
     
 
@@ -54,9 +59,7 @@ function SelectCourses({ courses }) {
                             <div key={course.course_id} className="col-12 mb-3">
                                 <div
                                     className={`border rounded-4 p-3 ${
-                                        selectedCourses.includes(
-                                            course.course_id
-                                        )
+                                        selectedCourse === course.course_id
                                             ? "bg-primary text-white"
                                             : "bg-light"
                                     }`}
@@ -68,10 +71,11 @@ function SelectCourses({ courses }) {
                                     <div className="form-check">
                                         <input
                                             className="form-check-input"
-                                            type="checkbox"
-                                            checked={selectedCourses.includes(
+                                            type="radio"
+                                            checked={
+                                                selectedCourse ===
                                                 course.course_id
-                                            )}
+                                            }
                                             onChange={() =>
                                                 handleCourseSelect(
                                                     course.course_id
@@ -98,19 +102,11 @@ function SelectCourses({ courses }) {
                     <button
                         className="btn btn-primary p-3 pt-2 pb-2 mt-3"
                         onClick={handleStartTest}
-                        disabled={selectedCourses.length === 0}
+                        disabled={!selectedCourse}
                     >
                         Start Test
                     </button>
                 </div>
-
-                {/* <Link
-                    onClick={handleStartTest}
-                    className="btn btn-primary p-3 pt-2 pb-2 mt-3" 
-                    disabled={selectedModules.length === 0}
-                >
-                    Take a Test
-                </Link> */}
             </div>
         </main>
     );

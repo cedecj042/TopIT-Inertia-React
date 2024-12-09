@@ -56,6 +56,7 @@ class StudentProfileController extends Controller
             $dateRange[] = $currentDate->copy()->subDays($i)->format('Y-m-d');
         }
         $dateRange = array_reverse($dateRange); //reverse to start from earliest
+        Log::info('Date Range: ', $dateRange);
 
         $progressData = [
             'labels' => $dateRange, 
@@ -65,13 +66,18 @@ class StudentProfileController extends Controller
         // group scores by course title
         $groupedScores = $thetaScores->groupBy('course.title');
 
+        Log::info('Grouped Scores: ', $groupedScores->toArray());
+
         foreach ($groupedScores as $courseTitle => $scores) {
-            $data = [];
+            $data = []; 
+            $currentThetaScore = $scores->first()->final_theta_score ?? 0;
             foreach ($dateRange as $label) {
                 $dateScores = $scores->where('date', $label);
-                $data[] = $dateScores->isNotEmpty()
-                    ? $dateScores->avg('final_theta_score') // use average for multiple scores per date
-                    : null; // fill null for dates w/ missing score
+                if ($dateScores->isNotEmpty()) {
+                    $currentThetaScore = $dateScores->avg('final_theta_score');
+                }
+                $data[] = $currentThetaScore;
+
             }
 
             $progressData['datasets'][] = [
@@ -79,7 +85,8 @@ class StudentProfileController extends Controller
                 'data' => $data,
                 'borderColor' => $this->generateRandomColor(),
                 'backgroundColor' => 'rgba(75, 192, 192, 0.2)',
-                'tension' => 0.4,
+                'tension' => 0.3,
+                'showLine' => true,
             ];
         }
 
