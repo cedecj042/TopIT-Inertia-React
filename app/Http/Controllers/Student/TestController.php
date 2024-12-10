@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Student;
 
+use App\Services\TerminationRuleService;
 use DB;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -32,11 +33,13 @@ class TestController extends Controller
 
     protected $scoringService;
     protected $itemSelectionService;
+    protected $terminationRuleService;
 
-    public function __construct(ScoringService $scoringService, ItemSelectionService $itemSelectionService)
+    public function __construct(ScoringService $scoringService, ItemSelectionService $itemSelectionService, TerminationRuleService $terminationRuleService)
     {
         $this->scoringService = $scoringService;
         $this->itemSelectionService = $itemSelectionService;
+        $this->terminationRuleService = $terminationRuleService;
     }
 
     public function select()
@@ -54,22 +57,21 @@ class TestController extends Controller
     {
         $student = Student::find(Auth::user()->userable->student_id);
 
-        // first, fetch the selected courses
-        $selectedCourses = $request->input('courses', []);
-        Log::info("selected courses:", $selectedCourses);
+        // Fetch the selected course
+        $selectedCourse = $request->input('courses');
 
-        if (empty($selectedCourses)) {
-            return redirect()->route('test.course')
-                ->with('error', 'Please select courses before starting the test.');
-        }
+        // Store the student's selected course in session
+        session()->put("assessment_selected_course", $selectedCourse);
+        // Log::info('Stored Course in Session', [
+        //     'selected_course' => session()->get("assessment_selected_course")
+        // ]);
 
-        // store student's selected courses in session
-        session()->put("assessment_selected_courses", $selectedCourses);
-        Log::info('stored Modules in Session', [
-            'selected_courses' => session()->get("assessment_selected_courses")
-        ]);
+        // Get the latest theta score for this student and course
+        $initialThetaScore = $this->getLatestThetaScore($student->student_id, $selectedCourse);
+        Log::info("Initial theta score:", ['initial_theta_score' => $initialThetaScore]);
 
-        // create new assessment record once test starts
+
+        // Create a new assessment record
         $assessment = Assessment::create([
             'student_id' => $student->student_id,
             'type' => 'Test',
@@ -80,46 +82,55 @@ class TestController extends Controller
             'percentage' => 0,
         ]);
 
-        // create assessmentCourse records for selected courses
-        foreach ($selectedCourses as $courseId) {
-            AssessmentCourse::create([
-                'assessment_id' => $assessment->assessment_id,
-                'course_id' => $courseId,
-                'status' => 'In Progress',
-                'total_items' => 0,
-                'total_score' => 0,
-                //initial to be updated
-                'initial_theta_score' => 0, // create function to get student score for each course in student_course_theta table
-                'final_theta_score' => 0,
-                'percentage' => 0
-            ]);
-        }
+        // Create an assessment course record for the selected course
+        AssessmentCourse::create([
+            'assessment_id' => $assessment->assessment_id,
+            'course_id' => $selectedCourse,
+            'status' => 'In Progress',
+            'total_items' => 0,
+            'total_score' => 0,
+            'initial_theta_score' => $initialThetaScore, // Replace with actual logic to fetch initial theta
+            'final_theta_score' => 0,
+            'percentage' => 0
+        ]);
 
         return redirect()->route('test.page', ['assessmentId' => $assessment->assessment_id]);
     }
+
+    protected function getLatestThetaScore(int $studentId, int $courseId)
+    {
+        $latestTheta = StudentCourseTheta::where('student_id', $studentId)
+            ->where('course_id', $courseId)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        // If found, return the theta score
+        if ($latestTheta) {
+            return $latestTheta->theta_score;
+        }
+
+        // If no previous theta score is found, return a default value
+        return 0.0;
+    }
+
 
     // for rendering the questions
     public function show($assessmentId)
     {
         $assessment = Assessment::with(['assessment_courses', 'student'])->findOrFail($assessmentId);
-        $selectedCourses = session()->get("assessment_selected_courses");
+        $selectedCourse = session()->get('assessment_selected_course');
 
-        Log::info('Retrieved Courses from Session', [
-            'selected_courses' => $selectedCourses
-        ]);
+        $answeredQuestions = session()->get('answered_questions', []);
+        $question = $this->selectQuestion($assessment, $selectedCourse, $answeredQuestions);
 
-        $question = $this->selectFirstQuestion($selectedCourses, $assessment->student);
+        Log::info("Answered questions:", $answeredQuestions);
 
-        // Log::info("Selected Question Details", [
-        //     'question_course_id' => $question ? $question->course_id : 'No question found',
-        //     'selected_course_ids' => $selectedCourses
+
+        // Log::info("Initial question details", [
+        //     'question_id' => $question->question_id,
+        //     'course_id' => $question->course_id,
+        //     'difficulty' => $question->difficulty_type
         // ]);
-
-        Log::info("Initial question details", [
-            'question_id' => $question->question_id,
-            'course_id' => $question->course_id,
-            'difficulty' => $question->difficulty_type
-        ]);
 
         return Inertia::render('Student/Test/Test', [
             'assessment' => $assessment,
@@ -127,61 +138,87 @@ class TestController extends Controller
         ]);
     }
 
-    protected function selectFirstQuestion(array $courseIds, Student $student)
+    protected function selectQuestion(Assessment $assessment, string $courseId, array $answeredQuestions = [])
     {
         try {
-            // Get initial theta from student's course history or use default
-            $initialTheta = StudentCourseTheta::whereIn('course_id', $courseIds)
-                ->where('student_id', $student->student_id)
-                ->value('theta_score') ?? 0;
+            // Determine if it is the first question or subsequent question
+            $isFirstQuestion = empty($answeredQuestions);
 
-            // Get available questions
-            $availableQuestions = Question::whereIn('course_id', $courseIds)
+            // Get the current theta score for the selected course
+            $assessmentCourse = AssessmentCourse::where('assessment_id', $assessment->assessment_id)
+                ->where('course_id', $courseId)
+                ->first();
+
+            $currentTheta = $isFirstQuestion
+                ? (StudentCourseTheta::where('course_id', $courseId)
+                    ->where('student_id', $assessment->student_id)
+                    ->value('theta_score') ?? 0)
+                : ($assessmentCourse->initial_theta_score ?? 0);
+
+            // Retrieve available questions for the course
+            $availableQuestions = Question::where('course_id', $courseId)
                 ->with(['question_detail', 'course'])
+                ->whereNotIn('question_id', $answeredQuestions)
                 ->get();
+
+            if ($availableQuestions->isEmpty()) {
+                Log::info('No more available questions', [
+                    'course_id' => $courseId,
+                    'answered_questions' => $answeredQuestions
+                ]);
+                return null;
+            }
 
             // Format questions for item selection
             $items = $availableQuestions->map(function ($question) {
+                // Log::debug('Question Detail for Question', [
+                //     'question_id' => $question->question_id,
+                //     'question_detail_id' => $question->question_detail_id,
+                //     'question_detail_loaded' => $question->relationLoaded('question_detail'),
+                //     'question_detail' => $question->question_detail ? $question->question_detail->toArray() : null
+                // ]);
+
                 return [
                     'id' => $question->question_id,
                     'a' => $question->discrimination_index ?? 1.0,
                     'b' => $question->difficulty_value ?? 0.0,
                     'course' => $question->course_id,
+                    'type' => $question->question_detail->type,
                     'question' => $question
                 ];
             })->toArray();
 
-            // Select first course (you might want to implement a specific course selection strategy)
-            $firstCourse = $courseIds[0];
+            Log::debug('Available Items for Course Selection', [
+                'items' => $items
+            ]);
 
-            // Get optimal first question
+            // Select the optimal question using the CAT algorithm
             $selectedItem = $this->itemSelectionService->getMaximumItemByCourse(
-                $initialTheta,
-                $firstCourse,
+                $currentTheta,
+                $courseId,
                 $items
             );
 
-            if (!$selectedItem) {
-                return $availableQuestions->random();
-            }
-
-            Log::info("First question ", [
-                'initial_theta' => $initialTheta,
-                'course_id' => $firstCourse,
-                'question' => $items
+            Log::info("Selected question", [
+                'question_id' => $selectedItem['id'],
+                'course_id' => $courseId,
+                'difficulty' => $selectedItem['b'],
+                'discrimination' => $selectedItem['a'],
+                'theta' => $currentTheta
             ]);
 
-            return Question::find($selectedItem['id']);
-
+            return Question::with('question_detail')->find($selectedItem['id']);
         } catch (\Exception $e) {
-            Log::error('Error in selectFirstQuestion: ' . $e->getMessage());
+            Log::error('Error in selectQuestion: ' . $e->getMessage());
             // Fallback to random selection
-            return Question::whereIn('course_id', $courseIds)
+            return Question::where('course_id', $courseId)
                 ->with(['question_detail', 'course'])
+                ->whereNotIn('question_id', $answeredQuestions)
                 ->inRandomOrder()
                 ->first();
         }
     }
+
 
     public function nextQuestion(Request $request)
     {
@@ -191,7 +228,6 @@ class TestController extends Controller
             'answer' => 'nullable'
         ]);
 
-
         $assessment = Assessment::findOrFail($validated['assessment_id']);
         $question = Question::with(['question_detail', 'course'])->findOrFail($validated['question_id']);
 
@@ -200,11 +236,11 @@ class TestController extends Controller
         $answeredQuestions[] = $question->question_id;
         session()->put('answered_questions', array_unique($answeredQuestions));
 
-        // answered questions
         Log::info('Answered questions updated in session', [
             'answered_questions' => $answeredQuestions
         ]);
 
+        //save itemm
         $assessmentItem = new AssessmentItem([
             'question_id' => $question->question_id,
             'participants_answer' => is_array($validated['answer'])
@@ -216,7 +252,7 @@ class TestController extends Controller
         $score = $this->scoringService->checkAnswer($assessmentItem);
         $assessmentItem->score = $score;
 
-        $assessmentCourse = AssessmentCourse::firstOrCreate(
+        $assessmentCourse = AssessmentCourse::updateOrCreate(
             [
                 'assessment_id' => $assessment->assessment_id,
                 'course_id' => $question->course_id
@@ -248,97 +284,47 @@ class TestController extends Controller
             ]);
         }
 
-        // also update assessment course 
+        // also update assessment course
         $assessmentCourse->increment('total_items');
         $assessmentCourse->increment('total_score', $score);
-        $assessmentCourse->percentage = ($assessmentCourse->total_score / $assessmentCourse->total_items) * 100;
-        //$assessmentCourse->initial_theta_score = // function/service to calculate 
+        // $assessmentCourse->percentage = ($assessmentCourse->total_score / $assessmentCourse->total_items) * 100;
         $assessmentCourse->save();
 
-        //testing
-        $nextQuestion = $this->selectNextQuestion($assessment, $question);
+        //check termination rule
+        if ($this->terminationRuleService->shouldTerminateTest($assessment)) {
+            return redirect()->route('test.finish', ['assessmentId' => $assessment->assessment_id]);
+        }
+
+        // Fetch next question
+        $selectedCourse = session()->get('assessment_selected_course');
+        $nextQuestion = $this->selectQuestion($assessment, $selectedCourse, $answeredQuestions);
+
 
         return Inertia::render('Student/Test/Test', [
             'assessment' => $assessment,
-            'question' => $nextQuestion,
+            'question' => $nextQuestion->load('question_detail'),
         ]);
-
     }
 
-    protected function selectNextQuestion(Assessment $assessment, Question $currentQuestion)
+
+
+
+
+
+
+
+
+    public function finish($assessmentId)
     {
-        // for testing only
-        // Find a question that:
-        // 1. Is in the selected courses
-        // 2. Has not been used in this current session assessment
-        // 3. Use the item selection algorithm
+        $assessment = Assessment::findOrFail($assessmentId);
 
-
-        $selectedCourses = session()->get("assessment_selected_courses", []);
-        $answeredQuestions = session()->get('answered_questions', []);
-
-        //get the assessment course for the current question
-        $assessmentCourse = AssessmentCourse::where('assessment_id', $assessment->assessment_id)
-            ->where('course_id', $currentQuestion->course_id)
-            ->first();
-
-        // get student's current theta for the course
-        $currentTheta = $assessmentCourse->final_theta_score ?? 0;
-
-        Log::info('Current course theta score:', [
-            'student_id' => $assessment->student_id,
-            'course_id' => $assessmentCourse->course_id,
-            'theta' => $currentTheta
+        return Inertia::render('Student/Test/TestFinish', [
+            'score' => $assessment->total_score,
+            'totalQuestions' => $assessment->total_items,
+            'pretestId' => $assessment->assessment_id,
+            'title' => "Finish"
         ]);
-
-        // get only available/unanswered questions
-        $availableQuestions = Question::whereIn('course_id', $selectedCourses)
-            ->whereNotIn('question_id', $answeredQuestions)
-            ->get();
-
-        if ($availableQuestions->isEmpty()) {
-            Log::info('No more available questions', [
-                'selected_courses' => $selectedCourses,
-                'answered_questions' => $answeredQuestions
-            ]);
-            return null;
-        }
-
-        $items = $availableQuestions->map(function ($question) {
-            return [
-                'id' => $question->question_id,
-                'a' => $question->discrimination_index ?? 1.0, // Default discrimination if not set
-                'b' => $question->difficulty_value ?? 0.0,    // Default difficulty if not set
-                'course' => $question->course_id,
-                'question' => $question
-            ];
-        })->toArray();
-
-        //retrieve theta 
-        //$currentTheta = 0;
-
-        $selectedItem = $this->itemSelectionService->getMaximumItemByCourse(
-            $currentTheta,
-            $currentQuestion->course_id,
-            $items
-        );
-
-        $nextQuestion = Question::find($selectedItem['id']);
-        Log::info("Next question selected via CAT", [
-            'question_id' => $nextQuestion->question_id,
-            'course_id' => $nextQuestion->course_id,
-            'difficulty' => $nextQuestion->difficulty_value,
-            'discrimination' => $nextQuestion->discrimination_value,
-            'current_theta' => $currentTheta
-        ]);
-
-        return $nextQuestion;
     }
-
-
-
-
-
 
     // for display
     public function index()
