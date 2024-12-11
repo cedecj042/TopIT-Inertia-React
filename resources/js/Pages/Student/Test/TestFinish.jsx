@@ -4,7 +4,7 @@ import Navbar from "@/Components/Navigation/Navbar";
 import "../../../../css/student/students.css";
 import "../../../../css/student/welcome.css";
 
-const TestFinish = ({ score, totalQuestions, pretestId }) => {
+const TestFinish = ({ score, totalQuestions, assessmentId }) => {
     return (
         <>
             <Head title="Finish" />
@@ -46,7 +46,7 @@ const TestFinish = ({ score, totalQuestions, pretestId }) => {
 
                         <div className="pe-md-5">
                             <Link
-                                href={`/pretest/review/${pretestId}`}
+                                href={`/test/review/${assessmentId}`}
                                 className="btn btn-outline-primary w-50 p-2 mt-3"
                             >
                                 Review Answers

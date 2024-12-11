@@ -21,6 +21,7 @@ class AssessmentResource extends JsonResource
             'assessment_id' => $this->assessment_id,
             'student_id' => $this->student_id,
             'start_time' => Carbon::parse($this->start_time)->format('g:i A'), 
+            'type' => $this->type,
             'end_time' => Carbon::parse($this->end_time)->format('g:i A'), 
             'total_items' => $this->total_items,
             'total_score' => $this->total_score,

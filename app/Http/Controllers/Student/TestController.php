@@ -24,7 +24,9 @@ use App\Models\AssessmentItem;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TestResource;
 use App\Http\Resources\AssessmentResource;
-
+use App\Http\Resources\CourseResource;
+use App\Http\Resources\QuestionReviewResource;
+use App\Http\Resources\QuestionDetailResource;
 use App\Services\ScoringService;
 use App\Services\ItemSelectionService;
 
@@ -311,6 +313,9 @@ class TestController extends Controller
     {
         $assessment = Assessment::findOrFail($assessmentId);
 
+        session()->forget('answered_questions');
+        session()->forget('assessment_selected_course');
+
         // Update assessment table and assessment course table
         DB::transaction(function () use ($assessment) {
             // Update assessment details
@@ -331,7 +336,8 @@ class TestController extends Controller
         return Inertia::render('Student/Test/TestFinish', [
             'score' => $assessment->total_score,
             'totalQuestions' => $assessment->total_items,
-            'pretestId' => $assessment->assessment_id,
+            'assessmentId' => $assessment->assessment_id,
+            'title' => "Finish",
         ]);
     }
 
@@ -416,6 +422,84 @@ class TestController extends Controller
                 ]
             );
         }
+    }
+
+    public function review($assessmentId)
+    {
+        $assessment = Assessment::with([
+            'assessment_courses.assessment_items.question.question_detail',
+            'assessment_courses.course',
+            'assessment_courses.assessment_items'
+        ])->findOrFail($assessmentId);
+
+        $student = Student::find(Auth::user()->userable->student_id);
+
+        // Organize student answers by question ID for easy lookup
+        $studentAnswers = collect();
+        foreach ($assessment->assessment_courses as $assessmentCourse) {
+            foreach ($assessmentCourse->assessment_items as $item) {
+                $studentAnswers->put($item->question_id, [
+                    'participants_answer' => $item->participants_answer ?? null,
+                    'score' => $item->score,
+                    'course_id' => $assessmentCourse->course_id,
+                    'question' => $item->question
+                ]);
+            }
+        }
+
+        // Prepare courses with their respective questions that appeared in the test
+        $coursesWithAnswers = $studentAnswers->groupBy('course_id')->map(function ($courseQuestions, $courseId) {
+            $course = Course::find($courseId);
+            $course->questions = $courseQuestions->map(function ($answerData) {
+                $question = $answerData['question'];
+
+                // Decode student's answer
+                $decodedAnswer = $answerData['participants_answer']
+                    ? json_decode($answerData['participants_answer'], true)
+                    : null;
+
+                // Prepare student answer details
+                $question->student_answer = is_array($decodedAnswer)
+                    ? (count($decodedAnswer) > 1 ? $decodedAnswer : $decodedAnswer[0] ?? null)
+                    : null;
+                $question->is_multiple_answer = is_array($decodedAnswer) && count($decodedAnswer) > 1;
+                $question->is_correct = $answerData['score'] > 0;
+
+                // Get the correct answers from question detail
+                $question->correct_answers = $question->question_detail->correct_answer
+                    ? json_decode($question->question_detail->correct_answer, true)
+                    : null;
+
+                return $question;
+            });
+
+            return $course;
+        });
+
+        $coursesData = CourseResource::collection($coursesWithAnswers)->additional([
+            'questions' => $coursesWithAnswers->map(function ($course) {
+                return [
+                    'course_id' => $course->course_id,
+                    'questions' => QuestionReviewResource::collection($course->questions)
+                ];
+            }),
+        ]);
+
+        Log::info('Courses Data Structure:', [
+            'data' => json_decode(json_encode($coursesData), true),
+        ]);
+
+        return Inertia::render('Student/Test/TestReview', [
+            'courses' => $coursesData,
+            'assessment' => [
+                'assessment_id' => $assessment->assessment_id,
+                'status' => $assessment->status,
+                'total_score' => $assessment->total_score,
+                'total_items' => $assessment->total_items,
+                'percentage' => round($assessment->percentage, 2)
+            ],
+            'student' => $student,
+        ]);
     }
 
     // for display
