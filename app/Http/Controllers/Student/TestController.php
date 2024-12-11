@@ -89,7 +89,7 @@ class TestController extends Controller
             'status' => 'In Progress',
             'total_items' => 0,
             'total_score' => 0,
-            'initial_theta_score' => $initialThetaScore, // Replace with actual logic to fetch initial theta
+            'initial_theta_score' => $initialThetaScore,
             'final_theta_score' => 0,
             'percentage' => 0
         ]);
@@ -97,6 +97,7 @@ class TestController extends Controller
         return redirect()->route('test.page', ['assessmentId' => $assessment->assessment_id]);
     }
 
+    //this is for placing the initial_theta_score in the assessment course
     protected function getLatestThetaScore(int $studentId, int $courseId)
     {
         $latestTheta = StudentCourseTheta::where('student_id', $studentId)
@@ -306,24 +307,115 @@ class TestController extends Controller
         ]);
     }
 
-
-
-
-
-
-
-
-
     public function finish($assessmentId)
     {
         $assessment = Assessment::findOrFail($assessmentId);
+
+        // Update assessment table and assessment course table
+        DB::transaction(function () use ($assessment) {
+            // Update assessment details
+            $totalItems = $this->updateAssessmentCourses($assessment->assessment_id);
+
+            $assessment->update([
+                'end_time' => now(),
+                'status' => 'Completed',
+                'total_items' => $totalItems,
+                'total_score' => $this->calculateTotalScore($assessment->assessment_id),
+                'percentage' => $this->calculatePercentage($assessment->assessment_id),
+            ]);
+
+            // Update student course theta scores table as well
+            $this->updateStudentCourseThetaScores($assessment);
+        });
 
         return Inertia::render('Student/Test/TestFinish', [
             'score' => $assessment->total_score,
             'totalQuestions' => $assessment->total_items,
             'pretestId' => $assessment->assessment_id,
-            'title' => "Finish"
         ]);
+    }
+
+    private function updateAssessmentCourses($assessmentId)
+    {
+        $totalItems = 0;
+        $assessmentCourses = AssessmentCourse::where('assessment_id', $assessmentId)->get();
+
+        foreach ($assessmentCourses as $assessmentCourse) {
+            // Calculate total score and items for this assessment course
+            $totalCourseItems = AssessmentItem::where('assessment_course_id', $assessmentCourse->assessment_course_id)
+                ->count();
+            $totalCourseScore = AssessmentItem::where('assessment_course_id', $assessmentCourse->assessment_course_id)
+                ->sum('score');
+
+            // Calculate final theta score
+            $initialThetaScore = $assessmentCourse->initial_theta_score;
+            $finalThetaScore = $this->calculateFinalThetaScore(
+                $initialThetaScore,
+                $totalCourseScore,
+                $totalCourseItems
+            );
+
+            // Update assessment course
+            $assessmentCourse->update([
+                'total_items' => $totalCourseItems,
+                'total_score' => $totalCourseScore,
+                'percentage' => $totalCourseItems > 0
+                    ? ($totalCourseScore / $totalCourseItems) * 100
+                    : 0,
+                'final_theta_score' => $finalThetaScore
+            ]);
+
+            // Accumulate total items
+            $totalItems += $totalCourseItems;
+        }
+
+        return $totalItems;
+    }
+
+    private function calculateFinalThetaScore($initialTheta, $totalScore, $totalItems)
+    {
+        //calculate here
+        // Simple linear interpolation - you might want to replace with a more sophisticated CAT scoring method
+        $scorePercentage = $totalItems > 0 ? ($totalScore / $totalItems) : 0;
+        return $initialTheta + ($scorePercentage - 0.5);
+    }
+
+    private function calculateTotalScore($assessmentId)
+    {
+        return AssessmentItem::whereHas('assessment_course', function ($query) use ($assessmentId) {
+            $query->where('assessment_id', $assessmentId);
+        })->sum('score');
+    }
+
+    private function calculatePercentage($assessmentId)
+    {
+        $totalItems = AssessmentItem::whereHas('assessment_course', function ($query) use ($assessmentId) {
+            $query->where('assessment_id', $assessmentId);
+        })->count();
+
+        $totalScore = $this->calculateTotalScore($assessmentId);
+
+        return $totalItems > 0 ? ($totalScore / $totalItems) * 100 : 0;
+    }
+
+    private function updateStudentCourseThetaScores(Assessment $assessment)
+    {
+        $assessmentCourses = $assessment->assessment_courses;
+
+        foreach ($assessmentCourses as $assessmentCourse) {
+            // Create or update StudentCourseTheta for each course
+            StudentCourseTheta::updateOrCreate(
+                [
+                    'student_id' => $assessment->student_id,
+                    'course_id' => $assessmentCourse->course_id,
+                ],
+                [
+                    'theta_score' => $assessmentCourse->final_theta_score,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]
+            );
+        }
     }
 
     // for display
