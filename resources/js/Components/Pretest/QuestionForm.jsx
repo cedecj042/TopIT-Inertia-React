@@ -7,6 +7,8 @@ const QuestionForm = ({ course, register, setValue, answers }) => {
     const renderQuestion = (question) => {
         const questionDetail = question.question_detail || {};
         const questionName = `answers.${question.question_id}`;
+        
+        console.log("Pretest question: ", question);
 
         switch (questionDetail.type) {
             case 'Multiple Choice - Single':

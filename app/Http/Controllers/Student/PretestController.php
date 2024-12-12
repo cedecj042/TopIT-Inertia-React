@@ -64,6 +64,10 @@ class PretestController extends Controller
             }
         ])->get();
 
+        if ($courses->isEmpty()) {
+            Log::warning('No courses found for Pretest.');
+        }
+
         // checking to avoid duplicate
         $existingPretest = Assessment::where('student_id', $student->student_id)
             ->where('type', 'Pretest')
@@ -94,6 +98,9 @@ class PretestController extends Controller
             })
         ]);
 
+        // Log::info('Courses Data:', $coursesData->toArray(request()));
+
+
         return Inertia::render('Student/Pretest/Pretest', [
             'courses' => $coursesData,
             'assessment' => [
@@ -121,8 +128,8 @@ class PretestController extends Controller
 
         $courses = Course::with([
             'questions' => function ($query) {
-                $query->
-                    with('question_detail');
+                $query->where('test_type', 'Pretest')
+                    ->with('question_detail');
             }
         ])->get();
 
@@ -240,7 +247,7 @@ class PretestController extends Controller
                         'score' => $score
                     ]
                 );
-    
+
                 $totalScore += $assessmentItem->score;
                 $totalItems++;
             }

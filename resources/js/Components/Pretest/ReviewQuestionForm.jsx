@@ -9,14 +9,14 @@ const ReviewQuestionForm = ({ course }) => {
     let correctAnswer = questionDetail.answer;
     let choices = questionDetail.choices;
 
+    console.log("Pretest review question: ", question);
+
     const getAnswerStyle = (isCorrect) => ({
       backgroundColor: isCorrect ? "#e7f6e7" : "#ffe7e7",
       padding: "0.5rem",
       borderRadius: "0.25rem",
       marginTop: "0.5rem",
     });
-
-    console.log("question in rveiew form: ", question);
 
     // Multiple Choice - Single
     if (questionDetail.type === "Multiple Choice - Single") {
