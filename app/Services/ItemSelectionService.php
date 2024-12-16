@@ -60,12 +60,7 @@ class ItemSelectionService
             // Fisher Information I(θ)
             $fisherInformation = pow($pThetaDerivative, 2) / ($pTheta * (1 - $pTheta));
 
-            Log::debug('Fisher Information calculated', [
-                'theta' => $theta,
-                'a' => $a,
-                'b' => $b,
-                'I(θ)' => $fisherInformation,
-            ]);
+            
 
             return $fisherInformation;
         } catch (\Exception $e) {
@@ -93,6 +88,13 @@ class ItemSelectionService
                 $b = $item['b'] ?? 0.0; // Default difficulty
 
                 $fisherInfo = $this->calculateFisherInformation($theta, $a, $b);
+
+                Log::debug('Fisher Information calculated', [
+                    'theta' => $theta,
+                    'a' => $a,
+                    'b' => $b,
+                    'I(θ)' => $fisherInfo,
+                ]);
 
                 // Store the item with its Fisher Information
                 $fisherInfoResults[] = [
@@ -127,20 +129,32 @@ class ItemSelectionService
      * @return array|null The selected item with the maximum Fisher Information for the course.
      */
 
-    public function getMaximumItemByCourse(float $theta, string $course, array $items): ?array
-    {
-        try {
-            // Filter items by the given course
-            $filteredItems = array_filter($items, function ($item) use ($course) {
-                return $item['course'] === $course;
-            });
-
-            // Use getMaximumItem to find the best item among the filtered ones
-            return $this->getMaximumItem($theta, $filteredItems);
-        } catch (\Exception $e) {
-            Log::error('Error in getMaximumItemByCourse: ' . $e->getMessage());
-            return null;
-        }
-    }
+     public function getMaximumItemByCourse(float $theta, int $course, array $items): ?array
+     {
+         try {
+             // Filter items by the given course
+             $filteredItems = array_filter($items, function ($item) use ($course) {
+                 return $item['course'] === $course;
+             });
+     
+             // If no items for the course, return null
+             if (empty($filteredItems)) {
+                 Log::warning('No items found for course', ['course' => $course]);
+                 return null;
+             }
+     
+             $maximumCourseItem = $this->getMaximumItem($theta, $filteredItems);
+     
+             Log::debug('Item with maximum Fisher Information selected', [
+                 'theta' => $theta,
+                 'selected_item' => $maximumCourseItem ?? null,
+             ]);
+     
+             return $maximumCourseItem;
+         } catch (\Exception $e) {
+             Log::error('Error in getMaximumItemByCourse: ' . $e->getMessage());
+             return null;
+         }
+     }
     
 }

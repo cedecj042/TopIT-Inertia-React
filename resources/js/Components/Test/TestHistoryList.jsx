@@ -40,7 +40,11 @@ export default function TestHistoryList ({ tests = [] }) {
                                 </div>
                                 {/* <div className="ms-3">
                                     <Link
-                                        href={`/pretest/review/${test.assessment_id}`}
+                                        href={`/${
+                                            test.type === "Pretest"
+                                                ? "pretest"
+                                                : "test"
+                                        }/review/${test.assessment_id}`}
                                         className="btn btn-link p-3"
                                         title="Student Test"
                                     >

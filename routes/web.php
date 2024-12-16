@@ -42,37 +42,41 @@ Route::middleware(['auth', 'student'])->group(function () {
     Route::get('/welcome', [StudentPretestController::class, 'welcome'])->name('welcome');
 
     Route::prefix('pretest')->name('pretest.')->group(function () {
-        // Route::middleware(['auth', 'pretest.not_taken'])->group(function () {
-            Route::get('/start', [StudentPretestController::class, 'startPretest'])->name('start');
-            Route::post('/submit', [StudentPretestController::class, 'submit'])->name('submit');
+        // Route::middleware(['auth', 'pretest.not_taken'])->group(function () { //users who already completed the pretest cannot revisit the pretest pages
+        Route::get('/start', [StudentPretestController::class, 'startPretest'])->name('start');
+        Route::post('/submit', [StudentPretestController::class, 'submit'])->name('submit');
         // });
         Route::get('/finish/{assessmentId}', [StudentPretestController::class, 'finish'])->name('finish');
         Route::get('/review/{assessmentId}', [StudentPretestController::class, 'review'])->name('review');
     });
 
+    Route::middleware(['auth', 'student', 'pretest.completed'])->group(function () { //registered users cannot proceed to dashboard if pretest not completed
+        Route::redirect('', '/dashboard');
+        Route::redirect('/', '/dashboard');
+        Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/profile', [StudentProfileController::class, 'showStudentDetails'])->name('profile');
+        Route::post('/profile', [StudentProfileController::class, 'editProfile'])->name('student.profile.edit');
 
-    Route::redirect('', '/dashboard');
-    Route::redirect('/', '/dashboard');
-    Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/profile', [StudentProfileController::class, 'showStudentDetails'])->name('profile');
-    Route::post('/profile', [StudentProfileController::class, 'editProfile'])->name('student.profile.edit');
+        Route::prefix('course')->name('course.')->group(function () {
+            Route::get('/', [StudentCourseController::class, 'index'])->name(name: 'index');
+            Route::get('/{id}', [StudentCourseController::class, 'show'])->name('show');
+            Route::get('/module/{id}', [StudentCourseController::class, 'module'])->name('module');
+        });
 
-    Route::prefix('course')->name('course.')->group(function (){
-        Route::get('/', [StudentCourseController::class, 'index'])->name(name: 'index');
-        Route::get('/{id}', [StudentCourseController::class, 'show'])->name('show');
-        Route::get('/module/{id}', [StudentCourseController::class, 'module'])->name('module');
+        Route::prefix('test')->name('test.')->group(function () {
+            Route::get('/', [TestController::class, 'index'])->name('index');
+            Route::get('/history', [TestController::class, 'history'])->name('history');
+
+            Route::get('/course', [TestController::class, 'select'])->name('course');
+            Route::post('/start', [TestController::class, 'start'])->name('start');
+            Route::get('/{assessmentId}', [TestController::class, 'show'])->name('page');
+            Route::post('/next-question', [TestController::class, 'nextQuestion'])->name('next-question');
+
+            Route::get('/finish/{assessmentId}', [TestController::class, 'finish'])->name('finish');
+            Route::get('/review/{assessmentId}', [TestController::class, 'review'])->name('review');
+        });
     });
-    
-    Route::prefix('test')->name('test.')->group(function (){
-        Route::get('/', [TestController::class, 'index'])->name('index');
-        Route::get('/history', [TestController::class, 'history'])->name('history');
-    
-        Route::get('/course', [TestController::class, 'select'])->name('course');
-        Route::post('/start', [TestController::class, 'start'])->name('start');
-        Route::get('/{assessmentId}', [TestController::class, 'show'])->name('page');
-        Route::post('/next-question', [TestController::class, 'nextQuestion'])->name('next-question');
-    });
-    
+
 
 
 });
@@ -127,21 +131,21 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/courses', [QuestionController::class, 'courses'])->name('courses');
     });
 
-    Route::prefix('pretest')->name('pretest.')->group(function(){
-        Route::get('/',[AdminPretestController::class,'index'])->name('index');
-        Route::get('/add',[AdminPretestController::class,'show'])->name('add');
-        Route::post('/add',[AdminPretestController::class,'add'])->name('add');
-        
+    Route::prefix('pretest')->name('pretest.')->group(function () {
+        Route::get('/', [AdminPretestController::class, 'index'])->name('index');
+        Route::get('/add', [AdminPretestController::class, 'show'])->name('add');
+        Route::post('/add', [AdminPretestController::class, 'add'])->name('add');
+
     });
-    Route::prefix('users')->name('users.')->group(function (){
-        Route::get('/',[AdminUserController::class,'index'])->name('index');
-        Route::post('/create',[AdminUserController::class,'create'])->name('create');
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/', [AdminUserController::class, 'index'])->name('index');
+        Route::post('/create', [AdminUserController::class, 'create'])->name('create');
         Route::delete('/{id}', [AdminUserController::class, 'delete'])->name('delete');
 
     });
     
     Route::get('/report',[ReportController::class,'index'])->name('report');
-    Route::post('/update', [AdminController::class, 'update'])->name('profile.update');
+    // Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
     Route::get('/student/{student_id}', [ReportController::class, 'student'])->name('student');
 });
 

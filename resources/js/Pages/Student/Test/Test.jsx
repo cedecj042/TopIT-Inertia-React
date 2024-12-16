@@ -18,6 +18,8 @@ const Test = ({ assessment, question, thetaScores }) => {
         },
     });
 
+    const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1);
+
     const [currentQuestion, setCurrentQuestion] = useState(question);
     const answers = watch("answers");
 
@@ -37,6 +39,7 @@ const Test = ({ assessment, question, thetaScores }) => {
                 onSuccess: (page) => {
                     setValue("answers", {});
                     setCurrentQuestion(page.props.question);
+                    setCurrentQuestionNumber((prev) => prev + 1);
                 },
             }
         );
@@ -44,7 +47,13 @@ const Test = ({ assessment, question, thetaScores }) => {
 
     const isNextDisabled = () => {
         const currentAnswer = answers[currentQuestion.question_id];
-        
+        console.log("Current question object:", currentQuestion);
+
+        if (!currentQuestion.question_detail) {
+            console.error("Question detail is missing", currentQuestion);
+            return true;
+        }
+
         switch (currentQuestion.question_detail.type) {
             case "Multiple Choice - Single":
             case "Identification":
@@ -57,6 +66,11 @@ const Test = ({ assessment, question, thetaScores }) => {
     };
 
     const renderQuestion = () => {
+        if (!currentQuestion.question_detail) {
+            console.error("Question detail is missing", currentQuestion);
+            return <p>Error: Question detail not found</p>;
+        }
+
         const questionName = `answers.${currentQuestion.question_id}`;
         switch (currentQuestion.question_detail.type) {
             case "Multiple Choice - Single":
@@ -107,7 +121,7 @@ const Test = ({ assessment, question, thetaScores }) => {
                                     <div className="card-body p-4">
                                         <div className="mb-4">
                                             <h5 className="card-title mb-3">
-                                                Question {assessment.total_items + 1}
+                                                Question {currentQuestionNumber}
                                             </h5>
                                             <p className="card-text mb-4">
                                                 {currentQuestion.question}

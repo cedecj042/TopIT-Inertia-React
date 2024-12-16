@@ -1,58 +1,43 @@
 import React, { useState } from "react";
 import { Head, Link } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout";
-import Sidebar from "@/Components/Pretest/Sidebar";
+import Sidebar from "@/Components/Test/Sidebar";
 import Navbar from "@/Components/Navigation/Navbar";
 import ReviewQuestionForm from "@/Components/Pretest/ReviewQuestionForm";
 import "../../../../css/student/students.css";
 import "../../../../css/student/welcome.css";
 
-const PretestReview = ({
+const TestReview = ({
     courses = { data: [], questions: [] },
     assessment = {},
 }) => {
-    const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
 
+    const currentCourseIndex = courses.data[0].course_id;
     const coursesData = courses.data || [];
+
     const questionsForCurrentCourse =
         courses.questions?.[currentCourseIndex]?.questions || [];
+
+    console.log("Courses data:", courses);
+    console.log("Questions:", courses);
+    console.log("Courses index:", currentCourseIndex);
+    
     const totalCourses = coursesData.length;
-
-    console.log("Questions: ", courses.questions);
-
-    const handleNextCourse = () => {
-        if (currentCourseIndex < courses.data.length - 1) {
-            setCurrentCourseIndex((prev) => prev + 1);
-            window.scrollTo(0, 0);
-        }
-    };
-
-    const handlePreviousCourse = () => {
-        if (currentCourseIndex > 0) {
-            setCurrentCourseIndex((prev) => prev - 1);
-            window.scrollTo(0, 0);
-        }
-    };
 
     return (
         <>
-            <Head title="Pretest" />
+            <Head title="Test Review" />
             <Navbar isLight={true} />
 
-            <div className="pretestb container-fluid">
+            <div className="testb container-fluid">
                 <div className="row min-vh-100">
                     {/* Sidebar */}
-                    <div className="col-md-3 position-fixed border-end h-100">
-                        <Sidebar
-                            courses={courses}
-                            currentCourseIndex={currentCourseIndex}
-                            setCurrentCourseIndex={setCurrentCourseIndex}
-                        />
+                    <div className="col-md-3 position-fixed border-end h-100 mt-5">
+                        <Sidebar courses={courses} />
                         <div className="px-4 mt-2">
                             <h5 className="pb-2">Assessment Summary</h5>
                             <div className="card">
                                 <div className="card-body">
-                                    {/* <h5 className="card-title">Assessment Summary</h5> */}
                                     <p className="mb-1">
                                         Score: {assessment.total_score} /{" "}
                                         {assessment.total_items}
@@ -70,7 +55,7 @@ const PretestReview = ({
                                     Proceed to Dashboard
                                 </Link>
                                 <Link
-                                    href={`/pretest/finish/${assessment.assessment_id}`}
+                                    href={`/test/finish/${assessment.assessment_id}`}
                                     className="btn btn-outline-primary w-50 p-2 mt-3"
                                 >
                                     Go Back to Results
@@ -80,11 +65,11 @@ const PretestReview = ({
                     </div>
 
                     {/* Main Content */}
-                    <div className="col-md-9 offset-md-3 p-4">
+                    <div className="col-md-9 offset-md-3 p-4 mt-5">
                         <div className="row align-items-center mb-4">
                             <div className="col-md-6">
                                 <h1 className="display-9 fs-3 mb-0">
-                                    Pretest Review
+                                    Test Review
                                 </h1>
                             </div>
                             <div className="col-md-6 text-end">
@@ -99,39 +84,14 @@ const PretestReview = ({
                             </div>
                         </div>
 
-                        {questionsForCurrentCourse.length > 0 ? (
                             <>
                                 <ReviewQuestionForm
-                                    course={{
-                                        questions: questionsForCurrentCourse,
-                                    }}
-                                    key={currentCourseIndex}
+                                    course={{ questions: questionsForCurrentCourse }}
                                 />
 
-                                <div className="d-flex justify-content-between mt-4">
-                                    <button
-                                        type="button"
-                                        className="btn btn-outline-secondary"
-                                        onClick={handlePreviousCourse}
-                                        disabled={currentCourseIndex === 0}
-                                    >
-                                        Previous
-                                    </button>
-
-                                    {currentCourseIndex < totalCourses - 1 && (
-                                        <button
-                                            type="button"
-                                            className="btn btn-primary"
-                                            onClick={handleNextCourse}
-                                        >
-                                            Next
-                                        </button>
-                                    )}
-                                </div>
+                                
                             </>
-                        ) : (
-                            <p>No questions available for this course.</p>
-                        )}
+                       
                     </div>
                 </div>
             </div>
@@ -139,6 +99,6 @@ const PretestReview = ({
     );
 };
 
-PretestReview.layout = (page) => <MainLayout children={page} />;
+TestReview.layout = (page) => <MainLayout children={page} />;
 
-export default PretestReview;
+export default TestReview;

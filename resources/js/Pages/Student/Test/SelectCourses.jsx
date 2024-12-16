@@ -5,22 +5,25 @@ import { useRequest } from "@/Library/hooks";
 import { toast } from "sonner";
 
 function SelectCourses({ courses }) {
-    const {postRequest,isProcessing} = useRequest();
     const [selectedCourses, setSelectedCourses] = useState([]);
 
     const handleCourseSelect = (courseId) => {
-        setSelectedCourses((prevSelected) =>
-            prevSelected.includes(courseId)
-                ? prevSelected.filter((id) => id !== courseId)
-                : [...prevSelected, courseId]
+        // setSelectedCourses((prevSelected) =>
+        //     prevSelected.includes(courseId)
+        //         ? prevSelected.filter((id) => id !== courseId)
+        //         : [...prevSelected, courseId]
+        // ); //this is for selecting an array of courses
+
+        setSelectedCourse((prevSelected) =>
+            prevSelected === courseId ? null : courseId
         );
     };
 
-    console.log("selected courses:", selectedCourses);
+    console.log("selected courses:", selectedCourse);
 
     const handleStartTest = () => {
         if (selectedCourses.length === 0) {
-            toast.error("Please select at least one course to proceed.");
+            alert("Please select at least one course to proceed.");
             return;
         }
 
@@ -90,7 +93,7 @@ function SelectCourses({ courses }) {
                     <button
                         className="btn btn-primary p-3 pt-2 pb-2 mt-3"
                         onClick={handleStartTest}
-                        disabled={selectedCourses.length === 0}
+                        disabled={!selectedCourse}
                     >
                         Start Test
                     </button>
