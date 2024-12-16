@@ -37,5 +37,14 @@ return [
     'fastapi'=>[
         'url'=> env('FASTAPI_URL','http://localhost:8001')
     ],
+    'mail' => [
+        'host'=> env('CMAIL_HOST'),
+        'username'=> env('CMAIL_USERNAME'),
+        'password'=> env('CMAIL_PASSWORD'),
+        'encryption'=> env('CMAIL_ENCRYPTION'),
+        'port'=> env('CMAIL_PORT'),
+        'from_address'=> env('CMAIL_FROM_ADDRESS'),
+        'from_name'=> env('CMAIL_FROM_NAME')
+    ]
 
 ];

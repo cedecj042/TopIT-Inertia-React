@@ -19,7 +19,7 @@ export default function StudentLogin() {
                                 btn={"btn-primary"}
                             />
                             <div className="mt-4">
-                                <Link href="#" className="text-dark auth_btn">
+                                <Link href="/forgot-password" className="text-dark auth_btn">
                                     Forgot Password?
                                 </Link>
                             </div>
