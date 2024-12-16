@@ -1,8 +1,7 @@
 import '../../../css/profile.css';
 
-export default function AdminProfile({auth,openEditModal, close }) {
-    const admin = auth.userable;
-    console.log(admin);
+export default function AdminProfile({ auth, openEditModal, close }) {
+    const admin = auth.userable.data;
 
     const profileImageURL = admin.profile_image
         ? `/storage/profile_images/${admin.profile_image}`
@@ -10,8 +9,8 @@ export default function AdminProfile({auth,openEditModal, close }) {
 
     return (
         <>
-            <div className="modal-body">
-                <div className="d-inline-flex gap-5">
+            <div className="modal-body p-3">
+                <div className="d-inline-flex gap-2 justify-content-center w-100 px-3s">
                     <div className="image-container">
                         <img
                             src={profileImageURL}
@@ -27,9 +26,26 @@ export default function AdminProfile({auth,openEditModal, close }) {
                             {admin.lastname}
                         </h2>
                         <hr />
-                        <div>
+                        <div className='col-12'>
                             <h5 className="mb-3">Details</h5>
-                            <p>Username: {auth.user.username}</p>
+                            <div className="details-container">
+                                <div className="detail-row">
+                                    <span className="detail-key">Username:</span>
+                                    <span className="detail-value">{auth.user.username}</span>
+                                </div>
+                                <div className="detail-row">
+                                    <span className="detail-key">Email:</span>
+                                    <span className="detail-value">{auth.user.email}</span>
+                                </div>
+                                <div className="detail-row">
+                                    <span className="detail-key">Created At:</span>
+                                    <span className="detail-value">{admin.created_at}</span>
+                                </div>
+                                <div className="detail-row">
+                                    <span className="detail-key">Last Login:</span>
+                                    <span className="detail-value">{admin.last_login}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

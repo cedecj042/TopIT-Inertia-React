@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { Inertia } from "@inertiajs/inertia";
-import { Link } from "@inertiajs/react";
+import { useState } from "react";
 import "../../../../css/student/students.css";
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
-import { router } from '@inertiajs/react'; 
+import { useRequest } from "@/Library/hooks";
+import { toast } from "sonner";
 
 function SelectCourses({ courses }) {
+    const {postRequest,isProcessing} = useRequest();
     const [selectedCourses, setSelectedCourses] = useState([]);
 
     const handleCourseSelect = (courseId) => {
@@ -20,12 +20,22 @@ function SelectCourses({ courses }) {
 
     const handleStartTest = () => {
         if (selectedCourses.length === 0) {
-            alert("Please select at least one course to proceed.");
+            toast.error("Please select at least one course to proceed.");
             return;
         }
-        router.post('/test/start', { courses: selectedCourses });
+
+        const data= {"courses": selectedCourses};
+        postRequest('test.start',data,{
+            onSuccess:(data)=>{
+                console.log(data);
+                toast.success('Test Started! Goodluck',{duration:3000});
+            },
+            onError:(error)=>{
+                toast.error(error,{duration:3000});
+            }
+        });
     };
-    
+
 
     return (
         <main className="row p-3 px-5">
@@ -50,38 +60,20 @@ function SelectCourses({ courses }) {
                 {/* left side */}
                 <div className="col-md-7 mb-4">
                     <div className="row">
-                        {courses.map((course) => (
-                            <div key={course.course_id} className="col-12 mb-3">
-                                <div
-                                    className={`border rounded-4 p-3 ${
-                                        selectedCourses.includes(
-                                            course.course_id
-                                        )
-                                            ? "bg-primary text-white"
-                                            : "bg-light"
-                                    }`}
-                                    onClick={() =>
-                                        handleCourseSelect(course.course_id)
-                                    }
-                                    style={{ cursor: "pointer" }}
+                        {courses.data.map((course) => (
+                            <div className="input-group mb-3" key={course.course_id}>
+                                <div className={`input-group-text gap-2 flex-grow-1 p-3 border rounded-4
+                                    ${selectedCourses.includes(course.course_id) ? "bg-primary text-white": "bg-light"}`}
                                 >
-                                    <div className="form-check">
-                                        <input
-                                            className="form-check-input"
-                                            type="checkbox"
-                                            checked={selectedCourses.includes(
-                                                course.course_id
-                                            )}
-                                            onChange={() =>
-                                                handleCourseSelect(
-                                                    course.course_id
-                                                )
-                                            }
-                                        />
-                                        <label className="form-check-label flex-grow-1">
-                                            {course.title}
-                                        </label>
-                                    </div>
+                                    <input 
+                                        className="form-check-input mt-0" 
+                                        type="checkbox" 
+                                        value={course.course_id} 
+                                        checked={selectedCourses.includes(course.course_id)}
+                                        onChange={()=>handleCourseSelect(course.course_id)}
+                                        id={`course${course.course_id}`} 
+                                    />
+                                    <label htmlFor={`course${course.course_id}`} className="flex-grow-1 text-start" role="button">{course.title}</label>
                                 </div>
                             </div>
                         ))}
@@ -103,17 +95,46 @@ function SelectCourses({ courses }) {
                         Start Test
                     </button>
                 </div>
-
-                {/* <Link
-                    onClick={handleStartTest}
-                    className="btn btn-primary p-3 pt-2 pb-2 mt-3" 
-                    disabled={selectedModules.length === 0}
-                >
-                    Take a Test
-                </Link> */}
             </div>
         </main>
     );
 }
 
 export default StudentContent(SelectCourses);
+
+
+// {courses.data.map((course) => (
+//     <div key={course.course_id} className="col-12 mb-3">
+//         <div
+//             className={`border rounded-4 p-3 ${
+//                 selectedCourses.includes(
+//                     course.course_id
+//                 )
+//                     ? "bg-primary text-white"
+//                     : "bg-light"
+//             }`}
+//             onClick={() =>
+//                 handleCourseSelect(course.course_id)
+//             }
+//             style={{ cursor: "pointer" }}
+//         >
+//             <div className="form-check">
+//                 <input
+//                     className="form-check-input"
+//                     type="checkbox"
+//                     checked={selectedCourses.includes(
+//                         course.course_id
+//                     )}
+//                     onChange={() =>
+//                         handleCourseSelect(
+//                             course.course_id
+//                         )
+//                     }
+//                 />
+//                 <label className="form-check-label flex-grow-1">
+//                     {course.title}
+//                 </label>
+//             </div>
+//         </div>
+//     </div>
+// ))}

@@ -2,18 +2,20 @@ import SelectInput from "@/Components/SelectInput";
 import ColumnFilter from "./ColumnFilter";
 
 export default function OtherFilter({
-    visibleColumns,
-    onColumnChange,
+    visibleColumns = [],
+    onColumnChange = null,
     handleOtherChange,
     otherState
 }) {
     return (
         <>
-            <div className="d-grid grid-template-2">
-                <ColumnFilter
-                    visibleColumns={visibleColumns}
-                    onColumnChange={onColumnChange}
-                />
+            <>
+                {Array.isArray(visibleColumns) && visibleColumns.length > 0 && (
+                    <ColumnFilter
+                        visibleColumns={visibleColumns}
+                        onColumnChange={onColumnChange}
+                    />
+                )}
                 <SelectInput
                     className=" form-select"
                     onChange={(e) => handleOtherChange("items", e.target.value)}
@@ -23,7 +25,7 @@ export default function OtherFilter({
                     <option value="10">10</option>
                     <option value="15">15</option>
                 </SelectInput>
-            </div>
+            </>
         </>
     );
 }

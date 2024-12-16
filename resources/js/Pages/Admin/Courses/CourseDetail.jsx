@@ -68,7 +68,7 @@ function CourseDetail({ title, course, pdfs, queryParams }) {
                     onClose={closeModal}
                     modalTitle={"Upload Pdf"}
                 >
-                    <PdfForm id={course.data.course_id} onClose={closeModal} />
+                    <PdfForm course={course.data} onClose={closeModal} />
                 </Modal>
             </div>
         </>

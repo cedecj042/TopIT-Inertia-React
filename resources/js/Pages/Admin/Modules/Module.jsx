@@ -23,6 +23,8 @@ function Module({ title, modules, queryParams,filters }) {
         }
     };
     const closeModal = () => setShowModal(false);
+    console.log('rendering',title);
+
     return (
         <>
             <div className="container-fluid p-5">

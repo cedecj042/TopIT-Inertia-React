@@ -78,7 +78,10 @@ export const INITIAL_TEST_STATE = (queryParams = {}) => ({
     filterState: {
         course: queryParams?.course || "",
         test_types: queryParams?.question_types || "",
-        month:queryParams?.month || "",
+    },
+    dateState : {
+        from: queryParams?.from || "",
+        to: queryParams?.to || "",
     },
     otherState: {
         items: queryParams?.items || "",

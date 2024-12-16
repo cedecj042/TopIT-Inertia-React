@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "@inertiajs/react";
-import TestHistory from "@/Components/Test/TestHistory";
+import TestHistory from "@/Components/Test/TestHistoryList";
 import "../../../css/student/students.css";
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 

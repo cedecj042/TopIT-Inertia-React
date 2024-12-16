@@ -2,18 +2,16 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Admin;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 
-class CourseRequest extends FormRequest
+class StudentCourseChoiceRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return Auth::check() && Auth::user()->userable instanceof Admin;
+        return true;
     }
 
     /**
@@ -25,8 +23,8 @@ class CourseRequest extends FormRequest
     {
         return [
             //
-            'course_title' => 'required|max:255|string',
-            'course_desc' => 'required|string',
+            'courses' => 'required|array',
+            'courses.*'=> 'integer'
         ];
     }
 }

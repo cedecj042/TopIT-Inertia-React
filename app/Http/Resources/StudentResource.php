@@ -21,7 +21,7 @@ class StudentResource extends JsonResource
             'firstname' => $this->firstname,
             'lastname' => $this->lastname,
             'profile_image' => $this->profile_image,
-            'birthdate' => $this->birthdate ? (new Carbon($this->birthdate))->format('Y-m-d') : null,
+            'birthdate' => $this->birthdate ? (new Carbon($this->birthdate))->format('F j, Y ') : null,
             'gender' => $this->gender,
             'address' => $this->address,
             'course' => $this->course,
@@ -29,7 +29,7 @@ class StudentResource extends JsonResource
             'year' => $this->year,
             'age' => $this->age,
             'pretest_completed'=> $this->pretest_completed,
-            'created_at'=> (new Carbon($this->created_at))->format('F j, Y '),
+            'created_at'=> (new Carbon($this->created_at))->format('Y-m-d'),
             'student_course_thetas' => StudentThetaScore::collection($this->whenLoaded('student_course_thetas'))
             
         ], function ($value) {

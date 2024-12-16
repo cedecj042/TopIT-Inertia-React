@@ -224,7 +224,7 @@ class ProcessContentJob implements ShouldQueue
 
         Storage::disk($folder)->put($imageName, $image);
 
-        $imagePath = Storage::disk($folder)->url($imageName);
+        $imagePath = "/storage/{$folder}/{$imageName}";
 
         // Update content with file name and path
         $content->update([

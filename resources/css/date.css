@@ -1,0 +1,14 @@
+.rs-picker-toggle-clean {
+    display: none !important; 
+}
+
+.rs-picker-input-group{
+    border-color: #e8e8e8 !important;
+    outline-color: #c7cbd3 !important;
+}
+
+.rs-input-group-addon{
+    display: none !important;
+}
+
+

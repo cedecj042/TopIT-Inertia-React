@@ -1,19 +1,19 @@
 import { Link } from "@inertiajs/react";
-import TestHistory from "@/Components/Test/TestHistory";
 import Pagination from "@/Components/Pagination";
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 import "../../../css/student/students.css";
-import { TableContext } from "@/Components/Context/TableContext";
 import { INITIAL_TEST_STATE } from "@/Library/filterState";
+import TestFilters from "@/Components/Filter/TestFilters";
+import { FilterContext } from "@/Components/Context/FilterContext";
+import TestHistoryList from "@/Components/Test/TestHistoryList";
 
-const TestHistoryPage = ({ tests = [], paginationLinks = [],queryParams={},filters}) => {
+const TestHistoryPage = ({ tests = [],queryParams={},filters}) => {
     const testsData = tests.data || [];
-    const pagination = paginationLinks || [];
 
     return (
         <>
             <main className="row p-3">
-                <div className="row mt-4 px-5">
+                <div className="row mt-3 px-5">
                     <div className="d-flex justify-content-between">
                         <Link
                             href={`/test`}
@@ -22,31 +22,28 @@ const TestHistoryPage = ({ tests = [], paginationLinks = [],queryParams={},filte
                             <i className="bi bi-arrow-left"></i> Back
                         </Link>
                     </div>
-                    <h3 className="fw-bold mb-2 mt-3">Test History</h3>
+                    <h3 className="fw-bold mb-2 mt-2">Test History</h3>
                     <p className="text-muted">
                         Review your past tests and track your progress.
                     </p>
                 </div>
-                <TableContext
+                <div className="row mt-3 px-5">
+
+                <FilterContext
                     initialState={INITIAL_TEST_STATE(queryParams)}
-                    routeName={'student.test.history'}
+                    routeName={'test.history'}
                     components={tests}
-                    column={null}
                 >
-
-
-
-
-                </TableContext>
-                <div className="row mt-4 px-5">
-                    <TestHistory tests={testsData} />
+                    <TestFilters
+                        filters={filters}
+                    />
+                    <TestHistoryList tests={testsData} />
+                </FilterContext>
                 </div>
-
-                <div className="row mt-4">
+                
+                <div className="row mt-2">
                     <div className="col-12">
-                        {pagination.length > 0 && (
-                            <Pagination links={pagination} />
-                        )}
+                        <Pagination links={tests.meta.links} />
                     </div>
                 </div>
             </main>

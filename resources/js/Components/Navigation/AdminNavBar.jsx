@@ -7,15 +7,16 @@ import AdminProfileForm from "../Forms/AdminProfileForm";
 
 export default function AdminNavbar({ title }) {
     const { auth } = usePage().props;
-
-    const profileImageUrl = auth.user && auth.user.profile_image
-        ? `/storage/profile_images/${auth.user.profile_image}`
+    
+    const profileImageUrl = auth.user && auth.userable.data.profile_image
+        ? `/storage/profile_images/${auth.userable.data.profile_image}`
         : "/assets/profile-circle.png";
 
     const [isReviewersOpen, setIsReviewersOpen] = useState(() => {
         const savedReviewersOpen = localStorage.getItem('reviewersSubmenu');
         return savedReviewersOpen ? JSON.parse(savedReviewersOpen) : false;
     });
+    
     const [isQuestionBankOpen, setIsQuestionBankOpen] = useState(() => {
         const savedQuestionBankOpen = localStorage.getItem('questionBankSubmenu');
         return savedQuestionBankOpen ? JSON.parse(savedQuestionBankOpen) : false;
@@ -159,8 +160,8 @@ export default function AdminNavbar({ title }) {
             </div>
             <div className="dropdown pb-4 px-4">
                 <Link href="#" className="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src={profileImageUrl} alt="Profile Image" className="rounded-circle" width="30" height="30" />
-                    <span className="d-none d-sm-inline mx-1 fs-6">{auth.user.username}</span>
+                    <img src={profileImageUrl} alt="Profile Image" className="rounded-circle  me-3" width="30" height="30" />
+                    <span className="d-none d-sm-inline fs-6 ">{auth.user.username}</span>
                 </Link>
                 <ul className="dropdown-menu dropdown-menu text-small shadow">
                     <li>

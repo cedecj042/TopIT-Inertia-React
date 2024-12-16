@@ -10,8 +10,8 @@ function Student({ student, theta_score, queryParams }) {
     };
     return (
         <>
-            <div className="row mt-4 p-3">
-                <div className="d-flex justify-content-between flex-column">
+            <div className="container-fluid mt-4 px-5 py-3">
+                <div className="row">
                     <div className="d-flex flex-row align-items-center mb-3">
                         <button
                             className="btn btn-transparent"

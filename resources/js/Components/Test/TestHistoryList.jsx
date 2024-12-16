@@ -1,31 +1,25 @@
-import React from "react";
-import { Link } from "@inertiajs/react"; // For Inertia.js links
+import { useRequest } from "@/Library/hooks";
+import '../../../css/student/test.css';
 
-const TestHistory = ({ tests = [] }) => {
-    if (!Array.isArray(tests) || tests.length === 0) {
-        <div
-            className="alert alert-light p-5 no-data d-flex flex-column"
-            role="alert"
-        >
-            <img src="/assets/sad-cloud.svg" alt="sad cloud" />
-            <label htmlFor="" className="text-secondary mt-3">
-                It seems like there is no data available.
-            </label>
-        </div>;
+export default function TestHistoryList ({ tests = [] }) {
+    const isEmpty = !Array.isArray(tests) || tests.length === 0;;
+    const {isProcessing,getRequest} = useRequest();
+    const handleClick = (id)=>{
+        getRequest('pretest.review',id,{})
     }
-
     return (
         <div>
-            <div className="row">
+            <div className="row g-1">
                 {tests.map((test, index) => (
-                    <div key={index} className="col-12 mb-3">
-                        <div className="card border-1 rounded-4 my-1 py-1">
+                    <div key={index} className="col-12">
+                        <div className="card border-1 rounded-4 my-1 py-1 clickable"
+                            onClick={() => handleClick(test.assessment_id)}
+                        >
                             <div className="card-body py-2 fs-6 d-flex justify-content-between align-items-center">
                                 <div>
                                     <p className="card-text mb-0">
                                         <small
-                                            className="text-muted"
-                                            style={{ fontSize: "0.8rem" }}
+                                            className="text-muted text-sm"
                                         >
                                             Started: {test.start_time} | Ended:{" "}
                                             {test.end_time}
@@ -38,18 +32,13 @@ const TestHistory = ({ tests = [] }) => {
                                         {test.updated_at}
                                     </h6>
                                     <span
-                                        className="badge bg-light text-dark"
-                                        style={{
-                                            fontSize: "0.8rem",
-                                            fontWeight: "normal",
-                                            padding: "0.6em 1em",
-                                        }}
+                                        className="badge bg-light text-dark text-sm fw-medium"
                                     >
                                         Score: {test.total_score} /{" "}
                                         {test.total_items} ({test.percentage}%)
                                     </span>
                                 </div>
-                                <div className="ms-3">
+                                {/* <div className="ms-3">
                                     <Link
                                         href={`/pretest/review/${test.assessment_id}`}
                                         className="btn btn-link p-3"
@@ -57,14 +46,23 @@ const TestHistory = ({ tests = [] }) => {
                                     >
                                         <i className="h3 bi bi-play-circle-fill"></i>
                                     </Link>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                     </div>
                 ))}
             </div>
+            {isEmpty && (
+                <div
+                    className="alert alert-light p-5 no-data d-flex flex-column"
+                    role="alert"
+                >
+                    <img src="/assets/sad-cloud.svg" alt="sad cloud" />
+                    <label htmlFor="" className="text-secondary mt-3 text-center">
+                        It seems like there is no data available.
+                    </label>
+                </div>
+            )}
         </div>
     );
 };
-
-export default TestHistory;

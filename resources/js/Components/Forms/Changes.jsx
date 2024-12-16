@@ -17,9 +17,6 @@ export default function Changes({handleDiscardChanges,setShowUnsavedChangesModal
                 >
                     Discard Changes
                 </button>
-                {/* <button className="btn btn-primary" onClick={handleSaveChanges}>
-                    Save Changes
-                </button> */}
             </div>
         </div>
     );

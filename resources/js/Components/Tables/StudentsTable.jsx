@@ -10,7 +10,7 @@ export default function StudentsTable({
 }) {
     const keyField="student_id";
     const { state, dispatch,visibleColumns} = useContext(ContextProvider);
-    const { changeSort} = useSortState(dispatch);
+    const { toggleTableSort} = useSortState(dispatch);
 
     const onClick = (e, rowData) => {
         e.preventDefault();
@@ -29,7 +29,7 @@ export default function StudentsTable({
                 data={data}
                 visibleColumns={visibleColumns}
                 sortState={state.sortState}
-                changeSort={changeSort}
+                changeSort={toggleTableSort}
                 isRowClickable={true}
                 handleClick={onClick}
                 keyField={keyField}

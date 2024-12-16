@@ -23,8 +23,8 @@ class ContentResource extends JsonResource
             'order'=>$this->order,
             'file_name' => $this->file_name,
             'file_path' => $this->file_path,
-            'created_at' => (new Carbon($this->created_at))->format('F d, Y'), // Optional: Format the date
-            'updated_at' => (new Carbon(time: $this->updated_at))->format('F d, Y'),
+            'created_at' => (new Carbon($this->created_at))->format('Y-m-d'),
+            'updated_at' => (new Carbon(time: $this->updated_at))->format('Y-m-d'),
         ];
     }
 }

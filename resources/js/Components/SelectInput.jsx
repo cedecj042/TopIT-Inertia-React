@@ -7,7 +7,7 @@ export default forwardRef(function SelectInput({className='',children,...props},
         <select
             {...props}
             className={
-                'form-control border focus:border-primary focus:ring-0 rounded' +
+                'form-select border focus:border-primary focus:ring-0 rounded' +
                 className
             }
             ref = {input}

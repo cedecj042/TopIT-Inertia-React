@@ -1,5 +1,4 @@
 import { Link } from "@inertiajs/react";
-import "../../css/admin/navigation.css";
 
 export default function Pagination({ links, queryParams = {} }) {
     return (

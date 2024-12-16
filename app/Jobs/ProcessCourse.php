@@ -16,16 +16,16 @@ class ProcessCourse implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $courseId;
+    protected Course $course;
 
     /**
      * Create a new job instance.
      *
-     * @param int $courseId
+     * @param Course $course
      */
-    public function __construct($courseId)
+    public function __construct($course)
     {
-        $this->courseId = $courseId;
+        $this->course = $course;
     }
 
     /**
@@ -34,22 +34,14 @@ class ProcessCourse implements ShouldQueue
     public function handle(FastApiService $fastApiService)
     {
         try {
-            // Fetch the course by its ID
-            $course = Course::find($this->courseId);
-
-            if (!$course) {
-                throw new \Exception("Course not found");
-            }
-
-            // Prepare the course data in the required format
             $courseData = [
-                'course_id' => $course->course_id,
-                'title' => $course->title,
-                'description' => $course->description,
+                'course_id' => $this->course->course_id,
+                'title' => $this->course->title,
+                'description' => $this->course->description,
             ];
 
             // Send the data to the FastAPI endpoint to create the course
-            $result = $fastApiService->sendToFastAPI($courseData,'create_course/');
+            $result = $fastApiService->sendToFastAPI($courseData, 'create_course/');
 
             if ($result) {
                 Log::info('Data was successfully sent to FastAPI.');

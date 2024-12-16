@@ -1,10 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
 
-@font-face {
-    font-family: Inter;
-    src: url('../fonts/Inter-VariableFont-wght.ttf');
-}
-
 *{
     font-family: Inter;
 }
@@ -24,13 +19,6 @@ body{
     padding: 0.8em 1em;
 }
 
-.clickable{
-    cursor: pointer;
-}
-.clickable:hover td{
-    background-color: #daeafc !important;
-}
-
 .page-link{
     z-index: 1 !important;
 }
@@ -44,3 +32,28 @@ body{
 .grid-template-3{
     grid-template-columns: repeat(3,1fr);
 }
+tr td ul {
+    padding-left: 1rem !important;
+}
+.no-data{
+    height: 15rem !important;
+}
+
+.no-data img{
+    width: 100%;
+    height: 70%;
+}
+.table-transparent {
+    background-color: transparent !important;
+}
+
+.table-transparent th,
+.table-transparent td {
+    background-color: transparent !important;
+    border: none !important;
+    padding-left: 0 !important;
+}
+a {
+    text-decoration: none !important;
+}
+

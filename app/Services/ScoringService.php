@@ -17,7 +17,7 @@ class ScoringService
         switch ($question->question_detail->type) {
             case 'Multiple Choice - Single':
                 return $this->scoreMultipleChoiceSingle($participantsAnswer, $correctAnswer);
-            
+
             case 'Multiple Choice - Many':
                 return $this->scoreMultipleChoiceMany($participantsAnswer, $correctAnswer);
 
@@ -29,7 +29,6 @@ class ScoringService
         }
     }
 
-    //checking text array approach cuz di mugana ang katu
     private function scoreMultipleChoiceSingle($participantsAnswer, $correctAnswer): int
     {
         $participantText = is_array($participantsAnswer) ? $participantsAnswer[0] : $participantsAnswer;
@@ -47,11 +46,6 @@ class ScoringService
         return preg_replace('/\s+/', ' ', $answer); 
     }
 
-    // private function scoreMultipleChoiceSingle($participantsAnswer, $correctAnswer): int
-    // {
-    //     return $participantsAnswer === $correctAnswer ? 1 : 0;
-    // }
-
     private function scoreMultipleChoiceMany(array $participantsAnswer, array $correctAnswer): int
     {
         // Ensure both arrays are identical
@@ -61,45 +55,38 @@ class ScoringService
         return $participantsAnswer === $correctAnswer ? 1 : 0;
     }
 
-    //no strict rules
     private function scoreIdentification($participantsAnswer, $correctAnswer): int
     {
         $participantText = is_array($participantsAnswer) ? $participantsAnswer[0] : $participantsAnswer;
-        $correctText = is_array($correctAnswer) ? $correctAnswer[0] : $correctAnswer;
+        $correctKeywords = is_array($correctAnswer) ? $correctAnswer : [$correctAnswer];
 
         $participantText = $this->normalizeAnswer($participantText);
-        $correctText = $this->normalizeAnswer($correctText);
 
-        return $participantText === $correctText ? 1 : 0;
+        foreach ($correctKeywords as $keyword) {
+            $keyword = $this->normalizeAnswer($keyword);
+
+            if ($this->areFormsEquivalent($participantText, $keyword) || $this->containsKeyword($participantText, $keyword)) {
+                return 1; // Match found
+            }
+        }
+
+        return 0; // No match
     }
 
-    // private function scoreIdentification(string $participantsAnswer, array $correctAnswer): int
-    // {
-    //     // Normalize participant's answer and correct answers (case-insensitive)
-    //     $normalizedAnswer = strtolower(trim($participantsAnswer));
-    //     $normalizedCorrectAnswers = array_map('strtolower', array_map('trim', $correctAnswer));
-
-    //     // Check for exact match
-    //     if (in_array($normalizedAnswer, $normalizedCorrectAnswers)) {
-    //         return 1;
-    //     }
-
-    //     // Singular/Plural Match
-    //     foreach ($normalizedCorrectAnswers as $correct) {
-    //         if ($this->areFormsEquivalent($normalizedAnswer, $correct)) {
-    //             return 1;
-    //         }
-    //     }
-
-    //     return 0; // No match
-    // }
     private function areFormsEquivalent(string $word1, string $word2): bool
     {
         // Compare singular and plural forms
         return Str::singular($word1) === Str::singular($word2) || Str::plural($word1) === Str::plural($word2);
     }
+
+    private function containsKeyword(string $text, string $keyword): bool
+    {
+        // Check if the keyword exists as a substring in the text
+        return str_contains($text, $keyword);
+    }
+
     private function validateAnswers($participantsAnswer, $correctAnswer): bool
-{
-    return isset($participantsAnswer, $correctAnswer) && is_array($correctAnswer);
-}
+    {
+        return isset($participantsAnswer, $correctAnswer) && is_array($correctAnswer);
+    }
 }

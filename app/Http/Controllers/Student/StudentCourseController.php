@@ -33,36 +33,19 @@ class StudentCourseController extends Controller
 
     public function module($id)
     {
+        // Define a closure to apply ordering by 'order' column
+        $orderAttachments = function ($query) {
+            $query->orderBy('order');
+        };
+        // Eager load relationships with ordered attachments
         $module = Module::with([
             'course:course_id,title', // Load only necessary columns from course
-            'lessons.sections.subsections.attachments' => function ($query) {
-                // Filter specific attachment types across all levels
-                $query->whereIn('type', [
-                    ContentType::FIGURE->value,
-                    ContentType::TABLE->value,
-                    ContentType::CODE->value,
-                    ContentType::TEXT->value,
-                ])->orderBy('order');
-            },
-            'lessons.sections.attachments' => function ($query) {
-                // Filter specific attachment types for sections
-                $query->whereIn('type', [
-                    ContentType::FIGURE->value,
-                    ContentType::TABLE->value,
-                    ContentType::CODE->value,
-                    ContentType::TEXT->value,
-                ])->orderBy('order');
-            },
-            'lessons.attachments' => function ($query) {
-                // Filter specific attachment types for lessons
-                $query->whereIn('type', [
-                    ContentType::FIGURE->value,
-                    ContentType::TABLE->value,
-                    ContentType::CODE->value,
-                    ContentType::TEXT->value,
-                ])->orderBy('order');
-            }
+            'contents' => $orderAttachments,
+            'lessons.contents' => $orderAttachments,
+            'lessons.sections.contents' => $orderAttachments,
+            'lessons.sections.subsections.contents' => $orderAttachments,
         ])->findOrFail($id);
+        
         return Inertia::render('Student/Courses/Module', [
             'title' => 'Student Course',
             'module' => new ModuleResource($module), // Use ModuleResource for formatting

@@ -35,7 +35,7 @@ function Courses ({courses}) {
                                         <a
                                             className="btn btn-link p-3"
                                             href={route(
-                                                "student-course-detail",
+                                                "course.show",
                                                 course.course_id
                                             )}
                                         >

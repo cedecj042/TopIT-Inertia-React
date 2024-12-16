@@ -1,8 +1,8 @@
 import { router } from "@inertiajs/react";
-import { useCallback, useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
-export const useColumnVisibility = (initialColumns) => {
+export const useColumnVisibility = (initialColumns=[]) => {
     const [visibleColumns, setVisibleColumns] = useState(initialColumns);
 
     const onColumnChange = (columnName, isVisible) => {
@@ -49,7 +49,7 @@ export const useFilterState = (dispatch) => {
 
 export const useSortState = (dispatch) => {
     // Handle sorting changes (field:direction)
-    const changeSort = (field) => {
+    const toggleTableSort = (field) => {
         dispatch({
             type: 'SET_SORT',
             payload: (prevSortState) => {
@@ -65,13 +65,20 @@ export const useSortState = (dispatch) => {
         });
     };
 
-    // Handle clearing the sort state
+    const changeDropdownSort = (field, direction) => {
+        dispatch({
+            type: 'SET_SORT',
+            payload: `${field}:${direction}`,
+        });
+    };
+
     const handleClearSort = () => {
-        dispatch({ type: 'SET_SORT', payload: ":" }); // Reset to empty state
+        dispatch({ type: 'SET_SORT', payload: ":" });
     };
 
     return {
-        changeSort,
+        toggleTableSort,
+        changeDropdownSort,
         handleClearSort,
     };
 };
@@ -104,6 +111,30 @@ export const useOtherState = (dispatch) => {
         onKeyPress
     };
 };
+export const useDateState = (dispatch) => {
+    const handleDateChange = (key, value) => {
+        dispatch({
+            type: "SET_DATE",
+            payload: {
+                [key]: value || "", 
+            },
+        });
+    };
+
+
+    const onDateClear = () => {
+        dispatch({
+            type: "SET_DATE",
+            payload: { from: "", to: "" },
+        });
+    };
+
+    return {
+        handleDateChange,
+        onDateClear,
+    };
+};
+
 
 export const useRequest = () => {
     const [isProcessing, setIsProcessing] = useState(false);
@@ -154,11 +185,10 @@ export const useRequest = () => {
     // PUT request handler
     const putRequest = async (routeName, id, data, customCallbacks = {}, options = {}) => {
         setIsProcessing(true);
-        const requestOptions = { ...defaultOptions, ...options }; // Merge default options with custom options
-
+        const requestOptions = { ...defaultOptions, ...options }; 
         try {
-            await router.put(route(routeName, { id }), data, { // Pass the id as a route parameter
-                ...requestOptions, // Spread merged options here
+            await router.put(route(routeName, { id }), data, {
+                ...requestOptions,
                 onSuccess: (page) => {
                     (customCallbacks.onSuccess || defaultCallbacks.onSuccess)(page);
                 },

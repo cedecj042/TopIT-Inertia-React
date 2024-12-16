@@ -3,9 +3,7 @@ import StudentLayout from "@/Layouts/StudentLayout";
 
 export const StudentContent = (Component) => {
     const LayoutWrapper = (page) => {
-        const {
-            props: { title },
-        } = page;
+        const {props: { title },} = page;
 
         return (
             <MainLayout>

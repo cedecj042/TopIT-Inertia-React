@@ -2,5 +2,5 @@
 
 return [
     App\Providers\AppServiceProvider::class,
-    App\Providers\StudentCourseThetaService::class,
+    // App\Providers\StudentCourseThetaService::class,
 ];

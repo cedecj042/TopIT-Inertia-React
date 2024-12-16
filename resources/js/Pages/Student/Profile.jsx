@@ -38,6 +38,7 @@ function Profile({ student, progressData }) {
                     show={showModal}
                     onClose={closeModal}
                     modalTitle={"Edit Profile"}
+                    modalSize={'modal-lg'}
                 >
                     <StudentProfileForm
                         student={studentData}

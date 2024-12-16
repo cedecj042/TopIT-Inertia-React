@@ -2,9 +2,8 @@
 
 import { createContext, useCallback, useEffect, useReducer, useRef } from "react";
 import { router } from "@inertiajs/react";
-import { useColumnVisibility } from "@/Library/hooks";
 
-const ContextProvider = createContext();
+const FilterProvider = createContext();
 
 const reducer = (state, action) => {
     switch (action.type) {
@@ -47,14 +46,12 @@ const reducer = (state, action) => {
     }
 };
 
-export const TableContext = ({
+export const FilterContext = ({
     children,
     initialState,
     routeName,
     components,
-    column = []
 }) => {
-    const {visibleColumns, onColumnChange} = useColumnVisibility(column);
     const [state, dispatch] = useReducer(reducer, initialState);
     const prevStateRef = useRef(state);
     const updateUrl = useCallback(() => {
@@ -89,13 +86,14 @@ export const TableContext = ({
         updateUrl();
     }, [state.filterState,state.sortState,state.otherState,,state.dateState]); 
 
+
     return (
-        <ContextProvider.Provider
-            value={{ state, dispatch, visibleColumns, onColumnChange }}
+        <FilterProvider.Provider
+            value={{ state, dispatch}}
         >
             {children}
-        </ContextProvider.Provider>
+        </FilterProvider.Provider>
     );
 };
 
-export default ContextProvider;
+export default FilterProvider;

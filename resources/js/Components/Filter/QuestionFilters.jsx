@@ -92,12 +92,14 @@ export default function QuestionFilters({filters}){
                     </div>
                 </div>
                 <div className="col-md-4 col-lg-3 offset-md-4 offset-lg-2 mb-3">
-                    <OtherFilter
-                        visibleColumns={visibleColumns}
-                        onColumnChange={onColumnChange}
-                        handleOtherChange={handleOtherChange}
-                        otherState={otherState}
-                    />
+                    <div className="d-grid grid-template-2">
+                        <OtherFilter
+                            visibleColumns={visibleColumns}
+                            onColumnChange={onColumnChange}
+                            handleOtherChange={handleOtherChange}
+                            otherState={otherState}
+                        />
+                    </div>
                 </div>
             </div>
         </>

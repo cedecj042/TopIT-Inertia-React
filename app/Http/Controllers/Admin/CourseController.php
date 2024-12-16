@@ -41,16 +41,16 @@ class CourseController extends Controller
     {
         $validatedData = $request->validated();
 
-        Log::info('Validated data:', $validatedData);
-
+        $exists = Course::where('title', $validatedData['title'])->exists();
+        if ($exists) {
+            return back()->with('error', 'Course with the same name already exists.');
+        }
         try {
             $course = Course::create([
-                'title' => $validatedData['course_name'],
+                'title' => $validatedData['course_title'],
                 'description' => $validatedData['course_desc'],
             ]);
             $course->save();
-
-            Log::info('Course saved successfully:', ['course_id' => $course->course_id]);
             //Save the course to vector
             return back()->with('success', 'Course added successfully!');
         } catch (\Exception $e) {
@@ -73,21 +73,34 @@ class CourseController extends Controller
             'queryParams'=>request()->query() ? :null,
         ]);
     }
-    
-    public function edit(string $id)
-    {
-        //
-    }
 
-    public function update(Request $request, string $id)
+    public function update(CourseRequest $request, string $id)
     {
-        //
+        $validated = $request->validated();
+
+        $prevCourse = Course::findOrFail($id);
+        Log::info('previous data', $prevCourse->toArray());
+        if($prevCourse->title != $validated['course_title']){
+            $exists = Course::where('title', $validated['course_title'])->exists();
+            if ($exists) {
+                return back()->with('error', 'Course with the same name already exists.');
+            } 
+        }
+        $prevCourse->update([
+            'title' => $validated['course_title'],
+            'description' => $validated['course_desc'],
+        ]);
+        return back()->with('success', 'Course updated successfully.');
     }
 
     public function delete(string $course_id)
     {
-        //
         $course = Course::findOrFail($course_id);
+        // Check if there are questions associated with the course
+        if ($course->questions()->count() > 0) {
+            return back()->with('error', 'Cannot delete course. Questions are tied to this course.');
+        }
+        
         $course->delete();
         return back()->with('success', 'Course removed successfully!');
     }

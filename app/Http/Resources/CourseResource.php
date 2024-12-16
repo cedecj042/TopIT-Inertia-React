@@ -20,7 +20,7 @@ class CourseResource extends JsonResource
             'course_id' =>$this->course_id,
             'title' => $this->title,
             'description' => $this->description,
-            'created_at' => (new Carbon($this->created_at))->format('F d, Y'),
+            'created_at' => (new Carbon($this->created_at))->format('Y-m-d'),
             'pdfs' => PdfResource::collection($this->whenLoaded('pdfs')),
         ];
     }

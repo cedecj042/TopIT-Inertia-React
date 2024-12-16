@@ -30,18 +30,24 @@ export default function StudentProfileForm({ student, onClose }) {
     const { postRequest } = useRequest();
 
     const handleFileChange = (e) => {
-        const file = e.target.files[0]; // Get the first file
+        const file = e.target.files[0]; // Get the first selected file
         if (file) {
-            setValue("profile_image", file); // Set file in react-hook-form
+            setValue("profile_image", file); // Set the file in react-hook-form
+            const reader = new FileReader(); // For image preview
+            reader.onload = (event) => {
+                setPreviewImage(event.target.result); // Set the image preview
+            };
+            reader.readAsDataURL(file);
         } else {
-            setValue("profile_image", null); // Reset file if none selected
+            setValue("profile_image", null);
+            setPreviewImage(null); // Clear the preview if no file is selected
         }
     };
-    
+
 
     const onSubmitForm = (data) => {
         const formData = new FormData();
-    
+
         Object.entries(data).forEach(([key, value]) => {
             if (key === "profile_image" && value instanceof File) {
                 formData.append(key, value); // Append the actual file
@@ -49,7 +55,7 @@ export default function StudentProfileForm({ student, onClose }) {
                 formData.append(key, value); // Append other fields
             }
         });
-    
+
         postRequest("student.profile.edit", formData, {
             onSuccess: () => {
                 toast.success("Profile updated successfully!");
@@ -61,8 +67,8 @@ export default function StudentProfileForm({ student, onClose }) {
             },
         });
     };
-    
-    
+
+
     return (
         <>
             <div className="modal-body">
@@ -72,7 +78,7 @@ export default function StudentProfileForm({ student, onClose }) {
                         {previewImage ? (
                             <img
                                 src={previewImage}
-                                alt="Profile"
+                                alt="Profile Preview"
                                 className="img-thumbnail"
                                 width="150"
                                 height="150"
@@ -90,7 +96,7 @@ export default function StudentProfileForm({ student, onClose }) {
                             name="profile_image"
                             id="profile_image"
                             accept="image/*"
-                            onChange={handleFileChange} // Manually handle file changes
+                            onChange={handleFileChange}
                             className="form-control"
                         />
                     </div>
@@ -98,60 +104,66 @@ export default function StudentProfileForm({ student, onClose }) {
                     {/* Student ID (Hidden) */}
                     <input type="hidden" {...register("student_id")} />
 
-                    {/* First Name */}
-                    <div className="mb-3">
-                        <label className="form-label">First Name</label>
-                        <input
-                            type="text"
-                            {...register("firstname", { required: "First name is required" })}
-                            className={`form-control ${errors.firstname ? "is-invalid" : ""}`}
-                        />
-                        {errors.firstname && (
-                            <div className="invalid-feedback">{errors.firstname.message}</div>
-                        )}
+                    <div className="row g-3">
+                        {/* First Name */}
+                        <div className="col-md-6 mb-3">
+                            <label className="form-label">First Name</label>
+                            <input
+                                type="text"
+                                {...register("firstname", { required: "First name is required" })}
+                                className={`form-control ${errors.firstname ? "is-invalid" : ""}`}
+                            />
+                            {errors.firstname && (
+                                <div className="invalid-feedback">{errors.firstname.message}</div>
+                            )}
+                        </div>
+
+                        {/* Last Name */}
+                        <div className="col-md-6 mb-3">
+                            <label className="form-label">Last Name</label>
+                            <input
+                                type="text"
+                                {...register("lastname", { required: "Last name is required" })}
+                                className={`form-control ${errors.lastname ? "is-invalid" : ""}`}
+                            />
+                            {errors.lastname && (
+                                <div className="invalid-feedback">{errors.lastname.message}</div>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Last Name */}
-                    <div className="mb-3">
-                        <label className="form-label">Last Name</label>
-                        <input
-                            type="text"
-                            {...register("lastname", { required: "Last name is required" })}
-                            className={`form-control ${errors.lastname ? "is-invalid" : ""}`}
-                        />
-                        {errors.lastname && (
-                            <div className="invalid-feedback">{errors.lastname.message}</div>
-                        )}
+                    
+                    <div className="row g-3">
+                        {/* Birthdate */}
+                        <div className="col-md-6 mb-3">
+                            <label className="form-label">Birthdate</label>
+                            <input
+                                type="date"
+                                {...register("birthdate", { required: "Birthdate is required" })}
+                                className={`form-control ${errors.birthdate ? "is-invalid" : ""}`}
+                            />
+                            {errors.birthdate && (
+                                <div className="invalid-feedback">{errors.birthdate.message}</div>
+                            )}
+                        </div>
+                        {/* Gender */}
+                        <div className="col-md-6 mb-3">
+                            <label className="form-label">Gender</label>
+                            <select
+                                {...register("gender", { required: "Gender is required" })}
+                                className={`form-select ${errors.gender ? "is-invalid" : ""}`}
+                            >
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Others">Others</option>
+                            </select>
+                            {errors.gender && (
+                                <div className="invalid-feedback">{errors.gender.message}</div>
+                            )}
+                        </div>
+                        
                     </div>
-
-                    {/* Birthdate */}
-                    <div className="mb-3">
-                        <label className="form-label">Birthdate</label>
-                        <input
-                            type="date"
-                            {...register("birthdate", { required: "Birthdate is required" })}
-                            className={`form-control ${errors.birthdate ? "is-invalid" : ""}`}
-                        />
-                        {errors.birthdate && (
-                            <div className="invalid-feedback">{errors.birthdate.message}</div>
-                        )}
-                    </div>
-
-                    {/* Gender */}
-                    <div className="mb-3">
-                        <label className="form-label">Gender</label>
-                        <select
-                            {...register("gender", { required: "Gender is required" })}
-                            className={`form-select ${errors.gender ? "is-invalid" : ""}`}
-                        >
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Others">Others</option>
-                        </select>
-                        {errors.gender && (
-                            <div className="invalid-feedback">{errors.gender.message}</div>
-                        )}
-                    </div>
+                    
 
                     {/* Address */}
                     <div className="mb-3">
@@ -178,24 +190,23 @@ export default function StudentProfileForm({ student, onClose }) {
                             <div className="invalid-feedback">{errors.school.message}</div>
                         )}
                     </div>
-
                     {/* Year */}
                     <div className="mb-3">
-                        <label className="form-label">Year</label>
-                        <select
-                            {...register("year", { required: "Year is required" })}
-                            className={`form-select ${errors.year ? "is-invalid" : ""}`}
-                        >
-                            {[1, 2, 3, 4, 5].map((year) => (
-                                <option key={year} value={year}>
-                                    {year}
-                                </option>
-                            ))}
-                        </select>
-                        {errors.year && (
-                            <div className="invalid-feedback">{errors.year.message}</div>
-                        )}
-                    </div>
+                            <label className="form-label">Year</label>
+                            <select
+                                {...register("year", { required: "Year is required" })}
+                                className={`form-select ${errors.year ? "is-invalid" : ""}`}
+                            >
+                                {[1, 2, 3, 4, 5].map((year) => (
+                                    <option key={year} value={year}>
+                                        {year}
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.year && (
+                                <div className="invalid-feedback">{errors.year.message}</div>
+                            )}
+                        </div>
                 </form>
             </div>
 

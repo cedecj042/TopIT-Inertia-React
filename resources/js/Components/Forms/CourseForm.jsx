@@ -13,13 +13,20 @@ export default function CourseForm({ onClose }) {
         handleSubmit,
     } = useForm();
 
-    const {isProcessing,postRequest} = useRequest();
+    const { isProcessing, postRequest } = useRequest();
     const onSubmit = async (data) => {
         postRequest("admin.course.add", data, {
-            onSuccess: () => {
+            onSuccess: (data) => {
+                if (data.props.flash.error) {
+                    toast.error(data.props.flash.error, { duration: 3000 });
+                } else {
+                    toast.success("Course added successfully!", { duration: 3000 });
+                }
                 onClose();
-                toast.success("Course added successfully!", { duration: 3000 });
             },
+            onerror: (error) => {
+                console.log(error);
+            }
         });
     };
 
@@ -27,20 +34,21 @@ export default function CourseForm({ onClose }) {
         <form onSubmit={handleSubmit(onSubmit)}>
             <div className="modal-body">
                 <div className="mb-3">
-                    <label htmlFor="courseName" className="form-label fs-6">
-                        Course Name
+                    <label htmlFor="course_title" className="form-label fs-6">
+                        Course Title
                     </label>
                     <input
                         type="text"
                         className="form-control"
-                        id="courseName"
-                        name="course_name"
-                        {...register("course_name", {
-                            required: "Course Name is required",
+                        id="course_title"
+                        placeholder="Enter course title"
+                        name="course_title"
+                        {...register("course_title", {
+                            required: "Course Title is required",
                         })}
                     />
                     {errors.courseName && (
-                        <p className="text-danger">{`${errors.course_name.message}`}</p>
+                        <p className="text-danger">{`${errors.course_title.message}`}</p>
                     )}
                 </div>
                 <div className="mb-3">
@@ -53,6 +61,7 @@ export default function CourseForm({ onClose }) {
                     <textarea
                         className="form-control"
                         id="courseDescription"
+                        placeholder="Enter course description"
                         name="course_desc"
                         {...register("course_desc", {
                             required: "Course Description is required",

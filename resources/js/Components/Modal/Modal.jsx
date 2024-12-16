@@ -1,6 +1,17 @@
+import { useEffect } from 'react';
 import '../../../css/modal.css';
 
 export default function Modal({modalTitle,modalSize=null,onClose,show,children}) {
+    useEffect(() => {
+        if (show) {
+            document.body.style.overflow = "hidden"; // Disable scrolling
+        } else {
+            document.body.style.overflow = ""; // Enable scrolling
+        }
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [show]);
     if (!show) return null;
     return (
         <div
@@ -8,6 +19,7 @@ export default function Modal({modalTitle,modalSize=null,onClose,show,children})
             tabIndex="-1"
             aria-labelledby="modalLabel"
             role="dialog"
+            aria-hidden="true"
         >
             <div className={`modal-dialog modal-dialog-centered modal-dialog-scrollable ${modalSize}`}>
                 <div className="modal-content">

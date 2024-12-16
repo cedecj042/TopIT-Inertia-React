@@ -20,8 +20,12 @@ class CourseObserver
     public function created(Course $course)
     {
         $this->thetaService->initializeThetaForCourse($course);
-        ProcessCourse::dispatch($course->course_id);
+        // Dispatch job to process the course
+        ProcessCourse::dispatch($course);
 
+        Log::info('Course created and job dispatched', [
+            'course_id' => $course->course_id,
+        ]);
     }
 
     public function deleted(Course $course)

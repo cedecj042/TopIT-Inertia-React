@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Resources\AdminResource;
+use App\Http\Resources\StudentResource;
 use App\Models\Admin;
 use App\Models\Student;
 use Illuminate\Http\Request;
@@ -38,6 +40,11 @@ class HandleInertiaRequests extends Middleware
         if ($user) {
             $userable = $user->userable; // The polymorphic relation
             $userRole = $userable instanceof Admin ? 'admin' : ($userable instanceof Student ? 'student' : null);
+            if ($userable instanceof Admin) {
+                $userable = new AdminResource($userable); // Transform with AdminResource
+            }else if ($userable instanceof Student){
+                $userable = new StudentResource($userable);
+            }
         }
     
         return [

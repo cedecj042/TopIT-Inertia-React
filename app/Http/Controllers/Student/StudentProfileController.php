@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\StudentResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -119,10 +120,10 @@ class StudentProfileController extends Controller
             });
 
             return redirect()->route('profile')->with('success', 'Profile updated successfully');
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            \Log::error('Profile update error: ' . $e->getMessage());
+            Log::error('Profile update error: ' . $e->getMessage());
             return back()->with('error', 'An error occurred while updating the profile. Please try again.');
         }
     }

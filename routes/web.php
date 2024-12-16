@@ -59,7 +59,7 @@ Route::middleware(['auth', 'student'])->group(function () {
 
     Route::prefix('course')->name('course.')->group(function (){
         Route::get('/', [StudentCourseController::class, 'index'])->name(name: 'index');
-        Route::get('/{id}', [StudentCourseController::class, 'course'])->name('show');
+        Route::get('/{id}', [StudentCourseController::class, 'show'])->name('show');
         Route::get('/module/{id}', [StudentCourseController::class, 'module'])->name('module');
     });
     
@@ -92,6 +92,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/', [CourseController::class, 'index'])->name('index');
         Route::post('/add', [CourseController::class, 'add'])->name('add');
         Route::get('/{course_id}', [CourseController::class, 'show'])->name('detail');
+        Route::put('/update/{course_id}', [CourseController::class, 'update'])->name('update');
         Route::delete('/delete/{course_id}', [CourseController::class, 'delete'])->name('delete');
         Route::post('/pdf/upload', [PdfController::class, 'store'])->name('pdf.upload');
         Route::delete('/pdf/delete/{id}', [PdfController::class, 'delete'])->name('pdf.delete');
@@ -140,7 +141,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     });
     
     Route::get('/report',[ReportController::class,'index'])->name('report');
-    // Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
+    Route::post('/update', [AdminController::class, 'update'])->name('profile.update');
     Route::get('/student/{student_id}', [ReportController::class, 'student'])->name('student');
 });
 

@@ -49,7 +49,7 @@ class PdfController extends Controller
                 ProcessPdfJob::dispatch($pdfFilePath, $fileName, $course->title, $course->course_id);
             
                 return redirect()->back()->with(['message'=>'PDF uploaded successfully! Processing will continue in the background.']);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error('Error dispatching PDF processing job: ' . $e->getMessage());
                 return redirect()->back()->withErrors(['error' => 'An error occurred while processing the PDF.']);
             }

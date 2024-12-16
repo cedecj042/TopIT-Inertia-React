@@ -13,9 +13,11 @@ export default function ClearFunction({
         else if (label === "sort") {
             handleClearFunction();
         }
+        else if (label === "date") {
+            handleClearFunction();
+        }
     };
     const filtersApplied = areFiltersApplied(initialState, currentState);
-    // Handling sortState which is a combined string (field:direction)
     const sortApplied = label === "sort" && currentState !== initialState;
     return (
         <>
@@ -47,6 +49,23 @@ export default function ClearFunction({
                                 : "Z-A"}
                         </span>
                     )}
+                    
+                    {/* Display applied sorting */}
+                    {label === "date" && 
+                        Object.keys(currentState).map(key=>{
+                            return(
+                                currentState[key] !== initialState[key] && (
+                                    <span
+                                        key={key}
+                                        className="badge rounded-pill bg-info d-inline-flex align-items-center"
+                                    >
+                                        {capitalizeFirstLetter(key)}:{" "}
+                                        {currentState[key]}
+                                    </span>
+                                )
+                            )
+                        })
+                    }
 
                     <a
                         onClick={resetFilters}
@@ -54,6 +73,7 @@ export default function ClearFunction({
                     >
                         Clear {capitalizeFirstLetter(label)}
                     </a>
+                    
                 </div>
             ) : null}
         </>

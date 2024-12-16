@@ -18,11 +18,6 @@ export default function StudentLogin() {
                                 routeName={"login"}
                                 btn={"btn-primary"}
                             />
-                            <div className="mt-4">
-                                <Link href="#" className="text-dark auth_btn">
-                                    Forgot Password?
-                                </Link>
-                            </div>
                             <div className="mt-5 text-center">
                                 <Link
                                     href="/register"

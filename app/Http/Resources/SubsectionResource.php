@@ -19,7 +19,7 @@ class SubsectionResource extends JsonResource
             'subsection_id' =>$this->subsection_id,
             'title' => $this->title,
             'content' => $this->content,
-            'created_at' => (new Carbon($this->created_at))->format('F d, Y'),
+            'created_at' => (new Carbon($this->created_at))->format('Y-m-d'),
             'section' => new SectionResource($this->whenLoaded('section')),
             'contents' => ContentResource::collection($this->whenLoaded('contents'))
         ];

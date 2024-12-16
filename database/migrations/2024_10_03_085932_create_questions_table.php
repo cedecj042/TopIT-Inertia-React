@@ -59,7 +59,15 @@ return new class extends Migration
             $table->enum('difficulty_type', ['Very Easy', 'Easy', 'Average', 'Hard', 'Very Hard']);
             $table->timestamps();
         });
-
+        Schema::create('question_recalibration_logs', function (Blueprint $table) {
+            $table->id('recalibration_log_id');
+            $table->foreignId('question_id')->references('question_id')->on('questions')->cascadeOnDelete();
+            $table->float('previous_difficulty_value');
+            $table->float('new_difficulty_value');
+            $table->float('previous_discrimination_index');
+            $table->float('new_discrimination_index');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -67,11 +75,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('questions');
-        Schema::dropIfExists('difficulty');
-        // Schema::dropIfExists('identifications');
-        // Schema::dropIfExists('multichoice_single');
-        // Schema::dropIfExists('multichoice_many');
         Schema::dropIfExists('question_details');
+        Schema::dropIfExists('questions');
+        Schema::dropIfExists('question_recalibration_logs');
     }
 };

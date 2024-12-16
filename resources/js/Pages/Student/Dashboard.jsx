@@ -1,4 +1,4 @@
-import TestHistory from "@/Components/Test/TestHistory";
+import TestHistory from "@/Components/Test/TestHistoryList";
 import { Link } from "@inertiajs/react";
 import "../../../css/student/dashboard.css";
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";

@@ -1,5 +1,5 @@
 import SelectInput from "../../SelectInput";
-import {capitalizeFirstLetter, formatFilterKey} from '../../../Library/utils';
+import {formatFilterKey} from '../../../Library/utils';
 
 export default function SelectFilter({keyValue,filterKey,data,handleFilterChange}) {
     return (

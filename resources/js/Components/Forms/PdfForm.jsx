@@ -1,70 +1,78 @@
-import { router } from "@inertiajs/react";
 import { useForm } from "react-hook-form"
 import { toast } from "sonner";
 import "../../../css/modal.css";
 import { useRequest } from "@/Library/hooks";
 
-export default function PdfForm({id,onClose}){
+export default function PdfForm({ course, onClose }) {
     const {
         register,
         reset,
         formState: { errors, isSubmitting },
         handleSubmit,
-    } = useForm();
-
+    } = useForm({
+        defaultValues:{
+            course_id: course?.course_id,
+            course_title: course?.title,
+        }
+    });
     const { isProcessing, postRequest } = useRequest();
 
     const onSubmit = async (data) => {
         const formData = new FormData();
         formData.append("course_id", data.course_id);
         formData.append("pdf_file", data.pdf_file[0]);
-
         postRequest("admin.course.pdf.upload", formData, {
             forceFormData: true,
-            onSuccess: () => {                
+            onSuccess: () => {
                 toast.info("Uploading pdf...", { duration: 3000 });
                 reset();
                 onClose();
             },
+            onError: (error)=>{
+                toast.error("Error uploading pdf..",{duration: 3000});
+                console.log(error);
+            }
         });
     };
-    
-    return(
+
+    return (
         <>
             <div className="modal-body">
                 <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
+                    <input
+                        type="text"
+                        className="form-control d-none"
+                        id="courseID"
+                        name="course_id"
+                        {...register("course_id")}
+                        readOnly={true}
+                    />
                     <div className="mb-3">
                         <label htmlFor="courseID" className="form-label fs-6">
-                            Course ID
+                            Course Title
                         </label>
                         <input
                             type="text"
                             className="form-control"
                             id="courseID"
                             name="course_id"
-                            value={id}
-                            {...register("course_id", {
-                                required: "Course ID is required",
-                            })}
+                            value={course.title}
                             readOnly={true}
                         />
-                        {errors.course_id && (
-                            <p className="text-danger">{`${errors.course_id.message}`}</p>
-                        )}
                     </div>
                     <div className="mb-3">
                         <label htmlFor="materialFile" className="form-label fs-6">Select file to upload</label>
-                        <input 
-                            type="file" 
-                            className="form-control" 
-                            id="materialFile" 
+                        <input
+                            type="file"
+                            className="form-control"
+                            id="materialFile"
                             name="pdf_file"
-                            accept="application/pdf" 
+                            accept="application/pdf"
                             {...register("pdf_file", {
                                 required: "PDF is required",
                             })}
-                            required/>
-                            {errors.file_name && (
+                            required />
+                        {errors.file_name && (
                             <p className="text-danger">{`${errors.pdf_file.message}`}</p>
                         )}
                     </div>

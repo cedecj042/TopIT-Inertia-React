@@ -12,12 +12,14 @@ export default function AdminFilters({ }) {
 
     return (
         <>
-            <OtherFilter
-                visibleColumns={visibleColumns}
-                onColumnChange={onColumnChange}
-                handleOtherChange={handleOtherChange}
-                otherState={otherState}
-            />
+            <div className="d-grid grid-template-2">
+                <OtherFilter
+                    visibleColumns={visibleColumns}
+                    onColumnChange={onColumnChange}
+                    handleOtherChange={handleOtherChange}
+                    otherState={otherState}
+                />
+            </div>
         </>
     )
 }

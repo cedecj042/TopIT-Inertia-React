@@ -1,0 +1,9 @@
+.clickable{
+    cursor: pointer;
+}
+.clickable:hover{
+    background-color: #eff1f4 !important;
+}
+.clickable:active{
+    background-color: #dfe4eb !important;
+}

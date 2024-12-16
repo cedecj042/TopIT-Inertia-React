@@ -19,7 +19,7 @@ class SectionResource extends JsonResource
             'section_id' =>$this->section_id,
             'title' => $this->title,
             'content' => $this->content,
-            'created_at' => (new Carbon($this->created_at))->format('F d, Y'),
+            'created_at' => (new Carbon($this->created_at))->format('Y-m-d'),
             'lesson' => new LessonResource($this->whenLoaded('lesson')),
             'subsections' => SubsectionResource::collection($this->whenLoaded('subsections')),
             'contents' => ContentResource::collection($this->whenLoaded('contents'))

@@ -24,12 +24,14 @@ export default function CourseFilters({}){
                     />
                 </div>
                 <div className="col-md-4 col-lg-3 offset-md-0 offset-lg-4 ps-2">
-                    <OtherFilter
-                        visibleColumns={visibleColumns}
-                        onColumnChange={onColumnChange}
-                        handleOtherChange={handleOtherChange}
-                        otherState={otherState}
-                    />
+                    <div className="d-grid grid-template-2">
+                        <OtherFilter
+                            visibleColumns={visibleColumns}
+                            onColumnChange={onColumnChange}
+                            handleOtherChange={handleOtherChange}
+                            otherState={otherState}
+                        />
+                    </div>
                 </div>
             </div>
         </>
