@@ -39,7 +39,7 @@ class StudentProfileController extends Controller
 
     public function getCourseProgressData($studentId, $selectedMonth = null)
     {
-        $selectedMonth = $selectedMonth ?? now()->format('Y-m');
+        $selectedMonth ?? now()->format('Y-m');
         $currentDate = now()->format('Y-m-d');
 
         $startOfMonth = Carbon::parse($selectedMonth)->startOfMonth();

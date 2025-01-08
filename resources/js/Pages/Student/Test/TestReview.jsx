@@ -1,22 +1,24 @@
 import React, { useState } from "react";
 import { Head, Link } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout";
-import Sidebar from "@/Components/Test/Sidebar";
 import Navbar from "@/Components/Navigation/Navbar";
 import ReviewQuestionForm from "@/Components/Pretest/ReviewQuestionForm";
 import "../../../../css/student/students.css";
 import "../../../../css/student/welcome.css";
+import Sidebar from "@/Components/Pretest/Sidebar";
 
 const TestReview = ({
     courses = { data: [], questions: [] },
     assessment = {},
 }) => {
 
-    const currentCourseIndex = courses.data[0].course_id;
+    // const currentCourseIndex = courses.data[0].course_id;
+    const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
+    
     const coursesData = courses.data || [];
 
     const questionsForCurrentCourse =
-        courses.questions?.[currentCourseIndex]?.questions || [];
+        courses.questions?.[currentCourseIndex + 1 ]?.questions || [];
 
     console.log("Courses data:", courses);
     console.log("Questions:", courses);
@@ -33,7 +35,11 @@ const TestReview = ({
                 <div className="row min-vh-100">
                     {/* Sidebar */}
                     <div className="col-md-3 position-fixed border-end h-100 mt-5">
-                        <Sidebar courses={courses} />
+                        <Sidebar
+                            courses={courses}
+                            currentCourseIndex={currentCourseIndex}
+                            setCurrentCourseIndex={setCurrentCourseIndex}
+                        />
                         <div className="px-4 mt-2">
                             <h5 className="pb-2">Assessment Summary</h5>
                             <div className="card">

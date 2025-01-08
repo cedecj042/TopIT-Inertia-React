@@ -1,28 +1,13 @@
 import "../../../css/admin/dashboard.css";
 import "../../../css/chart.css";
-import Pagination from "@/Components/Pagination";
-import StudentsTable from "@/Components/Tables/StudentsTable";
 import { AdminContent } from "@/Components/LayoutContent/AdminContent";
-import { INITIAL_STUDENT_STATE } from "@/Library/filterState";
-import {
-    COURSE_COLUMN,
-    STUDENT_COLUMN,
-    STUDENT_FILTER_COMPONENT,
-} from "@/Library/constants";
-import { TableContext } from "@/Components/Context/TableContext";
-import StudentFilters from "@/Components/Filter/StudentFilters";
-import AverageLineChart from "@/Components/Chart/AverageLineChart";
 import MonthlyBarChart from "@/Components/Chart/MonthlyBarChart";
-import AverageRadarChart from "@/Components/Chart/AverageRadarChart";
-import ThetaScoreBar from "@/Components/Chart/ThetaScoreLine";
+import PdfContent from "@/Components/Content/PdfContent";
 
 function Dashboard({
-    students,
+    pdfs,
     cards,
     chartData,
-    thetaScoreData,
-    filters,
-    queryParams = {},
 }) {
     const cardEntries = Object.entries(cards);
     const pastelColors = [
@@ -34,7 +19,7 @@ function Dashboard({
     return (
         <>
             <div className="container-fluid p-5">
-                <div className="row mb-3">
+                <div className="row mb-5">
                     <h3 className="fw-bold">Dashboard</h3>
                     {cardEntries.map(([label, value], index) => (
                     <div className="col-md-3" key={index}>
@@ -49,7 +34,17 @@ function Dashboard({
                     </div>
                     ))}
                 </div>
-                <div className="row mb-3">
+                <div className="row mb-5">
+                    <h5 className="fw-semibold">
+                        Recent PDF Uploads
+                    </h5>
+                    <div className="col-12">
+                        <div className="row g-1">
+                        <PdfContent pdf={pdfs.data}/>
+                        </div>
+                    </div>
+                </div>
+                <div className="row mb-5">
                     <h5 className="fw-semibold">
                         Total Number of Students Registered
                     </h5>

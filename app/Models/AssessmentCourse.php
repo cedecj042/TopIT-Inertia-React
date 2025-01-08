@@ -22,6 +22,7 @@ class AssessmentCourse extends Model
       'initial_theta_score',
       'final_theta_score'
     ];
+    
     public function assessment(){
         return $this->belongsTo(Assessment::class,'assessment_id','assessment_id');
     }
@@ -32,5 +33,8 @@ class AssessmentCourse extends Model
 
     public function course(){
         return $this->belongsTo(Course::class,'course_id','course_id');
+    }
+    public function theta_score_logs(){
+        return $this->hasMany(ThetaScoreLog::class,'assessment_course_id','assessment_course_id');
     }
 }

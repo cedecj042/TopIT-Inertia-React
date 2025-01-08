@@ -72,7 +72,7 @@ class ProcessQuestionsJob implements ShouldQueue
                         'question_detail_id' => $questionDetailId,
                         'test_type' => TestType::TEST->value,
                         'question' => $qData['question'],
-                        'discrimination_index' => $qData['discrimination'] ?? null,
+                        'discrimination_index' => $qData['discrimination_index'] ?? null,
                         'difficulty_value'=> $qData['difficulty_value'] ?? null,
                         'difficulty_type' => $questionDifficulty,
                         'created_at' => now(),

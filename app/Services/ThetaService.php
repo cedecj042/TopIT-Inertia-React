@@ -18,11 +18,50 @@ class ThetaService
      *                         - 'difficulty' (float): The difficulty parameter (b).
      * @return float The estimated theta value.
      */
+    // public function estimateThetaMLE(float $initialTheta, array $responses): float
+    // {
+    //     $theta = $initialTheta;
+    //     $tolerance = 1e-5; // Convergence tolerance
+    //     $maxIterations = 100; // Maximum number of iterations
+
+    //     for ($iteration = 0; $iteration < $maxIterations; $iteration++) {
+    //         $numerator = 0.0;
+    //         $denominator = 0.0;
+
+    //         foreach ($responses as $response) {
+    //             $a = $response['discrimination'];
+    //             $b = $response['difficulty'];
+    //             $isCorrect = $response['is_correct'];
+
+    //             $pTheta = 1 / (1 + exp(-$a * ($theta - $b))); // P(\theta)
+    //             $qTheta = 1 - $pTheta; // Q(\theta)
+
+    //             // First derivative (gradient)
+    //             $numerator += $a * ($isCorrect - $pTheta);
+
+    //             // Second derivative (Hessian)
+    //             $denominator += $a * $a * $pTheta * $qTheta;
+    //         }
+
+    //         // Newton-Raphson update
+    //         $delta = $numerator / $denominator;
+    //         $theta += $delta;
+
+    //         // Check for convergence
+    //         if (abs($delta) < $tolerance) {
+    //             break;
+    //         }
+    //     }
+    //     return $theta;
+    // }
+
     public function estimateThetaMLE(float $initialTheta, array $responses): float
     {
         $theta = $initialTheta;
         $tolerance = 1e-5; // Convergence tolerance
-        $maxIterations = 20; // Maximum number of iterations
+        $maxIterations =100; // Maximum number of iterations
+        $thetaMin = -5.0; // Lower bound for theta
+        $thetaMax = 5.0;  // Upper bound for theta
 
         for ($iteration = 0; $iteration < $maxIterations; $iteration++) {
             $numerator = 0.0;
@@ -43,9 +82,17 @@ class ThetaService
                 $denominator += $a * $a * $pTheta * $qTheta;
             }
 
+            // Check for zero denominator
+            if (abs($denominator) < 1e-6) {
+                break; // Avoid division by zero or very small denominator
+            }
+
             // Newton-Raphson update
             $delta = $numerator / $denominator;
             $theta += $delta;
+
+            // Clamp theta to be within the range [-5, 5]
+            $theta = max($thetaMin, min($thetaMax, $theta));
 
             // Check for convergence
             if (abs($delta) < $tolerance) {
@@ -54,6 +101,7 @@ class ThetaService
         }
         return $theta;
     }
+
 
     /**
      * Save the updated theta value for a student in the database.
@@ -149,7 +197,7 @@ class ThetaService
      * @param Course $course The student object.
      * @return void
      */
-    
+
     public function initializeThetaForCourse(Course $course)
     {
         $students = Student::all();
@@ -169,16 +217,17 @@ class ThetaService
         }
     }
 
-    public function getTheta(int $course_id,int $student_id){
-        
+    public function getCurrentTheta(int $course_id, int $student_id)
+    {
+
         $studentCourseTheta = StudentCourseTheta::where('student_id', $student_id)
-        ->where('course_id', $course_id)
-        ->first();
-        
+            ->where('course_id', $course_id)
+            ->first();
+
         if ($studentCourseTheta) {
             return $studentCourseTheta->theta_score; // Return the theta value
         }
-    
+
         return 0.0;
     }
 }

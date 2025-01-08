@@ -50,7 +50,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('students');
-        Schema::dropIfExists('coordinators');
+        Schema::dropIfExists('admins');
         Schema::dropIfExists('student_course_thetas');
     }
 };

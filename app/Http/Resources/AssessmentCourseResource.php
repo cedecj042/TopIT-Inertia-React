@@ -27,6 +27,7 @@ class AssessmentCourseResource extends JsonResource
             'course' => new CourseResource(($this->whenLoaded('course'))),
             'assessment'=> new AssessmentResource($this->whenLoaded('assessment')),
             'assessment_items'=> AssessmentItemResource::collection($this->whenLoaded('assessment_items')),
+            'theta_score_logs'=> ThetaScoreLogResource::collection($this->whenLoaded('theta_score_logs')),
         ];
     }
 }

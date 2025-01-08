@@ -110,10 +110,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/{id}', [ModuleController::class, 'show'])->name('detail');
         Route::get('/edit/{id}', [ModuleController::class, 'edit'])->name('edit');
         Route::put('/update/{id}', [ModuleController::class, 'update'])->name('update');
-        Route::delete('/delete/module/{id}', [ModuleController::class, 'deleteModule'])->name('delete');
-        Route::delete('/delete/lesson/{id}', [ModuleController::class, 'deleteLesson'])->name('delete.lesson');
-        Route::delete('/delete/section/{id}', [ModuleController::class, 'deleteSection'])->name('delete.section');
-        Route::delete('/delete/subsection/{id}', [ModuleController::class, 'deleteSubsection'])->name('delete.subsection');
+        Route::delete('module/{id}', [ModuleController::class, 'delete'])->name('delete');
+        Route::delete('module/{type}/{id}', [ModuleController::class, 'destroyContent'])->name('content.destroy');
+
+        // Route::delete('/delete/module/{id}', [ModuleController::class, 'deleteModule'])->name('delete');
+        // Route::delete('/delete/lesson/{id}', [ModuleController::class, 'deleteLesson'])->name('delete.lesson');
+        // Route::delete('/delete/section/{id}', [ModuleController::class, 'deleteSection'])->name('delete.section');
+        // Route::delete('/delete/subsection/{id}', [ModuleController::class, 'deleteSubsection'])->name('delete.subsection');
 
     });
     Route::prefix('content')->name('content.')->group(function () {

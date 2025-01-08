@@ -21,19 +21,36 @@ export default function PdfForm({ course, onClose }) {
         const formData = new FormData();
         formData.append("course_id", data.course_id);
         formData.append("pdf_file", data.pdf_file[0]);
-        postRequest("admin.course.pdf.upload", formData, {
-            forceFormData: true,
-            onSuccess: () => {
-                toast.info("Uploading pdf...", { duration: 3000 });
-                reset();
-                onClose();
-            },
-            onError: (error)=>{
-                toast.error("Error uploading pdf..",{duration: 3000});
-                console.log(error);
-            }
-        });
+        // postRequest("admin.course.pdf.upload", formData, {
+        //     forceFormData: true,
+        //     onSuccess: () => {
+        //         toast.info("Uploading pdf...", { duration: 3000 });
+        //         reset();
+        //         onClose();
+        //     },
+        //     onError: (error)=>{
+        //         toast.error("Error uploading pdf..",{duration: 3000});
+        //         console.log(error);
+        //     }
+        // });
+        try {
+            await postRequest("admin.course.pdf.upload", formData, {
+                forceFormData: true,
+                onSuccess: () => {
+                    toast.success("PDF uploaded successfully! Processing will continue in the background.");
+                    reset();
+                    onClose();
+                },
+                onError: () => {
+                    toast.error("Failed to upload the PDF. Please try again.");
+                },
+            });
+        } catch (error) {
+            console.error("Unexpected error during upload:", error);
+            toast.error("An unexpected error occurred.");
+        }
     };
+    
 
     return (
         <>

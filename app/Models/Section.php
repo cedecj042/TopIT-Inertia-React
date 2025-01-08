@@ -16,6 +16,18 @@ class Section extends Model
 {
     use HasFactory;
     protected $primaryKey = 'section_id';
+    public $incrementing = false;
+    protected $keyType = 'string';
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($section) {
+            $lesson_id = $section->lesson_id;
+            $lastSection = Section::where('lesson_id', $lesson_id)->orderBy('section_id', 'desc')->first();
+            $section->section_id = $lastSection ? $lastSection->section_id + 1 : $lesson_id . '001';
+        });
+    }
     protected $fillable = [
         'lesson_id',
         'title',

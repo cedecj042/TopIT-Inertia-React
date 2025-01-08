@@ -6,98 +6,38 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\VectorRequest;
 use App\Http\Resources\ModuleResource;
 use App\Jobs\ProcessModule;
-use App\Models\Content;
 use App\Models\Course;
+use App\Models\Content;
 use App\Models\Module;
-use App\Models\Lesson;
-use App\Models\Section;
-use App\Models\Subsection;
-use Exception;
+use App\Services\ModuleService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ModuleController extends Controller
 {
-    protected function resolveModelClass($type)
-    {
-        $mapping = [
-            'Module' => Module::class,
-            'Lesson' => Lesson::class,
-            'Section' => Section::class,
-            'Subsection' => Subsection::class,
-        ];
+    protected $moduleService;
 
-        return $mapping[$type] ?? null;
-    }
-    protected function getModuleId($contentableType, $contentableId)
+    public function __construct(ModuleService $moduleService)
     {
-        if ($contentableType === 'Module') {
-            return $contentableId;
-        }
-        
-        $modelClass = $this->resolveModelClass($contentableType);
-        if (!$modelClass) {
-            throw new Exception('Invalid contentable_type');
-        }
-
-        $parentModel = $modelClass::findOrFail($contentableId);
-        return $parentModel->module->module_id; // Assumes `module` relationship exists in each model
+        $this->moduleService = $moduleService;
     }
 
     public function index()
     {
-        $query = Module::with(['course:course_id,title']);
-
-
-        if ($title = request('title')) {
-            $query->where('title', 'like', '%' . $title . '%');
-        }
-        // Filter by course_id if provided
-        if ($courseTitle = request('course')) {
-            // Query the course table to get the course_id based on the course title
-            $course = DB::table('courses')->where('title', 'like', '%' . $courseTitle . '%')->first();
-
-            if ($course) {
-                $query->where('course_id', $course->course_id);
-            } else {
-                $query->whereNull('course_id');
-            }
-        }
-
-        $perPage = request('items', 5);
-        $modules = $query->paginate($perPage)->onEachSide(1);
-
-        $title =  DB::table('courses')->distinct()->pluck('title');
-        $filters = [
-            'courses' => $title
-        ];
+        $modules = $this->moduleService->getFilteredModules(request());
+        Log::info($modules['data']);
         return Inertia::render('Admin/Modules/Module', [
             'title' => 'Admin Module',
-            'modules' => ModuleResource::collection($modules),
-            'filters' => $filters,
+            'modules' => ModuleResource::collection($modules['data']),
+            'filters' => $modules['filters'],
             'queryParams' => request()->query() ?: null,
         ]);
     }
 
     public function show(string $id)
     {
-        // Define a closure to apply ordering by 'order' column
-        $orderAttachments = function ($query) {
-            $query->orderBy('order');
-        };
-
-        // Eager load relationships with ordered attachments
-        $module = Module::with([
-            'course:course_id,title', // Load only necessary columns from course
-            'contents' => $orderAttachments,
-            'lessons.contents' => $orderAttachments,
-            'lessons.sections.contents' => $orderAttachments,
-            'lessons.sections.subsections.contents' => $orderAttachments,
-        ])->findOrFail($id);
-
-        // Return the Inertia render with the module details
+        $module = $this->moduleService->getModuleWithDetails($id);
         return Inertia::render('Admin/Modules/ModuleDetail', [
             'title' => 'Admin Module',
             'module' => new ModuleResource($module)
@@ -106,120 +46,82 @@ class ModuleController extends Controller
 
     public function edit(string $id)
     {
-        // Define a closure to apply ordering by 'order' column
-        $orderAttachments = function ($query) {
-            $query->orderBy('order');
-        };
-        // Eager load all contents at each level without filtering by type
-        $module = Module::with([
-            'course:course_id,title', // Load only necessary columns from course
-            'contents' => $orderAttachments,
-            'lessons.contents' => $orderAttachments,
-            'lessons.sections.contents' => $orderAttachments,
-            'lessons.sections.subsections.contents' => $orderAttachments,
-        ])->findOrFail($id);
-
-        // Return the Inertia render with the module details
+        $module = $this->moduleService->getModuleWithDetails($id);
         return Inertia::render('Admin/Modules/ModuleEdit', [
             'title' => 'Admin Module',
             'module' => new ModuleResource($module),
-            'queryParams' => request()->query() ? : null,
+            'queryParams' => request()->query() ?: null,
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-
     public function update(Request $request, $contentableId)
     {
-        // Validate the request data, making 'contents' optional
-        $validatedData = $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'contents' => 'nullable|array', // 'nullable' allows 'contents' to be empty
-            'contents.*.content_id' => 'required_with:contents|exists:contents,content_id', // only required if 'contents' is provided
-            'contents.*.order' => 'required_with:contents|integer', // only required if 'contents' is provided
+            'contents' => 'nullable|array',
+            'contents.*.content_id' => 'required_with:contents|exists:contents,content_id',
+            'contents.*.order' => 'required_with:contents|integer',
             'contentable_type' => 'required|string|in:Module,Lesson,Section,Subsection',
         ]);
 
-
-        // Use resolveModelClass to get the model class
-        $contentableClass = $this->resolveModelClass($validatedData['contentable_type']);
-        
-        if (!$contentableClass) {
-            Log::error('Invalid contentable_type');
-            throw new Exception('Invalid contentable_type');
-        }
-
-        // Find the contentable model by ID
-        $contentable = $contentableClass::findOrFail($contentableId);
-
-        // Update the title
-        $contentable->title = $validatedData['title'];
-        $contentable->save();
-
-        // Update the order of contents only if contents are provided
-        if (!empty($validatedData['contents'])) {
-            foreach ($validatedData['contents'] as $contentData) {
-                Content::where('content_id', $contentData['content_id'])
-                    ->update(['order' => $contentData['order']]);
-                // Log each content update
-                Log::info('Updated content order:', $contentData);
-            }
-        } else {
-            Log::info('No contents to update.');
-        }
-
-        $moduleId = $this->getModuleId($validatedData['contentable_type'],$contentableId);
-        Log::info($moduleId);
+        $moduleId = $this->moduleService->updateContentable($validated, $contentableId);
 
         return redirect()->route('admin.module.edit', [
             'id' => $moduleId,
             'contentableId' => $contentableId,
-            'contentableType' => $validatedData['contentable_type'],
+            'contentableType' => $validated['contentable_type'],
         ])->with('success', 'Updated Successfully');
     }
+    public function delete($id)
+    {
+        try {
+            // Fetch the module using the given ID
+            $module = Module::findOrFail($id);
 
-    public function deleteModule(int $id) {
+            // Perform deletion of the module
+            $module->delete();
 
-        $content = Module::findOrFail($id);
-        $content->delete();
-        
-        return redirect()->back()->with('success', 'Deleted Successfully');
-
-    }
-    public function deleteLesson(int $id) {
-
-        $content = Lesson::findOrFail($id);
-        $content->delete();
-        
-        return redirect()->back()->with('success', 'Deleted Successfully');
-
-    }
-    public function deleteSection(int $id) {
-
-        $content = Section::findOrFail($id);
-        $content->delete();
-        
-        return redirect()->back()->with('success', 'Deleted Successfully');
-
-    }
-    public function deleteSubsection(int $id) {
-
-        $content = Subsection::findOrFail($id);
-        $content->delete();
-        
-        return redirect()->back()->with('success', 'Deleted Successfully');
-
-    }
-    public function courses(){
-        $courses = Course::with('modules')->get();
-        return response()->json(['courses' => $courses]);
+            // Redirect back with success message
+            return redirect()->route('admin.module.index')->with('success', 'Module deleted successfully.');
+        } catch (\Exception $e) {
+            Log::error("Error deleting module: {$id}", ['error' => $e->getMessage()]);
+            // Redirect back with error message if there's an exception
+            return redirect()->back()->withErrors(['error' => 'Failed to delete the module.']);
+        }
     }
 
-    public function vectorize(VectorRequest $request){
-        $validate = $request->validated();
-        Log::info($request);
-        ProcessModule::dispatch($validate);
+
+    public function destroyContent($type, $id)
+    {
+        try {
+            // Resolve the model class dynamically
+            $modelClass = $this->moduleService->resolveModelClass(ucfirst($type));
+
+            if (!$modelClass) {
+                throw new \Exception('Invalid type specified.');
+            }
+
+            // Find and delete the model
+            $model = $modelClass::findOrFail($id);
+            $model->delete();
+
+            return redirect()->back()->with('success', ucfirst($type) . ' deleted successfully.');
+        } catch (\Exception $e) {
+            Log::error("Error deleting {$type}: ", ['error' => $e->getMessage()]);
+            return redirect()->back()->withErrors(['error' => 'Failed to delete the content.']);
+        }
+    }
+
+
+    public function courses()
+    {
+        return response()->json(['courses' => $this->moduleService->getCoursesWithModules()]);
+    }
+
+    public function vectorize(VectorRequest $request)
+    {
+        $validated = $request->validated();
+        Log::info($validated);
+        ProcessModule::dispatch($validated);
     }
 }

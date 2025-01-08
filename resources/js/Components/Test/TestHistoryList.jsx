@@ -5,7 +5,8 @@ export default function TestHistoryList ({ tests = [] }) {
     const isEmpty = !Array.isArray(tests) || tests.length === 0;;
     const {isProcessing,getRequest} = useRequest();
     const handleClick = (id)=>{
-        getRequest('pretest.review',id,{})
+        console.log(id);
+        getRequest('test.review',id,{})
     }
     return (
         <div>
@@ -38,19 +39,6 @@ export default function TestHistoryList ({ tests = [] }) {
                                         {test.total_items} ({test.percentage}%)
                                     </span>
                                 </div>
-                                {/* <div className="ms-3">
-                                    <Link
-                                        href={`/${
-                                            test.type === "Pretest"
-                                                ? "pretest"
-                                                : "test"
-                                        }/review/${test.assessment_id}`}
-                                        className="btn btn-link p-3"
-                                        title="Student Test"
-                                    >
-                                        <i className="h3 bi bi-play-circle-fill"></i>
-                                    </Link>
-                                </div> */}
                             </div>
                         </div>
                     </div>

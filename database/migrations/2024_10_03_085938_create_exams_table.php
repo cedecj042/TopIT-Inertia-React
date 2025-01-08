@@ -38,15 +38,15 @@ return new class extends Migration
             $table->id('assessment_item_id');
             $table->foreignID('assessment_course_id')->references('assessment_course_id')->on('assessment_courses')->cascadeOnDelete();
             $table->foreignID('question_id')->references('question_id')->on('questions')->cascadeOnDelete();
-            $table->json('participants_answer');
-            $table->integer(column: 'score');
+            $table->json('participants_answer')->nullable();
+            $table->integer(column: 'score')->default(0);
             $table->timestamps();
         });
         
         Schema::create('theta_score_logs',function (Blueprint $table){
             $table->id('theta_score_log_id');
             $table->foreignID('assessment_item_id')->references('assessment_item_id')->on('assessment_items')->cascadeOnDelete();
-            $table->foreignID('student_course_theta_id')->references('student_course_theta_id')->on('student_course_thetas')->cascadeOnDelete();
+            $table->foreignID('assessment_course_id')->references('assessment_course_id')->on('assessment_courses')->cascadeOnDelete();
             $table->float('previous_theta_score');
             $table->float('new_theta_score');
             $table->timestamps();

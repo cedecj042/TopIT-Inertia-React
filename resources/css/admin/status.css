@@ -1,0 +1,20 @@
+/* statusColors.css */
+.status-success {
+    background-color: rgb(222, 235, 222);
+    color: rgb(15, 85, 33);
+}
+
+.status-processing {
+    background-color: rgb(227, 237, 246);
+    color: rgb(14, 75, 141);
+}
+
+.status-uploading {
+    background-color: rgb(234, 234, 234);
+    color: rgb(97, 97, 97);
+}
+
+.status-failed {
+    background-color: rgb(255, 224, 224);
+    color: rgb(147, 35, 35);
+}

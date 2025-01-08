@@ -24,7 +24,12 @@ class AssessmentItem extends Model
     {
         return $this->belongsTo(Question::class, 'question_id', 'question_id');
     }
-    public function assessment_course(){
-        return $this->belongsTo(AssessmentCourse::class,'assessment_course_id','assessment_course_id');
+    public function assessment_course()
+    {
+        return $this->belongsTo(AssessmentCourse::class, 'assessment_course_id', 'assessment_course_id');
+    }
+    public function theta_score_log()
+    {
+        return $this->hasOne(ThetaScoreLog::class, 'assessment_item_id', 'assessment_item_id');
     }
 }

@@ -20,7 +20,9 @@ class PdfResource extends JsonResource
             'file_name' => $this->file_name,
             'status' => $this->status,
             'uploaded_by' => $this->uploaded_by,
-            'created_at'=>(new Carbon($this->created_at))->format('Y-m-d')
+            'created_at'=>(new Carbon($this->created_at))->format('Y-m-d'),
+            'updated_at'=>(new Carbon($this->updated_at))->format('Y-m-d'),
+            'course' => new CourseResource($this->whenLoaded('course')),
         ];
     }
 }

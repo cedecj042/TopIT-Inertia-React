@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PdfResource;
 use App\Http\Resources\StudentResource;
 use App\Http\Resources\UserResource;
 use App\Models\Course;
+use App\Models\Pdf;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -43,11 +45,14 @@ class DashboardController extends Controller
 
         $chartData = $this->prepareChartData($monthlyCounts);
 
+        $pdfs = Pdf::with('course')->orderBy('updated_at', 'desc')->take(3)->get();
+
         return Inertia::render(
             'Admin/Dashboard',[
                 'title' => 'Admin Dashboard',
                 'chartData' => $chartData,
                 'cards'=> $cards,
+                'pdfs'=> PdfResource::collection($pdfs),
             ]
         );
     }

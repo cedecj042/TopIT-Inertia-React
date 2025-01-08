@@ -37,7 +37,6 @@ class AdminUserController extends Controller
      */
     public function create(CoordinatorRequest $request)
     {
-        Log::info('im here ');
         $validated = $request->validated();
 
         $profileImage = $request->hasFile('profile_image')

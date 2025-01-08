@@ -10,6 +10,19 @@ class Module extends Model
 {
     use HasFactory;
     protected $primaryKey = 'module_id';
+    public $incrementing = false;
+    protected $keyType = 'string';
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($module) {
+            $course_id = $module->course_id;
+            $lastModule = Module::where('course_id', $course_id)->orderBy('module_id', 'desc')->first();
+            $module->module_id = $lastModule ? $lastModule->module_id + 1 : $course_id . '001';  // String manipulation for ID
+        });
+    }
+
     protected $fillable = [
         'course_id',
         'title',

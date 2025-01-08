@@ -18,6 +18,7 @@ class ModuleResource extends JsonResource
         return [
             'module_id' =>$this->module_id,
             'title' => $this->title,
+            'vectorized' => $this->vectorized,
             'created_at' => (new Carbon($this->created_at))->format('Y-m-d'),
             'course' => new CourseResource($this->whenLoaded('course')),
             'lessons' => LessonResource::collection($this->whenLoaded('lessons')),

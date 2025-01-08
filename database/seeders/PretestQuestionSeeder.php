@@ -33,21 +33,21 @@ class PretestQuestionSeeder extends Seeder
             ],
             'Overview of System Architecture' => [
                 ['What method is used to secure data by encoding it?', ['Encryption'], []], // Identification
-                ['What is a client-server architecture?', 'A network model with clients and servers.', ['A network model with clients and servers', 'An operating system model', 'A programming paradigm', 'A database structure']], // MC Single
+                ['What is a client-server architecture?', 'A network model with clients and servers', ['A network model with clients and servers', 'An operating system model', 'A programming paradigm', 'A database structure']], // MC Single
                 ['Which are types of system architecture?', ['Client-server', 'Peer-to-peer'], ['Client-server', 'Peer-to-peer', 'Distributed', 'Monolithic']], // MC Many
                 ['What does a system bus do?', 'Transfers data between components.', ['Transfers data between components.', 'Stores programs', 'Executes instructions', 'Monitors power usage']], // MC Single
                 ['Which are parts of a system architecture?', ['Processor', 'Memory'], ['Processor', 'Memory', 'Mouse', 'Monitor']], // MC Many
             ],
             'Understanding Information Security' => [
                 ['What does the acronym CPU stand for?', ['Central Processing Unit'], []], // Identification
-                ['What is a firewall?', 'A tool to monitor and control network traffic.', ['A tool to monitor and control network traffic', 'A database backup tool', 'A network cable', 'A power surge protector']], // MC Single
+                ['What is a firewall?', 'A tool to monitor and control network traffic', ['A tool to monitor and control network traffic', 'A database backup tool', 'A network cable', 'A power surge protector']], // MC Single
                 ['Which are information security threats?', ['Phishing', 'Ransomware'], ['Phishing', 'Ransomware', 'Firewall', 'Ethernet']], // MC Many
                 ['What is multi-factor authentication?', 'Using multiple methods to verify identity.', ['Using multiple methods to verify identity.', 'Encrypting passwords', 'Storing passwords securely', 'Tracking logins']], // MC Single
                 ['Which techniques improve security?', ['Encryption', 'Access control'], ['Encryption', 'Access control', 'Data duplication', 'Physical backups']], // MC Many
             ],
             'Understanding the IT Business and Ethics' => [
                 ['What database query language is used to manage and manipulate data?', ['SQL', 'Structured Query Language'], []],
-                ['What is corporate social responsibility (CSR)?', 'Managing a business to positively impact society.', ['Managing a business to positively impact society', 'A system for storing customer data', 'A tax management tool', 'A software licensing agreement']], // MC Single
+                ['What is corporate social responsibility (CSR)?', 'Managing a business to positively impact society', ['Managing a business to positively impact society', 'A system for storing customer data', 'A tax management tool', 'A software licensing agreement']], // MC Single
                 ['Which are IT ethical principles?', ['Confidentiality', 'Integrity'], ['Confidentiality', 'Integrity', 'Profitability', 'Growth']], // MC Many
                 ['What is data privacy?', 'Protecting personal information from misuse.', ['Protecting personal information from misuse.', 'Securing hardware.', 'Backing up software.', 'Encrypting files.']], // MC Single
                 ['Which are ethical IT issues?', ['Data misuse', 'Unlicensed software'], ['Data misuse', 'Unlicensed software', 'Slow networks', 'Large files']], // MC Many

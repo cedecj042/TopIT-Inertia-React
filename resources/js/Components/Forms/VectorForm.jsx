@@ -69,19 +69,31 @@ export default function VectorForm({ courses, closeModal }) {
             courses: {},
         };
 
+        // Object.keys(selectedCourses).forEach(courseId => {
+        //     console.log(courseId);
+        //     if (selectedCourses[courseId].checked) {
+        //         formData.courses[courseId] = Object.keys(selectedCourses[courseId].modules).filter(
+        //             moduleId => selectedCourses[courseId].modules[moduleId]
+        //         );
+        //     }
+        // });
         Object.keys(selectedCourses).forEach(courseId => {
-            if (selectedCourses[courseId].checked) {
-                formData.courses[courseId] = Object.keys(selectedCourses[courseId].modules).filter(
-                    moduleId => selectedCourses[courseId].modules[moduleId]
-                );
+            const selectedModules = Object.keys(selectedCourses[courseId].modules).filter(
+                moduleId => selectedCourses[courseId].modules[moduleId]
+            );
+            if (selectedModules.length > 0) {
+                formData.courses[courseId] = selectedModules;
             }
         });
+
+        // console.log("Form data to be sent:", formData);
         postRequest("admin.module.vectorize", formData, {
             onSuccess: () => {
                 toast.success('Successfully sent the request', { duration: 3000 });
                 closeModal();
             },
-            onError: () => {
+            onError: (data) => {
+                console.log(data);
                 toast.error('Failed to send the request', { duration: 3000 });
             }
         });
@@ -109,7 +121,7 @@ export default function VectorForm({ courses, closeModal }) {
                                         id={`course_${course.course_id}`}
                                         checked={selectedCourses[course.course_id]?.checked || false}
                                         onChange={() => handleCourseCheck(course.course_id)}
-                                        disabled={course.modules.length === 0}
+                                        disabled={course.modules.every(module => module.vectorized) ||course.modules.length === 0}
                                     />
                                     <label className="form-check-label fw-bold" htmlFor={`course_${course.course_id}`}>
                                         {course.title}
@@ -137,33 +149,39 @@ export default function VectorForm({ courses, closeModal }) {
                             {selectedCourses[course.course_id]?.showModules && course.modules.length > 0 && (
                                 <div className="materials-container" style={{ display: "block" }}>
                                     <hr className="my-2" />
-                                    {course.modules.map(module => (
-                                        <div
-                                            key={module.module_id}
-                                            className="form-check ps-5 pe-2 py-2 custom-card"
-                                            style={
-                                                selectedCourses[course.course_id]?.modules[module.module_id]
-                                                    ? checkedStyle
-                                                    : {}
-                                            }
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                className="form-check-input module-checkbox p-2"
-                                                id={`module_${module.module_id}-course_${course.course_id}`}
-                                                checked={
-                                                    selectedCourses[course.course_id]?.modules[module.module_id] || false
-                                                }
-                                                onChange={() => handleModuleCheck(course.course_id, module.module_id)}
-                                            />
-                                            <label
-                                                className="form-check-label"
-                                                htmlFor={`module_${module.module_id}-course_${course.course_id}`}
-                                            >
-                                                {module.title}
-                                            </label>
+                                    {course.modules.every(module => module.vectorized) ? (
+                                        <div className="ps-5 pe-2 py-2 custom-card text-muted">
+                                            All modules are vectorized
                                         </div>
-                                    ))}
+                                    ) : (
+                                        course.modules.filter(module => !module.vectorized).map(module => (
+                                            <div
+                                                key={module.module_id}
+                                                className="form-check ps-5 pe-2 py-2 custom-card"
+                                                style={
+                                                    selectedCourses[course.course_id]?.modules[module.module_id]
+                                                        ? checkedStyle
+                                                        : {}
+                                                }
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    className="form-check-input module-checkbox p-2"
+                                                    id={`module_${module.module_id}-course_${course.course_id}`}
+                                                    checked={
+                                                        selectedCourses[course.course_id]?.modules[module.module_id] || false
+                                                    }
+                                                    onChange={() => handleModuleCheck(course.course_id, module.module_id)}
+                                                />
+                                                <label
+                                                    className="form-check-label"
+                                                    htmlFor={`module_${module.module_id}-course_${course.course_id}`}
+                                                >
+                                                    {module.title}
+                                                </label>
+                                            </div>
+                                        ))
+                                    )}
                                 </div>
                             )}
 
@@ -174,7 +192,7 @@ export default function VectorForm({ courses, closeModal }) {
                             )}
                         </div>
                     ))}
-                    
+
                 </form>
             </div>
             <div className="modal-footer">

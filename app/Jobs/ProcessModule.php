@@ -103,11 +103,18 @@ class ProcessModule implements ShouldQueue
             // Use Laravel's Storage facade to store the file
             Storage::disk('local')->put("public/json/{$fileName}", $jsonData);
             Log::info("Sending all module data to FastAPI", ['module_data' => $allModulesData]);
-            
+
             // Send all module data to FastAPI for processing
             $result = $fastApiService->sendToFastAPI($allModulesData, 'add-modules/');
-
             if ($result) {
+                // Update each module's vectorized status
+                foreach ($allModulesData as $moduleData) {
+                    $module = Module::find($moduleData['module_id']);
+                    if ($module) {
+                        $module->vectorized = true;
+                        $module->save();
+                    }
+                }
                 Log::info('Data was successfully sent to FastAPI.');
                 $this->broadcastEvent(null, "Successfully vectorized selected modules", null);
             } else {
@@ -126,11 +133,14 @@ class ProcessModule implements ShouldQueue
     private function formatContents($contents)
     {
         return $contents->map(function ($content) {
+
+            $description = $this->sanitizeForJson($content->description ?? "");
+
             // Include basic fields for all content types
             $formattedContent = [
                 'content_id' => $content->content_id,
                 'type' => $content->type,
-                'description' => $content->description,
+                'description' =>  $description,
                 'order' => $content->order,
             ];
 
@@ -147,5 +157,9 @@ class ProcessModule implements ShouldQueue
         Log::info('starting the event');
         broadcast(new UploadEvent($info, $success, $error));
         Log::info('Event broadcasted');
+    }
+    private function sanitizeForJson($string)
+    {
+        return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
     }
 }

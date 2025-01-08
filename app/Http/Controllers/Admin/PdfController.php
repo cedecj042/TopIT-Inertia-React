@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PdfRequest;
 use App\Http\Requests\ProcessContentRequest;
 use App\Jobs\ProcessContentJob;
+use App\Jobs\ProcessModuleJob;
 use App\Jobs\ProcessPdfJob;
 use App\Models\Course;
 use App\Models\Pdf;
@@ -14,7 +15,9 @@ use App\Services\FastApiService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
+use PHPUnit\Event\Code\Throwable;
 
 class PdfController extends Controller
 {
@@ -34,7 +37,7 @@ class PdfController extends Controller
             $file = $request->file('pdf_file');
             $fileName = $file->getClientOriginalName();
             $filePath = $file->storeAs('', $fileName, 'pdfs');
-        
+
             Log::info('File stored at: ' . $filePath);
 
             $pdf = $this->savePdfToDatabase($request, $fileName, $filePath);
@@ -47,8 +50,8 @@ class PdfController extends Controller
             try {
                 $pdfFilePath = $fullPath;
                 ProcessPdfJob::dispatch($pdfFilePath, $fileName, $course->title, $course->course_id);
-            
-                return redirect()->back()->with(['message'=>'PDF uploaded successfully! Processing will continue in the background.']);
+
+                return redirect()->back()->with(['message' => 'PDF uploaded successfully! Processing will continue in the background.']);
             } catch (Exception $e) {
                 Log::error('Error dispatching PDF processing job: ' . $e->getMessage());
                 return redirect()->back()->withErrors(['error' => 'An error occurred while processing the PDF.']);
@@ -102,30 +105,30 @@ class PdfController extends Controller
      */
     public function delete($id)
     {
-        try{
+        try {
             $pdf = Pdf::findOrFail($id);
 
             $this->deletePdfFile($pdf);
             $this->deleteImagesViaFastAPI($pdf);
 
             $pdf->delete();
-            return redirect()->back()->with(['success'=> 'PDF and associated images deleted successfully']);
+            return redirect()->back()->with(['success' => 'PDF and associated images deleted successfully']);
 
-        }catch(Exception $e){
-            return redirect()->back()->withErrors(['error'=> 'Something went wrong during deletion of pdf.']);
+        } catch (Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Something went wrong during deletion of pdf.']);
 
         }
     }
 
-    public function process(ProcessContentRequest $request){
-        $validated = $request->validated();
-        try{
-            ProcessContentJob::dispatch($validated['course_id'],$validated['processed_data'],$validated['file_name']);
-        }catch(Exception $e){
-            Log::error('Error processing content:', ['exception' => $e->getMessage()]);
-            return redirect()->back()->withErrors(['error'=>'Failed to process content. Please try again.']);
-        }
-    }
+    // public function process(ProcessContentRequest $request){
+    //     $validated = $request->validated();
+    //     try{
+    //         ProcessContentJob::dispatch($validated['course_id'],$validated['processed_data'],$validated['file_name']);
+    //     }catch(Exception $e){
+    //         Log::error('Error processing content:', ['exception' => $e->getMessage()]);
+    //         return redirect()->back()->withErrors(['error'=>'Failed to process content. Please try again.']);
+    //     }
+    // }
 
     private function deletePdfFile(Pdf $pdf)
     {

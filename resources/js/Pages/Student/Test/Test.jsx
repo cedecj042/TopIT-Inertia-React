@@ -11,38 +11,54 @@ import Navbar from "@/Components/Navigation/Navbar";
 import "../../../../css/student/students.css";
 import "../../../../css/student/welcome.css";
 
-const Test = ({ assessment, question, thetaScores }) => {
+const Test = ({ assessment_item, thetaScores }) => {
     const { register, handleSubmit, setValue, watch } = useForm({
         defaultValues: {
             answers: {},
         },
     });
+    const assessment_course = assessment_item.data.assessment_course;
+    const assessment = assessment_course.assessment;
+    const { isProcessing, postRequest } = useRequest();
 
     const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1);
 
-    const [currentQuestion, setCurrentQuestion] = useState(question);
+    const [currentQuestion, setCurrentQuestion] = useState(assessment_item.data.question);
     const answers = watch("answers");
 
     const onSubmit = (data) => {
         // get the current question's answer
         console.log("current answer: ", data);
+        const answer = {
+            'assessment_id': assessment_course.assessment_id,
+            'assessment_item_id': assessment_item.data.assessment_item_id,
+            'question_id': assessment_item.data.question_id,
+            'answer': data.answers[currentQuestion.question_id]
+        };
         const currentQuestionAnswer = data.answers[currentQuestion.question_id];
 
-        router.post(
-            route("test.next-question"),
-            {
-                assessment_id: assessment.assessment_id,
-                question_id: currentQuestion.question_id,
-                answer: currentQuestionAnswer,
-            },
-            {
-                onSuccess: (page) => {
-                    setValue("answers", {});
-                    setCurrentQuestion(page.props.question);
-                    setCurrentQuestionNumber((prev) => prev + 1);
-                },
+        postRequest('test.next-question', answer, {
+            onSuccess: () => {
+                setValue("answers", {});
+                setCurrentQuestion(page.props.question);
+                setCurrentQuestionNumber((prev) => prev + 1);
             }
-        );
+        })
+        // router.post(
+        //     route("test.next-question"),
+        //     {
+        //         assessment_id: assessment_course.assessment_id,
+        //         question_id: currentQuestion.question_id,
+        //         answer: currentQuestionAnswer,
+        //     },
+        //     {
+        //         onSuccess: (page) => {
+        //             setValue("answers", {});
+        //             setCurrentQuestion(page.props.question);
+        //             setCurrentQuestionNumber((prev) => prev + 1);
+        //         },
+        //     }
+        // );
     };
 
     const isNextDisabled = () => {
@@ -113,7 +129,7 @@ const Test = ({ assessment, question, thetaScores }) => {
                         <div className="col-12 col-md-8 col-lg-6">
                             <h1 className="h3 mb-2">Assessment Test</h1>
                             <p className="text-muted small mb-5">
-                                {assessment.updated_at} {assessment.start_time}
+                                {assessment.updated_at} <span className="ms-2">{assessment.start_time}</span>
                             </p>
 
                             <form onSubmit={handleSubmit(onSubmit)}>

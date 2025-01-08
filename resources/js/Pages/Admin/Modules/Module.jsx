@@ -23,7 +23,6 @@ function Module({ title, modules, queryParams,filters }) {
         }
     };
     const closeModal = () => setShowModal(false);
-    console.log('rendering',title);
 
     return (
         <>
@@ -52,7 +51,7 @@ function Module({ title, modules, queryParams,filters }) {
                             <ModuleFilters filters={filters}/>
                             <ModuleTable data={modules.data}/>
                         </TableContext>
-                        <Pagination links={modules.meta.links} />
+                        <Pagination links={modules.meta.links} queryParams={queryParams} />
                     </div>
                 </div>
 

@@ -43,7 +43,7 @@ class ScoringService
     private function normalizeAnswer($answer): string
     {
         $answer = strtolower(trim((string) $answer));
-        return preg_replace('/\s+/', ' ', $answer); 
+        return preg_replace('/\s+/', ' ', $answer);
     }
 
     private function scoreMultipleChoiceMany(array $participantsAnswer, array $correctAnswer): int
@@ -65,7 +65,13 @@ class ScoringService
         foreach ($correctKeywords as $keyword) {
             $keyword = $this->normalizeAnswer($keyword);
 
-            if ($this->areFormsEquivalent($participantText, $keyword) || $this->containsKeyword($participantText, $keyword)) {
+            // Check for singular/plural equivalence first
+            if ($this->areFormsEquivalent($participantText, $keyword)) {
+                return 1; // Match found
+            }
+
+            // Check for keyword as a substring
+            if ($this->containsKeyword($participantText, $keyword)) {
                 return 1; // Match found
             }
         }
@@ -75,8 +81,14 @@ class ScoringService
 
     private function areFormsEquivalent(string $word1, string $word2): bool
     {
+        // Normalize input
+        $word1 = $this->normalizeAnswer($word1);
+        $word2 = $this->normalizeAnswer($word2);
+
         // Compare singular and plural forms
-        return Str::singular($word1) === Str::singular($word2) || Str::plural($word1) === Str::plural($word2);
+        return Str::singular($word1) === Str::singular($word2)
+            || Str::plural($word1) === Str::plural($word2)
+            || $word1 === $word2;
     }
 
     private function containsKeyword(string $text, string $keyword): bool

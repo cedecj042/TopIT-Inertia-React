@@ -41,7 +41,7 @@ function Course({ title, courses, queryParams}) {
                             <CourseFilters queryParams={queryParams}/>
                             <CourseTable data={courses.data}/>
                         </TableContext>
-                        <Pagination links={courses.meta.links} />
+                        <Pagination links={courses.meta.links} queryParams={queryParams}/>
                     </div>
                 </div>
 

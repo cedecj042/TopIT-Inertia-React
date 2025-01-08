@@ -13,16 +13,18 @@ class ThetaScoreLog extends Model
     protected $table = 'theta_score_logs';
 
     protected $fillable = [
-      'assessment_item_id',
-      'student_course_theta_id',
-      'previous_theta_score',
-      'new_theta_score',
+        'assessment_item_id',
+        'assessment_course_id',
+        'previous_theta_score',
+        'new_theta_score',
     ];
-    public function student_course_theta(){
-        return $this->belongsTo(StudentCourseTheta::class,'student_course_theta_id','student_course_theta_id');
+    public function assessment_course()
+    {
+        return $this->belongsTo(AssessmentCourse::class, 'assessment_course_id', 'assessment_course_id');
     }
 
-    public function assessment_items(){
-        return $this->hasMany(AssessmentItem::class,'assessment_id','assessment_id');
+    public function assessment_item()
+    {
+        return $this->belongsTo(AssessmentItem::class, 'assessment_item_id', 'assessment_item_id');
     }
 }

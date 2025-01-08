@@ -41,7 +41,7 @@ class CourseController extends Controller
     {
         $validatedData = $request->validated();
 
-        $exists = Course::where('title', $validatedData['title'])->exists();
+        $exists = Course::where('title', $validatedData['course_title'])->exists();
         if ($exists) {
             return back()->with('error', 'Course with the same name already exists.');
         }

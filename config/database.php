@@ -57,8 +57,16 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
+            // 'options' => extension_loaded('pdo_mysql') ? array_filter([
+            //     PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            // ]) : [],
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET time_zone='+00:00'",
+                PDO::ATTR_PERSISTENT => env('DB_PERSISTENT_CONNECTIONS', false),
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_TIMEOUT => 5, // Wait time to establish a connection
+                PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
             ]) : [],
         ],
 

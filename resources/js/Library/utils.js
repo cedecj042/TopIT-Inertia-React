@@ -77,3 +77,18 @@ export const formatFilterKey = (filterKey) => {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize each word
         .join(' '); // Join the words with spaces
 }
+
+export const getStatusClass = (status)=>{
+    switch (status) {
+      case 'Success':
+        return 'status-success';
+      case 'Processing':
+        return 'status-processing';
+      case 'Uploading':
+        return 'status-uploading';
+      case 'Failed':
+        return 'status-failed';
+      default:
+        return '';
+    }
+  }

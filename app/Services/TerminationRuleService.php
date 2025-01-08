@@ -11,7 +11,7 @@ class TerminationRuleService
     /**
      * Maximum number of questions in the test
      */
-    const MAX_QUESTIONS = 3;
+    public const MAX_QUESTIONS = 3;
 
     /**
      * Check if the test should terminate
@@ -19,20 +19,41 @@ class TerminationRuleService
      * @param Assessment $assessment
      * @return bool
      */
+    // public function shouldTerminateTest(Assessment $assessment): bool
+    // {
+    //     // Check if total items have reached the maximum
+    //     $totalItems = AssessmentItem::where(
+    //         'assessment_course_id',
+    //         $assessment->assessment_courses()->first()->assessment_course_id
+    //     )->count();
+
+    //     Log::info('CAT Termination Check', [
+    //         'total_items' => $totalItems,
+    //         'max_questions' => self::MAX_QUESTIONS
+    //     ]);
+
+    //     return $totalItems >= self::MAX_QUESTIONS;
+    // }
     public function shouldTerminateTest(Assessment $assessment): bool
     {
-        // Check if total items have reached the maximum
-        $totalItems = AssessmentItem::where('assessment_course_id', 
-            $assessment->assessment_courses()->first()->assessment_course_id
-        )->count();
+        // Define the maximum number of questions allowed per course
+        $maxQuestionsPerCourse = self::MAX_QUESTIONS;
 
+        // Check each assessment_course to see if they have reached the max limit
+        $allCoursesTerminated = $assessment->assessment_courses->every(function ($course) use ($maxQuestionsPerCourse) {
+            return $course->assessment_items->count() >= $maxQuestionsPerCourse;
+        });
+
+        // Log the termination check details
         Log::info('CAT Termination Check', [
-            'total_items' => $totalItems,
-            'max_questions' => self::MAX_QUESTIONS
+            'assessment_id' => $assessment->assessment_id,
+            'all_courses_terminated' => $allCoursesTerminated,
+            'max_questions_per_course' => $maxQuestionsPerCourse,
         ]);
 
-        return $totalItems >= self::MAX_QUESTIONS;
+        return $allCoursesTerminated;
     }
+
 
     /**
      * Get termination reason
