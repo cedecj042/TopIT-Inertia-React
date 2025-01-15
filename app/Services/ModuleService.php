@@ -7,6 +7,7 @@ use App\Models\Content;
 use App\Models\Module;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Log;
 
 class ModuleService
 {
@@ -25,6 +26,18 @@ class ModuleService
     {
         $query = Module::with(['course:course_id,title']);
 
+        $sort = $request->get('sort', ''); // Empty by default
+        $sortField = $sortDirection = null;  // Initialize sortField and sortDirection as null
+    
+        if (!empty($sort)) {
+            [$sortField, $sortDirection] = explode(':', $sort);
+    
+            // Ensure sortDirection is either 'asc' or 'desc'
+            if (!in_array($sortDirection, ['asc', 'desc'])) {
+                $sortDirection = null;
+            }
+        }
+        
         if ($title = $request->get('title')) {
             $query->where('title', 'like', "%$title%");
         }
@@ -33,15 +46,66 @@ class ModuleService
             $course = DB::table('courses')->where('title', 'like', "%$courseTitle%")->first();
             $query->where('course_id', $course ? $course->course_id : null);
         }
+        
+        if ($vectorized = $request->get('vectorized')) {
+            if (strtolower($vectorized) === 'saved') {
+                $query->where('vectorized', 1); // 1 for indexed
+            } elseif (strtolower($vectorized) === 'not saved') {
+                $query->where('vectorized', 0); // 0 for not indexed
+            }
+        }
+      
+        if (!empty($sortField) && !empty($sortDirection)) {
+            $query->orderBy($sortField, $sortDirection);
+        } else {
+            // Default sorting by `created_at` in descending order
+            $query->orderBy('created_at', 'desc');
+        }
+    
+
+        $filters = [
+            'courses' => Course::distinct()->pluck('title'),
+            'vectorized' => ['Saved', 'Not saved'], // Add vectorized filter options
+        ];
+  
 
         $perPage = $request->get('items', 5);
         return [
             'data' => $query->paginate($perPage)->onEachSide(1),
-            'filters' => ['courses' => Course::distinct()->pluck('title')],
+            'filters' => $filters,
         ];
     }
 
-    public function getModuleWithDetails($id)
+    function romanToInt($roman)
+{
+    $map = [
+        'I' => 1,
+        'V' => 5,
+        'X' => 10,
+        'L' => 50,
+        'C' => 100,
+        'D' => 500,
+        'M' => 1000,
+    ];
+
+    $result = 0;
+    $prevValue = 0;
+
+    for ($i = strlen($roman) - 1; $i >= 0; $i--) {
+        $currentValue = $map[$roman[$i]];
+        if ($currentValue >= $prevValue) {
+            $result += $currentValue;
+        } else {
+            $result -= $currentValue;
+        }
+        $prevValue = $currentValue;
+    }
+
+    return $result;
+}
+
+
+    public function getModuleWithDetails($module_id)
     {
         return Module::with([
             'course:course_id,title',
@@ -49,7 +113,7 @@ class ModuleService
             'lessons.contents' => fn($q) => $q->orderBy('order'),
             'lessons.sections.contents' => fn($q) => $q->orderBy('order'),
             'lessons.sections.subsections.contents' => fn($q) => $q->orderBy('order'),
-        ])->findOrFail($id);
+        ])->findOrFail($module_id);
     }
 
     public function updateContentable(array $data, int $id)

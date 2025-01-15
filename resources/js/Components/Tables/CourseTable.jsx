@@ -3,14 +3,15 @@ import { toast } from "sonner";
 import Table from "./Table";
 import { useContext, useState } from "react";
 import ContextProvider from "../Context/TableContext";
-import { useRequest } from "@/Library/hooks";
+import { useRequest, useSortState } from "@/Library/hooks";
 import Modal from "../Modal/Modal";
 import DeleteForm from "../Forms/DeleteForm";
 import EditcourseForm from "../Forms/EditCourseForm";
 
-export default function CourseTable({ data }) {
-    const { visibleColumns } = useContext(ContextProvider);
+export default function CourseTable({ data,queryParams }) {
+    const { state,dispatch,visibleColumns } = useContext(ContextProvider);
     const { isProcessing, deleteRequest, getRequest } = useRequest();
+    const { toggleTableSort} = useSortState(dispatch);
     const [modal, setModal] = useState(false);
     const [editModal, setEditModal] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState(null);
@@ -82,7 +83,7 @@ export default function CourseTable({ data }) {
 
     const viewCourse = (e, course) => {
         e.preventDefault();
-        getRequest("admin.course.detail", course.course_id, {
+        getRequest("admin.course.detail", {id:course.course_id, ...queryParams }, {
             onSuccess: (success) => {
                 console.log(success);
             },
@@ -97,6 +98,8 @@ export default function CourseTable({ data }) {
             <Table
                 data={data}
                 visibleColumns={visibleColumns}
+                sortState={state.sortState}
+                changeSort={toggleTableSort}
                 renderActions={renderActions}
                 keyField="course_id"
                 isRowClickable={true}

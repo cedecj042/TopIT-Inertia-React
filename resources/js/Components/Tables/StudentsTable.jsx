@@ -1,8 +1,7 @@
-import { router } from "@inertiajs/react";
 import Table from "./Table";
 import { useContext, useEffect } from "react";
 import ContextProvider from "../Context/TableContext";
-import { useSortState } from "@/Library/hooks";
+import { useRequest, useSortState } from "@/Library/hooks";
 
 export default function StudentsTable({
     data,
@@ -11,15 +10,20 @@ export default function StudentsTable({
     const keyField="student_id";
     const { state, dispatch,visibleColumns} = useContext(ContextProvider);
     const { toggleTableSort} = useSortState(dispatch);
-
+    const {getRequest,isProcessing} = useRequest();
     const onClick = (e, rowData) => {
         e.preventDefault();
-        router.get(
-            route("admin.student", {
-                student_id: rowData[keyField],
-                ...queryParams,
-            }),
-            { preserveState: true }
+        getRequest(
+            "admin.student", // The route name
+            { id: rowData[keyField], ...queryParams }, // Params for the route
+            {
+                onSuccess: (page) => {
+                    console.log("Request successful", page);
+                },
+                onError: (error) => {
+                    console.error("Request failed", error);
+                },
+            },
         );
     };
     

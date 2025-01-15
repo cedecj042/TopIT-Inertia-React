@@ -37,6 +37,7 @@ class GenerateQuestionJob implements ShouldQueue
 
         // Prepare the JSON content to send to FastAPI
         $jsonContent = json_encode($this->requestData, JSON_PRETTY_PRINT);
+        Log::info($jsonContent);
 
         // Send data to FastAPI
         $fastApiService->generateQuestions($jsonContent);

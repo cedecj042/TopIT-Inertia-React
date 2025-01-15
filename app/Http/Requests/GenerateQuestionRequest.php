@@ -24,14 +24,12 @@ class GenerateQuestionRequest extends FormRequest
         return [
             '*.course_id' => 'required|integer|min:1', // Validate course_id as a positive integer
             '*.course_title' => 'required|string|max:255', // Ensure course_title is a string and has a maximum length
-            '*.questions' => 'required|array', // Ensure "questions" is a required array
-            '*.questions.*.type' => 'required|string|max:255', // Ensure "type" is a required string
-            '*.questions.*.difficulty' => 'required|array', // Ensure "difficulty" is a required array
-            '*.questions.*.difficulty.numOfVeryEasy' => 'integer|min:0', // Validate "numOfVeryEasy" as an integer >= 0
-            '*.questions.*.difficulty.numOfEasy' => 'integer|min:0', // Validate "numOfEasy" as an integer >= 0
-            '*.questions.*.difficulty.numOfAverage' => 'integer|min:0', // Validate "numOfAverage" as an integer >= 0
-            '*.questions.*.difficulty.numOfHard' => 'integer|min:0', // Validate "numOfHard" as an integer >= 0
-            '*.questions.*.difficulty.numOfVeryHard' => 'integer|min:0', // Validate "numOfVeryHard" as an integer >= 0
+            '*.difficulty' => 'required|array', // Ensure difficulties is a required array
+            '*.difficulty.numOfVeryEasy' => 'integer|min:0', // Validate "Very Easy" as an integer >= 0
+            '*.difficulty.numOfEasy' => 'integer|min:0', // Validate "Easy" as an integer >= 0
+            '*.difficulty.numOfAverage' => 'integer|min:0', // Validate "Average" as an integer >= 0
+            '*.difficulty.numOfHard' => 'integer|min:0', // Validate "Hard" as an integer >= 0
+            '*.difficulty.numOfVeryHard' => 'integer|min:0', // Validate "Very Hard" as an integer >= 0
         ];
     }
 
@@ -47,23 +45,18 @@ class GenerateQuestionRequest extends FormRequest
             '*.course_title.required' => 'Each course must have a title.',
             '*.course_title.string' => 'The course_title must be a valid string.',
             '*.course_title.max' => 'The course_title must not exceed 255 characters.',
-            '*.questions.required' => 'The questions field is required for each course.',
-            '*.questions.array' => 'The questions field must be an array.',
-            '*.questions.*.type.required' => 'Each question must have a "type" field.',
-            '*.questions.*.type.string' => 'The "type" field must be a valid string.',
-            '*.questions.*.type.max' => 'The "type" field must not exceed 255 characters.',
-            '*.questions.*.difficulty.required' => 'Each question must have a "difficulty" field.',
-            '*.questions.*.difficulty.array' => 'The "difficulty" field must be an array.',
-            '*.questions.*.difficulty.numOfVeryEasy.integer' => 'The "numOfVeryEasy" value must be an integer.',
-            '*.questions.*.difficulty.numOfVeryEasy.min' => 'The "numOfVeryEasy" value must be at least 0.',
-            '*.questions.*.difficulty.numOfEasy.integer' => 'The "numOfEasy" value must be an integer.',
-            '*.questions.*.difficulty.numOfEasy.min' => 'The "numOfEasy" value must be at least 0.',
-            '*.questions.*.difficulty.numOfAverage.integer' => 'The "numOfAverage" value must be an integer.',
-            '*.questions.*.difficulty.numOfAverage.min' => 'The "numOfAverage" value must be at least 0.',
-            '*.questions.*.difficulty.numOfHard.integer' => 'The "numOfHard" value must be an integer.',
-            '*.questions.*.difficulty.numOfHard.min' => 'The "numOfHard" value must be at least 0.',
-            '*.questions.*.difficulty.numOfVeryHard.integer' => 'The "numOfVeryHard" value must be an integer.',
-            '*.questions.*.difficulty.numOfVeryHard.min' => 'The "numOfVeryHard" value must be at least 0.',
+            '*.difficulties.required' => 'The difficulties field is required for each course.',
+            '*.difficulties.array' => 'The difficulties field must be an array.',
+            '*.difficulties.Very Easy.integer' => 'The "Very Easy" value must be an integer.',
+            '*.difficulties.Very Easy.min' => 'The "Very Easy" value must be at least 0.',
+            '*.difficulties.Easy.integer' => 'The "Easy" value must be an integer.',
+            '*.difficulties.Easy.min' => 'The "Easy" value must be at least 0.',
+            '*.difficulties.Average.integer' => 'The "Average" value must be an integer.',
+            '*.difficulties.Average.min' => 'The "Average" value must be at least 0.',
+            '*.difficulties.Hard.integer' => 'The "Hard" value must be an integer.',
+            '*.difficulties.Hard.min' => 'The "Hard" value must be at least 0.',
+            '*.difficulties.Very Hard.integer' => 'The "Very Hard" value must be an integer.',
+            '*.difficulties.Very Hard.min' => 'The "Very Hard" value must be at least 0.',
         ];
     }
 

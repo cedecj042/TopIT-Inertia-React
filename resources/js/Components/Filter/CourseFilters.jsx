@@ -1,18 +1,27 @@
-import { useOtherState } from "@/Library/hooks";
+import { useOtherState, useSortState } from "@/Library/hooks";
 import TextInputFilter from "./Filters/TextInputFilter";
 import "../../../css/filter.css";
 import OtherFilter from "./Filters/otherFilter";
 import { useContext, useEffect } from "react";
 import ContextProvider from "../Context/TableContext";
+import ClearFunction from "./Filters/ClearFunction";
+import { INITIAL_COURSE_STATE } from "@/Library/filterState";
 
-export default function CourseFilters({}){  
+export default function CourseFilters({ }) {
 
-    const {state,dispatch,visibleColumns,onColumnChange} = useContext(ContextProvider);
-    const { handleInputChange,handleOtherChange,onKeyPress } = useOtherState(dispatch);
-    const {otherState} = state;
-    
-    return(
+    const { state, dispatch, visibleColumns, onColumnChange } = useContext(ContextProvider);
+    const { handleInputChange, handleOtherChange, onKeyPress } = useOtherState(dispatch);
+    const { otherState } = state;
+    const {handleClearSort} = useSortState(dispatch);
+
+    return (
         <>
+            <ClearFunction
+                currentState={state.sortState}
+                initialState={INITIAL_COURSE_STATE().sortState}
+                handleClearFunction={handleClearSort}
+                label={"sort"}
+            />
             <div className="row g-0 w-100">
                 <div className="col-md-8 col-lg-5 input-container mb-3">
                     <TextInputFilter

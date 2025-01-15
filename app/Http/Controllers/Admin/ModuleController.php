@@ -9,6 +9,7 @@ use App\Jobs\ProcessModule;
 use App\Models\Course;
 use App\Models\Content;
 use App\Models\Module;
+use App\Services\FastApiService;
 use App\Services\ModuleService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -23,10 +24,11 @@ class ModuleController extends Controller
         $this->moduleService = $moduleService;
     }
 
+
     public function index()
     {
         $modules = $this->moduleService->getFilteredModules(request());
-        Log::info($modules['data']);
+    
         return Inertia::render('Admin/Modules/Module', [
             'title' => 'Admin Module',
             'modules' => ModuleResource::collection($modules['data']),
@@ -35,18 +37,19 @@ class ModuleController extends Controller
         ]);
     }
 
-    public function show(string $id)
+    public function show(int $module_id)
     {
-        $module = $this->moduleService->getModuleWithDetails($id);
+        $module = $this->moduleService->getModuleWithDetails($module_id);
         return Inertia::render('Admin/Modules/ModuleDetail', [
             'title' => 'Admin Module',
+            'queryParams' => request()->query() ?: null,
             'module' => new ModuleResource($module)
         ]);
     }
 
-    public function edit(string $id)
+    public function edit(int $module_id)
     {
-        $module = $this->moduleService->getModuleWithDetails($id);
+        $module = $this->moduleService->getModuleWithDetails($module_id);
         return Inertia::render('Admin/Modules/ModuleEdit', [
             'title' => 'Admin Module',
             'module' => new ModuleResource($module),
@@ -72,19 +75,16 @@ class ModuleController extends Controller
             'contentableType' => $validated['contentable_type'],
         ])->with('success', 'Updated Successfully');
     }
-    public function delete($id)
+    public function delete(int $module_id)
     {
         try {
             // Fetch the module using the given ID
-            $module = Module::findOrFail($id);
-
-            // Perform deletion of the module
+            $module = Module::findOrFail($module_id);
             $module->delete();
-
             // Redirect back with success message
             return redirect()->route('admin.module.index')->with('success', 'Module deleted successfully.');
         } catch (\Exception $e) {
-            Log::error("Error deleting module: {$id}", ['error' => $e->getMessage()]);
+            Log::error("Error deleting module: {$module_id}", ['error' => $e->getMessage()]);
             // Redirect back with error message if there's an exception
             return redirect()->back()->withErrors(['error' => 'Failed to delete the module.']);
         }

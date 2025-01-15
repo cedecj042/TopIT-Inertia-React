@@ -3,10 +3,12 @@ import "../../../css/chart.css";
 import { router } from "@inertiajs/react";
 import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import ThetaScoreLine from "@/Components/Chart/ThetaScoreLine";
+import { useRequest } from "@/Library/hooks";
 function Student({ student, theta_score, queryParams }) {
-    console.log(student)
+    const {getRequest} = useRequest();
     const handleBackClick = () => {
-        router.get(route('admin.report', queryParams));
+        getRequest('admin.report',{...queryParams});
+        // router.get(route('admin.report', queryParams));
     };
     return (
         <>

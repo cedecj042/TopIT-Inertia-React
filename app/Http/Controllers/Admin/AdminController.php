@@ -8,10 +8,12 @@ use App\Http\Requests\LoginRequest;
 use App\Models\Admin;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Log\Logger;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use PHPUnit\TextUI\XmlConfiguration\Logging\Logging;
 
 
 class AdminController extends Controller
@@ -42,8 +44,10 @@ class AdminController extends Controller
         Log::warning('Admin authentication failed for username.', ['username' => $validated['username']]);
         return redirect()->back()->withErrors( ['error'=>'The provided credentials do not match our records.']);
     }
+
     public function update(AdminProfileEdit $request)
     {
+        Log::info('request receive to update');
         $validatedData = $request->validated();
     
         $user = User::findOrFail($validatedData["user_id"]);

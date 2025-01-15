@@ -76,11 +76,13 @@ export default function QuestionTable({
             },
         });
     };
+
     const viewQuestion = (e,rowData) => {
         e.preventDefault();
         openModal("view", rowData); // Open view modal on row click
     };
-    return(
+
+    return (
         <>  
             <Table
                 data={data}

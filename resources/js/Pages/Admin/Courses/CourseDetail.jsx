@@ -18,7 +18,7 @@ function CourseDetail({ title, course, pdfs, queryParams }) {
     
     const {isProcessing,getRequest} = useRequest();
     const handleBackClick = async () => {
-        getRequest('admin.course.index',queryParams);
+        getRequest('admin.course.index',{...queryParams});
     };
 
     return (

@@ -154,8 +154,8 @@ export const useRequest = () => {
 
     // Default Inertia options
     const defaultOptions = {
-        preserveScroll: false,
-        preserveState: false,
+        // preserveScroll: false,
+        // preserveState: false,
         // replace: false,
     };
 
@@ -207,11 +207,11 @@ export const useRequest = () => {
 
 
     // GET request handler
-    const getRequest = async (routeName, params = null, customCallbacks = {}, options = {}) => {
+    const getRequest = async (routeName, params = {}, customCallbacks = {}, options = {}) => {
         setIsProcessing(true);
         const requestOptions = { ...defaultOptions, ...options }; // Merge default options with custom options
-        const url = params ? route(routeName, { id: params }) : route(routeName);
-
+        // const url = params ? route(routeName, { id: params }) : route(routeName);
+        const url = route(routeName, params);
         try {
             await router.get(url, {
                 ...requestOptions, // Spread merged options here

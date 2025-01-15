@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\CourseController;
+use App\Http\Controllers\Admin\FastApiController;
 use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\PdfController;
 use App\Http\Controllers\Admin\QuestionController;
@@ -82,8 +83,9 @@ Route::middleware(['auth', 'student'])->group(function () {
 });
 
 // Admin
-Route::post('/admin/store-processed-pdf', [ProcessedPdfController::class, 'store'])->name('store-pdf');
-Route::post('/admin/store-questions', [QuestionController::class, 'store'])->name('store-questions');
+Route::post('/admin/store-processed-pdf', [FastApiController::class, 'storeProcessedPdf'])->name('store-pdf');
+Route::post('/admin/store-questions', [FastApiController::class, 'storeProcessedQuestion'])->name('store-questions');
+Route::post('/admin/update-module-status', [FastApiController::class, 'updateModuleStatus'])->name('update-module-status');
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::redirect('/', '/admin/dashboard');
@@ -95,9 +97,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::prefix('course')->name('course.')->group(function () {
         Route::get('/', [CourseController::class, 'index'])->name('index');
         Route::post('/add', [CourseController::class, 'add'])->name('add');
-        Route::get('/{course_id}', [CourseController::class, 'show'])->name('detail');
-        Route::put('/update/{course_id}', [CourseController::class, 'update'])->name('update');
-        Route::delete('/delete/{course_id}', [CourseController::class, 'delete'])->name('delete');
+        Route::get('/{id}', [CourseController::class, 'show'])->name('detail');
+        Route::put('/update/{id}', [CourseController::class, 'update'])->name('update');
+        Route::delete('/delete/{id}', [CourseController::class, 'delete'])->name('delete');
         Route::post('/pdf/upload', [PdfController::class, 'store'])->name('pdf.upload');
         Route::delete('/pdf/delete/{id}', [PdfController::class, 'delete'])->name('pdf.delete');
     });
@@ -149,7 +151,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     
     Route::get('/report',[ReportController::class,'index'])->name('report');
     // Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
-    Route::get('/student/{student_id}', [ReportController::class, 'student'])->name('student');
+    Route::post('/profile/update',[AdminController::class,'update'])->name('profile.update');
+    Route::get('/student/{id}', [ReportController::class, 'student'])->name('student');
 });
 
 Route::get('/access-denied', [ErrorController::class, 'index'])->name('access.denied');

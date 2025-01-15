@@ -14,6 +14,7 @@ export default function MainLayout({ children }) {
                         fontSize: "1rem",
                     },
                 }}
+                closeButton 
             />
             {children}
         </>

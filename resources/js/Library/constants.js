@@ -8,15 +8,16 @@ export const STUDENT_COLUMN = [
 
 export const COURSE_COLUMN = [
     {key:'course_id',label:'ID', sortable:false,visible:true},
-    {key:'title',label:'Title', sortable:false,visible:true},
+    {key:'title',label:'Title', sortable:true,visible:true},
     {key:'description',label:'Description', sortable:false,visible:true},
-    {key:'created_at',label:'Created At', sortable:false,visible:true}
+    {key:'created_at',label:'Created At', sortable:true,visible:true}
 ]
 export const MODULE_COLUMN = [
     {key:'module_id',label:'ID', sortable:false,visible:true},
-    {key:'title',label:'Title', sortable:false,visible:true},
+    {key:'title',label:'Title', sortable:true,visible:true},
     {key:'course.title',label:'Course', sortable:false,visible:true},
-    {key:'created_at',label:'Created At', sortable:false,visible:true}
+    {key:'vectorized',label:'Vectorized', sortable:false,visible:false},
+    {key:'created_at',label:'Created At', sortable:true,visible:true}
 ]
 
 export const PDF_COLUMN = [
@@ -63,7 +64,7 @@ export const STUDENT_THETA_SCORE_COLUMN = [
 ]
 
 
-export const STUDENT_FILTER_COMPONENT = ["students","filters","queryParams"]
+export const STUDENT_FILTER_COMPONENT = ["students","students.meta","filters","queryParams"]
 export const COURSE_FILTER_COMPONENT = ["courses","courses.meta","queryParams"]
 export const MODULE_FILTER_COMPONENT = ["modules","modules.meta","filters","queryParams"]
 export const QUESTION_FILTER_COMPONENT = ["questions","questions.meta","filters","queryParams"]

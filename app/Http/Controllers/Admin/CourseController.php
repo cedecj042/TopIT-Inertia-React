@@ -9,12 +9,19 @@ use App\Http\Resources\PdfResource;
 use App\Jobs\ProcessCourse;
 use App\Models\Course;
 use App\Models\Pdf;
+use App\Services\FastApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class CourseController extends Controller
 {
+    protected $fastAPIService;
+
+    public function __construct(FastApiService $fastAPIService)
+    {
+        $this->fastAPIService = $fastAPIService;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -24,6 +31,23 @@ class CourseController extends Controller
         
         if($title = request('title')){
             $query->where('title', 'like', '%' . $title . '%');
+        }
+
+        $sort = request()->query('sort', ''); // Empty by default
+        $sortField = $sortDirection = null;  // Initialize sortField and sortDirection as null
+
+        // Only split if $sort is not empty
+        if (!empty($sort)) {
+            [$sortField, $sortDirection] = explode(':', $sort);
+                
+            // Ensure sortDirection is either 'asc' or 'desc', otherwise set it to null
+            if (!in_array($sortDirection, ['asc', 'desc'])) {
+                $sortDirection = null;
+            }
+        }
+
+        if (!empty($sortField) && !empty($sortDirection)) {
+            $query->orderBy($sortField, $sortDirection);
         }
 
         $perPage = request('items', 5);
@@ -60,10 +84,10 @@ class CourseController extends Controller
     }
 
 
-    public function show(string $course_id)
+    public function show(int $id)
     {
         //
-        $course = Course::findOrFail($course_id);
+        $course = Course::findOrFail($id);
         $pdfs = $course->pdfs()->paginate(5)->onEachSide(1);
         
         return Inertia::render('Admin/Courses/CourseDetail',[
@@ -74,7 +98,7 @@ class CourseController extends Controller
         ]);
     }
 
-    public function update(CourseRequest $request, string $id)
+    public function update(CourseRequest $request, int $id)
     {
         $validated = $request->validated();
 
@@ -93,9 +117,9 @@ class CourseController extends Controller
         return back()->with('success', 'Course updated successfully.');
     }
 
-    public function delete(string $course_id)
+    public function delete(int $id)
     {
-        $course = Course::findOrFail($course_id);
+        $course = Course::findOrFail($id);
         // Check if there are questions associated with the course
         if ($course->questions()->count() > 0) {
             return back()->with('error', 'Cannot delete course. Questions are tied to this course.');

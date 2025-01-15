@@ -23,7 +23,6 @@ function Module({ title, modules, queryParams,filters }) {
         }
     };
     const closeModal = () => setShowModal(false);
-
     return (
         <>
             <div className="container-fluid p-5">
@@ -49,7 +48,7 @@ function Module({ title, modules, queryParams,filters }) {
                             column={MODULE_COLUMN}
                             >
                             <ModuleFilters filters={filters}/>
-                            <ModuleTable data={modules.data}/>
+                            <ModuleTable data={modules.data} queryParams={queryParams}/>
                         </TableContext>
                         <Pagination links={modules.meta.links} queryParams={queryParams} />
                     </div>

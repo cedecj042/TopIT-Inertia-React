@@ -1,6 +1,5 @@
-import { router } from "@inertiajs/react";
 import Table from "./Table";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import ContextProvider from "../Context/TableContext";
 import { useRequest, useSortState } from "@/Library/hooks";
 import DeleteForm from "../Forms/DeleteForm";
@@ -8,9 +7,10 @@ import Modal from "../Modal/Modal";
 import { toast } from "sonner";
 
 export default function ModuleTable({ data, queryParams }) {
+    console.log(queryParams)
     const keyField = "module_id";
     const { state, dispatch, visibleColumns } = useContext(ContextProvider);
-    const { changeSort } = useSortState(dispatch);
+    const { toggleTableSort } = useSortState(dispatch);
     const { isProcessing, getRequest, deleteRequest } = useRequest();
     const [selectedModule, setSelectedModule] = useState();
 
@@ -20,6 +20,7 @@ export default function ModuleTable({ data, queryParams }) {
         setShowModal(true);
     };
     const closeModal = () => setShowModal(false);
+
 
     const renderActions = (rowData) => {
         return (
@@ -60,6 +61,9 @@ export default function ModuleTable({ data, queryParams }) {
             onError: (error) => {
                 console.log(error);
             },
+        },{
+            // preserveScroll: true,
+            // preserveState: true,
         });
     };
 
@@ -77,7 +81,7 @@ export default function ModuleTable({ data, queryParams }) {
 
     const viewModule = (e, module) => {
         e.preventDefault();
-        getRequest("admin.module.detail", module.module_id, {
+        getRequest("admin.module.detail", { id: module.module_id, ...queryParams }, {
             onSuccess: (success) => {
                 console.log(success);
             },
@@ -85,6 +89,9 @@ export default function ModuleTable({ data, queryParams }) {
                 console.log(error);
                 // toast.error(error, { duration: 3000 });
             },
+        },{
+            // preserveScroll: true,
+            // preserveState: true,
         });
     };
 
@@ -93,6 +100,8 @@ export default function ModuleTable({ data, queryParams }) {
             <Table
                 data={data}
                 isRowClickable={true}
+                sortState={state.sortState}
+                changeSort={toggleTableSort}
                 handleClick={viewModule}
                 visibleColumns={visibleColumns}
                 renderActions={renderActions}

@@ -10,7 +10,7 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 function ModuleDetail({ module, queryParams }) {
-    console.log(module.data)
+    console.log(queryParams)
     const { isProcessing, getRequest } = useRequest();
 
     useEffect(() => {
@@ -33,7 +33,10 @@ function ModuleDetail({ module, queryParams }) {
     }, [module]);
 
     const handleBackClick = async () => {
-        getRequest("admin.module.index", queryParams);
+        getRequest("admin.module.index", {...queryParams},{},{
+            // preserveScroll: true,
+            // preserveState: true,
+        });
     };
 
     const highlightNavItem = (index) => {

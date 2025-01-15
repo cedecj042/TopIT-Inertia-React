@@ -230,4 +230,8 @@ class ThetaService
 
         return 0.0;
     }
+    public function cleanupThetaForDeletedCourse(Course $course)
+    {
+        StudentCourseTheta::where('course_id', $course->course_id)->delete();
+    }
 }

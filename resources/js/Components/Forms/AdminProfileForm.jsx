@@ -52,14 +52,15 @@ export default function AdminProfileForm({ onclose, auth }) {
         });
 
         postRequest("admin.profile.update",formData, {
-            onSuccess: () => {
+            onSuccess: (data) => {
+                console.log(data)
                 toast.success("Profile updated successfully!");
                 onclose();
             },
             onError: (error) => {
                 toast.error("Failed to update profile. Please check the form.");
                 console.error(error);
-            },
+            }
         });
     }
 

@@ -39,7 +39,7 @@ function Course({ title, courses, queryParams}) {
                             column={COURSE_COLUMN}
                             >
                             <CourseFilters queryParams={queryParams}/>
-                            <CourseTable data={courses.data}/>
+                            <CourseTable data={courses.data} queryParams={queryParams}/>
                         </TableContext>
                         <Pagination links={courses.meta.links} queryParams={queryParams}/>
                     </div>

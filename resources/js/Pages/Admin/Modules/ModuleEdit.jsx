@@ -83,7 +83,10 @@ function ModuleEdit({ module, queryParams = {} }) {
     }, [module, safeQueryParams]);
 
     const handleBackClick = async () => {
-        getRequest("admin.module.index", {});
+        getRequest("admin.module.index", {},{
+            preserveScroll: true,
+            preserveState: true,
+        });
     };
 
     const handleTabClick = (item, type) => {

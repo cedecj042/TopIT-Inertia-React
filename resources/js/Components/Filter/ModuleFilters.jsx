@@ -6,7 +6,7 @@ import { INITIAL_MODULE_STATE } from "@/Library/filterState";
 import OtherFilter from "@/Components/Filter/Filters/OtherFilter";
 import { useContext } from "react";
 import ContextProvider from "../Context/TableContext";
-import { useFilterState, useOtherState } from "@/Library/hooks";
+import { useFilterState, useOtherState, useSortState } from "@/Library/hooks";
 
 export default function ModuleFilters({ filters }) {
     const { state, dispatch, visibleColumns, onColumnChange } =
@@ -14,13 +14,19 @@ export default function ModuleFilters({ filters }) {
     const { handleClearFilter, handleFilterChange } = useFilterState(dispatch);
     const { handleInputChange, handleOtherChange, onKeyPress } =
         useOtherState(dispatch);
-    const { filterState, otherState } = state;
+    const { handleClearSort } = useSortState(dispatch);
+    const { filterState,sortState, otherState } = state;
 
     const FILTER_DATA = [
         {
             data: filters.courses,
             filterKey: "course",
             keyValue: filterState.course,
+        },
+        {
+            data: filters.vectorized,
+            filterKey: "vectorized",
+            keyValue: filterState.vectorized,
         },
     ];
 
@@ -31,6 +37,12 @@ export default function ModuleFilters({ filters }) {
                 initialState={INITIAL_MODULE_STATE().filterState}
                 handleClearFunction={handleClearFilter}
                 label={"filter"}
+            />
+            <ClearFunction
+                currentState={sortState}
+                initialState={INITIAL_MODULE_STATE().sortState}
+                handleClearFunction={handleClearSort}
+                label={"sort"}
             />
             <div className="row g-0 w-100">
                 <div className="col-lg-5 col-md-12 input-container mb-3">

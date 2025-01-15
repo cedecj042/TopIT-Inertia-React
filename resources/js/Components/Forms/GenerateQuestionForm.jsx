@@ -5,7 +5,7 @@ import "../../../css/admin/question.css";
 
 export default function GenerateQuestionForm({ data, closeModal }) {
     const courses = data.courses;
-    const difficulties = data.difficulty; // ['Very Easy', 'Easy', 'Average', 'Hard', 'Very Hard']
+    const difficulties = data.difficulty;
     const { isProcessing, postRequest } = useRequest();
     const [selectedCourses, setSelectedCourses] = useState([]);
 
@@ -19,62 +19,28 @@ export default function GenerateQuestionForm({ data, closeModal }) {
                 ...prevState,
                 {
                     course_id: courseId,
-                    types: {},
+                    difficulties: difficulties.reduce((acc, difficulty) => {
+                        acc[difficulty] = 0; // Initialize difficulty count to 0
+                        return acc;
+                    }, {}),
                 },
             ];
         });
     };
 
-    const handleQuestionTypeCheck = (courseId, questionType) => {
+    const handleDifficultyInput = (courseId, difficulty, value) => {
         setSelectedCourses((prevState) => {
             const courseIndex = prevState.findIndex(course => course.course_id === courseId);
             if (courseIndex > -1) {
                 const course = prevState[courseIndex];
-                const newTypes = { ...course.types };
-
-                if (newTypes[questionType]) {
-                    delete newTypes[questionType];
-                } else {
-                    newTypes[questionType] = {
-                        difficulties: difficulties.reduce((acc, difficulty) => {
-                            acc[difficulty] = 0; // Initialize difficulty count to 0
-                            return acc;
-                        }, {}),
-                    };
-                }
-
-                // Update the state
-                return [
-                    ...prevState.slice(0, courseIndex),
-                    { ...course, types: newTypes },
-                    ...prevState.slice(courseIndex + 1),
-                ];
-            }
-            return prevState;
-        });
-    };
-
-    const handleDifficultyInput = (courseId, questionType, difficulty, value) => {
-        setSelectedCourses((prevState) => {
-            const courseIndex = prevState.findIndex(course => course.course_id === courseId);
-            if (courseIndex > -1) {
-                const course = prevState[courseIndex];
-                const newTypes = { ...course.types };
-                const newDifficulties = { ...newTypes[questionType].difficulties };
-
+                const newDifficulties = { ...course.difficulties };
                 newDifficulties[difficulty] = parseInt(value, 10) || 0;
 
                 return [
                     ...prevState.slice(0, courseIndex),
                     {
                         ...course,
-                        types: {
-                            ...newTypes,
-                            [questionType]: {
-                                ...newTypes[questionType],
-                                difficulties: newDifficulties,
-                            },
-                        },
+                        difficulties: newDifficulties,
                     },
                     ...prevState.slice(courseIndex + 1),
                 ];
@@ -89,19 +55,16 @@ export default function GenerateQuestionForm({ data, closeModal }) {
         const formData = selectedCourses.map((course) => ({
             course_id: course.course_id,
             course_title: courses.find(c => c.course_id === course.course_id)?.title || "Unknown Title",
-            questions: Object.entries(course.types).map(([typeKey, typeData]) => ({
-                type: typeKey,
-                difficulty: {
-                    numOfVeryEasy: typeData.difficulties["Very Easy"] || 0,
-                    numOfEasy: typeData.difficulties["Easy"] || 0,
-                    numOfAverage: typeData.difficulties["Average"] || 0,
-                    numOfHard: typeData.difficulties["Hard"] || 0,
-                    numOfVeryHard: typeData.difficulties["Very Hard"] || 0,
-                },
-            })),
+            difficulty: {
+                numOfVeryEasy: course.difficulties["Very Easy"] || 0,
+                numOfEasy: course.difficulties["Easy"] || 0,
+                numOfAverage: course.difficulties["Average"] || 0,
+                numOfHard: course.difficulties["Hard"] || 0,
+                numOfVeryHard: course.difficulties["Very Hard"] || 0,
+            },
         }));
 
-        console.log("Prepared FormData:", formData);
+        console.log("Prepared FormData:", JSON.stringify(formData, null, 2));
 
         postRequest("admin.question.generate", formData, {
             onSuccess: () => {
@@ -143,63 +106,35 @@ export default function GenerateQuestionForm({ data, closeModal }) {
                                         <table className="table">
                                             <thead>
                                                 <tr>
-                                                    <th>Question Type</th>
                                                     {difficulties.map((difficulty) => (
                                                         <th key={difficulty}>{difficulty}</th>
                                                     ))}
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {data.question_detail_types.map((type) => (
-                                                    <tr key={type}>
-                                                        <td className="align-content-center px-3" style={{ width: "20rem" }}>
+                                                <tr>
+                                                    {difficulties.map((difficulty) => (
+                                                        <td key={difficulty}>
                                                             <input
-                                                                type="checkbox"
-                                                                className="form-check-input custom-check me-2"
-                                                                id={`type_${type}_course_${course.course_id}`}
-                                                                onChange={() =>
-                                                                    handleQuestionTypeCheck(course.course_id, type)
+                                                                type="number"
+                                                                className="form-control"
+                                                                min="0"
+                                                                step="1"
+                                                                defaultValue="0"
+                                                                disabled={
+                                                                    !selectedCourses.some(selected => selected.course_id === course.course_id)
                                                                 }
-                                                                checked={
-                                                                    selectedCourses.some(selected => 
-                                                                        selected.course_id === course.course_id && 
-                                                                        selected.types[type]
+                                                                onChange={(e) =>
+                                                                    handleDifficultyInput(
+                                                                        course.course_id,
+                                                                        difficulty,
+                                                                        e.target.value
                                                                     )
                                                                 }
                                                             />
-                                                            <label
-                                                                htmlFor={`type_${type}_course_${course.course_id}`}
-                                                            >
-                                                                {type}
-                                                            </label>
                                                         </td>
-                                                        {difficulties.map((difficulty) => (
-                                                            <td key={difficulty}>
-                                                                <input
-                                                                    type="number"
-                                                                    className="form-control"
-                                                                    min="0"
-                                                                    step="1"
-                                                                    defaultValue="0"
-                                                                    disabled={
-                                                                        !selectedCourses.some(selected => 
-                                                                            selected.course_id === course.course_id && 
-                                                                            selected.types[type]
-                                                                        )
-                                                                    }
-                                                                    onChange={(e) =>
-                                                                        handleDifficultyInput(
-                                                                            course.course_id,
-                                                                            type,
-                                                                            difficulty,
-                                                                            e.target.value
-                                                                        )
-                                                                    }
-                                                                />
-                                                            </td>
-                                                        ))}
-                                                    </tr>
-                                                ))}
+                                                    ))}
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </div>

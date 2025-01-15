@@ -106,20 +106,28 @@ class ProcessModule implements ShouldQueue
 
             // Send all module data to FastAPI for processing
             $result = $fastApiService->sendToFastAPI($allModulesData, 'add-modules/');
+            
+            // if ($result) {
+            //     // Update each module's vectorized status
+            //     foreach ($allModulesData as $moduleData) {
+            //         $module = Module::find($moduleData['module_id']);
+            //         if ($module) {
+            //             $module->vectorized = true;
+            //             $module->save();
+            //         }
+            //     }
+            //     Log::info('Data was successfully sent to FastAPI.');
+            //     $this->broadcastEvent(null, "Successfully vectorized selected modules", null);
+            // } else {
+            //     Log::warning('Data failed to send to FastAPI.');
+            //     $this->broadcastEvent(null, null, "Failed to process modules.");
+            // }
             if ($result) {
-                // Update each module's vectorized status
-                foreach ($allModulesData as $moduleData) {
-                    $module = Module::find($moduleData['module_id']);
-                    if ($module) {
-                        $module->vectorized = true;
-                        $module->save();
-                    }
-                }
-                Log::info('Data was successfully sent to FastAPI.');
-                $this->broadcastEvent(null, "Successfully vectorized selected modules", null);
+                Log::info('Data sent to FastAPI successfully. Waiting for vectorization callback.');
+                $this->broadcastEvent(null, "Modules are being vectorized...", null);
             } else {
                 Log::warning('Data failed to send to FastAPI.');
-                $this->broadcastEvent(null, null, "Failed to process modules.");
+                $this->broadcastEvent(null, null, "Failed to send data to FastAPI.");
             }
         } catch (\Exception $e) {
             Log::error('Error processing course: ' . $e->getMessage());
@@ -127,9 +135,6 @@ class ProcessModule implements ShouldQueue
         }
     }
 
-    /**
-     * Helper function to format contents based on content type
-     */
     private function formatContents($contents)
     {
         return $contents->map(function ($content) {

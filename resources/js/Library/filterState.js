@@ -8,6 +8,10 @@ export const INITIAL_STUDENT_STATE = (queryParams = {}) => ({
         items: queryParams?.items || "",
     },
     sortState: (() => {
+        if (queryParams?.sort) {
+            const [field, direction] = queryParams.sort.split(":"); // Split sort into field and direction
+            return `${field || ""}:${direction || ""}`;
+        }
         const field = queryParams?.field || "";
         const direction = queryParams?.direction || "";
         return `${field}:${direction}`;
@@ -22,6 +26,10 @@ export const INITIAL_COURSE_STATE = (queryParams = {}) => ({
         items: queryParams?.items || "",
     },
     sortState:(() => {
+        if (queryParams?.sort) {
+            const [field, direction] = queryParams.sort.split(":"); // Split sort into field and direction
+            return `${field || ""}:${direction || ""}`;
+        }
         const field = queryParams?.field || "";
         const direction = queryParams?.direction || "";
         return `${field}:${direction}`;
@@ -29,14 +37,20 @@ export const INITIAL_COURSE_STATE = (queryParams = {}) => ({
 });
 
 export const INITIAL_MODULE_STATE = (queryParams = {}) => ({
+    
     filterState: {
         course: queryParams?.course || "",
+        vectorized: queryParams?.vectorized || "",
     },
     otherState: {
         title: queryParams?.title || "",
         items: queryParams?.items || "",
     },
     sortState:(() => {
+        if (queryParams?.sort) {
+            const [field, direction] = queryParams.sort.split(":"); // Split sort into field and direction
+            return `${field || ""}:${direction || ""}`; // Ensure fallback to empty strings
+        }
         const field = queryParams?.field || "";
         const direction = queryParams?.direction || "";
         return `${field}:${direction}`;
@@ -56,6 +70,10 @@ export const INITIAL_QUESTION_STATE = (queryParams = {}) => ({
         items: queryParams?.items || "",
     },
     sortState: (() => {
+        if (queryParams?.sort) {
+            const [field, direction] = queryParams.sort.split(":"); // Split sort into field and direction
+            return `${field || ""}:${direction || ""}`;
+        }
         const field = queryParams?.field || "";
         const direction = queryParams?.direction || "";
         return `${field}:${direction}`;
@@ -68,6 +86,10 @@ export const INITIAL_ADMIN_STATE = (queryParams = {}) => ({
         items: queryParams?.items || "",
     },
     sortState:(() => {
+        if (queryParams?.sort) {
+            const [field, direction] = queryParams.sort.split(":"); 
+            return `${field || ""}:${direction || ""}`;
+        }
         const field = queryParams?.field || "";
         const direction = queryParams?.direction || "";
         return `${field}:${direction}`;
