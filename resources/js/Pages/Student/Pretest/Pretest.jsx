@@ -11,24 +11,21 @@ import "../../../../css/student/students.css";
 import "../../../../css/student/welcome.css";
 import { toast } from "sonner";
 
-const Pretest = ({
-    assessment_id,
-    assessment_courses,
-}) => {
-    const assessment_courses = assessment_courses.data;
+const Pretest = ({assessment_id, assessment_courses}) => {
+    const assessmentCourses = assessment_courses.data;
     const [confirmationState, setConfirmationState] = useState({
         show: false,
         unansweredCount: 0,
     });
 
     const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
-    const [selectedAssessmentCourse, setSelectedAssessmentCourse] = useState(assessment_courses[currentCourseIndex]);
+    const [selectedAssessmentCourse, setSelectedAssessmentCourse] = useState(assessmentCourses[currentCourseIndex]);
 
     const { getValues, register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
         defaultValues: {
             assessment_id: Number(assessment_id),
             assessment_items: Object.fromEntries(
-                assessment_courses.flatMap(course => 
+                assessmentCourses.flatMap(course => 
                     course.assessment_items.map(item => {
                         const key = `${course.assessment_course_id}_${item.assessment_item_id}`;
                         return [key, {
@@ -44,7 +41,7 @@ const Pretest = ({
     });
 
     useEffect(() => {
-        setSelectedAssessmentCourse(assessment_courses[currentCourseIndex]);
+        setSelectedAssessmentCourse(assessmentCourses[currentCourseIndex]);
     }, [currentCourseIndex])
 
     const handleCourseChange = (index) => {
@@ -64,16 +61,16 @@ const Pretest = ({
     };
 
     const handleNextCourse = () => {
-        if (!assessment_courses || assessment_courses.length === 0 || !selectedAssessmentCourse) return;
+        if (!assessmentCourses || assessmentCourses.length === 0 || !selectedAssessmentCourse) return;
 
-        if (currentCourseIndex < assessment_courses.length - 1) {
+        if (currentCourseIndex < assessmentCourses.length - 1) {
             setCurrentCourseIndex(currentCourseIndex + 1)
             window.scrollTo(0, 0);
         }
     };
 
     const handlePreviousCourse = () => {
-        if (!assessment_courses || assessment_courses.length === 0 || !selectedAssessmentCourse) return; //Safety checks.
+        if (!assessmentCourses || assessmentCourses.length === 0 || !selectedAssessmentCourse) return; //Safety checks.
 
         if (currentCourseIndex > 0) {
             setCurrentCourseIndex(currentCourseIndex - 1)
@@ -105,7 +102,7 @@ const Pretest = ({
                     {/* Sidebar */}
                     <div className="col-md-3 position-fixed border-end h-100">
                         <Sidebar
-                            assessment_courses={assessment_courses}
+                            assessment_courses={assessmentCourses}
                             selectedCourse={selectedAssessmentCourse}
                             handleCourseChange={handleCourseChange}
                         />
@@ -133,7 +130,7 @@ const Pretest = ({
                                 </h5>
                                 <small className="text-muted">
                                     Course {currentCourseIndex + 1} of{" "}
-                                    {assessment_courses.length}
+                                    {assessmentCourses.length}
                                 </small>
                             </div>
                         </div>
@@ -161,7 +158,7 @@ const Pretest = ({
                                         Previous
                                     </button>
 
-                                    {currentCourseIndex < assessment_courses.length - 1 ? (
+                                    {currentCourseIndex < assessmentCourses.length - 1 ? (
                                         <button
                                             type="button"
                                             className="btn btn-primary"
