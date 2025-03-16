@@ -15,7 +15,7 @@ function Profile({ student, progressData, availableMonths, selectedMonth }) {
 
     const handleMonthChange = (month) => {
         router.get(
-            route("student.profile"),
+            route("profile"),
             { month },
             {
                 preserveState: true,

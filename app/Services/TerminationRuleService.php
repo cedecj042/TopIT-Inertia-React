@@ -11,7 +11,7 @@ class TerminationRuleService
     /**
      * Maximum number of questions in the test
      */
-    public const MAX_QUESTIONS = 3;
+    public const MAX_QUESTIONS = 10;
 
     /**
      * Check if the test should terminate

@@ -145,9 +145,7 @@ class TestController extends Controller
             })
             ->firstWhere('assessment_item_id', $validated['assessment_item_id']);
 
-        $participantsAnswer = is_array($validated['answer'])
-            ? json_encode($validated['answer'])
-            : json_encode([$validated['answer']]);
+        $participantsAnswer = is_array($validated['answer']) ? json_encode($validated['answer']) : json_encode([$validated['answer']]);
         $assessmentItem->participants_answer = $participantsAnswer;
 
         $question = Question::with(['question_detail', 'course'])->findOrFail($validated['question_id']);
@@ -278,6 +276,7 @@ class TestController extends Controller
 
         // Get 3 recent test history
         $tests = Assessment::where('student_id', $studentId)
+            ->where('status', AssessmentStatus::COMPLETED->value)
             ->orderBy('updated_at', 'desc')
             ->take(3)
             ->get();
@@ -294,7 +293,8 @@ class TestController extends Controller
     {
         $studentId = Auth::user()->userable->student_id;
         $query = Assessment::with(['assessment_courses.course'])
-            ->where('student_id', $studentId);
+            ->where('student_id', $studentId)
+            ->where('status', AssessmentStatus::COMPLETED->value);
 
         if ($courseTitle = request('course')) {
             $query->whereHas('assessment_courses.course', function ($q) use ($courseTitle) {

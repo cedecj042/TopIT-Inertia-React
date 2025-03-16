@@ -60,8 +60,8 @@ class ThetaService
         $theta = $initialTheta;
         $tolerance = 1e-5; // Convergence tolerance
         $maxIterations =100; // Maximum number of iterations
-        $thetaMin = -5.0; // Lower bound for theta
-        $thetaMax = 5.0;  // Upper bound for theta
+        $thetaMin = -3.0; // Lower bound for theta
+        $thetaMax = 3.0;  // Upper bound for theta
 
         for ($iteration = 0; $iteration < $maxIterations; $iteration++) {
             $numerator = 0.0;

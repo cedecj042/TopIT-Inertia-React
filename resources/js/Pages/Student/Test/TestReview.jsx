@@ -11,7 +11,7 @@ const TestReview = ({
     assessment_courses,
     assessment_id
 }) => {
-    console.log(assessment_id)
+
     const assessmentCourses = assessment_courses.data;
     const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
     const [selectedAssessmentCourse, setSelectedAssessmentCourse] = useState(assessmentCourses[currentCourseIndex]);
@@ -24,6 +24,7 @@ const TestReview = ({
         setCurrentCourseIndex(index);
         window.scrollTo(0, 0);
     };
+
 
     return (
         <>
@@ -105,7 +106,6 @@ const TestReview = ({
                             >
                                 Previous
                             </button>
-
                             {currentCourseIndex < assessment_courses.length - 1 && (
                                 <button
                                     type="button"
@@ -116,6 +116,7 @@ const TestReview = ({
                                 </button>
                             )}
                         </div>
+
                     </div>
                 </div>
             </div>
