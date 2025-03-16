@@ -10,7 +10,6 @@ import ScrollTrigger from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 function ModuleDetail({ module, queryParams }) {
-    console.log(queryParams)
     const { isProcessing, getRequest } = useRequest();
 
     useEffect(() => {
@@ -35,7 +34,7 @@ function ModuleDetail({ module, queryParams }) {
     const handleBackClick = async () => {
         getRequest("admin.module.index", {...queryParams},{},{
             // preserveScroll: true,
-            // preserveState: true,
+            // preserveState: false,
         });
     };
 

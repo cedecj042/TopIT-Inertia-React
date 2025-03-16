@@ -18,8 +18,8 @@ return new class extends Migration
             $table->time('start_time');
             $table->time('end_time')->nullable();
             $table->integer('total_items');
-            $table->integer('total_score');
-            $table->float('percentage');
+            $table->integer('total_score')->nullable();
+            $table->float('percentage')->nullable();
             $table->enum('status',['Not Started','In Progress','Completed']);
             $table->timestamps();
         });
@@ -28,10 +28,10 @@ return new class extends Migration
             $table->foreignID('assessment_id')->references('assessment_id')->on('assessments')->cascadeOnDelete();
             $table->foreignID('course_id')->references('course_id')->on('courses')->cascadeOnDelete();
             $table->integer('total_items');
-            $table->integer('total_score');
-            $table->float('initial_theta_score')->nullable();
+            $table->integer('total_score')->nullable();
+            $table->float('initial_theta_score');
             $table->float('final_theta_score')->nullable(); //or default(0)? getting this error Field 'final_theta_score' and 'initial_theta_score doesn't have a default value if wala
-            $table->float('percentage');
+            $table->float('percentage')->nullable();
             $table->timestamps();
         });
         Schema::create('assessment_items',function (Blueprint $table){
@@ -39,6 +39,7 @@ return new class extends Migration
             $table->foreignID('assessment_course_id')->references('assessment_course_id')->on('assessment_courses')->cascadeOnDelete();
             $table->foreignID('question_id')->references('question_id')->on('questions')->cascadeOnDelete();
             $table->json('participants_answer')->nullable();
+            $table->float('theta_score')->nullable();
             $table->integer(column: 'score')->default(0);
             $table->timestamps();
         });

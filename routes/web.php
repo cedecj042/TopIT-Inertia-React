@@ -13,14 +13,14 @@ use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PretestController as AdminPretestController;
 use App\Http\Controllers\Student\PretestController as StudentPretestController;
-use App\Http\Controllers\Admin\ProcessedPdfController;
-use App\Http\Controllers\ErrorController;
 use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\StudentCourseController;
 use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\StudentProfileController;
 use App\Http\Controllers\Student\TestController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use Laravel\Prompts\Concerns\Fallback;
 
 
 Route::middleware('guest')->group(function () {
@@ -39,24 +39,12 @@ Route::middleware('auth')->group(function () {
 
 
 Route::middleware(['auth', 'student'])->group(function () {
-    Route::redirect('/', '/dashboard');
     Route::get('/welcome', [StudentPretestController::class, 'welcome'])->name('welcome');
-
-    Route::prefix('pretest')->name('pretest.')->group(function () {
-        // Route::middleware(['auth', 'pretest.not_taken'])->group(function () { //users who already completed the pretest cannot revisit the pretest pages
-        Route::get('/start', [StudentPretestController::class, 'startPretest'])->name('start');
-        Route::post('/submit', [StudentPretestController::class, 'submit'])->name('submit');
-        // });
-        Route::get('/finish/{assessmentId}', [StudentPretestController::class, 'finish'])->name('finish');
-        Route::get('/review/{assessmentId}', [StudentPretestController::class, 'review'])->name('review');
-    });
-
-    Route::middleware(['auth', 'student', 'pretest.completed'])->group(function () { //registered users cannot proceed to dashboard if pretest not completed
+    Route::middleware(['pretest.completed'])->group(function () { //registered users cannot proceed to dashboard if pretest not completed
         Route::redirect('', '/dashboard');
-        Route::redirect('/', '/dashboard');
         Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
         Route::get('/profile', [StudentProfileController::class, 'showStudentDetails'])->name('profile');
-        Route::post('/profile', [StudentProfileController::class, 'editProfile'])->name('student.profile.edit');
+        Route::post('/profile', [StudentProfileController::class, 'editProfile'])->name('profile.edit');
 
         Route::prefix('course')->name('course.')->group(function () {
             Route::get('/', [StudentCourseController::class, 'index'])->name(name: 'index');
@@ -70,15 +58,17 @@ Route::middleware(['auth', 'student'])->group(function () {
 
             Route::get('/course', [TestController::class, 'select'])->name('course');
             Route::post('/start', [TestController::class, 'start'])->name('start');
-            Route::get('/{assessmentId}', [TestController::class, 'show'])->name('page');
+            Route::get('/{assessment}', [TestController::class, 'show'])->name('page');
             Route::post('/next-question', [TestController::class, 'nextQuestion'])->name('next-question');
 
-            Route::get('/finish/{assessmentId}', [TestController::class, 'finish'])->name('finish');
-            Route::get('/review/{assessmentId}', [TestController::class, 'review'])->name('review');
+            Route::get('/finish/{assessment}', [TestController::class, 'finish'])->name('finish');
+            Route::get('/review/{assessment}', [TestController::class, 'review'])->name('review');
         });
     });
-
-
+    Route::middleware('pretest.not_taken')->group(function () { //users who already completed the pretest cannot revisit the pretest pages
+        Route::get('/start', [StudentPretestController::class, 'startPretest'])->name('pretest.start');
+        Route::put('/submit/{assessment}', [StudentPretestController::class, 'submit'])->name('pretest.submit');
+    });  
 
 });
 
@@ -88,9 +78,6 @@ Route::post('/admin/store-questions', [FastApiController::class, 'storeProcessed
 Route::post('/admin/update-module-status', [FastApiController::class, 'updateModuleStatus'])->name('update-module-status');
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::redirect('/', '/admin/dashboard');
-    Route::redirect('', '/admin/dashboard');
-    Route::redirect('/admin', '/admin/dashboard');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Courses
@@ -114,11 +101,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::put('/update/{id}', [ModuleController::class, 'update'])->name('update');
         Route::delete('module/{id}', [ModuleController::class, 'delete'])->name('delete');
         Route::delete('module/{type}/{id}', [ModuleController::class, 'destroyContent'])->name('content.destroy');
-
-        // Route::delete('/delete/module/{id}', [ModuleController::class, 'deleteModule'])->name('delete');
-        // Route::delete('/delete/lesson/{id}', [ModuleController::class, 'deleteLesson'])->name('delete.lesson');
-        // Route::delete('/delete/section/{id}', [ModuleController::class, 'deleteSection'])->name('delete.section');
-        // Route::delete('/delete/subsection/{id}', [ModuleController::class, 'deleteSubsection'])->name('delete.subsection');
+        Route::delete('/delete/module/{id}', [ModuleController::class, 'deleteModule'])->name('delete');
+        Route::delete('/delete/lesson/{id}', [ModuleController::class, 'deleteLesson'])->name('delete.lesson');
+        Route::delete('/delete/section/{id}', [ModuleController::class, 'deleteSection'])->name('delete.section');
+        Route::delete('/delete/subsection/{id}', [ModuleController::class, 'deleteSubsection'])->name('delete.subsection');
 
     });
     Route::prefix('content')->name('content.')->group(function () {
@@ -153,6 +139,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
     Route::post('/profile/update',[AdminController::class,'update'])->name('profile.update');
     Route::get('/student/{id}', [ReportController::class, 'student'])->name('student');
+    
 });
 
-Route::get('/access-denied', [ErrorController::class, 'index'])->name('access.denied');
+Route::fallback(function () {
+    return Inertia::render('Error', [
+        'title' => 'Page not Found',
+        'auth' => Auth::check() ? Auth::user() : null,
+    ]);
+});

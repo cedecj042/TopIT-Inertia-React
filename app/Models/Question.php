@@ -5,10 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Course;
-use App\Models\Test;
-use App\Models\Difficulty;
-use App\Models\PretestQuestion;
-use App\Models\TestAnswer;
 
 class Question extends Model
 {
@@ -16,6 +12,7 @@ class Question extends Model
     protected $primaryKey = 'question_id';
     protected $fillable = [
         'course_id',
+        'question_uid',
         'question_detail_id',
         'difficulty_id',
         'test_type',

@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Middleware\AdminOrStudentAuth;
+use App\Http\Middleware\RedirectIfAuthenticated;
+use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,8 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\ShareInertiaFlashMessages::class,
         ]);
         $middleware->alias([
+            'auth' => Authenticate::class,
             'student' => \App\Http\Middleware\StudentAccess::class,
             'admin' => \App\Http\Middleware\AdminAccess::class,
+            'guest' => RedirectIfAuthenticated::class,
             'pretest.not_taken' => \App\Http\Middleware\EnsurePretestNotTaken::class,
             'pretest.completed' =>\App\Http\Middleware\CheckPretestCompletion::class,
         ]);

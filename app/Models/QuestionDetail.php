@@ -14,6 +14,7 @@ class QuestionDetail extends Model
         'type',
         'answer',
         'choices',
+        'requires_all_answer',
         'created_at',
         'updated_at'
     ];

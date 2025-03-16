@@ -48,7 +48,7 @@ export default function CourseTable({ data,queryParams }) {
             onError: () => {
                 toast.error("Failed to delete course", { duration: 3000 });
             },
-        });
+        }); 
     };
 
     const renderActions = (rowData) => {
@@ -83,7 +83,7 @@ export default function CourseTable({ data,queryParams }) {
 
     const viewCourse = (e, course) => {
         e.preventDefault();
-        getRequest("admin.course.detail", {id:course.course_id, ...queryParams }, {
+        getRequest("admin.course.detail", {id:course.course_id }, {
             onSuccess: (success) => {
                 console.log(success);
             },

@@ -27,6 +27,7 @@ class ProcessContentRequest extends FormRequest
             'course_id' => 'required|exists:courses,course_id',
             'processed_data' => 'required|array',
             'file_name' => 'required',
+            'pdf_id'=>'required'
         ];
         
     }

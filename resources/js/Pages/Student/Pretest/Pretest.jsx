@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Head, router } from "@inertiajs/react";
+import React, { useState, useEffect } from "react";
+import { Head } from "@inertiajs/react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { useRequest } from "@/Library/hooks";
 import MainLayout from "@/Layouts/MainLayout";
 import Sidebar from "@/Components/Pretest/Sidebar";
@@ -10,146 +9,91 @@ import QuestionForm from "@/Components/Pretest/QuestionForm";
 import Modal from "@/Components/Modal/Modal";
 import "../../../../css/student/students.css";
 import "../../../../css/student/welcome.css";
+import { toast } from "sonner";
 
 const Pretest = ({
-    courses = { data: [], questions: [] },
-    assessment = {},
+    assessment_id,
+    assessment_courses,
 }) => {
-    const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
-    const [confirmationModal, setConfirmationModal] = useState({
+    const assessment_courses = assessment_courses.data;
+    const [confirmationState, setConfirmationState] = useState({
         show: false,
-        title: "",
-        message: "",
-        onConfirm: null,
+        unansweredCount: 0,
     });
-    const submissionInProgress = useRef(false);
-    const [isSubmitted, setIsSubmitted] = useState(false);
 
+    const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
+    const [selectedAssessmentCourse, setSelectedAssessmentCourse] = useState(assessment_courses[currentCourseIndex]);
 
-    const { register, handleSubmit, watch, setValue } = useForm({
+    const { getValues, register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
         defaultValues: {
-            answers: {},
-            assessment_id: assessment?.assessment_id,
-        },
+            assessment_id: Number(assessment_id),
+            assessment_items: Object.fromEntries(
+                assessment_courses.flatMap(course => 
+                    course.assessment_items.map(item => {
+                        const key = `${course.assessment_course_id}_${item.assessment_item_id}`;
+                        return [key, {
+                            assessment_course_id: Number(course.assessment_course_id),
+                            assessment_item_id: Number(item.assessment_item_id),
+                            question_id: Number(item.question_id),
+                            participant_answer: [],
+                        }];
+                    })
+                )
+            )
+        }
     });
-
-    const { postRequest, loading } = useRequest();
-    const answers = watch("answers");
 
     useEffect(() => {
-        if (isSubmitted) return;
-        console.log("Assessment initialization effect running");
-        if (!assessment?.assessment_id) {
-            toast.error("No assessment ID found");
-            return;
-        }
+        setSelectedAssessmentCourse(assessment_courses[currentCourseIndex]);
+    }, [currentCourseIndex])
 
-        const initialAnswers = {};
-        courses.questions?.forEach((courseQuestions) => {
-            courseQuestions.questions?.forEach((question) => {
-                initialAnswers[question.question_id] =
-                    question.question_detail?.type === "Multiple Choice - Many"
-                        ? []
-                        : "";
-            });
-        });
-        console.log("Setting initial answers:", initialAnswers);
-        setValue("answers", initialAnswers);
-    }, [courses.questions, setValue, assessment]);
-
-    const showConfirmationModal = (title, message, onConfirm) => {
-        setConfirmationModal({
-            show: true,
-            title,
-            message,
-            onConfirm,
-        });
+    const handleCourseChange = (index) => {
+        setCurrentCourseIndex(index);
     };
+    const { putRequest, getRequest, isProcessing } = useRequest();
 
-    const hideConfirmationModal = () => {
-        setConfirmationModal({
-            show: false,
-            title: "",
-            message: "",
-            onConfirm: null,
-        });
-    };
+    const onSubmit = async () => {
+        const formData = getValues();
+        putRequest("pretest.submit",assessment_id,formData,{
+            onSuccess: () => {
+                toast.success("Pretest submitted successfully.");
+                setConfirmationState(false);
 
-    const onSubmit = async (formData) => {
-        if (submissionInProgress.current) {
-            return;
-        }
-
-        const unansweredCount = Object.values(formData.answers).filter(
-            (answer) =>
-                !answer || (Array.isArray(answer) && answer.length === 0)
-        ).length;
-
-        const handleSubmission = () => {
-            try {
-                submissionInProgress.current = true;
-
-                router.post(route("pretest.submit"), formData, {
-                    onSuccess: () => {
-                        setIsSubmitted(true);
-                        console.log("submitted!!");
-                        router.visit(
-                            route("pretest.finish", {
-                                assessmentId: assessment?.assessment_id,
-                            })
-                        );
-                        toast.success("Assessment submitted successfully!");
-                    },
-                    onError: (errors) => {
-                        console.error("Submission errors:", errors);
-                        toast.error(
-                            errors.message ||
-                                "An error occurred while submitting your assessment. Please try again later."
-                        );
-                    },
-                    onFinish: () => {
-                        submissionInProgress.current = false;
-                        hideConfirmationModal();
-                    },
-                });
-            } catch (error) {
-                console.error("Submission error:", error);
-                toast.error(
-                    error.message ||
-                        "An error occurred while submitting your assessment. Please try again later."
-                );
-                submissionInProgress.current = false;
-                hideConfirmationModal();
             }
-        };
-
-        showConfirmationModal(
-            "Submit Assessment",
-            unansweredCount > 0
-                ? `You have ${unansweredCount} unanswered question(s). Are you sure you want to submit?`
-                : "Are you sure you want to submit your assessment?",
-            handleSubmission
-        );
+        });
     };
 
     const handleNextCourse = () => {
-        if (currentCourseIndex < courses.data.length - 1) {
-            setCurrentCourseIndex((prev) => prev + 1);
+        if (!assessment_courses || assessment_courses.length === 0 || !selectedAssessmentCourse) return;
+
+        if (currentCourseIndex < assessment_courses.length - 1) {
+            setCurrentCourseIndex(currentCourseIndex + 1)
             window.scrollTo(0, 0);
         }
     };
 
     const handlePreviousCourse = () => {
+        if (!assessment_courses || assessment_courses.length === 0 || !selectedAssessmentCourse) return; //Safety checks.
+
         if (currentCourseIndex > 0) {
-            setCurrentCourseIndex((prev) => prev - 1);
+            setCurrentCourseIndex(currentCourseIndex - 1)
             window.scrollTo(0, 0);
         }
     };
 
-    const coursesData = courses.data || [];
-    const questionsForCurrentCourse =
-        courses.questions?.[currentCourseIndex]?.questions || [];
-    const totalCourses = coursesData.length;
+    const handleConfirmationModal = () => {
+        const formData = getValues();
+        const assessmentItems = Object.values(formData.assessment_items) || [];
+        const unansweredCount = assessmentItems.filter(item => {
+            const answer = item?.participant_answer;
+            return !answer || (Array.isArray(answer) && answer.length === 0);
+        }).length;   
+    
+        setConfirmationState({
+            show: true,
+            unansweredCount: unansweredCount
+        });
+    };
 
     return (
         <>
@@ -161,13 +105,13 @@ const Pretest = ({
                     {/* Sidebar */}
                     <div className="col-md-3 position-fixed border-end h-100">
                         <Sidebar
-                            courses={courses}
-                            currentCourseIndex={currentCourseIndex}
-                            setCurrentCourseIndex={setCurrentCourseIndex}
+                            assessment_courses={assessment_courses}
+                            selectedCourse={selectedAssessmentCourse}
+                            handleCourseChange={handleCourseChange}
                         />
                         <div className="p-3 mt-1">
                             <button
-                                onClick={handleSubmit(onSubmit)}
+                                onClick={handleConfirmationModal}
                                 className="btn btn-success w-100"
                             >
                                 Finish Attempt
@@ -185,26 +129,23 @@ const Pretest = ({
                             </div>
                             <div className="col-md-6 text-end">
                                 <h5 className="mb-0 fs-5">
-                                    {coursesData[currentCourseIndex]?.title ||
-                                        "Course Title"}
+                                    {selectedAssessmentCourse.course.title}
                                 </h5>
                                 <small className="text-muted">
                                     Course {currentCourseIndex + 1} of{" "}
-                                    {totalCourses}
+                                    {assessment_courses.length}
                                 </small>
                             </div>
                         </div>
 
-                        {questionsForCurrentCourse.length > 0 ? (
-                            <form onSubmit={handleSubmit(onSubmit)}>
+                        {selectedAssessmentCourse.assessment_items.length > 0 ? (
+                            <form>
                                 <QuestionForm
-                                    course={{
-                                        questions: questionsForCurrentCourse,
-                                    }}
+                                    index={currentCourseIndex}
+                                    assessment_items={selectedAssessmentCourse.assessment_items}
                                     register={register}
-                                    setValue={setValue}
                                     watch={watch}
-                                    answers={answers}
+                                    setValue={setValue}
                                     key={currentCourseIndex}
                                 />
 
@@ -214,25 +155,27 @@ const Pretest = ({
                                         className="btn btn-outline-secondary"
                                         onClick={handlePreviousCourse}
                                         disabled={
-                                            currentCourseIndex === 0 || loading
+                                            currentCourseIndex === 0 || isProcessing
                                         }
                                     >
                                         Previous
                                     </button>
 
-                                    {currentCourseIndex < totalCourses - 1 ? (
+                                    {currentCourseIndex < assessment_courses.length - 1 ? (
                                         <button
                                             type="button"
                                             className="btn btn-primary"
                                             onClick={handleNextCourse}
-                                            disabled={loading}
+                                            disabled={isProcessing}
                                         >
                                             Next
                                         </button>
                                     ) : (
                                         <button
-                                            type="submit"
+                                            type="button"
                                             className="btn btn-success"
+                                            onClick={handleConfirmationModal} 
+                                            disabled={isProcessing}
                                         >
                                             Finish Attempt
                                         </button>
@@ -247,25 +190,29 @@ const Pretest = ({
             </div>
 
             <Modal
-                show={confirmationModal.show}
-                modalTitle={confirmationModal.title}
-                onClose={hideConfirmationModal}
+                show={confirmationState.show}
+                modalTitle={"Confirm Pretest"}
+                onClose={() => setConfirmationState({ show: false, unansweredCount: 0 })}
             >
-                <div className="modal-body">{confirmationModal.message}</div>
+
+                <div className="modal-body">
+                    <p>Are you finished with your pretest?</p>
+                    {confirmationState.unansweredCount > 0 && (
+                        <p>You have <span className="text-danger fw-bold">{confirmationState.unansweredCount}</span> unanswered questions.</p>
+                    )}
+                </div>
                 <div className="modal-footer">
                     <button
                         type="button"
                         className="btn btn-secondary"
-                        onClick={hideConfirmationModal}
+                        onClick={() => setConfirmationState({ show: false, unansweredCount: 0 })}
                     >
                         Cancel
                     </button>
                     <button
                         type="button"
                         className="btn btn-primary"
-                        onClick={() => {
-                            confirmationModal.onConfirm();
-                        }}
+                        onClick={onSubmit}
                     >
                         Confirm
                     </button>

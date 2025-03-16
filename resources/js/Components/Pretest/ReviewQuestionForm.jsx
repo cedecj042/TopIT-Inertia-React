@@ -1,170 +1,133 @@
 import React from "react";
 import { CheckCircleFill, XCircleFill } from "react-bootstrap-icons";
 
-const ReviewQuestionForm = ({ course }) => {
-  const renderAnswer = (question) => {
-    const questionDetail = question.question_detail || {};
-    let studentAnswer = question.student_answer;
+const ReviewQuestionForm = ({ assessment_items }) => {
+    const renderAnswer = (item) => {
+        const question = item.question;
+        const is_correct = item.score > 0;
+        const correctAnswer = question.answer;
 
-    let correctAnswer = questionDetail.answer;
-    let choices = questionDetail.choices;
-
-    console.log("Pretest review question: ", question);
-
-    const getAnswerStyle = (isCorrect) => ({
-      backgroundColor: isCorrect ? "#e7f6e7" : "#ffe7e7",
-      padding: "0.5rem",
-      borderRadius: "0.25rem",
-      marginTop: "0.5rem",
-    });
-
-    // Multiple Choice - Single
-    if (questionDetail.type === "Multiple Choice - Single") {
-      const singleAnswer = studentAnswer || "No answer provided";
-      return (
-        <div>
-          {choices.map((choice, index) => (
-            <div key={index} className="form-check mb-2">
-              <input
-                className="form-check-input"
-                type="radio"
-                checked={singleAnswer === choice}
-                disabled
-              />
-              <label
-                className={`form-check-label ${
-                  choice === correctAnswer ? "text-success fw-bold" : ""
-                }`}
-              >
-                {choice}
-                {choice === correctAnswer ? (
-                  <CheckCircleFill className="ms-2 text-success" />
-                ) : singleAnswer === choice ? (
-                  <XCircleFill className="ms-2 text-danger" />
-                ) : null}
-              </label>
-            </div>
-          ))}
-          <div style={getAnswerStyle(question.is_correct)}>
-            <strong>Your Answer:</strong> {singleAnswer}
-            {!question.is_correct && (
-              <div className="text-danger mt-1">
-                <strong>Correct Answer:</strong> {correctAnswer}
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    // Multiple Choice - Many
-    if (questionDetail.type === "Multiple Choice - Many") {
-      const studentAnswerArray = Array.isArray(studentAnswer)
-        ? studentAnswer
-        : [];
-
-      return (
-        <div>
-          {choices.map((choice, index) => (
-            <div key={index} className="form-check mb-2">
-              <input
-                type="checkbox"
-                className="form-check-input"
-                checked={studentAnswerArray.includes(choice)}
-                disabled
-              />
-              <label
-                className={`form-check-label ${
-                  Array.isArray(correctAnswer) &&
-                  correctAnswer.includes(choice)
-                    ? "text-success fw-bold"
-                    : ""
-                }`}
-              >
-                {choice}
-                {Array.isArray(correctAnswer) &&
-                correctAnswer.includes(choice) ? (
-                  <CheckCircleFill className="ms-2 text-success" />
-                ) : studentAnswerArray.includes(choice) ? (
-                  <XCircleFill className="ms-2 text-danger" />
-                ) : null}
-              </label>
-            </div>
-          ))}
-          <div style={getAnswerStyle(question.is_correct)}>
-            <strong>Your Answers:</strong>{" "}
-            {studentAnswerArray.length > 0
-              ? studentAnswerArray.join(", ")
-              : "No answer provided"}
-            {!question.is_correct &&
-              Array.isArray(correctAnswer) &&
-              correctAnswer.length > 0 && (
-                <div className="text-danger mt-1">
-                  <strong>Correct Answers:</strong> {correctAnswer.join(", ")}
+        // Multiple Choice - Single
+        if (question.type === "Multiple Choice - Single") {
+            const singleAnswer = item.participants_answer || "No answer provided";
+            return (
+                <div>
+                    {question.choices.map((choice, index) => {
+                        const isTheAnswer = singleAnswer === choice;
+                        return (
+                            <div key={index} className="form-check mb-2">
+                                <input
+                                    className="form-check-input"
+                                    type="radio"
+                                    checked={isTheAnswer}
+                                    disabled={!isTheAnswer}
+                                    readOnly
+                                />
+                                <label
+                                    className={`form-check-label ${isTheAnswer ? is_correct ? "text-success fw-semibold" : "text-danger fw-semibold" : ""}`}
+                                >
+                                    {choice}
+                                    {isTheAnswer && (
+                                        is_correct ? (<CheckCircleFill className="ms-2 text-success" />) : (<XCircleFill className="ms-2 text-danger" />)
+                                    )}
+                                </label>
+                            </div>
+                        )
+                    })}
                 </div>
-              )}
-          </div>
-        </div>
-      );
-    }
+            );
+        }
 
-    // Identification
-    if (questionDetail.type === "Identification") {
-      return (
-        <div>
-          <div className="mb-3">
-            <input
-              type="text"
-              className="form-control"
-              value={studentAnswer || ""}
-              disabled
-            />
-          </div>
-          <div style={getAnswerStyle(question.is_correct)}>
-            <strong>Your Answer:</strong>{" "}
-            {studentAnswer || "No answer provided"}
-            {!question.is_correct && correctAnswer && (
-              <div className="text-danger mt-1">
-                <strong>Correct Answer:</strong> {correctAnswer}
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    }
+        if (question.type === "Multiple Choice - Many") {
+            const studentAnswerArray = Array.isArray(item.participants_answer)
+                ? item.participants_answer
+                : [];
 
-    return <div>Unknown question type</div>;
-  };
-
-  return (
-    <div>
-      {course.questions?.length > 0 ? (
-        course.questions.map((question) => {
-          return (
-            <div key={question.question_id} className="card mb-4 shadow-sm">
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-center">
-                <h5 className="card-title">Question {course.questions.indexOf(question) + 1}</h5>
-
-                  <span
-                    className={`badge ${
-                      question.is_correct ? "bg-success" : "bg-danger"
-                    }`}
-                  >
-                    {question.is_correct ? "Correct" : "Incorrect"}
-                  </span>
+            return (
+                <div>
+                    {question.choices.map((choice, index) => (
+                        <div key={index} className="form-check mb-2">
+                            <input
+                                type="checkbox"
+                                className="form-check-input"
+                                checked={studentAnswerArray.includes(choice)}
+                                readOnly
+                                disabled= { !studentAnswerArray.includes(choice)}
+                            />
+                            <label
+                                className={`form-check-label ${Array.isArray(correctAnswer) &&
+                                    studentAnswerArray.includes(choice)
+                                    ? correctAnswer.includes(choice) ? "text-success fw-semibold" : "text-danger fw-semibold"
+                                    : null
+                                    }`}
+                            >
+                                {choice}
+                                {studentAnswerArray.includes(choice) ?
+                                    correctAnswer.includes(choice) ?
+                                        (<CheckCircleFill className="ms-2 text-success" />) : (<XCircleFill className="ms-2 text-danger" />)
+                                    :
+                                    null
+                                }
+                            </label>
+                        </div>
+                    ))}
                 </div>
-                <p className="card-text">{question.question}</p>
-                {renderAnswer(question)}
-              </div>
-            </div>
-          );
-        })
-      ) : (
-        <p>No questions found for this course.</p>
-      )}
-    </div>
-  );
+            );
+        }
+
+        // Identification
+        if (question.type === "Identification") {
+            return (
+                <div>
+                    <div className="mb-3 d-flex flex-row">
+                        <input
+                            type="text"
+                            className={`form-control bg-light fw-semibold ${item.score > 0 ? ("text-success") : ("text-danger")}`}
+                            value={item.participants_answer || ""}
+                            disabled
+                            readOnly
+                        />
+                        <div className="align-self-center">
+                            {item.score > 0 ? (
+                                <CheckCircleFill className="ms-2 text-success" />
+                            ) : (
+                                <XCircleFill className="ms-2 text-danger" />
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        return <div>Unknown question type</div>;
+    };
+
+    return (
+        <div>
+            {assessment_items.length > 0 ? (
+                assessment_items.map((item, index) => (
+                    <div key={index} className="card mb-4 shadow-sm">
+                        <div className="card-body">
+                            <div className="d-flex justify-content-between align-items-center">
+                                <h5 className="card-title">Question {index + 1}</h5>
+                                <span
+                                    className={`badge pt-2 
+                                        ${!!item.participants_answer ? (item.score > 0 ? "bg-success" : "bg-danger") : "bg-secondary"}
+                                        `}
+                                >
+                                    {!!item.participants_answer ? (item.score > 0 ? "Correct" : "Incorrect") : "Not Answered"}
+                                </span>
+                            </div>
+                            <p className="card-text">{item.question.question}</p>
+                            {renderAnswer(item)}
+                        </div>
+                    </div>
+                ))
+            ) : (
+                <p>No questions found for this course.</p>
+            )}
+        </div>
+    );
 };
 
 export default ReviewQuestionForm;

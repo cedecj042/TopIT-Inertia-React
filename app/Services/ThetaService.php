@@ -89,11 +89,12 @@ class ThetaService
 
             // Newton-Raphson update
             $delta = $numerator / $denominator;
-            $theta += $delta;
+            $theta += 0.5 * ($numerator / $denominator);
 
             // Clamp theta to be within the range [-5, 5]
             $theta = max($thetaMin, min($thetaMax, $theta));
-
+            // $theta = max(-4.5, min(4.5, $theta));
+            
             // Check for convergence
             if (abs($delta) < $tolerance) {
                 break;
@@ -225,7 +226,7 @@ class ThetaService
             ->first();
 
         if ($studentCourseTheta) {
-            return $studentCourseTheta->theta_score; // Return the theta value
+            return $studentCourseTheta->theta_score; 
         }
 
         return 0.0;

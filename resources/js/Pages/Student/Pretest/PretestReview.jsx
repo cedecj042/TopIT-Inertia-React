@@ -7,18 +7,22 @@ import ReviewQuestionForm from "@/Components/Pretest/ReviewQuestionForm";
 import "../../../../css/student/students.css";
 import "../../../../css/student/welcome.css";
 
+
 const PretestReview = ({
-    courses = { data: [], questions: [] },
     assessment = {},
 }) => {
+
+
+    // const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
+
+    const courses = data.assessment_courses;
     const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
+    const [selectedAssessmentCourse, setSelectedAssessmentCourse] = useState(courses[currentCourseIndex]);
 
-    const coursesData = courses.data || [];
-    const questionsForCurrentCourse =
-        courses.questions?.[currentCourseIndex]?.questions || [];
-    const totalCourses = coursesData.length;
+    // const questionsForCurrentCourse = courses.questions?.[currentCourseIndex]?.questions || [];
+    const totalCourses = courses.length;
 
-    console.log("Questions: ", courses.questions);
+    // console.log("Questions: ", courses.questions);
 
     const handleNextCourse = () => {
         if (currentCourseIndex < courses.data.length - 1) {
@@ -37,7 +41,7 @@ const PretestReview = ({
     return (
         <>
             <Head title="Pretest" />
-            <Navbar isLight={true} />
+            <Navbar isLight={false} />
 
             <div className="pretestb container-fluid">
                 <div className="row min-vh-100">
@@ -45,14 +49,14 @@ const PretestReview = ({
                     <div className="col-md-3 position-fixed border-end h-100">
                         <Sidebar
                             courses={courses}
-                            currentCourseIndex={currentCourseIndex}
-                            setCurrentCourseIndex={setCurrentCourseIndex}
+                            selectedCourse={selectedAssessmentCourse}
+                            handleCourseChange={handleCourseChange}
                         />
                         <div className="px-4 mt-2">
                             <h5 className="pb-2">Assessment Summary</h5>
                             <div className="card">
                                 <div className="card-body">
-                                    {/* <h5 className="card-title">Assessment Summary</h5> */}
+                                    <h5 className="card-title">Assessment Summary</h5>
                                     <p className="mb-1">
                                         Score: {assessment.total_score} /{" "}
                                         {assessment.total_items}
@@ -99,7 +103,7 @@ const PretestReview = ({
                             </div>
                         </div>
 
-                        {questionsForCurrentCourse.length > 0 ? (
+                        {/* {questionsForCurrentCourse.length > 0 ? (
                             <>
                                 <ReviewQuestionForm
                                     course={{
@@ -131,7 +135,7 @@ const PretestReview = ({
                             </>
                         ) : (
                             <p>No questions available for this course.</p>
-                        )}
+                        )} */}
                     </div>
                 </div>
             </div>

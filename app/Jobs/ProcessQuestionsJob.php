@@ -42,32 +42,36 @@ class ProcessQuestionsJob implements ShouldQueue
             foreach ($this->data as $courseData) {
                 Log::info('Processing course', [
                     'course_id' => $courseData['course_id'],
-                    'course_title' => $courseData['course_title']
+                    'course_title' => $courseData['course_title'],
                 ]);
     
                 foreach ($courseData['questions'] as $qData) {
-                    // Normalize difficulty name and check difficulty
+                    $question_uid = $qData['question_uid'];
                     $difficultyName = ucwords($qData['difficulty_type']); 
                     $questionDifficulty= $this->determineQuestionDifficulty($difficultyName);
-
-                    // Determine the type of the question detail and difficulty using the enum
                     $questionDetailType = $this->determineQuestionDetailType($qData['questionType']);
-                    // Process `answer`
                     $answer = $this->normalizeArray($qData['answer'] ?? []);
-                    // Process `choices` only if present
                     $choices = $this->normalizeArray($qData['choices'] ?? []);
+                    $requires = null;
+                    if ($qData['questionType'] === 'Identification') {
+                        $requires = $qData['requires_all_answer'] ?? null;
+                    }
 
                     // Insert into question_details table
                     $questionDetailId = DB::table('question_details')->insertGetId([
                         'type' => $questionDetailType,
                         'answer' => json_encode($answer),
                         'choices' => !empty($choices) ? json_encode($choices) : null,
+                        'requires_all_answer' => $requires,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
+
+                    
     
                     // Insert into questions table with test_type as "Test"
                     DB::table('questions')->insert([
+                        'question_uid' => $question_uid,
                         'course_id' => $courseData['course_id'],
                         'question_detail_id' => $questionDetailId,
                         'test_type' => TestType::TEST->value,

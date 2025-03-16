@@ -87,7 +87,7 @@ export const TableContext = ({
 
     useEffect(() => {
         updateUrl();
-    }, [state.filterState,state.sortState,state.otherState,,state.dateState]); 
+    }, [state.filterState,state.sortState,state.otherState,state.dateState]); 
 
     return (
         <ContextProvider.Provider

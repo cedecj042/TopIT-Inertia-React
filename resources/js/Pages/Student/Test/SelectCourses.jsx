@@ -23,9 +23,6 @@ function SelectCourses({ courses }) {
             }
         });
     };
-
-    console.log("selected courses:", selectedCourses);
-
     const handleStartTest = () => {
         if (selectedCourses.length === 0) {
             // alert("Please select at least one course to proceed.");
@@ -61,12 +58,11 @@ function SelectCourses({ courses }) {
                     We'll personalize your test with your selected topic.
                 </h3>
                 <p className="text-muted">
-                    Please select the course you want to take.
+                    Please select the course you want to take up to 3 courses.
                 </p>
             </div>
 
             <div className="row align-items-start mt-4 gx-4 px-5">
-                {/* left side */}
                 <div className="col-md-7 mb-4">
                     <div className="row gap-2">
                         {courses.data.map((course) => (
@@ -112,40 +108,3 @@ function SelectCourses({ courses }) {
 }
 
 export default StudentContent(SelectCourses);
-
-
-// {courses.data.map((course) => (
-//     <div key={course.course_id} className="col-12 mb-3">
-//         <div
-//             className={`border rounded-4 p-3 ${
-//                 selectedCourses.includes(
-//                     course.course_id
-//                 )
-//                     ? "bg-primary text-white"
-//                     : "bg-light"
-//             }`}
-//             onClick={() =>
-//                 handleCourseSelect(course.course_id)
-//             }
-//             style={{ cursor: "pointer" }}
-//         >
-//             <div className="form-check">
-//                 <input
-//                     className="form-check-input"
-//                     type="checkbox"
-//                     checked={selectedCourses.includes(
-//                         course.course_id
-//                     )}
-//                     onChange={() =>
-//                         handleCourseSelect(
-//                             course.course_id
-//                         )
-//                     }
-//                 />
-//                 <label className="form-check-label flex-grow-1">
-//                     {course.title}
-//                 </label>
-//             </div>
-//         </div>
-//     </div>
-// ))}

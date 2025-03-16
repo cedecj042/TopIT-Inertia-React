@@ -47,7 +47,7 @@ const PretestFinish = ({ score, totalQuestions, pretestId }) => {
 
                         <div className="pe-md-5">
                             <Link
-                                href={`/pretest/review/${pretestId}`}
+                                href={`/test/review/${pretestId}`}
                                 className="btn btn-outline-primary w-50 p-2 mt-3"
                             >
                                 Review Answers

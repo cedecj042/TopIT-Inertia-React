@@ -40,7 +40,7 @@ return new class extends Migration
 
     Schema::create('contents', function (Blueprint $table) {
         $table->id('content_id');
-        $table->unsignedBigInteger('contentable_id')->nullable();
+        $table->string('contentable_id')->nullable();
         $table->string('contentable_type')->nullable();
         $table->enum('type',['Code','Figures','Tables','Text','Header']);
         $table->longText('description')->nullable();

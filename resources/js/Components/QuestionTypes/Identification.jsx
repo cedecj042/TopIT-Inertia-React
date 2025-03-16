@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Identification = ({ question, questionName, register }) => {
+const Identification = ({ questionName, register }) => {
     return (
         <div className="mb-3">
             <input
@@ -8,6 +8,10 @@ const Identification = ({ question, questionName, register }) => {
                 type="text"
                 className="form-control"
                 placeholder="Type your answer here"
+                key={questionName}
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck="false"
             />
         </div>
     );

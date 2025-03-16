@@ -1,22 +1,20 @@
 import React from 'react';
 
-const MultipleChoiceMany = ({ question, answers, setValue }) => {
-    // const choices = question.question_detail?.choices || [];
-    const choices = Array.isArray(question.question_detail?.choices) 
-        ? question.question_detail.choices 
-        : (
-            typeof question.question_detail?.choices === 'string' 
-            ? JSON.parse(question.question_detail.choices) 
-            : []
-        );
-    const currentValues = answers[question.question_id] || [];
+const MultipleChoiceMany = ({ question_detail, questionName, setValue, watch }) => {
+    const choices = question_detail.choices || [];
+    const selectedAnswers = watch(questionName) || [];
 
-    const handleMultipleChoiceMany = (questionId, choice, checked) => {
-        const newValues = checked
-            ? [...currentValues, choice]
-            : currentValues.filter((value) => value !== choice);
+    const handleChoiceChange = (choice, checked) => {
+        let updatedAnswers = [...selectedAnswers];
 
-        setValue(`answers.${questionId}`, newValues, { shouldDirty: true });
+        if (checked) {
+            if (!updatedAnswers.includes(choice)) {
+                updatedAnswers.push(choice);
+            }
+        } else {
+            updatedAnswers = updatedAnswers.filter((answer) => answer !== choice);
+        }
+        setValue(questionName, updatedAnswers);
     };
 
     return (
@@ -26,13 +24,11 @@ const MultipleChoiceMany = ({ question, answers, setValue }) => {
                     <input
                         type="checkbox"
                         className="form-check-input"
-                        id={`${question.question_id}-${index}`}
-                        checked={currentValues.includes(choice)}
-                        onChange={(e) =>
-                            handleMultipleChoiceMany(question.question_id, choice, e.target.checked)
-                        }
+                        id={`${question_detail.question_detail_id}-${index}`}
+                        checked={selectedAnswers.includes(choice)}
+                        onChange={(e) => handleChoiceChange(choice, e.target.checked)}
                     />
-                    <label className="form-check-label" htmlFor={`${question.question_id}-${index}`}>
+                    <label className="form-check-label" htmlFor={`${question_detail.question_detail_id}-${index}`}>
                         {choice}
                     </label>
                 </div>

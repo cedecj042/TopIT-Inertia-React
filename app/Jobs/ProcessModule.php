@@ -51,11 +51,13 @@ class ProcessModule implements ShouldQueue
 
                     // Fetch the module by its ID with its related data
                     $module = Module::with([
-                        'contents', // Get contents directly associated with the module
-                        'lessons.contents', // Contents associated with lessons
-                        'lessons.sections.contents', // Contents associated with sections
-                        'lessons.sections.subsections.contents' // Contents associated with subsections
-                    ])->find($moduleId);
+                        'contents',
+                        'lessons.contents',
+                        'lessons.sections.contents',
+                        'lessons.sections.subsections.contents'
+                    ])
+                    ->where('module_id', $moduleId)
+                    ->first();
 
                     if (!$module) {
                         Log::error("Module with ID $moduleId not found.");
@@ -65,22 +67,26 @@ class ProcessModule implements ShouldQueue
                     // Prepare the module data in the required format
                     $moduleData = [
                         'module_id' => $module->module_id,
+                        'module_uid' => $module->module_uid,
                         'course_id' => $module->course_id,
                         'title' => $module->title,
                         'contents' => $this->formatContents($module->contents), // Contents for module
                         'lessons' => $module->lessons->map(function ($lesson) {
                             return [
                                 'lesson_id' => $lesson->lesson_id,
+                                'lesson_uid' => $lesson->lesson_uid,
                                 'title' => $lesson->title,
                                 'contents' => $this->formatContents($lesson->contents), // Contents for lesson
                                 'sections' => $lesson->sections->map(function ($section) {
                                     return [
                                         'section_id' => $section->section_id,
+                                        'section_uid' => $section->section_uid,
                                         'title' => $section->title,
                                         'contents' => $this->formatContents($section->contents), // Contents for section
                                         'subsections' => $section->subsections->map(function ($subsection) {
                                             return [
                                                 'subsection_id' => $subsection->subsection_id,
+                                                'subsection_uid' => $subsection->subsection_uid,
                                                 'title' => $subsection->title,
                                                 'contents' => $this->formatContents($subsection->contents), // Contents for subsection
                                             ];
@@ -122,9 +128,10 @@ class ProcessModule implements ShouldQueue
             //     Log::warning('Data failed to send to FastAPI.');
             //     $this->broadcastEvent(null, null, "Failed to process modules.");
             // }
+
             if ($result) {
                 Log::info('Data sent to FastAPI successfully. Waiting for vectorization callback.');
-                $this->broadcastEvent(null, "Modules are being vectorized...", null);
+                $this->broadcastEvent("Modules are being vectorized...", null, null);
             } else {
                 Log::warning('Data failed to send to FastAPI.');
                 $this->broadcastEvent(null, null, "Failed to send data to FastAPI.");

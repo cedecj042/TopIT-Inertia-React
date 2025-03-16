@@ -76,34 +76,6 @@ class ModuleService
         ];
     }
 
-    function romanToInt($roman)
-{
-    $map = [
-        'I' => 1,
-        'V' => 5,
-        'X' => 10,
-        'L' => 50,
-        'C' => 100,
-        'D' => 500,
-        'M' => 1000,
-    ];
-
-    $result = 0;
-    $prevValue = 0;
-
-    for ($i = strlen($roman) - 1; $i >= 0; $i--) {
-        $currentValue = $map[$roman[$i]];
-        if ($currentValue >= $prevValue) {
-            $result += $currentValue;
-        } else {
-            $result -= $currentValue;
-        }
-        $prevValue = $currentValue;
-    }
-
-    return $result;
-}
-
 
     public function getModuleWithDetails($module_id)
     {
@@ -116,7 +88,7 @@ class ModuleService
         ])->findOrFail($module_id);
     }
 
-    public function updateContentable(array $data, int $id)
+    public function updateContentable(array $data,$id)
     {
         // Resolve the fully qualified class name
         $contentableClass = $this->resolveModelClass($data['contentable_type']);
@@ -144,7 +116,7 @@ class ModuleService
             : $contentable->module->module_id;
     }
 
-    public function deleteContentable(int $id, string $type)
+    public function deleteContentable($id, string $type)
     {
         $modelClass = $this->resolveModelClass($type);
         if (!$modelClass)

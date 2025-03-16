@@ -8,21 +8,23 @@ use Illuminate\Support\Str; // Laravel string helper for pluralization/singulari
 
 class ScoringService
 {
-    public function checkAnswer(AssessmentItem $item): int
+    public function checkAnswer($question_id, $participants_answer): int
     {
-        $question = Question::with(['question_detail'])->findOrFail($item->question_id);
-        $participantsAnswer = json_decode($item->participants_answer, true);
-        $correctAnswer = json_decode($question->question_detail->answer, true); // Array of possible answers
+        if (empty($participants_answer)) {
+            return 0;
+        }
+        $question = Question::with(['question_detail'])->findOrFail($question_id);
+        $correctAnswer = json_decode($question->question_detail->answer, true);
 
         switch ($question->question_detail->type) {
             case 'Multiple Choice - Single':
-                return $this->scoreMultipleChoiceSingle($participantsAnswer, $correctAnswer);
+                return $this->scoreMultipleChoiceSingle($participants_answer, $correctAnswer);
 
             case 'Multiple Choice - Many':
-                return $this->scoreMultipleChoiceMany($participantsAnswer, $correctAnswer);
+                return $this->scoreMultipleChoiceMany($participants_answer, $correctAnswer);
 
             case 'Identification':
-                return $this->scoreIdentification($participantsAnswer, $correctAnswer);
+                return $this->scoreIdentification($participants_answer, $correctAnswer);
 
             default:
                 return 0;
@@ -48,7 +50,6 @@ class ScoringService
 
     private function scoreMultipleChoiceMany(array $participantsAnswer, array $correctAnswer): int
     {
-        // Ensure both arrays are identical
         sort($participantsAnswer);
         sort($correctAnswer);
 
@@ -65,18 +66,12 @@ class ScoringService
         foreach ($correctKeywords as $keyword) {
             $keyword = $this->normalizeAnswer($keyword);
 
-            // Check for singular/plural equivalence first
             if ($this->areFormsEquivalent($participantText, $keyword)) {
-                return 1; // Match found
-            }
-
-            // Check for keyword as a substring
-            if ($this->containsKeyword($participantText, $keyword)) {
-                return 1; // Match found
+                return 1;
             }
         }
 
-        return 0; // No match
+        return 0;
     }
 
     private function areFormsEquivalent(string $word1, string $word2): bool

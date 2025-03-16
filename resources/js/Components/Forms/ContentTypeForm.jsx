@@ -9,12 +9,16 @@ import ContentList from "../Content/ContentList";
 import DeleteForm from "./DeleteForm";
 import { useForm } from "react-hook-form";
 import ContentForm from "./ContentForm";
+import { replace } from "react-router-dom";
 
 export default function ContentTypeForm({
     content,
     contentableId,
     contentableType,
     onOrderChange,
+    setActiveContent,
+    activeContent,
+    module,
 }) {
     // Initialize react-hook-form
     const { register, handleSubmit, setValue, watch } = useForm({
@@ -105,6 +109,9 @@ export default function ContentTypeForm({
                 onError: (error) => {
                     toast.error("Failed to save module.");
                 },
+            },{
+                preserveState: false,
+                replace: true
             }
         );
     };
@@ -147,7 +154,7 @@ export default function ContentTypeForm({
             contentable_id: contentableId,
             contentable_type: contentableType,
         };
-        console.log(contentData)
+        
         putRequest(
             "admin.content.update",
             data.content_id,
@@ -161,6 +168,9 @@ export default function ContentTypeForm({
                         duration: 3000,
                     });
                 },
+            },{
+                preserveState: false,
+                replace: true
             }
         );
         closeModal();
@@ -184,6 +194,8 @@ export default function ContentTypeForm({
                     console.log(error);
                     toast.error("Failed to add new content.");
                 },
+            },{
+                preserveState: false,
             }
         );
     };
@@ -200,6 +212,8 @@ export default function ContentTypeForm({
                 onError: () => {
                     toast.error("Failed to deleted content.");
                 },
+            },{
+                preserveState: false,
             }
         );
     };
@@ -230,7 +244,10 @@ export default function ContentTypeForm({
             onError: () => {
                 toast.error("Failed to delete content.");
             },
-        });
+        },{
+            preserveState:false
+        }
+    );
     };
     
 

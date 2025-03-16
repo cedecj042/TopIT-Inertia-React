@@ -40,9 +40,9 @@ const Welcome = ({ student, hasExistingPretest }) => {
             <Head title="Welcome" />
             <Navbar isLight={false} />
             <div
-                className="pretestb container-fluid"
+                className="container-fluid h-100"
             >
-                <div className="row align-items-center full-height custom-margin ">
+                <div className="row align-items-center h-100">
                     <div className="col-md-4 left-column">
                         <div className="ps-4 ms-5" ref={contentRef}>
                             <h1 className="mb-4">

@@ -68,7 +68,16 @@ class QuestionService
 
             // Step 7: Create assessment item for the selected item
             $assessmentItem = $this->createAssessmentItem($selectedCourse, $selectedItem);
+          
+            // Eager load relationships
+            $assessmentItem->load(['question.question_detail']);
 
+            Log::info("New question selected for assessment:", [
+                'assessment_item_id' => $assessmentItem->assessment_item_id,
+                'question_id' => $selectedItem['id'],
+                'course_id' => $randomCourse->course_id,
+                'theta' => $currentTheta,
+            ]);
             // Step 8: SEM calculation for the course
             $this->calculateCourseSEM($selectedCourse, $currentTheta);
 

@@ -45,11 +45,13 @@ return new class extends Migration
             $table->enum('type',['Identification','Multiple Choice - Single','Multiple Choice - Many']);
             $table->json('answer');
             $table->json('choices')->nullable();
+            $table->boolean('requires_all_answer')->nullable();
             $table->timestamps();
         });
 
         Schema::create('questions', function (Blueprint $table) {
             $table->id('question_id');
+            $table->string('question_uid');
             $table->foreignId('course_id')->references('course_id')->on('courses')->cascadeOnDelete();
             $table->foreignId('question_detail_id')->references('question_detail_id')->on('question_details')->cascadeOnDelete();
             $table->enum('test_type', ['Pretest', 'Test']);

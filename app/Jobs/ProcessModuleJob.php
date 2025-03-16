@@ -49,14 +49,29 @@ class ProcessModuleJob implements ShouldQueue
         }
     }
 
+    // private function processLessons(Module $module)
+    // {
+    //     foreach ($this->moduleData['Lessons'] as $lessonData) {
+    //         $lesson = Lesson::create([
+    //             'module_id' => $module->module_id,
+    //             'title' => $lessonData['Title'],
+    //         ]);
+    //         $this->processSections($lesson, $lessonData['Sections']);
+    //     }
+    // }
     private function processLessons(Module $module)
     {
+        if (!isset($this->moduleData['Lessons']) || !is_array($this->moduleData['Lessons'])) {
+            Log::warning("No lessons found for module: " . $module->title);
+            return; // Or throw an exception if lessons are required
+        }
+
         foreach ($this->moduleData['Lessons'] as $lessonData) {
             $lesson = Lesson::create([
-                'module_id' => $module->module_id,
+                'module_id' => $module->module_id, 
                 'title' => $lessonData['Title'],
             ]);
-            $this->processSections($lesson, $lessonData['Sections']);
+            $this->processSections($lesson, $lessonData['Sections'] ?? []); // Handle missing sections
         }
     }
 
