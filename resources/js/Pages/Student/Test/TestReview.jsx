@@ -15,7 +15,6 @@ const TestReview = ({
     const assessmentCourses = assessment_courses.data;
     const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
     const [selectedAssessmentCourse, setSelectedAssessmentCourse] = useState(assessmentCourses[currentCourseIndex]);
-
     useEffect(() => {
         setSelectedAssessmentCourse(assessmentCourses[currentCourseIndex]);
     }, [currentCourseIndex]);

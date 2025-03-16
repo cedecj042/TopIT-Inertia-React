@@ -59,7 +59,10 @@ sail down --volumes
 ```
 sail up -d
 ```
-
+4. To connect the images from storage locally, run this command:
+```
+sail artisan storage:link
+```
 
 
 ## Setting up Pusher (No need to run)

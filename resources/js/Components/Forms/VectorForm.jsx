@@ -69,14 +69,6 @@ export default function VectorForm({ courses, closeModal }) {
             courses: {},
         };
 
-        // Object.keys(selectedCourses).forEach(courseId => {
-        //     console.log(courseId);
-        //     if (selectedCourses[courseId].checked) {
-        //         formData.courses[courseId] = Object.keys(selectedCourses[courseId].modules).filter(
-        //             moduleId => selectedCourses[courseId].modules[moduleId]
-        //         );
-        //     }
-        // });
         Object.keys(selectedCourses).forEach(courseId => {
             const selectedModules = Object.keys(selectedCourses[courseId].modules).filter(
                 moduleId => selectedCourses[courseId].modules[moduleId]
@@ -86,14 +78,12 @@ export default function VectorForm({ courses, closeModal }) {
             }
         });
 
-        // console.log("Form data to be sent:", formData);
         postRequest("admin.module.vectorize", formData, {
             onSuccess: () => {
                 toast.success('Successfully sent the request', { duration: 3000 });
                 closeModal();
             },
-            onError: (data) => {
-                console.log(data);
+            onError: (error) => {
                 toast.error('Failed to send the request', { duration: 3000 });
             }
         });

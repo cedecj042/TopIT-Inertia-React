@@ -77,9 +77,11 @@ class PretestController extends Controller
             $courses = Course::with([
                 'questions' => function ($query) {
                     $query->where('test_type', 'Pretest')
-                        ->with(['question_detail'=> function ($query){
-                            $query->select(['question_detail_id','question_id','choices','type']); 
-                        }]);
+                        ->with([
+                            'question_detail' => function ($query) {
+                                $query->select(['question_detail_id', 'choices', 'type']);
+                            }
+                        ]);
                 }
             ])->get();
 
@@ -184,6 +186,12 @@ class PretestController extends Controller
             $courseScore = $assessment_course->assessment_items()->sum('score');
             $courseItems = $assessment_course->total_items;
             $percentage = ($courseItems > 0) ? ($courseScore / $courseItems) * 100 : 0;
+            Log::info('Course Score: ' . $courseScore);
+            Log::info('Total Course Items: ' . $courseItems);
+            Log::info('Calculated Percentage: ' . $percentage);
+            Log::info('Assessment Items:', $assessment_course->assessment_items()->pluck('score')->toArray());
+            Log::info('Total Course Score: ' . $courseScore);
+
 
             $assessment_course->update([
                 'total_items' => $courseItems,

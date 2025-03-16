@@ -64,16 +64,13 @@ export default function GenerateQuestionForm({ data, closeModal }) {
             },
         }));
 
-        console.log("Prepared FormData:", JSON.stringify(formData, null, 2));
-
         postRequest("admin.question.generate", formData, {
             onSuccess: () => {
                 toast.success("Successfully submitted", { duration: 3000 });
                 closeModal();
             },
             onError: (error) => {
-                console.error("Request Failed:", error.response?.data || error);
-                toast.error("Unexpected Error", { duration: 3000 });
+                toast.error(error.message, { duration: 3000 });
             },
         });
     };

@@ -21,7 +21,6 @@ ChartJS.register(
 );
 
 export default function ProgressLineChart({ progressData }) {
-    console.log("Progress Data Received:", progressData);
     const originalData = progressData?.original;
     if (!originalData || !originalData.labels || originalData.labels.length === 0) {
         return <p>Loading chart data...</p>;
@@ -71,6 +70,5 @@ export default function ProgressLineChart({ progressData }) {
         },
     };
 
-    console.log("Chart Data Prepared:", data);
     return <Line data={data} options={options} />;
 }

@@ -19,7 +19,7 @@ class AssessmentReviewResource extends JsonResource
             'assessment_course_id' => $this->assessment_course_id,
             'total_score' => $this->total_score,
             'total_items' => $this->total_items,
-            'percentage' => $this->total_items,
+            'percentage' => $this->percentage,
             'initial_theta_score' => number_format($this->initial_theta_score, 2),
             'final_theta_score' => number_format($this->final_theta_score, 2),
             'course_id' => $this->course_id,

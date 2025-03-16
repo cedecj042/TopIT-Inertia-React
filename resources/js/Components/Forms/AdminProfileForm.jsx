@@ -59,7 +59,6 @@ export default function AdminProfileForm({ onclose, auth }) {
             },
             onError: (error) => {
                 toast.error("Failed to update profile. Please check the form.");
-                console.error(error);
             }
         });
     }

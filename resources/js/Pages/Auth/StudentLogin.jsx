@@ -10,7 +10,7 @@ export default function StudentLogin() {
             <Head title="Student Login" />
             <div className="container-fluid">
                 <div className="row vh-100">
-                    <HeaderLogin></HeaderLogin>
+                    <HeaderLogin/>
                     <div className="col d-flex align-items-center form-bg">
                         <div className="w-100 px-5 mx-4">
                             <h3 className="fw-semibold">Login</h3>

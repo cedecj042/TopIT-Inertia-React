@@ -23,9 +23,6 @@ export default function CourseForm({ onClose }) {
                     toast.info("Adding new course", { duration: 3000 });
                 }
                 onClose();
-            },
-            onError: (error) => {
-                console.log(error);
             }
         });
     };

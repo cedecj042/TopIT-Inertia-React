@@ -8,9 +8,8 @@ export default function StudentProfileForm({ student, onClose }) {
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         if (isNaN(date)) return "";
-        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${
-            String(date.getDate()).padStart(2, '0')
-        }`;
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')
+            }`;
     };
     const {
         register,
@@ -31,8 +30,6 @@ export default function StudentProfileForm({ student, onClose }) {
         },
     });
 
-    
-    
 
     const [previewImage, setPreviewImage] = useState(
         student.profile_image ? `/storage/profile_images/${student.profile_image}` : null
@@ -67,14 +64,13 @@ export default function StudentProfileForm({ student, onClose }) {
             }
         });
 
-        postRequest("student.profile.edit", formData, {
+        postRequest("profile.edit", formData, {
             onSuccess: () => {
                 toast.success("Profile updated successfully!");
                 onClose();
             },
             onError: (error) => {
                 toast.error("Failed to update profile. Please check the form.");
-                console.error(error);
             },
         });
     };
@@ -111,6 +107,10 @@ export default function StudentProfileForm({ student, onClose }) {
                             className="form-control"
                         />
                     </div>
+                    {errors.profile_image && (
+                            <div className="invalid-feedback">{errors.profile_image.message}</div>
+                        )}
+
 
                     {/* Student ID (Hidden) */}
                     <input type="hidden" {...register("student_id")} />
@@ -203,21 +203,21 @@ export default function StudentProfileForm({ student, onClose }) {
                     </div>
                     {/* Year */}
                     <div className="mb-3">
-                            <label className="form-label">Year</label>
-                            <select
-                                {...register("year", { required: "Year is required" })}
-                                className={`form-select ${errors.year ? "is-invalid" : ""}`}
-                            >
-                                {[1, 2, 3, 4, 5].map((year) => (
-                                    <option key={year} value={year}>
-                                        {year}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.year && (
-                                <div className="invalid-feedback">{errors.year.message}</div>
-                            )}
-                        </div>
+                        <label className="form-label">Year</label>
+                        <select
+                            {...register("year", { required: "Year is required" })}
+                            className={`form-select ${errors.year ? "is-invalid" : ""}`}
+                        >
+                            {[1, 2, 3, 4, 5].map((year) => (
+                                <option key={year} value={year}>
+                                    {year}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.year && (
+                            <div className="invalid-feedback">{errors.year.message}</div>
+                        )}
+                    </div>
                 </form>
             </div>
 

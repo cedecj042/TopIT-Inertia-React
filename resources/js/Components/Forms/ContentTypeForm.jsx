@@ -25,7 +25,7 @@ export default function ContentTypeForm({
         defaultValues: {
             title: content.title,
             contents: content.contents.map((content, index) => ({
-                ...content,
+                ...content, 
                 order: index + 1,
             })),
             contentableId: contentableId,
@@ -107,7 +107,7 @@ export default function ContentTypeForm({
                     toast.success(`${contentableType} saved successfully`);
                 },
                 onError: (error) => {
-                    toast.error("Failed to save module.");
+                    toast.error(error.message,{duration:3000});
                 },
             },{
                 preserveState: false,

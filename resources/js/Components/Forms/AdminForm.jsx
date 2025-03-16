@@ -31,8 +31,7 @@ export default function AdminForm({ onClose }) {
                 onClose();
             },
             onError:(error)=>{
-                console.log(error)
-                toast.error("Error adding coordinator")
+                toast.error(error.message, { duration: 3000 });
             }
         });
     };

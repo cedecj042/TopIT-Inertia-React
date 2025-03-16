@@ -94,20 +94,16 @@ class StudentController extends Controller
 
         if (Auth::attempt(['username' => $validated['username'], 'password' => $validated['password']])) {
             $user = Auth::user();
-            Log::info('User authenticated successfully.', ['user_id' => $user->user_id]);
-
             if ($user->userable_type === 'App\Models\Student') {
-                Log::info('Authenticated user is a Student.', ['user_id' => $user->user_id]);
                 $request->session()->regenerate();
                 return redirect()->intended('dashboard');
             } else {
                 Auth::logout();
-                Log::warning('Access restricted. User is not a Student.', ['user_id' => $user->user_id]);
-                return redirect()->route('login')->withErrors(['username' => 'Access restricted to students only.']);
+                return redirect()->route('login')->withErrors(['message' => 'Access restricted to students only.']);
             }
         }
         return back()->withErrors([
-            'username' => 'The provided credentials do not match our records.'
+            'message' => 'The provided credentials do not match our records.'
         ])->withInput();
     }
 }

@@ -55,7 +55,6 @@ const Pretest = ({assessment_id, assessment_courses}) => {
             onSuccess: () => {
                 toast.success("Pretest submitted successfully.");
                 setConfirmationState(false);
-
             }
         });
     };

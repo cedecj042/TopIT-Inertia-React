@@ -19,7 +19,7 @@ export default function LoginForm({routeName,btn}) {
                 toast.success("Login Successfully", { duration: 3000 });
                 reset();
             },onError:(error)=>{
-                toast.error(error.error, { duration: 3000 });
+                toast.error(error.message, { duration: 3000 });
             },
         });
     };

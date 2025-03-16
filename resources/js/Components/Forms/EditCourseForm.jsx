@@ -31,7 +31,6 @@ export default function EditcourseForm({ onClose, course }) {
                 }
             },
             onError: (error) => {
-                console.log(error);
                 toast.error("Failed to update course", { duration: 3000 });
             }
         });

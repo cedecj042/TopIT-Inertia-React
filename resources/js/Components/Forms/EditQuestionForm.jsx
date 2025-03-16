@@ -89,7 +89,6 @@ export default function EditQuestionForm({ question, onClose, filters }) {
                 onClose();
             },
             onError: (error) => {
-                console.log(error);
                 toast.error('Error updating question', { duration: 3000 });
             }
         });

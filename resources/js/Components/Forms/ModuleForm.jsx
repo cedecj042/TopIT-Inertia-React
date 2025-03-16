@@ -22,9 +22,8 @@ export default function ModuleForm({ onClose }) {
                 reset();
             },
             onError: (error) => {
-                toast.error(error, { duration: 3000 });
-            },
-            onFinish: () => {},
+                toast.error(error.message, { duration: 3000 });
+            }
         });
     };
 
