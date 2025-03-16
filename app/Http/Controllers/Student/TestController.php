@@ -74,17 +74,6 @@ class TestController extends Controller
             return back()->with('error', 'Please select courses before starting the test.');
         }
 
-        // store student's selected courses in session
-        // session()->put("assessment_selected_courses", $validated['courses']);
-        // Log::info('stored Modules in Session', [
-        //     'selected_courses' => session()->get("assessment_selected_courses")
-        // ]);
-
-        // Get the latest theta score for this student and course
-        // $initialThetaScore = $this->getLatestThetaScore($student->student_id, $selectedCourse);
-        // Log::info("Initial theta score:", ['initial_theta_score' => $initialThetaScore]);
-
-
         // Create a new assessment record
         $assessment = Assessment::create([
             'student_id' => $student->student_id,
@@ -151,9 +140,7 @@ class TestController extends Controller
             })
             ->firstWhere('assessment_item_id', $validated['assessment_item_id']);
 
-        $participantsAnswer = is_array($validated['answer'])
-            ? json_encode($validated['answer'])
-            : json_encode([$validated['answer']]);
+        $participantsAnswer = is_array($validated['answer']) ? json_encode($validated['answer']) : json_encode([$validated['answer']]);
         $assessmentItem->participants_answer = $participantsAnswer;
 
         $question = Question::with(['question_detail', 'course'])->findOrFail($validated['question_id']);
@@ -255,13 +242,12 @@ class TestController extends Controller
             $totalCourseScore = AssessmentItem::where('assessment_course_id', $assessmentCourse->assessment_course_id)
                 ->sum('score');
 
+            $latestThetaLog = ThetaScoreLog::where('assessment_course_id', $assessmentCourse->assessment_course_id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+
             // Calculate final theta score
-            $initialThetaScore = $assessmentCourse->initial_theta_score;
-            $finalThetaScore = $this->calculateFinalThetaScore(
-                $initialThetaScore,
-                $totalCourseScore,
-                $totalCourseItems
-            );
+            $finalThetaScore = $latestThetaLog->new_theta_score;
 
             // Update assessment course
             $assessmentCourse->update([
@@ -280,13 +266,13 @@ class TestController extends Controller
         return $totalItems;
     }
 
-    // private function calculateFinalThetaScore($initialTheta, $totalScore, $totalItems)
-    // {
-    //     //calculate here
-    //     // Simple linear interpolation - you might want to replace with a more sophisticated CAT scoring method
-    //     $scorePercentage = $totalItems > 0 ? ($totalScore / $totalItems) : 0;
-    //     return $initialTheta + ($scorePercentage - 0.5);
-    // }
+    private function calculateFinalThetaScore($initialTheta, $totalScore, $totalItems)
+    {
+        //calculate here
+        // Simple linear interpolation - you might want to replace with a more sophisticated CAT scoring method
+        $scorePercentage = $totalItems > 0 ? ($totalScore / $totalItems) : 0;
+        return $initialTheta + ($scorePercentage - 0.5);
+    }
 
     private function calculateTotalScore($assessmentId)
     {
@@ -356,9 +342,7 @@ class TestController extends Controller
                 $question = $answerData['question'];
 
                 // Decode student's answer
-                $decodedAnswer = $answerData['participants_answer']
-                    ? json_decode($answerData['participants_answer'], true)
-                    : null;
+                $decodedAnswer = json_decode($answerData['participants_answer'], true);
 
                 // Prepare student answer details
                 $question->student_answer = is_array($decodedAnswer)
@@ -368,9 +352,7 @@ class TestController extends Controller
                 $question->is_correct = $answerData['score'] > 0;
 
                 // Get the correct answers from question detail
-                $question->correct_answers = $question->question_detail->correct_answer
-                    ? json_decode($question->question_detail->correct_answer, true)
-                    : null;
+                $question->correct_answers = $question->question_detail->correct_answer;
 
                 return $question;
             });
@@ -411,6 +393,7 @@ class TestController extends Controller
 
         // Get 3 recent test history
         $tests = Assessment::where('student_id', $studentId)
+            ->where('status', AssessmentStatus::COMPLETED->value)
             ->orderBy('updated_at', 'desc')
             ->take(3)
             ->get();
@@ -427,7 +410,8 @@ class TestController extends Controller
     {
         $studentId = Auth::user()->userable->student_id;
         $query = Assessment::with(['assessment_courses.course'])
-            ->where('student_id', $studentId);
+            ->where('student_id', $studentId)
+            ->where('status', AssessmentStatus::COMPLETED->value);
 
         if ($courseTitle = request('course')) {
             $query->whereHas('assessment_courses.course', function ($q) use ($courseTitle) {

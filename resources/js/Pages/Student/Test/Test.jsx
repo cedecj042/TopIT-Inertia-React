@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useRequest } from "@/Library/hooks";
 import { Head, Link, router } from "@inertiajs/react";
@@ -23,42 +23,70 @@ const Test = ({ assessment_item, thetaScores }) => {
 
     const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1);
 
-    const [currentQuestion, setCurrentQuestion] = useState(assessment_item.data.question);
+    const [currentQuestion, setCurrentQuestion] = useState(
+        assessment_item.data.question
+    );
     const answers = watch("answers");
+
+    // Add this in your useEffect
+    // Modify your useEffect hook
+    useEffect(() => {
+        if (assessment_item?.data?.question) {
+            setCurrentQuestion(assessment_item.data.question);
+
+            const testId = assessment_course.assessment_id;
+            const storedTestId = sessionStorage.getItem("currentTestId");
+
+            if (!storedTestId || storedTestId !== testId.toString()) {
+                // Reset question no. since this is a new test or first load
+                console.log("New test detected, resetting question number");
+                setCurrentQuestionNumber(1);
+                sessionStorage.setItem("currentQuestionNumber", "1");
+                sessionStorage.setItem("currentTestId", testId);
+            } else {
+                // Same test, get the stored question number
+                const storedNumber = sessionStorage.getItem("currentQuestionNumber");
+                if (storedNumber) {
+                    setCurrentQuestionNumber(parseInt(storedNumber));
+                }
+            }
+        }
+    }, [assessment_item]);
 
     const onSubmit = (data) => {
         // get the current question's answer
         console.log("current answer: ", data);
         const answer = {
-            'assessment_id': assessment_course.assessment_id,
-            'assessment_item_id': assessment_item.data.assessment_item_id,
-            'question_id': assessment_item.data.question_id,
-            'answer': data.answers[currentQuestion.question_id]
+            assessment_id: assessment_course.assessment_id,
+            assessment_item_id: assessment_item.data.assessment_item_id,
+            question_id: assessment_item.data.question_id,
+            answer: data.answers[currentQuestion.question_id],
         };
-        const currentQuestionAnswer = data.answers[currentQuestion.question_id];
 
-        postRequest('test.next-question', answer, {
-            onSuccess: () => {
-                setValue("answers", {});
-                setCurrentQuestion(page.props.question);
-                setCurrentQuestionNumber((prev) => prev + 1);
-            }
-        })
-        // router.post(
-        //     route("test.next-question"),
-        //     {
-        //         assessment_id: assessment_course.assessment_id,
-        //         question_id: currentQuestion.question_id,
-        //         answer: currentQuestionAnswer,
-        //     },
-        //     {
-        //         onSuccess: (page) => {
-        //             setValue("answers", {});
-        //             setCurrentQuestion(page.props.question);
-        //             setCurrentQuestionNumber((prev) => prev + 1);
-        //         },
-        //     }
-        // );
+        router.post(route("test.next-question"), answer, {
+            preserveState: false,
+            preserveScroll: true,
+            onSuccess: (page) => {
+                Object.keys(answers).forEach(questionId => {
+                    setValue(`answers.${questionId}`, null);
+                });
+                
+                setCurrentQuestion(page.props.assessment_item.data.question);
+                
+                if (page.props.assessment_item.data.question) {
+                    const newNumber = currentQuestionNumber + 1;
+                    setCurrentQuestionNumber(newNumber);
+                    sessionStorage.setItem('currentQuestionNumber', newNumber.toString());
+                } else {
+                    // Test is complete
+                    sessionStorage.removeItem('currentQuestionNumber');
+                    sessionStorage.removeItem('currentTestId');
+                }
+            },
+            onError: (errors) => {
+                console.error("Error submitting answer:", errors);
+            },
+        });
     };
 
     const isNextDisabled = () => {
@@ -129,7 +157,10 @@ const Test = ({ assessment_item, thetaScores }) => {
                         <div className="col-12 col-md-8 col-lg-6">
                             <h1 className="h3 mb-2">Assessment Test</h1>
                             <p className="text-muted small mb-5">
-                                {assessment.updated_at} <span className="ms-2">{assessment.start_time}</span>
+                                {assessment.updated_at}{" "}
+                                <span className="ms-2">
+                                    {assessment.start_time}
+                                </span>
                             </p>
 
                             <form onSubmit={handleSubmit(onSubmit)}>

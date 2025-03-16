@@ -7,7 +7,6 @@ use App\Models\Question;
 use Illuminate\Support\Facades\Log;
 
 class ItemSelectionService
-
 {
     /**
      * THis function calculates the probability of a correct response for an item using the 2-parameter logistic model (2PL).
@@ -24,12 +23,12 @@ class ItemSelectionService
         try {
             $exponent = -$a * ($theta - $b);
             $probability = 1 / (1 + exp($exponent));
-            Log::debug('Probability calculated', [
-                'theta' => $theta,
-                'a' => $a,
-                'b' => $b,
-                'P(θ)' => $probability,
-            ]);
+            // Log::debug('Probability calculated', [
+            //     'theta' => $theta,
+            //     'a' => $a,
+            //     'b' => $b,
+            //     'P(θ)' => $probability,
+            // ]);
 
             return $probability;
         } catch (\Exception $e) {
@@ -54,13 +53,8 @@ class ItemSelectionService
             // P(θ)
             $pTheta = $this->calculateProbability($theta, $a, $b);
 
-            // First derivative of P(θ), P'(θ) = a * P(θ) * (1 - P(θ))
-            $pThetaDerivative = $a * $pTheta * (1 - $pTheta);
-
             // Fisher Information I(θ)
-            $fisherInformation = pow($pThetaDerivative, 2) / ($pTheta * (1 - $pTheta));
-
-            
+            $fisherInformation = pow($a, 2) * $pTheta * (1 - $pTheta);
 
             return $fisherInformation;
         } catch (\Exception $e) {
@@ -106,11 +100,11 @@ class ItemSelectionService
             // Step 2: Select the item with the maximum Fisher Information
             $selectedItem = collect($fisherInfoResults)->sortByDesc('fisher_information')->first();
 
-            Log::debug('Item with maximum Fisher Information selected', [
-                'theta' => $theta,
-                'selected_item' => $selectedItem['item'] ?? null,
-                'max_fisher_info' => $selectedItem['fisher_information'] ?? null,
-            ]);
+            // Log::debug('Item with maximum Fisher Information selected', [
+            //     'theta' => $theta,
+            //     'selected_item' => $selectedItem['item'] ?? null,
+            //     'max_fisher_info' => $selectedItem['fisher_information'] ?? null,
+            // ]);
 
             return $selectedItem['item'] ?? null;
         } catch (\Exception $e) {
@@ -129,32 +123,57 @@ class ItemSelectionService
      * @return array|null The selected item with the maximum Fisher Information for the course.
      */
 
-     public function getMaximumItemByCourse(float $theta, int $course, array $items): ?array
-     {
-         try {
-             // Filter items by the given course
-             $filteredItems = array_filter($items, function ($item) use ($course) {
-                 return $item['course'] === $course;
-             });
-     
-             // If no items for the course, return null
-             if (empty($filteredItems)) {
-                 Log::warning('No items found for course', ['course' => $course]);
-                 return null;
-             }
-     
-             $maximumCourseItem = $this->getMaximumItem($theta, $filteredItems);
-     
-             Log::debug('Item with maximum Fisher Information selected', [
-                 'theta' => $theta,
-                 'selected_item' => $maximumCourseItem ?? null,
-             ]);
-     
-             return $maximumCourseItem;
-         } catch (\Exception $e) {
-             Log::error('Error in getMaximumItemByCourse: ' . $e->getMessage());
-             return null;
-         }
-     }
-    
+    public function getMaximumItemByCourse(float $theta, int $course, array $items): ?array
+    {
+        try {
+            // Filter items by the given course
+            $filteredItems = array_filter($items, function ($item) use ($course) {
+                return $item['course'] === $course;
+            });
+
+            // If no items for the course, return null
+            if (empty($filteredItems)) {
+                Log::warning('No items found for course', ['course' => $course]);
+                return null;
+            }
+
+            $maximumCourseItem = $this->getMaximumItem($theta, $filteredItems);
+
+            Log::debug('Item with maximum Fisher Information selected (course)', [
+                'theta' => $theta,
+                'selected_item' => $maximumCourseItem ?? null,
+            ]);
+
+            return $maximumCourseItem;
+        } catch (\Exception $e) {
+            Log::error('Error in getMaximumItemByCourse: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+
+    /**
+     * Calculates the standard error of measurement for the current assessment state
+     * @param float $theta The examinee's ability level
+     * @param array $items Array of items with their parameters
+     * @return float The standard error of measurement
+     */
+    public function calculateStandardError(float $theta, array $items): float
+    {
+        try {
+            // Calculate total Fisher information
+            $totalInformation = array_sum(array_map(function ($item) use ($theta) {
+                return $this->calculateFisherInformation($theta, $item['a'], $item['b']);
+            }, $items));
+
+            $sem = 1 / sqrt($totalInformation);
+
+            return $sem;
+
+        } catch (\Exception $e) {
+            Log::error('Error in calculateStandardError: ' . $e->getMessage());
+            return INF;
+        }
+    }
+
 }

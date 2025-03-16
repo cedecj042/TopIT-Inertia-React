@@ -86,9 +86,9 @@ function SelectCourses({ courses }) {
                                 </div>
                             </div>
                         ))}
-                        <div className="col-12 text-end">
+                        <div className="text-center">
                             <button
-                                className="btn btn-primary p-3 pt-2 pb-2"
+                                className="btn btn-primary p-3 pt-2 pb-2 mt-4"
                                 onClick={handleStartTest}
                                 disabled={selectedCourses.length == 0 || isProcessing}
                             >

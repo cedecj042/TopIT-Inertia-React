@@ -4,6 +4,14 @@ import { toast } from "sonner";
 import { useState } from "react";
 
 export default function StudentProfileForm({ student, onClose }) {
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        if (isNaN(date)) return "";
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${
+            String(date.getDate()).padStart(2, '0')
+        }`;
+    };
     const {
         register,
         handleSubmit,
@@ -15,13 +23,16 @@ export default function StudentProfileForm({ student, onClose }) {
             profile_image: null,
             firstname: student.firstname || "",
             lastname: student.lastname || "",
-            birthdate: student.birthdate || "",
+            birthdate: student.birthdate ? formatDate(student.birthdate) : "",
             gender: student.gender || "Male",
             address: student.address || "",
             school: student.school || "",
             year: student.year ? student.year.toString() : "",
         },
     });
+
+    
+    
 
     const [previewImage, setPreviewImage] = useState(
         student.profile_image ? `/storage/profile_images/${student.profile_image}` : null

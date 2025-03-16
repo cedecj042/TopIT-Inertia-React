@@ -11,19 +11,20 @@ const TestReview = ({
     courses = { data: [], questions: [] },
     assessment = {},
 }) => {
-
     // const currentCourseIndex = courses.data[0].course_id;
-    const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
-    
     const coursesData = courses.data || [];
+    const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
+    const currentCourseId = coursesData[currentCourseIndex]?.course_id;
+    
 
-    const questionsForCurrentCourse =
-        courses.questions?.[currentCourseIndex + 1 ]?.questions || [];
+    const questionsForCurrentCourse = currentCourseId
+        ? courses.questions[currentCourseId].questions || []
+        : [];
 
     console.log("Courses data:", courses);
-    console.log("Questions:", courses);
-    console.log("Courses index:", currentCourseIndex);
-    
+    console.log("Questions for current course:", questionsForCurrentCourse);
+    console.log("Current course ID:", currentCourseId);
+
     const totalCourses = coursesData.length;
 
     return (
@@ -90,14 +91,13 @@ const TestReview = ({
                             </div>
                         </div>
 
-                            <>
-                                <ReviewQuestionForm
-                                    course={{ questions: questionsForCurrentCourse }}
-                                />
-
-                                
-                            </>
-                       
+                        <>
+                            <ReviewQuestionForm
+                                course={{
+                                    questions: questionsForCurrentCourse,
+                                }}
+                            />
+                        </>
                     </div>
                 </div>
             </div>
