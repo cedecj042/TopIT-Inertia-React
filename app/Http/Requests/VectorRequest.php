@@ -24,7 +24,7 @@ class VectorRequest extends FormRequest
         return [
             'courses' => 'required|array', // Ensure 'courses' is an array
             'courses.*' => 'array', // Each course should be an array of module IDs
-            'courses.*.*' => 'integer', // Each module ID should be an integer
+            'courses.*.*' => 'string', // Each module ID should be an integer
         ];
     }
 }

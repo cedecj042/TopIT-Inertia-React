@@ -2,7 +2,14 @@
 
 namespace App\Http\Controllers\Student;
 
+use App\Enums\AssessmentStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StorePretestRequest;
+use App\Http\Resources\AssessmentCourseResource;
+use App\Http\Resources\AssessmentResource;
+use App\Http\Resources\AssessmentReviewResource;
+use App\Services\ScoringService;
+use App\Services\ThetaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -24,6 +31,18 @@ use App\Http\Resources\StudentResource;
 
 class PretestController extends Controller
 {
+    protected $scoringService;
+    protected $thetaService;
+
+
+    public function __construct(
+        ScoringService $scoringService,
+        ThetaService $thetaService,
+    ) {
+        $this->scoringService = $scoringService;
+        $this->thetaService = $thetaService;
+    }
+
     public function welcome()
     {
         $student = Student::find(Auth::user()->userable->student_id);
@@ -40,381 +59,154 @@ class PretestController extends Controller
         ]);
     }
 
-
-    public function finish($assessmentId)
-    {
-        $assessment = Assessment::findOrFail($assessmentId);
-
-        return Inertia::render('Student/Pretest/PretestFinish', [
-            'score' => $assessment->total_score,
-            'totalQuestions' => $assessment->total_items,
-            'pretestId' => $assessment->assessment_id,
-            'title' => "Finish"
-        ]);
-    }
-
     public function startPretest()
     {
         $student = Student::find(Auth::user()->userable->student_id);
 
-        $courses = Course::with([
-            'questions' => function ($query) {
-                $query->where('test_type', 'Pretest')
-                    ->with('question_detail');
-            }
-        ])->get();
-
-        if ($courses->isEmpty()) {
-            Log::warning('No courses found for Pretest.');
+        if ($student->pretest_status == 'Completed') {
+            return redirect()->route('student.pretest.finish', $student->pretest_id);
         }
 
-        // checking to avoid duplicate
-        $existingPretest = Assessment::where('student_id', $student->student_id)
+        $existingPretest = $student->assessments()
             ->where('type', 'Pretest')
             ->where('status', 'In Progress')
+            ->with('assessment_courses.course', 'assessment_courses.assessment_items.question.question_detail')
             ->first();
 
         if (!$existingPretest) {
-            $existingPretest = Assessment::create([
+            $courses = Course::with([
+                'questions' => function ($query) {
+                    $query->where('test_type', 'Pretest')
+                        ->with(['question_detail'=> function ($query){
+                            $query->select(['question_detail_id','question_id','choices','type']); 
+                        }]);
+                }
+            ])->get();
+
+            $totalItems = $courses->sum(fn($course) => $course->questions->count());
+
+            // Upsert assessment (Pretest)
+            $assessmentData = [
                 'student_id' => $student->student_id,
                 'type' => 'Pretest',
                 'status' => 'In Progress',
                 'start_time' => now(),
-                'end_time' => null,
-                'total_items' => $courses->sum(function ($course) {
-                    return $course->questions->count();
-                }),
                 'total_score' => 0,
-                'percentage' => 0
-            ]);
-        }
+                'percentage' => 0,
+                'total_items' => $totalItems,
+            ];
 
-        $coursesData = CourseResource::collection($courses)->additional([
-            'questions' => $courses->map(function ($course) {
-                return [
-                    'course_id' => $course->course_id,
-                    'questions' => QuestionResource::collection($course->questions)
-                ];
-            })
-        ]);
+            $existingPretest = $student->assessments()->updateOrCreate([
+                'student_id' => $student->student_id,
+                'type' => 'Pretest',
+            ], $assessmentData);
 
-        // Log::info('Courses Data:', $coursesData->toArray(request()));
-
-
-        return Inertia::render('Student/Pretest/Pretest', [
-            'courses' => $coursesData,
-            'assessment' => [
+            $assessmentCourses = collect($courses)->map(fn($course) => [
                 'assessment_id' => $existingPretest->assessment_id,
-                'status' => $existingPretest->status,
-                'start_time' => $existingPretest->start_time,
-                'type' => $existingPretest->type
-            ],
+                'course_id' => $course->course_id,
+                'total_items' => $course->questions->count(),
+                'initial_theta_score' => 0.0,
+                'total_score' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])->toArray();
+
+            AssessmentCourse::upsert(
+                $assessmentCourses,
+                ['assessment_id', 'course_id'],
+                ['total_items', 'initial_theta_score', 'total_score']
+            );
+
+            $assessmentCourseIds = AssessmentCourse::where('assessment_id', $existingPretest->assessment_id)
+                ->pluck('assessment_course_id', 'course_id');
+
+            $assessmentItems = collect($courses)->flatMap(
+                fn($course) =>
+                collect($course->questions)->map(fn($question) => [
+                    'assessment_course_id' => $assessmentCourseIds[$course->course_id] ?? null,
+                    'question_id' => $question->question_id,
+                    'created_at' => now(),
+                ])
+            )->filter(fn($item) => $item['assessment_course_id'] !== null) // Ensure valid IDs
+                ->toArray();
+
+            if (!empty($assessmentItems)) {
+                AssessmentItem::insert($assessmentItems);
+            }
+            $existingPretest->load('assessment_courses.course', 'assessment_courses.assessment_items.question.question_detail');
+        }
+        return Inertia::render('Student/Pretest/Pretest', [
+            'assessment_id' => $existingPretest->assessment_id,
+            'assessment_courses' => AssessmentCourseResource::collection($existingPretest->assessment_courses),
             'student' => $student
         ]);
     }
 
-    public function review($assessmentId)
+    public function submit(StorePretestRequest $request, Assessment $assessment)
     {
-        $assessment = Assessment::with([
-            'assessment_courses.assessment_items.question.question_detail',
-            'assessment_courses.course',
-            'assessment_courses.assessment_items'
-        ])->findOrFail($assessmentId);
+        $validated = $request->validated();
 
-        // dd($assessment->toArray());
+        $assessmentItems = collect($validated['assessment_items'])
+            ->map(function ($item) {
+                $score = $this->scoringService->checkAnswer($item['question_id'], $item['participant_answer']);
+                return [
+                    'assessment_item_id' => $item['assessment_item_id'],
+                    'assessment_course_id' => $item['assessment_course_id'],
+                    'question_id' => $item['question_id'],
+                    'participants_answer' => json_encode($item['participant_answer']),
+                    'score' => $score,
+                    'theta_score' => '0.0',
+                    'updated_at' => now()
+                ];
+            })
+            ->toArray();
 
+        AssessmentItem::upsert(
+            $assessmentItems,
+            ['assessment_item_id', 'assessment_course_id', 'question_id'],
+            ['participants_answer', 'score', 'theta_score', 'updated_at']
+        );
 
-        $student = Student::find(Auth::user()->userable->student_id);
+        $assessment_courses = $assessment->assessment_courses()->get();
+        $assessment_courses->each(function ($assessment_course) {
+            $responses = $assessment_course->assessment_items()->get()->map(function ($item) {
+                return [
+                    'is_correct' => $item->score > 0,
+                    'discrimination' => $item->question->discrimination_index ?? 1.0,
+                    'difficulty' => $item->question->difficulty_value ?? 0.0,
+                ];
+            })->toArray();
 
-        $courses = Course::with([
-            'questions' => function ($query) {
-                $query->where('test_type', 'Pretest')
-                    ->with('question_detail');
-            }
-        ])->get();
+            $updatedTheta = $this->thetaService->estimateThetaMLE(
+                $assessmentCourse->initial_theta_score ?? 0.0,
+                $responses
+            );
+            $courseScore = $assessment_course->assessment_items()->sum('score');
+            $courseItems = $assessment_course->total_items;
+            $percentage = ($courseItems > 0) ? ($courseScore / $courseItems) * 100 : 0;
 
-        // Organize student answers by question ID for easy lookup
-        $studentAnswers = collect();
-        foreach ($assessment->assessment_courses as $assessmentCourse) {
-            foreach ($assessmentCourse->assessment_items as $item) {
-                $studentAnswers->put($item->question_id, [
-                    'participants_answer' => $item->participants_answer ?? null,
-                    'score' => $item->score,
-                    'course_id' => $assessmentCourse->course_id
-                ]);
-            }
-        }
-
-        // Add student answers and correctness to the questions
-        $coursesWithAnswers = $courses->map(function ($course) use ($studentAnswers) {
-            $course->questions->transform(function ($question) use ($studentAnswers) {
-                $studentAnswer = $studentAnswers->get($question->question_id);
-
-                $decodedAnswer = $studentAnswer && !is_null($studentAnswer['participants_answer'])
-                    ? json_decode($studentAnswer['participants_answer'], true)
-                    : null;
-
-                $question->student_answer = is_array($decodedAnswer)
-                    ? (count($decodedAnswer) > 1 ? $decodedAnswer : $decodedAnswer[0] ?? null)
-                    : null;
-
-                $question->is_multiple_answer = is_array($decodedAnswer) && count($decodedAnswer) > 1;
-
-                $question->is_correct = $studentAnswer ? $studentAnswer['score'] > 0 : false;
-
-                logger()->info("Question: {$question}", [
-
-                ]);
-                return $question;
-            });
-            return $course;
+            $assessment_course->update([
+                'total_items' => $courseItems,
+                'total_score' => $courseScore,
+                'percentage' => $percentage,
+                'final_theta_score' => $updatedTheta,
+                'updated_at' => now()
+            ]);
         });
 
-        $coursesData = CourseResource::collection($coursesWithAnswers)->additional([
-            'questions' => $coursesWithAnswers->map(function ($course) {
-                return [
-                    'course_id' => $course->course_id,
-                    'questions' => QuestionReviewResource::collection($course->questions)
-                ];
-            }),
-        ]);
+        $totalScore = $assessment->assessment_courses()->sum('total_score');
+        $totalItems = $assessment->assessment_courses()->sum('total_items');
 
-        return Inertia::render('Student/Pretest/PretestReview', [
-            'courses' => $coursesData,
-            'assessment' => [
-                'assessment_id' => $assessment->assessment_id,
-                'status' => $assessment->status,
-                'total_score' => $assessment->total_score,
-                'total_items' => $assessment->total_items,
-                'percentage' => round($assessment->percentage, 2)
-            ],
-            'student' => $student,
-        ]);
-    }
-
-    public function submit(Request $request)
-    {
-        try {
-            Log::info('Pretest submission data: ', $request->all());
-            Log::info('Starting pretest submission', [
-                'student_id' => Auth::user()->userable->student_id,
-                'assessment_id' => $request->assessment_id
-            ]);
-
-            $validated = $request->validate([
-                'assessment_id' => 'required|exists:assessments,assessment_id',
-                'answers' => 'required|array'
-            ]);
-
-            DB::beginTransaction();
-
-            $assessment = Assessment::where('assessment_id', $validated['assessment_id'])
-                ->where('status', '!=', 'Completed')
-                ->firstOrFail();
-
-            $totalScore = 0;
-            $totalItems = 0;
-
-            foreach ($validated['answers'] as $questionId => $participantAnswer) {
-                $question = Question::with(['question_detail', 'course'])
-                    ->findOrFail($questionId);
-
-                // deocding correct answer
-                $correctAnswer = $question->question_detail->answer;
-                if (is_string($correctAnswer)) {
-                    $correctAnswer = json_decode($correctAnswer, true);
-                    if (json_last_error() !== JSON_ERROR_NONE) {
-                        Log::error('JSON decode error for correct answer: ' . json_last_error_msg());
-                        continue;
-                    }
-                }
-
-                // calculate score with proper answer formats
-                $score = $this->calculateQuestionScore(
-                    $question->question_detail->type,
-                    $participantAnswer,
-                    $correctAnswer
-                );
-
-                // store and encode participant answer 
-                $assessmentItem = AssessmentItem::updateOrCreate(
-                    [
-                        'assessment_course_id' => $this->getAssessmentCourseId($assessment->assessment_id, $question->course_id),
-                        'question_id' => $questionId
-                    ],
-                    [
-                        'participants_answer' => is_array($participantAnswer) ? json_encode($participantAnswer) : json_encode([$participantAnswer]),
-                        'score' => $score
-                    ]
-                );
-
-                $totalScore += $assessmentItem->score;
-                $totalItems++;
-            }
-
-            // assessment score
-            $assessment->update([
-                'end_time' => now(),
-                'status' => 'Completed',
-                'total_items' => $totalItems,
-                'total_score' => $totalScore,
-                'percentage' => ($totalItems > 0) ? ($totalScore / $totalItems) * 100 : 0,
-                // to update
-                'initial_theta_score' => 0,
-                'final_theta_scoure' => 0
-            ]);
-
-            Log::info('Completed pretest submission after update', [
-                'student_id' => Auth::user()->userable->student_id,
-                'assessment_id' => $assessment->assessment_id,
-                'total_score' => $totalScore,
-                'total_items' => $totalItems
-            ]);
-
-            $this->updateAssessmentCourses($assessment->assessment_id);
-
-            //update student table 
-            $student = Student::findOrFail($assessment->student_id);
-            $student->update(['pretest_completed' => true]);
-
-            DB::commit();
-
-            // !!
-            return Inertia::render('Student/Pretest/PretestFinish', [
-                'score' => $assessment->total_score,
-                'totalQuestions' => $assessment->total_items,
-                'pretestId' => $assessment->assessment_id,
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Pretest submission error: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
-            return back()->with('error', 'An error occurred while submitting your pretest. Please try again.');
-        }
-    }
-
-    private function calculateQuestionScore($questionType, $participantAnswer, $correctAnswer)
-    {
-        try {
-            Log::debug('calculateQuestionScore input:', [
-                'type' => $questionType,
-                'participant_answer' => $participantAnswer,
-                'correct_answer' => $correctAnswer
-            ]);
-
-            switch ($questionType) {
-                case 'Identification':
-                    $participantText = is_array($participantAnswer) ? $participantAnswer[0] : $participantAnswer;
-                    $correctText = is_array($correctAnswer) ? $correctAnswer[0] : $correctAnswer;
-
-                    #normalization
-                    $participantText = strtolower(trim((string) $participantText));
-                    $correctText = strtolower(trim((string) $correctText));
-
-                    $participantText = preg_replace('/\s+/', ' ', $participantText);
-                    $correctText = preg_replace('/\s+/', ' ', $correctText);
-
-                    $score = $participantText === $correctText ? 1 : 0;
-                    break;
-
-                case 'Multiple Choice - Single':
-                    $participantChoice = is_array($participantAnswer) ? $participantAnswer[0] : $participantAnswer;
-                    $correctChoice = is_array($correctAnswer) ? $correctAnswer[0] : $correctAnswer;
-
-                    $participantChoice = strtolower(trim((string) $participantChoice));
-                    $correctChoice = strtolower(trim((string) $correctChoice));
-
-                    $score = $participantChoice === $correctChoice ? 1 : 0;
-                    break;
-
-                case 'Multiple Choice - Many':
-                    $participantAnswers = is_array($participantAnswer) ? $participantAnswer : [$participantAnswer];
-                    $correctAnswers = is_array($correctAnswer) ? $correctAnswer : [$correctAnswer];
-
-                    $participantAnswers = array_map(function ($ans) {
-                        return strtolower(trim((string) $ans));
-                    }, $participantAnswers);
-
-                    $correctAnswers = array_map(function ($ans) {
-                        return strtolower(trim((string) $ans));
-                    }, $correctAnswers);
-
-                    sort($participantAnswers);
-                    sort($correctAnswers);
-
-                    $score = (json_encode($participantAnswers) === json_encode($correctAnswers)) ? 1 : 0;
-                    break;
-
-                default:
-                    Log::warning("Unknown question type: $questionType");
-                    $score = 0;
-            }
-
-            Log::debug('Score calculated:', [
-                'type' => $questionType,
-                'score' => $score
-            ]);
-
-            return $score;
-
-        } catch (\Exception $e) {
-            Log::error('Error in calculateQuestionScore: ' . $e->getMessage());
-            return 0;
-        }
-    }
-    private function getAssessmentCourseId($assessmentId, $courseId)
-    {
-        $assessmentCourse = AssessmentCourse::where('assessment_id', $assessmentId)
-            ->where('course_id', $courseId)
-            ->first();
-
-        Log::info('Creating assessment course:', [
-            'assessment_id' => $assessmentId,
-            'course_id' => $courseId,
-            'total_items' => 0,
-            'total_score' => 0,
-            'percentage' => 0,
+        $assessment->update([
+            'end_time' => now(),
+            'status' => AssessmentStatus::COMPLETED,
+            'total_items' => $totalItems,
+            'total_score' => $totalScore,
+            'percentage' => ($totalItems > 0) ? ($totalScore / $totalItems) * 100 : 0,
             'initial_theta_score' => 0,
-            'final_theta_score' => 0,
+            'final_theta_score' => 0
         ]);
 
-
-        if (!$assessmentCourse) {
-            $assessmentCourse = AssessmentCourse::create([
-                'assessment_id' => $assessmentId,
-                'course_id' => $courseId,
-                'total_items' => 0,
-                'total_score' => 0,
-                'percentage' => 0,
-                'initial_theta_score' => 0, // Add this line
-                'final_theta_score' => 0,
-            ]);
-        }
-
-        return $assessmentCourse->assessment_course_id;
+        return redirect()->route('test.finish', $assessment->assessment_id);
     }
-
-    private function updateAssessmentCourses($assessmentId)
-    {
-        $assessmentCourses = AssessmentCourse::where('assessment_id', $assessmentId)->get();
-
-        foreach ($assessmentCourses as $assessmentCourse) {
-            $totalScore = AssessmentItem::where('assessment_course_id', $assessmentCourse->assessment_course_id)
-                ->sum('score');
-            $totalItems = AssessmentItem::where('assessment_course_id', $assessmentCourse->assessment_course_id)
-                ->count();
-
-            $assessmentCourse->update([
-                'total_score' => $totalScore,
-                'total_items' => $totalItems,
-                'percentage' => ($totalItems > 0) ? ($totalScore / $totalItems) * 100 : 0,
-                'initial_theta_score' => 0,
-                'final_theta_score' => 0
-            ]);
-
-            //add student_courses_theta
-        }
-    }
-
 }

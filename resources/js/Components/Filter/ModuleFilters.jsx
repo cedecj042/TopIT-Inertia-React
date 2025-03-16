@@ -81,7 +81,7 @@ export default function ModuleFilters({ filters }) {
                             <button
                                 className="btn btn-light w-100"
                                 onClick={() =>
-                                    handleClearFilter(["course"])
+                                    handleClearFilter(["course","vectorized"])
                                 }
                             >
                                 Clear Filters

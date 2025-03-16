@@ -34,5 +34,13 @@ class Assessment extends Model
         return $this->hasMany(AssessmentCourse::class,'assessment_id','assessment_id');
     }
 
-    
+    public function scopeIsPretest($query)
+    {
+        return $query->where('type', AssessmentType::PRETEST);
+    }
+
+    public function scoeIsTest($query)
+    {
+        return $query->where('type', AssessmentType::TEST);
+    }
 }

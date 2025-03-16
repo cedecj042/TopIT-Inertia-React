@@ -69,6 +69,7 @@ function Question({ questions,filters,queryParams = {} }) {
                 <GenerateQuestionForm data={data} closeModal={closeModal} />
 
             </Modal>
+            
         </>
     );
 }

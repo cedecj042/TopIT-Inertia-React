@@ -1,70 +1,74 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Head, Link } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout";
 import Navbar from "@/Components/Navigation/Navbar";
 import ReviewQuestionForm from "@/Components/Pretest/ReviewQuestionForm";
-import "../../../../css/student/students.css";
-import "../../../../css/student/welcome.css";
 import Sidebar from "@/Components/Pretest/Sidebar";
+import "../../../../css/student/students.css";
+
 
 const TestReview = ({
-    courses = { data: [], questions: [] },
-    assessment = {},
+    assessment_courses,
+    assessment_id
 }) => {
-
-    // const currentCourseIndex = courses.data[0].course_id;
+    console.log(assessment_id)
+    const assessmentCourses = assessment_courses.data;
     const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
-    
-    const coursesData = courses.data || [];
+    const [selectedAssessmentCourse, setSelectedAssessmentCourse] = useState(assessmentCourses[currentCourseIndex]);
 
-    const questionsForCurrentCourse =
-        courses.questions?.[currentCourseIndex + 1 ]?.questions || [];
-
-    console.log("Courses data:", courses);
-    console.log("Questions:", courses);
-    console.log("Courses index:", currentCourseIndex);
+    useEffect(() => {
+        setSelectedAssessmentCourse(assessmentCourses[currentCourseIndex]);
+    }, [currentCourseIndex]);
     
-    const totalCourses = coursesData.length;
+    const handleCourseChange = (index) => {
+        setCurrentCourseIndex(index);
+        window.scrollTo(0, 0);
+    };
 
     return (
         <>
             <Head title="Test Review" />
             <Navbar isLight={true} />
-
-            <div className="testb container-fluid">
+            <div
+                className="container-fluid h-100"
+            >
                 <div className="row min-vh-100">
                     {/* Sidebar */}
                     <div className="col-md-3 position-fixed border-end h-100 mt-5">
                         <Sidebar
-                            courses={courses}
-                            currentCourseIndex={currentCourseIndex}
-                            setCurrentCourseIndex={setCurrentCourseIndex}
+                            assessment_courses={assessmentCourses}
+                            selectedCourse={selectedAssessmentCourse}
+                            handleCourseChange={handleCourseChange}
                         />
                         <div className="px-4 mt-2">
                             <h5 className="pb-2">Assessment Summary</h5>
                             <div className="card">
-                                <div className="card-body">
-                                    <p className="mb-1">
-                                        Score: {assessment.total_score} /{" "}
-                                        {assessment.total_items}
-                                    </p>
-                                    <p className="mb-0">
-                                        Percentage: {assessment.percentage}%
-                                    </p>
+                                <div className="card-body d-grid gap-2" style={{ gridTemplateColumns: "auto auto" }}>
+                                    <span className="fw-semibold d-flex flex-row justify-content-between pe-3">Score <span>:</span></span>
+                                    <span>{selectedAssessmentCourse.total_score} / {selectedAssessmentCourse.total_items}</span>
+
+                                    <span className="fw-semibold d-flex flex-row justify-content-between pe-3">Percentage <span>:</span></span>
+                                    <span>{selectedAssessmentCourse.percentage}%</span>
+
+                                    <span className="fw-semibold d-flex flex-row justify-content-between pe-3">Initial Theta <span>:</span></span>
+                                    <span>{selectedAssessmentCourse.initial_theta_score}</span>
+
+                                    <span className="fw-semibold d-flex flex-row justify-content-between pe-3">Final Theta <span>:</span></span>
+                                    <span>{selectedAssessmentCourse.final_theta_score}</span>
                                 </div>
                             </div>
-                            <div className="d-flex justify-content-between mt-3">
+                            <div className="row g-0 gap-3 mt-3">
                                 <Link
-                                    href={`/dashboard`}
-                                    className="btn btn-primary w-50 p-2 mt-3 me-3"
+                                    href={route('dashboard')}
+                                    className="btn btn-primary col"
                                 >
-                                    Proceed to Dashboard
+                                    Dashboard
                                 </Link>
                                 <Link
-                                    href={`/test/finish/${assessment.assessment_id}`}
-                                    className="btn btn-outline-primary w-50 p-2 mt-3"
+                                    href={route('test.finish', assessment_id)}
+                                    className="btn btn-outline-primary  col"
                                 >
-                                    Go Back to Results
+                                    Summary
                                 </Link>
                             </div>
                         </div>
@@ -80,24 +84,38 @@ const TestReview = ({
                             </div>
                             <div className="col-md-6 text-end">
                                 <h5 className="mb-0 fs-5">
-                                    {coursesData[currentCourseIndex]?.title ||
+                                    {selectedAssessmentCourse.course.title ||
                                         "Course Title"}
                                 </h5>
                                 <small className="text-muted">
                                     Course {currentCourseIndex + 1} of{" "}
-                                    {totalCourses}
+                                    {assessment_courses.length}
                                 </small>
                             </div>
                         </div>
+                        <ReviewQuestionForm
+                            assessment_items={selectedAssessmentCourse.assessment_items}
+                        />
+                        <div className="d-flex justify-content-between mt-4">
+                            <button
+                                type="button"
+                                className={`btn ${!!currentCourseIndex ? "btn-secondary" : "btn-outline-secondary"}`}
+                                onClick={() => handleCourseChange(currentCourseIndex - 1)}
+                                disabled={currentCourseIndex === 0}
+                            >
+                                Previous
+                            </button>
 
-                            <>
-                                <ReviewQuestionForm
-                                    course={{ questions: questionsForCurrentCourse }}
-                                />
-
-                                
-                            </>
-                       
+                            {currentCourseIndex < assessment_courses.length - 1 && (
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={() => handleCourseChange(currentCourseIndex + 1)}
+                                >
+                                    Next
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

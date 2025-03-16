@@ -5,8 +5,7 @@ export default function TestHistoryList ({ tests = [] }) {
     const isEmpty = !Array.isArray(tests) || tests.length === 0;;
     const {isProcessing,getRequest} = useRequest();
     const handleClick = (id)=>{
-        console.log(id);
-        getRequest('test.review',id,{})
+        getRequest('test.finish',id,{})
     }
     return (
         <div>

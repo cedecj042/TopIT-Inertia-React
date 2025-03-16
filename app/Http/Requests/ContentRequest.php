@@ -27,8 +27,8 @@ class ContentRequest extends FormRequest
     {
         return [
         'type' => 'required|string',
-        'contentable_id' => 'required|integer',
-        'contentable_type' => 'required|string|in:Module,Lesson,Section,Subsection', // Ensure it's one of the allowed types
+        'contentable_id' => 'required|string',
+        'contentable_type' => 'required|string|in:Module,Lesson,Section,Subsection',
         'description' => 'nullable|string',
         'caption' => 'nullable|string|max:255',
         'order' => 'nullable|integer',

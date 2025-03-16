@@ -17,18 +17,20 @@ class ProcessPdfJob implements ShouldQueue
     protected $fileName;
     protected string $courseTitle;
     protected int $courseId;
+    protected int $pdfId;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($pdfFilePath, $fileName, $courseTitle, $courseId)
+    public function __construct($pdfFilePath, $fileName, $courseTitle, $courseId,$pdfId)
     {
         $this->pdfFilePath = $pdfFilePath;
         $this->fileName = $fileName;
         $this->courseTitle = $courseTitle;
         $this->courseId = $courseId;
+        $this->pdfId = $pdfId;
     }
 
     /**
@@ -71,7 +73,7 @@ class ProcessPdfJob implements ShouldQueue
                 throw new \Exception("Failed to read content from: {$this->pdfFilePath}");
             }
         
-            $response = $fastAPIService->processPdf($pdfContent, $this->fileName, $this->courseTitle, $this->courseId);
+            $response = $fastAPIService->processPdf($pdfContent, $this->fileName, $this->courseTitle, $this->courseId, $this->pdfId);
         
             if ($response && $response->successful()) {
                 Log::info('FastAPI successfully processed the PDF.', [

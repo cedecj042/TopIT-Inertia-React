@@ -8,7 +8,10 @@ use App\Http\Resources\ModuleResource;
 use App\Jobs\ProcessModule;
 use App\Models\Course;
 use App\Models\Content;
+use App\Models\Lesson;
 use App\Models\Module;
+use App\Models\Section;
+use App\Models\Subsection;
 use App\Services\FastApiService;
 use App\Services\ModuleService;
 use Illuminate\Http\Request;
@@ -37,7 +40,7 @@ class ModuleController extends Controller
         ]);
     }
 
-    public function show(int $module_id)
+    public function show(string $module_id)
     {
         $module = $this->moduleService->getModuleWithDetails($module_id);
         return Inertia::render('Admin/Modules/ModuleDetail', [
@@ -47,7 +50,7 @@ class ModuleController extends Controller
         ]);
     }
 
-    public function edit(int $module_id)
+    public function edit(string $module_id)
     {
         $module = $this->moduleService->getModuleWithDetails($module_id);
         return Inertia::render('Admin/Modules/ModuleEdit', [
@@ -75,7 +78,7 @@ class ModuleController extends Controller
             'contentableType' => $validated['contentable_type'],
         ])->with('success', 'Updated Successfully');
     }
-    public function delete(int $module_id)
+    public function delete(string $module_id)
     {
         try {
             // Fetch the module using the given ID
@@ -110,6 +113,53 @@ class ModuleController extends Controller
             Log::error("Error deleting {$type}: ", ['error' => $e->getMessage()]);
             return redirect()->back()->withErrors(['error' => 'Failed to delete the content.']);
         }
+    }
+
+    public function deleteModule(string $id) {
+        $content = Module::findOrFail($id);
+        $content->delete();
+        
+        return redirect()->route('admin.module.index')->with('success', 'Module Deleted Successfully');
+    }
+    public function deleteLesson(string $id) {
+
+        $content = Lesson::findOrFail($id);
+        $moduleId = $content->module->module_id;
+        $content->delete();
+        
+        // return redirect()->back()->with('success', 'Deleted Successfully');
+        return redirect()->route('admin.module.edit', [
+            'id' => $moduleId,
+            'contentableId' => $moduleId,
+            'contentableType' => "Module",
+        ])->with('success', 'Lesson Deleted Successfully');
+
+    }
+    public function deleteSection(string $id) {
+        $content = Section::findOrFail($id);
+        $moduleId = $content->lesson->module->module_id;
+        $content->delete();
+        
+        // return redirect()->back()->with('success', 'Deleted Successfully');
+        return redirect()->route('admin.module.edit', [
+            'id' => $moduleId,
+            'contentableId' => $moduleId,
+            'contentableType' => "Module",
+        ])->with('success', 'Lesson Deleted Successfully');
+    }
+    public function deleteSubsection(string $id) {
+
+        $content = Subsection::findOrFail($id);
+        $moduleId = $content->section->lesson->module->module_id;
+        $content->delete();
+        
+        // return redirect()->back()->with('success', 'Deleted Successfully');
+        return redirect()->route('admin.module.edit', [
+            'id' => $moduleId,
+            'contentableId' => $moduleId,
+            'contentableType' => "Module",
+        ])->with('success', 'Lesson Deleted Successfully');
+
     }
 
 

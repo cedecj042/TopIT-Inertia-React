@@ -15,36 +15,41 @@ use App\Models\Figure;
 class Section extends Model
 {
     use HasFactory;
+
     protected $primaryKey = 'section_id';
-    public $incrementing = false;
-    protected $keyType = 'string';
+
+    protected $fillable = [
+        'section_uid',
+        'lesson_id',
+        'title',
+    ];
 
     protected static function boot()
     {
         parent::boot();
+
         static::creating(function ($section) {
-            $lesson_id = $section->lesson_id;
-            $lastSection = Section::where('lesson_id', $lesson_id)->orderBy('section_id', 'desc')->first();
-            $section->section_id = $lastSection ? $lastSection->section_id + 1 : $lesson_id . '001';
+            if (!$section->section_uid) {
+                $section->section_uid = 'SC' . ((Section::max('section_id') ?? 0) + 1);
+            }
         });
     }
-    protected $fillable = [
-        'lesson_id',
-        'title',
-    ];
-    public function lesson(){
-        return $this->belongsTo(Lesson::class,'lesson_id','lesson_id');
+
+    public function lesson()
+    {
+        return $this->belongsTo(Lesson::class, 'lesson_id', 'lesson_id');
     }
-    public function subsections(){
-        return $this->hasMany(Subsection::class,'section_id');
+    public function subsections()
+    {
+        return $this->hasMany(Subsection::class, 'section_id');
     }
     public function contents()
     {
         return $this->morphMany(Content::class, 'contentable');
     }
     public function module()
-{
-    return $this->lesson->module();
-}
-    
+    {
+        return $this->lesson->module();
+    }
+
 }

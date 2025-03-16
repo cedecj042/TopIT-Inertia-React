@@ -28,7 +28,8 @@ return new class extends Migration
         });
 
         Schema::create('modules', function (Blueprint $table) {
-            $table->string('module_id')->primary();
+            $table->id('module_id');
+            $table->string('module_uid')->unique();
             $table->foreignId('course_id')->references('course_id')->on('courses')->cascadeOnDelete();
             $table->string('title')->nullable();
             $table->boolean('vectorized')->default(false);
@@ -36,25 +37,25 @@ return new class extends Migration
         });
 
         Schema::create('lessons',function(Blueprint $table){
-            $table->string('lesson_id')->primary();
-            $table->string('module_id');
-            $table->foreign('module_id')->references('module_id')->on('modules')->cascadeOnDelete();
+            $table->id('lesson_id');
+            $table->string('lesson_uid')->unique();
+            $table->foreignId('module_id')->references('module_id')->on('modules')->cascadeOnDelete();
             $table->string('title')->nullable();
             $table->timestamps();
         }); 
 
         Schema::create('sections',function(Blueprint $table){
-            $table->string('section_id')->primary();
-            $table->string('lesson_id');
-            $table->foreign('lesson_id')->references('lesson_id')->on('lessons')->cascadeOnDelete();
+            $table->id('section_id');
+            $table->string('section_uid')->unique();
+            $table->foreignId('lesson_id')->references('lesson_id')->on('lessons')->cascadeOnDelete();
             $table->string('title')->nullable();
             $table->timestamps();
         });
 
         Schema::create('subsections',function(Blueprint $table){
-            $table->string('subsection_id')->primary();
-            $table->string('section_id');
-            $table->foreign('section_id')->references('section_id')->on('sections')->cascadeOnDelete();
+            $table->id('subsection_id');
+            $table->string('subsection_uid')->unique();
+            $table->foreignId('section_id')->   references('section_id')->on('sections')->cascadeOnDelete();
             $table->string('title')->nullable();
             $table->timestamps();
         });

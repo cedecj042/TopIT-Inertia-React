@@ -5,28 +5,29 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Lesson;
+use Log;
 
 class Module extends Model
 {
     use HasFactory;
+
     protected $primaryKey = 'module_id';
-    public $incrementing = false;
-    protected $keyType = 'string';
+    protected $fillable = [
+        'module_uid',
+        'course_id',
+        'title',
+    ];
 
     protected static function boot()
     {
         parent::boot();
+
         static::creating(function ($module) {
-            $course_id = $module->course_id;
-            $lastModule = Module::where('course_id', $course_id)->orderBy('module_id', 'desc')->first();
-            $module->module_id = $lastModule ? $lastModule->module_id + 1 : $course_id . '001';  // String manipulation for ID
+            if (!$module->module_uid) {
+                $module->module_uid = 'MD' . ((Module::max('module_id') ?? 0) + 1);
+            }
         });
     }
-
-    protected $fillable = [
-        'course_id',
-        'title',
-    ];
 
 
     public function lessons()
@@ -41,5 +42,5 @@ class Module extends Model
     {
         return $this->morphMany(Content::class, 'contentable');
     }
-    
+
 }

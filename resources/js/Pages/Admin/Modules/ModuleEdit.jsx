@@ -5,6 +5,7 @@ import ContentTypeForm from "@/Components/Forms/ContentTypeForm";
 import { useState, useEffect, useMemo } from "react";
 import Modal from "@/Components/Modal/Modal";
 import Changes from "@/Components/Forms/Changes";
+import { usePage } from "@inertiajs/react";
 
 function ModuleEdit({ module, queryParams = {} }) {
     const { isProcessing, getRequest } = useRequest();
@@ -12,11 +13,13 @@ function ModuleEdit({ module, queryParams = {} }) {
     const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
     const [pendingTab, setPendingTab] = useState(null);
 
-    // Ensure queryParams is always an object and handle case where it might be null
-    const safeQueryParams = useMemo(() => ({
-        ...queryParams || {}, // Use an empty object if queryParams is null or undefined
-        contentableId: queryParams?.contentableId ? parseInt(queryParams.contentableId, 10) : module?.id, // Default to module.id if contentableId is null or not provided
-    }), [queryParams, module?.id]);
+    const safeQueryParams = useMemo(() => {
+        const params = queryParams || {}; // Handle null/undefined queryParams
+        return {
+            contentableId: params.contentableId || module?.module_id || null, // Provide default, handle missing ID
+            contentableType: params.contentableType || "Module" || null, // Provide default, handle missing type
+        };
+    }, [queryParams, module?.id]);
     
     // Function to get the content ID based on type
     const getContentId = (content, type) => {
@@ -70,6 +73,7 @@ function ModuleEdit({ module, queryParams = {} }) {
 
     // Automatically set activeContent based on queryParams when the component mounts or queryParams changes
     useEffect(() => {
+        console.log("safeQueryParams:", safeQueryParams);
         if (safeQueryParams.contentableType && safeQueryParams.contentableId) {
             const contentData = getContentByTypeAndId(safeQueryParams.contentableType, safeQueryParams.contentableId);
             if (contentData) {

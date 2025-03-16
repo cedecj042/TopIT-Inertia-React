@@ -4,9 +4,9 @@ import '../../../css/modal.css';
 export default function Modal({modalTitle,modalSize=null,onClose,show,children}) {
     useEffect(() => {
         if (show) {
-            document.body.style.overflow = "hidden"; // Disable scrolling
+            document.body.style.overflow = "hidden"; 
         } else {
-            document.body.style.overflow = ""; // Enable scrolling
+            document.body.style.overflow = "";
         }
         return () => {
             document.body.style.overflow = "";

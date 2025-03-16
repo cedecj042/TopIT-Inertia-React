@@ -144,7 +144,8 @@ export const useRequest = () => {
         onSuccess: () => {
             toast.success("Request successful", { duration: 3000 });
         },
-        onError: () => {
+        onError: (error) => {
+            console.log(error)
             toast.error("Unexpected error", { duration: 3000 });
         },
         onFinish: () => {
@@ -160,13 +161,13 @@ export const useRequest = () => {
     };
 
     // POST request handler
-    const postRequest = async (routeName, data, customCallbacks = {}, options = {}) => {
+    const postRequest = async (routeName,data, customCallbacks = {}, options = {}) => {
         setIsProcessing(true);
-        const requestOptions = { ...defaultOptions, ...options }; // Merge default options with custom options
-
+        const requestOptions = { ...defaultOptions, ...options };
+        
         try {
             await router.post(route(routeName), data, {
-                ...requestOptions, // Spread merged options here
+                ...requestOptions,
                 onSuccess: (page) => {
                     (customCallbacks.onSuccess || defaultCallbacks.onSuccess)(page);
                 },
@@ -234,7 +235,7 @@ export const useRequest = () => {
     // DELETE request handler
     const deleteRequest = async (routeName, params, customCallbacks = {}, options = {}) => {
         setIsProcessing(true);
-        const requestOptions = { ...defaultOptions, ...options }; // Merge default options with custom options
+        const requestOptions = { ...defaultOptions, ...options }; 
 
         try {
             await router.delete(route(routeName, params), {

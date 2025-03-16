@@ -99,10 +99,7 @@ class QuestionService
             ]);
 
             // Eager load relationships
-            $assessmentItem->load([
-                'question.question_detail',
-                'assessment_course.assessment'
-            ]);
+            $assessmentItem->load(['question.question_detail']);
 
             Log::info("New question selected for assessment:", [
                 'assessment_item_id' => $assessmentItem->assessment_item_id,

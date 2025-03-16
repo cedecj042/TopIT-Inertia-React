@@ -7,8 +7,6 @@ import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 function TestPage(props) {
     const testsData = props.tests && props.tests.data ? props.tests.data : [];
     const assessmentId = props.assessmentId || null;
-
-    console.log("assessment id: ", assessmentId);
     return (
         <>
             <main className="row p-3 mt-4">
@@ -38,11 +36,11 @@ function TestPage(props) {
                 <div className="row mt-4 px-5">
                     <div className="d-flex justify-content-between align-items-center mb-3">
                         <h5 className="fw-semibold fs-5">Recent Attempts</h5>
-                        <Link href={`/test/history`} className="text-decoration-none">
+                        <Link href={route('test.history')} className="text-decoration-none">
                             View Test History
                         </Link>
                     </div>
-                    <TestHistory tests={testsData} />
+                    <TestHistory tests={testsData}/>
                 </div>
             </main>
         </>

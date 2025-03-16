@@ -22,11 +22,10 @@ class AdminAccess
             if ($user->userable instanceof Admin) {
                 return $next($request);
             } else {
-                Auth::logout();
-                return redirect()->route('admin.login')->withErrors(['error' => 'You do not have access to this page.']);
+                return redirect('/dashboard')->withErrors(['error' => 'You do not have admin access.']);
             }
         } else {
-            return redirect()->route('admin.login');
+            return redirect()->back();
         }
     }
 }

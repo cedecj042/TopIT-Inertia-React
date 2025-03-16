@@ -62,6 +62,6 @@ class TerminationRuleService
      */
     public function getTerminationReason(): string
     {
-        return "Maximum number of questions {$this->MAX_QUESTIONS} reached.";
+        return "Maximum number of questions " . self::MAX_QUESTIONS . " reached." ;
     }
 }

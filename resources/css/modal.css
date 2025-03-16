@@ -11,3 +11,16 @@
     background-color: rgba(0,0,0,0.15);
     border-radius: 50%;
 }
+
+.grid-5{
+    grid-template-columns: repeat(5,1fr);
+    gap: 0.5rem;
+}
+.grid-2{
+    grid-template-columns: repeat(2,1fr);
+    gap: 0.5rem;
+}
+.grid-3{
+    grid-template-columns: repeat(3,1fr);
+    gap: 0.5rem;
+}

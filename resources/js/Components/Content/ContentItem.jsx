@@ -51,7 +51,7 @@ export default function ContentItem({ item }) {
                 <div className="code my-3 w-100">
                     <div className="code-images d-flex flex-column justify-content-center">
                         <img
-                            src={image.file_path}
+                            src={item.file_path}
                             alt="Code Image"
                             className="img-fluid"
                         />

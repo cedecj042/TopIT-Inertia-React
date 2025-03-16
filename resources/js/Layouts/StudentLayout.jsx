@@ -7,7 +7,7 @@ export default function StudentLayout({ children, title }) {
     return (
         <>
             <Head title={title} />
-            <div className="container-fluid">
+            <div className="container-fluid h-100">
                 <div className="row h-100">
                     <StudentSideBar title={title} />
                     <main className="col-md-9 ms-sm-auto col-lg-10 p-0">

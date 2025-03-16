@@ -16,14 +16,15 @@ class FastApiService
         $this->baseUrl = config('services.fastapi.url');
     }
 
-    public function processPdf($pdfContent, $fileName, $courseName, $courseId)
+    public function processPdf($pdfContent, $fileName, $courseName, $courseId, $pdfId)
     {
         try {
             // Log the details of the request before making the call
             Log::info('Sending PDF to FastAPI', [
                 'fileName' => $fileName,
                 'courseName' => $courseName,
-                'courseId' => $courseId
+                'courseId' => $courseId,
+                'pdf_id'=> $pdfId
             ]);
 
             // Send the request to FastAPI
@@ -32,6 +33,7 @@ class FastApiService
                 ->post("{$this->baseUrl}/process-pdf/", [
                     'course_name' => $courseName,
                     'course_id' => $courseId,
+                    'pdf_id' => $pdfId,
                 ]);
 
             // Check for a failed response
@@ -150,9 +152,13 @@ class FastApiService
     {
         return Http::delete("{$this->baseUrl}/delete_course/{$course_id}");
     }
-    public function deleteModule(int $module_id)
+    public function deleteModule(string $module_uid)
     {
-        return Http::delete("{$this->baseUrl}/delete_module/{$module_id}");
+        return Http::delete("{$this->baseUrl}/delete_module/{$module_uid}");
+    }
+    public function deleteQuestion(string $question_uid)
+    {
+        return Http::delete("{$this->baseUrl}/delete_question/{$question_uid}");
     }
     public function broadcastEvent($info = null, $success = null, $error = null)
     {

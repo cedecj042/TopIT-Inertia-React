@@ -20,7 +20,7 @@ export default function LoginForm({routeName,btn}) {
                 reset();
             },onError:(error)=>{
                 toast.error(error.error, { duration: 3000 });
-            }
+            },
         });
     };
     
