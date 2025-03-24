@@ -6,13 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\VectorRequest;
 use App\Http\Resources\ModuleResource;
 use App\Jobs\ProcessModule;
-use App\Models\Course;
-use App\Models\Content;
 use App\Models\Lesson;
 use App\Models\Module;
 use App\Models\Section;
 use App\Models\Subsection;
-use App\Services\FastApiService;
 use App\Services\ModuleService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -81,14 +78,12 @@ class ModuleController extends Controller
     public function delete(string $module_id)
     {
         try {
-            // Fetch the module using the given ID
             $module = Module::findOrFail($module_id);
             $module->delete();
-            // Redirect back with success message
+            
             return redirect()->route('admin.module.index')->with('success', 'Module deleted successfully.');
         } catch (\Exception $e) {
             Log::error("Error deleting module: {$module_id}", ['error' => $e->getMessage()]);
-            // Redirect back with error message if there's an exception
             return redirect()->back()->withErrors(['error' => 'Failed to delete the module.']);
         }
     }
@@ -127,7 +122,6 @@ class ModuleController extends Controller
         $moduleId = $content->module->module_id;
         $content->delete();
         
-        // return redirect()->back()->with('success', 'Deleted Successfully');
         return redirect()->route('admin.module.edit', [
             'id' => $moduleId,
             'contentableId' => $moduleId,
@@ -140,7 +134,6 @@ class ModuleController extends Controller
         $moduleId = $content->lesson->module->module_id;
         $content->delete();
         
-        // return redirect()->back()->with('success', 'Deleted Successfully');
         return redirect()->route('admin.module.edit', [
             'id' => $moduleId,
             'contentableId' => $moduleId,
@@ -153,7 +146,6 @@ class ModuleController extends Controller
         $moduleId = $content->section->lesson->module->module_id;
         $content->delete();
         
-        // return redirect()->back()->with('success', 'Deleted Successfully');
         return redirect()->route('admin.module.edit', [
             'id' => $moduleId,
             'contentableId' => $moduleId,

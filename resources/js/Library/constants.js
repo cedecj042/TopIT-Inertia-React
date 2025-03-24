@@ -33,9 +33,9 @@ export const QUESTION_COLUMN = [
     {key:'course.title',label:'Course', sortable:false,visible:true},
     {key:'question',label:'Question', sortable:false,visible:true},
     {key:'difficulty_type',label:'Difficulty', sortable:false,visible:true},
-    {key:'question_detail.type',label:'Type', sortable:false,visible:true},
-    {key:'question_detail.choices',label:'Choices', sortable:false,visible:true},
-    {key:'question_detail.answer',label:'Answer', sortable:false,visible:true}
+    {key:'question_type',label:'Type', sortable:false,visible:true},
+    {key:'choices',label:'Choices', sortable:false,visible:true},
+    {key:'answer',label:'Answer', sortable:false,visible:true}
 ]
 
 export const PRETEST_COLUMN = [
@@ -43,9 +43,9 @@ export const PRETEST_COLUMN = [
     {key:'course.title',label:'Course', sortable:false,visible:true},
     {key:'question',label:'Question', sortable:false,visible:true},
     {key:'difficulty_type',label:'Difficulty', sortable:false,visible:true},
-    {key:'question_detail.type',label:'Type', sortable:false,visible:true},
-    // {key:'question_detail.choices',label:'Choices', sortable:false,visible:true},
-    {key:'question_detail.answer',label:'Answer', sortable:false,visible:true},
+    {key:'question_type',label:'Type', sortable:false,visible:true},
+    // {key:'choices',label:'Choices', sortable:false,visible:true},
+    {key:'answer',label:'Answer', sortable:false,visible:true},
 ]
 
 export const ADMIN_COLUMN = [

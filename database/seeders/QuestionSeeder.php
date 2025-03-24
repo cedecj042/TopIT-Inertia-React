@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Enums\QuestionDetailType;
 use App\Enums\QuestionDifficulty;
-use App\Enums\QuestionTestType;
+use App\Enums\QuestionType;
 use App\Enums\TestType;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -85,20 +84,12 @@ class QuestionSeeder extends Seeder
 
                         // Determine question detail type
                         $type = empty($questionData[2])
-                            ? QuestionDetailType::IDENTIFICATION->value
+                            ? QuestionType::IDENTIFICATION->value
                             : (is_array($questionData[1])
-                                ? QuestionDetailType::MULTIPLE_CHOICE_MANY->value
-                                : QuestionDetailType::MULTIPLE_CHOICE_SINGLE->value);
+                                ? QuestionType::MULTIPLE_CHOICE_MANY->value
+                                : QuestionType::MULTIPLE_CHOICE_SINGLE->value);
 
-                        // Insert question details
-                        $question_detail_id = DB::table('question_details')->insertGetId([
-                            'type' => $type,
-                            'answer' => json_encode($questionData[1]),
-                            'choices' => !empty($questionData[2]) ? json_encode($questionData[2]) : null,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-
+                    
                         // Generate difficulty value within the specified range
                         $difficultyRange = $difficultyRanges[$difficultyName];
                         $difficultyValue = mt_rand($difficultyRange[0] * 10, $difficultyRange[1] * 10) / 10;
@@ -109,14 +100,14 @@ class QuestionSeeder extends Seeder
                         // Insert question
                         DB::table('questions')->insert([
                             'course_id' => $course->course_id,
-                            'question_detail_id' => $question_detail_id,
                             'difficulty_type' => $difficultyName,
                             'test_type' => TestType::TEST->value,
                             'question' => $questionData[0],
                             'discrimination_index' => $discriminationIndex,
                             'difficulty_value' => $difficultyValue,
-                            'created_at' => now(),
-                            'updated_at' => now(),
+                            'type' => $type,
+                            'answer' => json_encode($questionData[1]),
+                            'choices' => !empty($questionData[2]) ? json_encode($questionData[2]) : null,
                         ]);
                     }
                 }

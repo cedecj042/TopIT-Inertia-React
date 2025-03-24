@@ -15,35 +15,30 @@ export default function EditQuestionForm({ question, onClose, filters }) {
         defaultValues: {
             question_id: question?.question_id || '',
             question: question?.question || '',
-            answer: question?.question_detail?.answer || [],
-            choices: question?.question_detail?.choices?.map(choice => ({ value: choice })) || [],
+            answer: question?.answer || [],
+            choices: question?.choices?.map(choice => ({ value: choice })) || [],
             difficulty: question?.difficulty_type || '',
             difficulty_value: question?.difficulty_value || '',
-            question_detail_type: question?.question_detail?.type || '',
-            question_detail_id: question?.question_detail?.question_detail_id || '',
+            question_type: question?.question_type || '',
             discrimination_index: question?.discrimination_index || '',
             course: question?.course?.title || '',
         },
     });
 
     const { fields, append, remove } = useFieldArray({ control, name: "choices" });
-    const type = watch("question_detail_type");
+    const type = watch("question_type");
     const answer = watch("answer");
     const { isProcessing, putRequest } = useRequest();
 
     const canAddMoreChoices = fields.length < 4;
 
-    // Handle answer format based on question type
     useEffect(() => {
         const currentAnswer = watch("answer");
-
         if (type === "Multiple Choice - Many") {
-            // Ensure answer is array
             if (!Array.isArray(currentAnswer)) {
                 setValue("answer", currentAnswer ? [currentAnswer] : []);
             }
         } else {
-            // Ensure answer is string for single choice and identification
             if (Array.isArray(currentAnswer)) {
                 setValue("answer", currentAnswer.join(", "));
             }
@@ -109,8 +104,7 @@ export default function EditQuestionForm({ question, onClose, filters }) {
                         />
                         {errors.question && <p className="text-danger">{errors.question.message}</p>}
                     </div>
-
-                    <input type="hidden" {...register("question_detail_id")} />
+                    
                     <input type="hidden" {...register("question_id")} />
 
                     {/* Choices Section */}
@@ -184,7 +178,7 @@ export default function EditQuestionForm({ question, onClose, filters }) {
                     <div className="mb-3">
                         <label className="form-label">Question Type</label>
                         <select className="form-select" {...register("question_detail_type")}>
-                            {filters.detail_types.map((type, index) => (
+                            {filters.question_type.map((type, index) => (
                                 <option value={type} key={index}>{type}</option>
                             ))}
                         </select>
@@ -223,10 +217,10 @@ export default function EditQuestionForm({ question, onClose, filters }) {
                             <input
                                 className="form-control"
                                 type="number"
-                                step="0.01" // Allows finer decimal values like 0.01
+                                step="0.01"
                                 {...register("discrimination_index", {
                                     required: "Discrimination index is required",
-                                    valueAsNumber: true, // Ensures it's converted to a number
+                                    valueAsNumber: true,
                                     validate: (value) =>
                                         !isNaN(value) || "Discrimination index must be a valid number",
                                 })}

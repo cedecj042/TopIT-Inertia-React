@@ -7,11 +7,9 @@ use App\Http\Requests\CoordinatorRequest;
 use App\Http\Resources\AdminResource;
 use App\Models\Admin;
 use App\Models\User;
-use Auth;
 use Hash;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Log;
 
 class AdminUserController extends Controller
 {

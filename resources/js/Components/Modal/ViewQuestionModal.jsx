@@ -1,27 +1,27 @@
 export default function ViewQuestionModal({ question }) {
-
+    console.log(question)
     return (
         <>
             <div className="modal-body">
                 <div className="d-flex flex-column p-3">
                     {/* <label htmlFor="">Question:</label> */}
                     <h5 className="fw-semibold">{question.question}</h5>
-                    {question.question_detail?.choices && (
-                        Array.isArray(question.question_detail.choices) ? (
+                    {question?.choices && (
+                        Array.isArray(question.choices) ? (
                             <ol type="a">
-                                {question.question_detail.choices.map((item, index) => (
+                                {question.choices.map((item, index) => (
                                     <li key={index}>{item}</li>
                                 ))}
                             </ol>
                         ) : (
-                            <p>{question.question_detail.choices}</p>
+                            <p>{question.choices}</p>
                         )
                     )}
-                    {Array.isArray(question.question_detail.answer) ? (
+                    {Array.isArray(question.answer) ? (
                         <>
                         <label htmlFor="">Answer</label>
                         <ul style={{listStyleType:"none"}} className="p-0 d-inline-flex gap-2">
-                            {question.question_detail.answer.map((item, index) => (
+                            {question.answer.map((item, index) => (
                                 // <li key={index}>{item}</li>
                                 <li className="px-3 py-2 bg-light bg-gradient rounded mb-2" key={index}>
                                     <p className="m-0">{item}</p>
@@ -32,15 +32,14 @@ export default function ViewQuestionModal({ question }) {
                     ) : (
                         <div className="px-3 py-2 bg-light bg-gradient rounded mb-2">
                             <label className="text-secondary" style={{ fontSize: '.8rem' }}>Answer</label>
-                            <p className="m-0">{question.question_detail.answer}</p>
+                            <p className="m-0">{question.answer}</p>
                         </div>
-                        // <p className="fw-semibold">Answer: {question.question_detail.answer}</p>
                     )}
                     <label htmlFor="" className="mb-2">Details</label>
                     <div className="d-grid mb-2 grid-2">
                     <div className="px-3 py-2 bg-light rounded mb-2">
                         <label className="text-secondary" style={{ fontSize: '.8rem' }}>Question Type</label>
-                        <p className="m-0">{question.question_detail.type}</p>
+                        <p className="m-0">{question.question_type}</p>
                     </div>
                     <div className="px-3 py-2 bg-light rounded">
                                 <label className="text-secondary" style={{ fontSize: '.8rem' }}>Test Type</label>

@@ -26,15 +26,15 @@ class AssessmentReviewResource extends JsonResource
             'course' => new CourseResource($this->course),
             'assessment_items' => $this->assessment_items->map(function ($item) {
                 return [
-                    'assessment_id' => $item->assessment_item_id,
+                    'assessment_item_id' => $item->assessment_item_id,
                     'score' => $item->score,
                     'participants_answer' => json_decode($item->participants_answer),
                     'question' => [
                         'question_id' => $item->question->question_id,
                         'question' => $item->question->question,
-                        'choices' => json_decode($item->question->question_detail->choices),
-                        'type' => $item->question->question_detail->type,
-                        'answer' => json_decode($item->question->question_detail->answer),
+                        'choices' => json_decode($item->question->choices),
+                        'type' => $item->question->type,
+                        'answer' => json_decode($item->question->answer),
                     ]
                 ];
             })

@@ -40,25 +40,27 @@ return new class extends Migration
         // });
 
 
-        Schema::create('question_details',function (Blueprint $table){
-            $table->id('question_detail_id');
-            $table->enum('type',['Identification','Multiple Choice - Single','Multiple Choice - Many']);
-            $table->json('answer');
-            $table->json('choices')->nullable();
-            $table->boolean('requires_all_answer')->nullable();
-            $table->timestamps();
-        });
+        // Schema::create('question_details',function (Blueprint $table){
+        //     $table->id('question_detail_id');
+        //     $table->enum('type',['Identification','Multiple Choice - Single','Multiple Choice - Many']);
+        //     $table->json('answer');
+        //     $table->json('choices')->nullable();
+        //     $table->boolean('requires_all_answer')->nullable();
+        //     $table->timestamps();
+        // });
 
         Schema::create('questions', function (Blueprint $table) {
             $table->id('question_id');
-            $table->string('question_uid');
+            $table->string('question_uid')->nullable();
             $table->foreignId('course_id')->references('course_id')->on('courses')->cascadeOnDelete();
-            $table->foreignId('question_detail_id')->references('question_detail_id')->on('question_details')->cascadeOnDelete();
             $table->enum('test_type', ['Pretest', 'Test']);
             $table->longText('question');
             $table->float('discrimination_index');
             $table->float('difficulty_value');
             $table->enum('difficulty_type', ['Very Easy', 'Easy', 'Average', 'Hard', 'Very Hard']);
+            $table->enum('question_type',['Identification','Multiple Choice - Single','Multiple Choice - Many']);
+            $table->json('answer');
+            $table->json('choices')->nullable();
             $table->timestamps();
         });
         Schema::create('question_recalibration_logs', function (Blueprint $table) {
@@ -77,7 +79,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('question_details');
+        // Schema::dropIfExists('question_details');
         Schema::dropIfExists('questions');
         Schema::dropIfExists('question_recalibration_logs');
     }

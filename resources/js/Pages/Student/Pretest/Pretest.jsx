@@ -11,8 +11,10 @@ import "../../../../css/student/students.css";
 import "../../../../css/student/welcome.css";
 import { toast } from "sonner";
 
-const Pretest = ({assessment_id, assessment_courses}) => {
+const Pretest = ({ assessment_id, assessment_courses }) => {
     const assessmentCourses = assessment_courses.data;
+    console.log(assessmentCourses);
+
     const [confirmationState, setConfirmationState] = useState({
         show: false,
         unansweredCount: 0,
@@ -25,7 +27,7 @@ const Pretest = ({assessment_id, assessment_courses}) => {
         defaultValues: {
             assessment_id: Number(assessment_id),
             assessment_items: Object.fromEntries(
-                assessmentCourses.flatMap(course => 
+                assessmentCourses.flatMap(course =>
                     course.assessment_items.map(item => {
                         const key = `${course.assessment_course_id}_${item.assessment_item_id}`;
                         return [key, {
@@ -51,7 +53,7 @@ const Pretest = ({assessment_id, assessment_courses}) => {
 
     const onSubmit = async () => {
         const formData = getValues();
-        putRequest("pretest.submit",assessment_id,formData,{
+        putRequest("pretest.submit", assessment_id, formData, {
             onSuccess: () => {
                 toast.success("Pretest submitted successfully.");
                 setConfirmationState(false);
@@ -83,8 +85,8 @@ const Pretest = ({assessment_id, assessment_courses}) => {
         const unansweredCount = assessmentItems.filter(item => {
             const answer = item?.participant_answer;
             return !answer || (Array.isArray(answer) && answer.length === 0);
-        }).length;   
-    
+        }).length;
+
         setConfirmationState({
             show: true,
             unansweredCount: unansweredCount
@@ -136,14 +138,22 @@ const Pretest = ({assessment_id, assessment_courses}) => {
 
                         {selectedAssessmentCourse.assessment_items.length > 0 ? (
                             <form>
-                                <QuestionForm
-                                    index={currentCourseIndex}
-                                    assessment_items={selectedAssessmentCourse.assessment_items}
-                                    register={register}
-                                    watch={watch}
-                                    setValue={setValue}
-                                    key={currentCourseIndex}
-                                />
+
+                                {selectedAssessmentCourse.assessment_items.length > 0 ? (
+                                    selectedAssessmentCourse.assessment_items.map((item, itemIndex) => (
+                                        <QuestionForm
+                                            index={itemIndex}
+                                            item={item}
+                                            register={register}
+                                            watch={watch}
+                                            setValue={setValue}
+                                            key={itemIndex}
+                                        />
+
+                                    ))
+                                ) : (
+                                    <p>No questions found for this course.</p>
+                                )}
 
                                 <div className="d-flex justify-content-between mt-4">
                                     <button
@@ -170,7 +180,7 @@ const Pretest = ({assessment_id, assessment_courses}) => {
                                         <button
                                             type="button"
                                             className="btn btn-success"
-                                            onClick={handleConfirmationModal} 
+                                            onClick={handleConfirmationModal}
                                             disabled={isProcessing}
                                         >
                                             Finish Attempt

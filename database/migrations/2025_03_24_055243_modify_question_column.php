@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('assessment_items', function (Blueprint $table) {
-            $table->float('theta_score')->nullable();
+        Schema::table('questions', function (Blueprint $table) {
+            $table->dropColumn('requires_all_answer');
         });
+        
     }
 
     /**
@@ -21,8 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('assessment_items', function (Blueprint $table) {
-            $table->dropColumn('theta_score')->nullable();
-        });
+        //
     }
 };

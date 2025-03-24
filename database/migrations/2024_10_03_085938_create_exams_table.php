@@ -39,8 +39,8 @@ return new class extends Migration
             $table->foreignID('assessment_course_id')->references('assessment_course_id')->on('assessment_courses')->cascadeOnDelete();
             $table->foreignID('question_id')->references('question_id')->on('questions')->cascadeOnDelete();
             $table->json('participants_answer')->nullable();
-            $table->float('theta_score')->nullable();
-            $table->integer(column: 'score')->default(0);
+            $table->enum('status',['In Progress','Completed'])->default('In Progress');
+            $table->integer( 'score')->default(0);
             $table->timestamps();
         });
         

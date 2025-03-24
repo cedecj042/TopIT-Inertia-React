@@ -25,7 +25,6 @@ class FastApiController extends Controller
         $validated = $request->validated();
         $course_id = $validated['course_id'];
         $pdf_id = $validated['pdf_id'];
-        $fileName = $validated['file_name'];
         $modules = $validated['processed_data']['Modules'];
 
         $jobs = collect($modules)->map(function ($moduleData) use ($course_id) {
@@ -55,7 +54,7 @@ class FastApiController extends Controller
         $pdf = Pdf::findOrFail($pdf_id);
         if ($pdf) {
             Log::info('PDF found', ['pdf' => $pdf]);
-            $pdf->status = $status->value; // Use the dynamically passed status
+            $pdf->status = $status->value;
             $pdf->save();
             Log::info('PDF processing status updated', ['status' => $status->name, 'pdf_id' => $pdf_id]);
         } else {

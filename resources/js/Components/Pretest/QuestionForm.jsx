@@ -3,7 +3,8 @@ import Identification from "./../QuestionTypes/Identification";
 import MultipleChoiceSingle from "./../QuestionTypes/MultipleChoiceSingle";
 import MultipleChoiceMany from '../QuestionTypes/MultipleChoiceMany';
 
-const QuestionForm = ({ index, assessment_items, register, setValue, watch}) => {
+const QuestionForm = ({ index, item, register, setValue, watch }) => {
+    console.log(item);
     const renderQuestion = (item) => {
         const question = item.question;
         const questionName = `assessment_items[${item.assessment_course_id}_${item.assessment_item_id}].participant_answer`;
@@ -12,7 +13,7 @@ const QuestionForm = ({ index, assessment_items, register, setValue, watch}) => 
                 return (
                     <MultipleChoiceSingle
                         key={item.assessment_item_id}
-                        question_detail={question.question_detail}
+                        question_detail={question}
                         questionName={questionName}
                         register={register}
                     />
@@ -42,36 +43,30 @@ const QuestionForm = ({ index, assessment_items, register, setValue, watch}) => 
         }
     };
     return (
-        <div>
-            {assessment_items.length > 0 ? (
-                assessment_items.map((item, itemIndex) => (
-                    <div key={item.question_id} className="card mb-4 shadow-sm">
-                        <div className="card-body">
-                            <h5 className="card-title">Question {itemIndex + 1}</h5>
-                            <p className="card-text">{item.question.question}</p>
-                            {renderQuestion(item, itemIndex)}
-                            <input
-                                type="hidden"
-                                {...register(`assessment_items[${item.assessment_course_id}_${item.assessment_item_id}].assessment_course_id`)}
-                                value={item.assessment_item_id}
-                            />
-                            <input
-                                type="hidden"
-                                {...register(`assessment_items[${item.assessment_course_id}_${item.assessment_item_id}].assessment_item_id`)}
-                                value={item.assessment_item_id}
-                            />
-                            <input
-                                type="hidden"
-                                {...register(`assessment_items[${item.assessment_course_id}_${item.assessment_item_id}].question_id`)}
-                                value={item.question_id}
-                            />
-                        </div>
-                    </div>
-                ))
-            ) : (
-                <p>No questions found for this course.</p>
-            )}
-        </div>
+        <>
+            <div className="card mb-4 shadow-sm">
+                <div className="card-body">
+                    <h5 className="card-title">Question {index + 1}</h5>
+                    <p className="card-text">{item.question.question}</p>
+                    {renderQuestion(item, index)}
+                    <input
+                        type="hidden"
+                        {...register(`assessment_items[${item.assessment_course_id}_${item.assessment_item_id}].assessment_course_id`)}
+                        value={item.assessment_course_id}
+                    />
+                    <input
+                        type="hidden"
+                        {...register(`assessment_items[${item.assessment_course_id}_${item.assessment_item_id}].assessment_item_id`)}
+                        value={item.assessment_item_id}
+                    />
+                    <input
+                        type="hidden"
+                        {...register(`assessment_items[${item.assessment_course_id}_${item.assessment_item_id}].question_id`)}
+                        value={item.question_id}
+                    />
+                </div>
+            </div>
+        </>
     );
 };
 

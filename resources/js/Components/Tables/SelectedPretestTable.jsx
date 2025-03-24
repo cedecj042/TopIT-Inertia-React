@@ -11,7 +11,6 @@ export default function SelectedPretestTable(
     const { selectedQuestions, setSelectedQuestions } = useSelectedQuestions();
     const { visibleColumns, onColumnChange } = useColumnVisibility(PRETEST_COLUMN);
     const { isProcessing, postRequest } = useRequest();
-    console.log(selectedQuestions);
     const addToPretest = () => {
         const questions = selectedQuestions.map((question) => question.question_id);
         postRequest("admin.pretest.add", { questions: questions }, {
@@ -49,8 +48,8 @@ export default function SelectedPretestTable(
             className="form-check-input align-content-center"
             checked={selectedQuestions.some(
                 (question) => question[keyField] === rowData[keyField]
-            )} // Check if rowData is in selectedQuestions
-            onChange={(e) => handleRowClick(e, rowData)} // Sync checkbox click with row selection
+            )}
+            onChange={(e) => handleRowClick(e, rowData)}
         />
     );
 
@@ -80,11 +79,11 @@ export default function SelectedPretestTable(
                                     </div>
                                     <label>Total per Type:</label>
                                     <div className="d-grid grid-3 mb-3">
-                                        {Array.from(new Set(selectedQuestions.map(q => q.question_detail.type))).map((type, index) => (
+                                        {Array.from(new Set(selectedQuestions.map(q => q.type))).map((type, index) => (
                                             <div className="px-3 py-2 bg-light rounded" key={index}>
                                                 <label className="text-secondary" style={{ fontSize: '.8rem' }}>{type}</label>
-                                                <p className="m-0">{selectedQuestions.filter(q => q.question_detail.type === type).length > 0 ?
-                                                    selectedQuestions.filter(q => q.question_detail.type === type).length :
+                                                <p className="m-0">{selectedQuestions.filter(q => q.type === type).length > 0 ?
+                                                    selectedQuestions.filter(q => q.type === type).length :
                                                     null
                                                 }</p>
                                             </div>

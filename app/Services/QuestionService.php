@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\ItemStatus;
 use App\Models\Assessment;
 use App\Models\AssessmentItem;
 use App\Models\Question;
@@ -70,12 +71,12 @@ class QuestionService
             $assessmentItem = $this->createAssessmentItem($selectedCourse, $selectedItem);
           
             // Eager load relationships
-            $assessmentItem->load(['question.question_detail']);
+            $assessmentItem->load(['question']);
 
             Log::info("New question selected for assessment:", [
                 'assessment_item_id' => $assessmentItem->assessment_item_id,
                 'question_id' => $selectedItem['id'],
-                'course_id' => $randomCourse->course_id,
+                'course_id' => $selectedCourse->course_id,
                 'theta' => $currentTheta,
             ]);
             // Step 8: SEM calculation for the course
@@ -165,7 +166,7 @@ class QuestionService
         $answeredQuestions = $selectedCourse->assessment_items->pluck('question_id')->toArray();
         return Question::where('course_id', $selectedCourse->course_id)
             ->whereNotIn('question_id', $answeredQuestions)
-            ->with(['question_detail', 'course'])
+            ->with(['course'])
             ->get();
     }
 
@@ -176,7 +177,7 @@ class QuestionService
             'a' => $question->discrimination_index ?? 1.0,
             'b' => $question->difficulty_value ?? 0.0,
             'course' => $question->course_id,
-            'type' => $question->question_detail->type,
+            'type' => $question->type,
             'question' => $question,
         ])->toArray();
     }
@@ -184,7 +185,7 @@ class QuestionService
     private function calculateCourseSEM($selectedCourse, $currentTheta)
     {
         $allCourseQuestions = Question::where('course_id', $selectedCourse->course_id)
-            ->with(['question_detail', 'course'])
+            ->with(['course'])
             ->get();
 
         $allCourseItems = $allCourseQuestions->map(fn($question) => [
@@ -192,7 +193,7 @@ class QuestionService
             'a' => $question->discrimination_index ?? 1.0,
             'b' => $question->difficulty_value ?? 0.0,
             'course' => $question->course_id,
-            'type' => $question->question_detail->type,
+            'type' => $question->type,
             'question' => $question,
         ])->toArray();
 
@@ -212,19 +213,13 @@ class QuestionService
             'assessment_course_id' => $selectedCourse->assessment_course_id,
             'question_id' => $selectedItem['id'],
             'participants_answer' => null,
+            'status'=> ItemStatus::IN_PROGRESS,
             'score' => 0,
         ]);
 
         $assessmentItem->load([
-            'question.question_detail',
+            'question',
             'assessment_course.assessment',
-        ]);
-
-        Log::info("New question selected for assessment:", [
-            'assessment_item_id' => $assessmentItem->assessment_item_id,
-            'question_id' => $selectedItem['id'],
-            'course_id' => $selectedCourse->course_id,
-            'theta' => $this->getCurrentThetaForCourse($selectedCourse),
         ]);
 
         return $assessmentItem;

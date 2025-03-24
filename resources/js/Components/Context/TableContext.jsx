@@ -63,6 +63,7 @@ export const TableContext = ({
             ...state.otherState,
             ...state.dateState, // Include dateState in URL
         };
+        console.log(combinedState);
     
         if (state.sortState !== ":") {
             combinedState.sort = state.sortState;

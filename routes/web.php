@@ -115,8 +115,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     });
     Route::prefix('question')->name('question.')->group(function () {
         Route::get('/', [QuestionController::class, 'index'])->name('index');
-        Route::put('/update/{id}', [QuestionController::class, 'update'])->name('update');
-        Route::delete('/delete/{id}', [QuestionController::class, 'delete'])->name('delete');
+        Route::put('/update/{question}', [QuestionController::class, 'update'])->name('update');
+        Route::delete('/delete/{question}', [QuestionController::class, 'delete'])->name('delete');
         Route::get('/generate/show', [QuestionController::class, 'show'])->name('show');
         Route::post('/generate', [QuestionController::class, 'generate'])->name('generate');
         Route::get('/courses', [QuestionController::class, 'courses'])->name('courses');

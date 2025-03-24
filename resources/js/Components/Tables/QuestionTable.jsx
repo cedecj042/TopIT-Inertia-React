@@ -49,7 +49,7 @@ export default function QuestionTable({
                     </button>
                     <button
                         onClick={(e) => {
-                            e.stopPropagation(); // Prevent row click
+                            e.stopPropagation(); 
                             openModal('delete',rowData);
                         }}
                         className="btn btn-outline-danger d-flex justify-content-center align-items-left"

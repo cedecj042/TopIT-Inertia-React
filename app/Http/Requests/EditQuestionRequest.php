@@ -24,19 +24,19 @@ class EditQuestionRequest extends FormRequest
         return [
             //
             'question_id' => 'required|int',
-            'question_detail_id' => 'required|int',
             'difficulty'=>'required|in:Very Easy,Easy,Average,Hard,Very Hard',
             'difficulty_value'=>'required|numeric',
             'discrimination_index' => 'required|numeric',
             'question' => 'required|string',
-            'question_detail_type'=> 'required|in:Multiple Choice - Single,Multiple Choice - Many,Identification',
+            'question_type'=> 'required|in:Multiple Choice - Single,Multiple Choice - Many,Identification',
             'answer' => ['required', function ($attribute, $value, $fail) {
                 if (!in_array(gettype($value), ['string', 'array'])) {
                     $fail("The $attribute must be either a string or an array.");
                 }
             }],
             'choices' => 'array',
-            'course' => 'required'
+            'course' => 'required',
+            'course_id' => 'required | int'
         ];
     }
 }

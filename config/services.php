@@ -35,7 +35,7 @@ return [
         ],
     ],
     'fastapi'=>[
-        'url'=> env('FASTAPI_URL','http://localhost:8001')
+        'url'=> env('FASTAPI_URL','http://app:8001')
     ],
 
 ];

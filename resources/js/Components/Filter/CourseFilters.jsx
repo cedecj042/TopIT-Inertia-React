@@ -1,7 +1,7 @@
 import { useOtherState, useSortState } from "@/Library/hooks";
 import TextInputFilter from "./Filters/TextInputFilter";
 import "../../../css/filter.css";
-import OtherFilter from "./Filters/otherFilter";
+import OtherFilter from "./Filters/OtherFilter";
 import { useContext, useEffect } from "react";
 import ContextProvider from "../Context/TableContext";
 import ClearFunction from "./Filters/ClearFunction";

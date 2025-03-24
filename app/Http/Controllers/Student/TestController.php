@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Student;
 
 use App\Enums\AssessmentStatus;
+use App\Enums\ItemStatus;
 use App\Http\Requests\StudentCourseChoiceRequest;
+use App\Http\Requests\TestItemRequest;
 use App\Http\Resources\AssessmentItemResource;
 use App\Http\Resources\AssessmentReviewResource;
 use App\Http\Resources\CourseResource;
 
+use App\Http\Resources\TestItemResource;
 use App\Models\StudentCourseTheta;
 use App\Models\ThetaScoreLog;
 use App\Services\TerminationRuleService;
@@ -28,7 +31,6 @@ use App\Models\AssessmentItem;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AssessmentResource;
-use App\Http\Resources\QuestionReviewResource;
 use App\Services\ScoringService;
 use App\Services\QuestionService;
 use App\Services\ThetaService;
@@ -90,7 +92,6 @@ class TestController extends Controller
             return [
                 'assessment_id' => $assessment->assessment_id,
                 'course_id' => $course_id,
-                'status' => AssessmentStatus::IN_PROGRESS->value,
                 'total_items' => 0,
                 'total_score' => 0,
                 'initial_theta_score' => $this->thetaService->getCurrentTheta($course_id, $student->student_id),
@@ -103,7 +104,7 @@ class TestController extends Controller
         AssessmentCourse::upsert(
             $assessmentCourses,
             ['assessment_id', 'course_id'],
-            ['status', 'total_items', 'total_score', 'initial_theta_score', 'final_theta_score', 'percentage', 'updated_at']
+            ['total_items', 'total_score', 'initial_theta_score', 'final_theta_score', 'percentage', 'updated_at']
         );
 
         return redirect()->route('test.page', ['assessment' => $assessment->assessment_id]);
@@ -112,44 +113,102 @@ class TestController extends Controller
     // for rendering the questions
     public function show(Assessment $assessment)
     {
-        $assessment->load('assessment_courses.assessment_items','assessment_courses.theta_score_logs', 'student');
-        
+
         // Ensure the correct type is passed
         if (!$assessment instanceof Assessment) {
             throw new \InvalidArgumentException('Expected an Assessment model instance.');
         }
-        
+        $assessmentItem = $assessment->inProgressItems()
+            ->with('question')
+            ->first();
+        if (!$assessmentItem) {
+            $assessmentItem = $this->questionService->selectQuestion($assessment);
+        }
 
-        $assessmentItem = $this->questionService->selectQuestion($assessment);
         return Inertia::render('Student/Test/Test', [
-            'assessment_item' => new AssessmentItemResource($assessmentItem),
+            'test_item' => new TestItemResource($assessmentItem),
         ]);
     }
 
-
-    public function nextQuestion(Request $request)
+    public function submit(TestItemRequest $request, AssessmentItem $assessment_item)
     {
-        $validated = $request->validate([
-            'assessment_id' => 'required|exists:assessments,assessment_id',
-            'assessment_item_id' => 'required|exists:assessment_items,assessment_item_id',
-            'question_id' => 'required|exists:questions,question_id',
-            'answer' => 'nullable'
+
+        $validated = $request->validated();
+        $participantsAnswer = is_array($validated['answer']) ? json_encode($validated['answer']) : json_encode([$validated['answer']]);
+        $score = $this->scoringService->checkAnswer($validated['question_id'], $participantsAnswer);
+
+        $assessment_item->update([
+            'participants_answer' => $participantsAnswer,
+            'score' => $score,
+            'status' => ItemStatus::COMPLETED
         ]);
 
-        $assessment = Assessment::with(['assessment_courses.assessment_items', 'assessment_courses.theta_score_logs', 'student'])
-        ->findOrFail($validated['assessment_id']);
+        $assessment = Assessment::with([
+            'assessment_courses.assessment_items',
+            'assessment_courses.theta_score_logs',
+            'student'
+        ])->firstOrFail($validated['assessment_id']);
+
+        $responses = $assessment->assessment_courses->flatMap(function ($course) {
+            return $course->assessment_items->map(function ($item) {
+                return [
+                    'is_correct' => $item->score > 0,
+                    'discrimination' => $item->question->discrimination_index ?? 1.0,
+                    'difficulty' => $item->question->difficulty_value ?? 0.0,
+                ];
+            });
+        })->toArray();
+
+        $currentCourse = $assessment_item->assessment_course;
+        $currentTheta = $this->thetaService->getCurrentTheta(
+            $currentCourse->course_id,
+            $assessment->assessment_id
+        );
+        $updatedTheta = $this->thetaService->estimateThetaMLE(
+            $currentTheta ?? 0.0,
+            $responses
+        );
+
+        $this->thetaService->updateThetaForStudent(
+            $assessment->student_id,
+            $currentCourse->course_id,
+            $updatedTheta
+        );
         
+
+        if ($this->terminationRuleService->shouldTerminateTest($assessment)) {
+            return redirect()->route('test.finish', ['assessmentId' => $assessment->assessment_id]);
+        }
+        return redirect()->route('test.show', $assessment->assessment_id)->with('message', 'success');
+
+    }
+
+
+    public function nextQuestion(TestItemRequest $request, )
+    {
+        // $validated = $request->validate([
+        //     'assessment_id' => 'required|exists:assessments,assessment_id',
+        //     'assessment_item_id' => 'required|exists:assessment_items,assessment_item_id',
+        //     'question_id' => 'required|exists:questions,question_id',
+        //     'answer' => 'nullable'
+        // ]);
+
+        $validated = $request->validated();
+
+        $assessment = Assessment::with(['assessment_courses.assessment_items', 'assessment_courses.theta_score_logs', 'student'])
+            ->findOrFail($validated['assessment_id']);
+
         $assessmentItem = $assessment->assessment_courses
             ->flatMap(function ($course) {
-                return $course->assessment_items; 
+                return $course->assessment_items;
             })
             ->firstWhere('assessment_item_id', $validated['assessment_item_id']);
 
         $participantsAnswer = is_array($validated['answer']) ? json_encode($validated['answer']) : json_encode([$validated['answer']]);
         $assessmentItem->participants_answer = $participantsAnswer;
 
-        $question = Question::with(['question_detail', 'course'])->findOrFail($validated['question_id']);
-        
+        $question = Question::with(['course'])->findOrFail($validated['question_id']);
+
         // Calculate the score using the scoring service
         $score = $this->scoringService->checkAnswer($assessmentItem->question_id, $assessmentItem->participants_answer);
         $assessmentItem->score = $score;
@@ -174,7 +233,7 @@ class TestController extends Controller
         Log::info("Updated Theta for Course {$currentCourse->course_id}: ", [
             'updated_theta' => $updatedTheta
         ]);
-    
+
         // Save to theta_score_logs
         ThetaScoreLog::create([
             'assessment_course_id' => $currentCourse->assessment_course_id,
@@ -199,7 +258,6 @@ class TestController extends Controller
 
         return Inertia::render('Student/Test/Test', [
             'assessment_item' => new AssessmentItemResource($assessmentItem),
-            // 'question' => $nextQuestion->load('question_detail'),
         ]);
     }
 
@@ -215,15 +273,15 @@ class TestController extends Controller
     public function review(Assessment $assessment)
     {
         $assessment->load([
-            'assessment_courses.assessment_items.question.question_detail',
+            'assessment_courses.assessment_items.question',
             'assessment_courses.course',
             'assessment_courses.assessment_items'
         ]);
 
         $student = Student::find(Auth::user()->userable->student_id);
-        
+
         return Inertia::render('Student/Test/TestReview', [
-            'assessment_courses'=> AssessmentReviewResource::collection($assessment->assessment_courses),
+            'assessment_courses' => AssessmentReviewResource::collection($assessment->assessment_courses),
             'assessment_id' => $assessment->assessment_id,
         ]);
     }
@@ -266,8 +324,8 @@ class TestController extends Controller
     // }
 
 
-    
-    
+
+
 
     // for display
     public function index()
@@ -399,104 +457,104 @@ class TestController extends Controller
 //     }
 // }
 
-        // Log::info('Assessment Item Updated:', [
-        //     'assessment_item_id' => $assessmentItem->assessment_item_id,
-        //     'score' => $assessmentItem->score,
-        //     'participants_answer' => $assessmentItem->participants_answer,
-        // ]);
+// Log::info('Assessment Item Updated:', [
+//     'assessment_item_id' => $assessmentItem->assessment_item_id,
+//     'score' => $assessmentItem->score,
+//     'participants_answer' => $assessmentItem->participants_answer,
+// ]);
 
-        // Log::info('Assessment Item Updated:', [
-        //     'assessment_item_id' => $assessmentItem->assessment_item_id,
-        //     'score' => $assessmentItem->score,
-        //     'participants_answer' => $assessmentItem->participants_answer,
-        // ]);
-    
-        // // Prepare responses for theta estimation
-        // $responses = $assessment->assessment_courses->flatMap(function ($course) {
-        //     return $course->assessment_items->map(function ($item) {
-        //         return [
-        //             'is_correct' => $item->score > 0,
-        //             'discrimination' => $item->question->discrimination_index ?? 1.0,
-        //             'difficulty' => $item->question->difficulty_value ?? 0.0,
-        //         ];
-        //     });
-        // })->toArray();
-    
-        // // Estimate the updated theta using MLE
-        // $currentCourse = $assessmentItem->assessment_course;
-        // $updatedTheta = $this->thetaService->estimateThetaMLE(
-        //     $currentCourse->initial_theta_score ?? 0.0,
-        //     $responses
-        // );
-    
-        // // Log the updated theta
-        // Log::info("Updated Theta for Course {$currentCourse->course_id}: ", [
-        //     'updated_theta' => $updatedTheta
-        // ]);
-    
-        // // Save to theta_score_logs
-        // ThetaScoreLog::create([
-        //     'assessment_course_id' => $currentCourse->assessment_course_id,
-        //     'assessment_item_id' => $assessmentItem->assessment_item_id,
-        //     'previous_theta_score' => $currentCourse->theta_score_logs()->latest()->value('new_theta_score') ?? $currentCourse->initial_theta_score ?? 0.0,
-        //     'new_theta_score' => $updatedTheta,
-        // ]);
-    
-        // store answered questions
-        // $answeredQuestions = session()->get('answered_questions', []);
-        // $answeredQuestions[] = $question->question_id;
-        // session()->put('answered_questions', array_unique($answeredQuestions));
+// Log::info('Assessment Item Updated:', [
+//     'assessment_item_id' => $assessmentItem->assessment_item_id,
+//     'score' => $assessmentItem->score,
+//     'participants_answer' => $assessmentItem->participants_answer,
+// ]);
 
-        // Log::info('Answered questions updated in session', [
-        //     'answered_questions' => $answeredQuestions
-        // ]);
+// // Prepare responses for theta estimation
+// $responses = $assessment->assessment_courses->flatMap(function ($course) {
+//     return $course->assessment_items->map(function ($item) {
+//         return [
+//             'is_correct' => $item->score > 0,
+//             'discrimination' => $item->question->discrimination_index ?? 1.0,
+//             'difficulty' => $item->question->difficulty_value ?? 0.0,
+//         ];
+//     });
+// })->toArray();
 
-        //save itemm
-        // $assessmentItem = new AssessmentItem([
-        //     'question_id' => $question->question_id,
-        //     'participants_answer' => is_array($validated['answer'])
-        //         ? json_encode($validated['answer'])
-        //         : json_encode([$validated['answer']])
-        // ]);
+// // Estimate the updated theta using MLE
+// $currentCourse = $assessmentItem->assessment_course;
+// $updatedTheta = $this->thetaService->estimateThetaMLE(
+//     $currentCourse->initial_theta_score ?? 0.0,
+//     $responses
+// );
 
-        // // getting the correct answer from question_detail
-        // $score = $this->scoringService->checkAnswer($assessmentItem);
-        // $assessmentItem->score = $score;
+// // Log the updated theta
+// Log::info("Updated Theta for Course {$currentCourse->course_id}: ", [
+//     'updated_theta' => $updatedTheta
+// ]);
 
-        // $assessmentCourse = AssessmentCourse::updateOrCreate(
-        //     [
-        //         'assessment_id' => $assessment->assessment_id,
-        //         'course_id' => $question->course_id
-        //     ],
-        //     [
-        //         'status' => 'In Progress',
-        //         'total_items' => 0,
-        //         'total_score' => 0,
-        //         'percentage' => 0
-        //     ]
-        // );
+// // Save to theta_score_logs
+// ThetaScoreLog::create([
+//     'assessment_course_id' => $currentCourse->assessment_course_id,
+//     'assessment_item_id' => $assessmentItem->assessment_item_id,
+//     'previous_theta_score' => $currentCourse->theta_score_logs()->latest()->value('new_theta_score') ?? $currentCourse->initial_theta_score ?? 0.0,
+//     'new_theta_score' => $updatedTheta,
+// ]);
 
-        // try {
-        //     // Save the AssessmentItem
-        //     $assessmentItem->assessment_course_id = $assessmentCourse->assessment_course_id;
-        //     $assessmentItem->save();
+// store answered questions
+// $answeredQuestions = session()->get('answered_questions', []);
+// $answeredQuestions[] = $question->question_id;
+// session()->put('answered_questions', array_unique($answeredQuestions));
 
-        //     Log::info('Assessment Item Created:', [
-        //         'assessment_item_id' => $assessmentItem->assessment_item_id,
-        //         'assessment_course_id' => $assessmentItem->assessment_course_id,
-        //         'question_id' => $assessmentItem->question_id,
-        //         'participants_answer' => $assessmentItem->participants_answer,
-        //         'score' => $assessmentItem->score
-        //     ]);
-        // } catch (\Exception $e) {
-        //     Log::error('Failed to create Assessment Item:', [
-        //         'error' => $e->getMessage(),
-        //         'trace' => $e->getTraceAsString()
-        //     ]);
-        // }
+// Log::info('Answered questions updated in session', [
+//     'answered_questions' => $answeredQuestions
+// ]);
 
-        // also update assessment course
-        // $assessmentCourse->increment('total_items');
-        // $assessmentCourse->increment('total_score', $score);
-        // // $assessmentCourse->percentage = ($assessmentCourse->total_score / $assessmentCourse->total_items) * 100;
-        // $assessmentCourse->save();
+//save itemm
+// $assessmentItem = new AssessmentItem([
+//     'question_id' => $question->question_id,
+//     'participants_answer' => is_array($validated['answer'])
+//         ? json_encode($validated['answer'])
+//         : json_encode([$validated['answer']])
+// ]);
+
+// // getting the correct answer from question_detail
+// $score = $this->scoringService->checkAnswer($assessmentItem);
+// $assessmentItem->score = $score;
+
+// $assessmentCourse = AssessmentCourse::updateOrCreate(
+//     [
+//         'assessment_id' => $assessment->assessment_id,
+//         'course_id' => $question->course_id
+//     ],
+//     [
+//         'status' => 'In Progress',
+//         'total_items' => 0,
+//         'total_score' => 0,
+//         'percentage' => 0
+//     ]
+// );
+
+// try {
+//     // Save the AssessmentItem
+//     $assessmentItem->assessment_course_id = $assessmentCourse->assessment_course_id;
+//     $assessmentItem->save();
+
+//     Log::info('Assessment Item Created:', [
+//         'assessment_item_id' => $assessmentItem->assessment_item_id,
+//         'assessment_course_id' => $assessmentItem->assessment_course_id,
+//         'question_id' => $assessmentItem->question_id,
+//         'participants_answer' => $assessmentItem->participants_answer,
+//         'score' => $assessmentItem->score
+//     ]);
+// } catch (\Exception $e) {
+//     Log::error('Failed to create Assessment Item:', [
+//         'error' => $e->getMessage(),
+//         'trace' => $e->getTraceAsString()
+//     ]);
+// }
+
+// also update assessment course
+// $assessmentCourse->increment('total_items');
+// $assessmentCourse->increment('total_score', $score);
+// // $assessmentCourse->percentage = ($assessmentCourse->total_score / $assessmentCourse->total_items) * 100;
+// $assessmentCourse->save();

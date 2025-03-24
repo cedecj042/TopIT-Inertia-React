@@ -23,29 +23,24 @@ class AdminController extends Controller
     }
     public function loginAdmin(LoginRequest $request)
     {
-        Log::info('Logging in admin',$request->query());
         $validated = $request->validated();
 
         if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
             $user = Auth::user();
             $request->session()->regenerate();
-            Log::info('User authenticated successfully.', ['user_id' => $user->user_id]);
 
             if ($user->userable_type === 'App\Models\Admin') {
-                Log::info('Authenticated user is an Admin.', ['user_id' => $user->user_id]);
                 return redirect()->route('admin.dashboard')->with(['message' => 'Login Successfully!']);
             } else {
                 Auth::logout();
                 return redirect()->back()->withErrors(['error' => 'Access restricted to admins only.']);
             }
         }
-        Log::warning('Admin authentication failed for username.', ['username' => $validated['username']]);
         return redirect()->back()->withErrors( ['error'=>'The provided credentials do not match our records.']);
     }
 
     public function update(AdminProfileEdit $request)
     {
-        Log::info('request receive to update');
         $validatedData = $request->validated();
     
         $user = User::findOrFail($validatedData["user_id"]);
@@ -59,11 +54,9 @@ class AdminController extends Controller
             $imageName = time() . '.' . $profileImage->extension();
             $profileImage->storeAs('', $imageName, 'profile_images');
         } else {
-            // Keep the existing profile image if no new image is uploaded
             $imageName = $admin->profile_image;
         }
         
-    
         $user->update([
             'email' => $validatedData['email'],
             'username' => $validatedData['username'],

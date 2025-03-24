@@ -6,11 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseRequest;
 use App\Http\Resources\CourseResource;
 use App\Http\Resources\PdfResource;
-use App\Jobs\ProcessCourse;
 use App\Models\Course;
-use App\Models\Pdf;
 use App\Services\FastApiService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 

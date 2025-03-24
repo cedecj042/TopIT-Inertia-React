@@ -8,6 +8,7 @@ use App\Http\Resources\StudentResource;
 use App\Http\Resources\UserResource;
 use App\Models\Course;
 use App\Models\Pdf;
+use App\Models\Question;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -24,21 +25,19 @@ class DashboardController extends Controller
     public function index()
     {
         $monthlyCounts = User::where('userable_type', 'App\\Models\\Student')
-            ->select(DB::raw('MONTH(created_at) as month'), DB::raw('COUNT(*) as count'))
-            ->groupBy(DB::raw('MONTH(created_at)'))
-            ->get()
+            ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+            ->groupBy('month')
             ->pluck('count', 'month');
 
-        
-        $questionCounts = DB::table('questions')
-            ->select('test_type', DB::raw('COUNT(*) as total'))
-            ->whereIn('test_type', ['Pretest', 'Test']) // Filter only for 'Pretest' and 'Test'
+
+        $questionCounts = Question::selectRaw('test_type, COUNT(*) as total')
+            ->whereIn('test_type', ['Pretest', 'Test'])
             ->groupBy('test_type')
             ->pluck('total', 'test_type');
 
         $cards = [
-            'Total Students' => DB::table('students')->count(),
-            'Total Courses' => DB::table('courses')->count(),
+            'Total Students' => Student::count(),
+            'Total Courses' => Course::count(),
             'Test Questions' => $questionCounts['Test'] ?? 0, // Default to 0 if no test questions
             'Pretest Questions' => $questionCounts['Pretest'] ?? 0, // Default to 0 if no pretest questions
         ];
@@ -48,11 +47,12 @@ class DashboardController extends Controller
         $pdfs = Pdf::with('course')->orderBy('updated_at', 'desc')->take(3)->get();
 
         return Inertia::render(
-            'Admin/Dashboard',[
+            'Admin/Dashboard',
+            [
                 'title' => 'Admin Dashboard',
                 'chartData' => $chartData,
-                'cards'=> $cards,
-                'pdfs'=> PdfResource::collection($pdfs),
+                'cards' => $cards,
+                'pdfs' => PdfResource::collection($pdfs),
             ]
         );
     }
@@ -69,54 +69,4 @@ class DashboardController extends Controller
             'data' => array_values($filledMonthlyCounts),
         ];
     }
-
-    
-    // public function getStudents()
-    // {
-    //     $query = Student::query()
-    //         ->select(['student_id', 'firstname', 'lastname', 'year', 'school', 'created_at', DB::raw("CONCAT(students.firstname, ' ', students.lastname) AS name")]);
-
-    //     $sort = request()->query('sort', ''); // Default empty
-    //     $sortField = $sortDirection = null;
-
-    //     // Only split if $sort is not empty
-    //     if (!empty($sort)) {
-    //         [$sortField, $sortDirection] = explode(':', $sort);
-
-    //         // Ensure sortDirection is valid
-    //         if (!in_array($sortDirection, ['asc', 'desc'])) {
-    //             $sortDirection = null;
-    //         }
-    //     }
-
-    //     // Apply filters
-    //     if ($name = request('name')) {
-    //         $query->where(function ($q) use ($name) {
-    //             $q->where('firstname', 'like', '%' . $name . '%')
-    //                 ->orWhere('lastname', 'like', '%' . $name . '%')
-    //                 ->orWhere(DB::raw("CONCAT(firstname, ' ', lastname)"), 'like', '%' . $name . '%');
-    //         });
-    //     }
-
-    //     if ($year = request('year')) {
-    //         $query->where('year', $year);
-    //     }
-
-    //     if ($school = request('school')) {
-    //         $query->where('school', $school);
-    //     }
-
-    //     if (!empty($sortField) && !empty($sortDirection)) {
-    //         $query->orderBy($sortField, $sortDirection);
-    //     }
-
-    //     $perPage = request('items', 5);
-
-    //     $students = $query->paginate($perPage);
-
-    //     return response()->json([
-    //         'students' => $students,
-    //         'queryParams' => request()->query(),
-    //     ]);
-    // }
 }

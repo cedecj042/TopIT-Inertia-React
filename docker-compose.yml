@@ -20,7 +20,7 @@ services:
         volumes:
             - '.:/var/www/html'
         networks:
-            - sail
+            - topit
         depends_on:
             - mysql
     mysql:
@@ -38,7 +38,7 @@ services:
             - 'sail-mysql:/var/lib/mysql'
             - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
         networks:
-            - sail
+            - topit
         healthcheck:
             test:
                 - CMD
@@ -48,8 +48,9 @@ services:
             retries: 3
             timeout: 5s
 networks:
-    sail:
-        driver: bridge
+    topit:
+        # driver: bridge
+        external: true
 volumes:
     sail-mysql:
         driver: local

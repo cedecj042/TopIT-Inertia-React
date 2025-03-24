@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\QuestionDetailType;
 use App\Enums\QuestionDifficulty;
+use App\Enums\QuestionType;
 use App\Enums\TestType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PretestRequest;
 use App\Http\Resources\QuestionResource;
+use App\Models\Course;
 use App\Models\Question;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -17,20 +18,15 @@ class PretestController extends Controller
 {
     //
     public function index(){
-        $query = Question::with(['course', 'question_detail'])->where('test_type','Pretest');
+        $query = Question::with(['course'])->where('test_type','Pretest');
 
         if ($search = request('question')) {
-            $search = strtolower($search); // Convert the search term to lowercase
-        
             $query->where(function ($q) use ($search) {
-                // Search in the question field (case-insensitive)
-                $q->where(DB::raw('LOWER(question)'), 'like', '%' . $search . '%')
-                  // Search in the answer field within the question_detail relationship (case-insensitive)
-                  ->orWhereHas('question_detail', function ($q) use ($search) {
-                      $q->where(DB::raw('LOWER(answer)'), 'like', '%' . $search . '%'); // Adjust if answer is JSON array
-                  });
+                $q->whereRaw('LOWER(question) LIKE ?', ['%' . strtolower($search) . '%'])
+                  ->orWhereRaw('LOWER(answer) LIKE ?', ['%' . strtolower($search) . '%']);
             });
         }
+        
 
         if ($courseTitle = request('course')) {
             $query->whereHas('course', function ($q) use ($courseTitle) {
@@ -42,19 +38,17 @@ class PretestController extends Controller
             $query->where('difficulty_type', $difficulty);
         }
 
-        if ($detail_types = request('detail_types')) {
-            $query->whereHas('question_detail', function ($q) use ($detail_types) {
-                $q->where('type', $detail_types); // Assuming 'name' is the field in difficulty table
-            });
+        if ($question_type = request('question_type')) {
+            $query->where('difficulty_type', $question_type);
         }
         
 
         $perPage = request('items', 5);
         $questions = $query->paginate($perPage)->onEachSide(1);
 
-        $title =  DB::table('courses')->distinct()->pluck('title');
+        $title = Course::select('title')->distinct()->pluck('title');
         $difficulty = QuestionDifficulty::cases();
-        $questionDetailTypes = collect(QuestionDetailType::cases())->map(function ($case) {
+        $questionTypes = collect(QuestionType::cases())->map(function ($case) {
             return $case->value;
         })->toArray();
 
@@ -62,7 +56,7 @@ class PretestController extends Controller
         $filters = [
             'courses' => $title,
             'difficulty' => $difficulty,
-            'detail_types' => $questionDetailTypes
+            'question_type' => $questionTypes
         ];
         
         return Inertia::render('Admin/Questions/Pretest', [
@@ -74,18 +68,14 @@ class PretestController extends Controller
     }
 
     public function show(){
-        $query = Question::with(['course', 'question_detail'])->where('test_type','Test');
+        $query = Question::with(['course'])->where('test_type','Test');
 
         if ($search = request('question')) {
             $search = strtolower($search); // Convert the search term to lowercase
         
             $query->where(function ($q) use ($search) {
-                // Search in the question field (case-insensitive)
-                $q->where(DB::raw('LOWER(question)'), 'like', '%' . $search . '%')
-                  // Search in the answer field within the question_detail relationship (case-insensitive)
-                  ->orWhereHas('question_detail', function ($q) use ($search) {
-                      $q->where(DB::raw('LOWER(answer)'), 'like', '%' . $search . '%'); // Adjust if answer is JSON array
-                  });
+                $q->whereRaw('LOWER(question) LIKE ?', ['%' . strtolower($search) . '%'])
+                  ->orWhereRaw('LOWER(answer) LIKE ?', ['%' . strtolower($search) . '%']);
             });
         }
         
@@ -98,19 +88,18 @@ class PretestController extends Controller
         if ($difficulty = request('difficulty')) {
             $query->where('difficulty_type', $difficulty);
         }
-        if ($detail_types = request('detail_types')) {
-            $query->whereHas('question_detail', function ($q) use ($detail_types) {
-                $q->where('type', $detail_types); // Assuming 'name' is the field in difficulty table
-            });
+        if ($question_type = request('question_type')) {
+            $query->where('difficulty_type', $question_type);
         }
+        
         
 
         $perPage = request('items', 5);
         $questions = $query->paginate($perPage)->onEachSide(1);
 
-        $title =  DB::table('courses')->distinct()->pluck('title');
+        $title = Course::select('title')->distinct()->pluck('title');
         $difficulty = array_map(fn($case) => $case->value, QuestionDifficulty::cases());
-        $questionDetailTypes = collect(QuestionDetailType::cases())->map(function ($case) {
+        $questionTypes = collect(QuestionType::cases())->map(function ($case) {
             return $case->value;
         })->toArray();
 
@@ -118,7 +107,7 @@ class PretestController extends Controller
         $filters = [
             'courses' => $title,
             'difficulty' => $difficulty,
-            'detail_types' => $questionDetailTypes
+            'question_type' => $questionTypes
         ];
         
         return Inertia::render('Admin/Questions/AddPretest',[
@@ -132,8 +121,6 @@ class PretestController extends Controller
     public function add(PretestRequest $request)
     {
         $validated = $request->validated();
-
-        Log::info($validated);
 
         foreach ($validated['questions'] as $id) { // Access the 'questions' array
             $question = Question::find($id);

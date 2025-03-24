@@ -103,32 +103,6 @@ class ThetaService
         return $theta;
     }
 
-
-    /**
-     * Save the updated theta value for a student in the database.
-     *
-     * @param Student $student The student object.
-     * @param Course $course The course object.
-     * @param float $newTheta The updated theta value.
-     * @return void
-     */
-    public function updateThetaForStudent(Student $student, Course $course, float $newTheta): void
-    {
-        $studentCourseTheta = StudentCourseTheta::firstOrCreate(
-            [
-                'student_id' => $student->id,
-                'course_id' => $course->id,
-            ],
-            [
-                'theta_score' => 0.0, // Default theta value
-            ]
-        );
-
-        // Update the theta value
-        $studentCourseTheta->theta_score = $newTheta;
-        $studentCourseTheta->save();
-    }
-
     /**
      * Process responses incrementally for adaptive testing.
      *
@@ -164,15 +138,10 @@ class ThetaService
         }
 
         // Save the final theta to the database
-        $this->updateThetaForStudent($student, $course, $currentTheta);
+        $this->updateThetaForStudent($student->student_id, $course->course_id, $currentTheta);
     }
 
-    /**
-     * Initialize theta for the student
-     *
-     * @param Student $student The student object.
-     * @return void
-     */
+
 
     public function initializeThetaForStudent(Student $student)
     {
@@ -192,12 +161,7 @@ class ThetaService
             StudentCourseTheta::insert($data);
         }
     }
-    /**
-     * Initialize theta for the student
-     *
-     * @param Course $course The student object.
-     * @return void
-     */
+
 
     public function initializeThetaForCourse(Course $course)
     {
@@ -235,4 +199,18 @@ class ThetaService
     {
         StudentCourseTheta::where('course_id', $course->course_id)->delete();
     }
+
+    public function updateThetaForStudent(int $studentId, int $courseId, float $newTheta): void
+    {
+        StudentCourseTheta::updateOrCreate(
+            [
+                'student_id' => $studentId,
+                'course_id' => $courseId,
+            ],
+            [
+                'theta_score' => $newTheta,
+            ]
+        );
+    }
+
 }

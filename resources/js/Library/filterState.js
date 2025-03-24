@@ -62,7 +62,7 @@ export const INITIAL_QUESTION_STATE = (queryParams = {}) => ({
     filterState: {
         course: queryParams?.course || "",
         difficulty: queryParams?.difficulty || "",
-        detail_types: queryParams?.detail_types || "",
+        question_type: queryParams?.question_type || "",
         // test_types: queryParams?.question_types || "",
     },
     otherState: {
@@ -99,7 +99,7 @@ export const INITIAL_ADMIN_STATE = (queryParams = {}) => ({
 export const INITIAL_TEST_STATE = (queryParams = {}) => ({
     filterState: {
         course: queryParams?.course || "",
-        test_types: queryParams?.question_types || "",
+        test_types: queryParams?.test_types || "",
     },
     dateState : {
         from: queryParams?.from || "",

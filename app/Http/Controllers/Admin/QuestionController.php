@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\QuestionDetailType;
 use App\Enums\QuestionDifficulty;
+use App\Enums\QuestionType;
 use App\Enums\TestType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\EditQuestionRequest;
@@ -24,19 +24,17 @@ class QuestionController extends Controller
     public function index()
     {
         //
-        $query = Question::query()->with(['question_detail','course'])->where('test_type','Test');
+        $query = Question::query()->with('course')->where('test_type', 'Test');
 
         if ($search = request('question')) {
             $search = strtolower($search); // Convert the search term to lowercase
-        
-            $query->where(function ($q) use ($search) {
-                // Search in the question field (case-insensitive)
-                $q->where(DB::raw('LOWER(question)'), 'like', '%' . $search . '%')
-                  // Search in the answer field within the question_detail relationship (case-insensitive)
-                  ->orWhereHas('question_detail', function ($q) use ($search) {
-                      $q->where(DB::raw('LOWER(answer)'), 'like', '%' . $search . '%'); // Adjust if answer is JSON array
-                  });
-            });
+
+            if ($search = request('question')) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereRaw('LOWER(question) LIKE ?', ['%' . strtolower($search) . '%'])
+                        ->orWhereRaw('LOWER(answer) LIKE ?', ['%' . strtolower($search) . '%']);
+                });
+            }
         }
 
         if ($courseTitle = request('course')) {
@@ -48,33 +46,31 @@ class QuestionController extends Controller
         if ($difficulty = request('difficulty')) {
             $query->where('difficulty_type', $difficulty);
         }
-        if ($detail_types = request('detail_types')) {
-            $query->whereHas('question_detail', function ($q) use ($detail_types) {
-                $q->where('type', $detail_types); // Assuming 'name' is the field in difficulty table
-            });
+        if ($question_type = request('question_type')) {
+            $query->where('question_type', $question_type);
         }
-        
+
         $perPage = request('items', 5);
         $questions = $query->paginate($perPage)->onEachSide(1);
 
-        $title =  DB::table('courses')->distinct()->pluck('title');
+        $title = Course::select('title')->distinct()->pluck('title');
         $difficulty = array_map(fn($case) => $case->value, QuestionDifficulty::cases());
-        $questionDetailTypes = collect(QuestionDetailType::cases())->map(function ($case) {
+        $questionTypes = collect(QuestionType::cases())->map(function ($case) {
             return $case->value;
         })->toArray();
-        
+
         $testTypes = collect(TestType::cases())->map(function ($case) {
             return $case->value;
         })->toArray();
-    
+
         // Add all filters to the filters array
         $filters = [
             'courses' => $title,
             'difficulty' => $difficulty,
-            'detail_types' => $questionDetailTypes
+            'question_type' => $questionTypes
         ];
-        
-        return Inertia::render('Admin/Questions/Question',[
+
+        return Inertia::render('Admin/Questions/Question', [
             'title' => 'Admin Question',
             'questions' => QuestionResource::collection($questions),
             'filters' => $filters,
@@ -85,7 +81,8 @@ class QuestionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function generate(GenerateQuestionRequest $request){
+    public function generate(GenerateQuestionRequest $request)
+    {
         $validatedData = $request->validated();
         GenerateQuestionJob::dispatch($validatedData);
         return redirect()->back()->with('message', 'Generating questions based on the selected courses.');
@@ -96,7 +93,7 @@ class QuestionController extends Controller
     {
         $courses = Course::with('modules')->get();
         $difficulty = array_map(fn($case) => $case->value, QuestionDifficulty::cases());
-        return Inertia::render('Admin/Questions/Generate',[
+        return Inertia::render('Admin/Questions/Generate', [
             'title' => 'Admin Question',
             'courses' => CourseResource::collection($courses),
             'difficulty' => $difficulty,
@@ -104,79 +101,38 @@ class QuestionController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id,EditQuestionRequest $request)
-    {
-        //
-        $validated = $request->validated();
-        Log::info($validated);
-    }
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(EditQuestionRequest $request, string $id)
+    public function update(EditQuestionRequest $request, Question $question)
     {
         $validated = $request->validated();
 
-        // Fetch the question with related data
-        $question = Question::with(['course', 'question_detail'])->findOrFail($validated['question_id']);
-
         // Update course if changed
-        if ($question->course->title !== $validated['course']) {
-            $course = Course::where('title', $validated['course'])->firstOrFail();
-            $question->course_id = $course->course_id;
+        if ($question->course->course_id !== $validated['course_id']) {
+            $question->course_id = Course::where('course_id', $validated['course_id'])->firstOrFail()->course_id;
         }
 
-        // Save relationship changes
-        if ($question->isDirty(['course_id', 'difficulty_id'])) {
-            $question->save();
-        }
-        // Prepare JSON-encoded values for answer and choices
-        $encodedAnswer = json_encode($validated['answer']);
-        $encodedChoices = json_encode($validated['choices'] ?? []);
+        $validated['answer'] = is_array($validated['answer']) ? json_encode($validated['answer']) : $validated['answer'];
+        $validated['choices'] = !empty($validated['choices']) ? json_encode($validated['choices']) : null;
 
-        // Update question_detail if any relevant field has changed
-        $questionDetail = $question->question_detail;
-        if (
-            $questionDetail->type !== $validated['question_detail_type'] ||
-            $questionDetail->answer !== $encodedAnswer ||
-            $questionDetail->choices !== $encodedChoices
-        ) {
-            $questionDetail->update([
-                'type' => $validated['question_detail_type'],
-                'answer' => $encodedAnswer,
-                'choices' => $encodedChoices,
-            ]);
-        }
-
-        // Update question attributes
-        $question->update([
-            'question' => $validated['question'],
-            'discrimination_index' => $validated['discrimination_index'],
-            'difficulty_value' => $validated['difficulty_value'],
-            'difficulty_type' => $validated['difficulty'],
-        ]);
+        $question->update($validated);
 
         return redirect()->back()->with('success', 'Successfully updated');
     }
 
-    public function delete(string $id)
+    public function delete(Question $question)
     {
-        //
-        $question = Question::with('question_detail')->findOrFail($id);
-        $question->question_detail->delete();
         $question->delete();
         return redirect()->back()->with('success', 'Deleted Successfully');
     }
-    public function courses(){
+    public function courses()
+    {
         $courses = Course::all();
         $difficulty = array_map(fn($case) => $case->value, QuestionDifficulty::cases());
-        $questionDetailTypes = collect(QuestionDetailType::cases())->map(function ($case) {
+        $questionTypes = collect(QuestionType::cases())->map(function ($case) {
             return $case->value;
         })->toArray();
-        return response()->json(['courses' => $courses,'difficulty' =>$difficulty,'question_detail_types'=>$questionDetailTypes]);
+        return response()->json(['courses' => $courses, 'difficulty' => $difficulty, 'question_type' => $questionTypes]);
     }
     public function store(Request $request)
     {
@@ -185,5 +141,5 @@ class QuestionController extends Controller
         ProcessQuestionsJob::dispatch($data);
         return redirect()->back()->with('success', 'Deleted Successfully');
     }
-    
+
 }

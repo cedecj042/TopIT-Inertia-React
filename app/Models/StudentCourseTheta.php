@@ -15,7 +15,6 @@ class StudentCourseTheta extends Model
     protected $fillable = [
         'student_id',
         'course_id',
-        'theta_score',
         'created_at',
         'updated_at'
     ];
@@ -25,5 +24,9 @@ class StudentCourseTheta extends Model
     }
     public function course(){
         return $this->belongsTo(Course::class,'course_id','course_id');
+    }
+
+    public function saveThetaScore($query,$updatedTheta){
+        
     }
 }

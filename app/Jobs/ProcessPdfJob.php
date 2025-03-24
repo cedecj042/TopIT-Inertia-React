@@ -40,27 +40,6 @@ class ProcessPdfJob implements ShouldQueue
      */
     public function handle(FastAPIService $fastAPIService)
     {
-
-        // try {
-        //     // Read the PDF content from the file
-        //     $pdfContent = file_get_contents($this->pdfFilePath);
-        //     $response = $fastAPIService->processPdf($pdfContent, $this->fileName, $this->courseTitle, $this->courseId);
-
-        //     if ($response !== null && $response->successful()) {
-        //         Log::info('FastAPI successfully processed the PDF. Response:', [
-        //             'status' => $response->status(),
-        //             'response_data' => $response->json(),
-        //         ]);
-        //     } else {
-        //         Log::error('FastAPI request failed:', [
-        //             'status' => optional($response)->status(),
-        //             'response_body' => optional($response)->body(),
-        //         ]);
-        //     }
-        // } catch (\Exception $e) {
-        //     // Log any exceptions that occur during the process
-        //     Log::error('Error sending PDF to FastAPI: ' . $e->getMessage());
-        // }
         try {
             // Ensure the file exists before processing
             if (!file_exists($this->pdfFilePath)) {

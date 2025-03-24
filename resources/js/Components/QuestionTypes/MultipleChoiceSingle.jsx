@@ -1,7 +1,7 @@
 import React from 'react';
 
-const MultipleChoiceSingle = ({ question_detail, questionName, register }) => {
-    const choices = question_detail?.choices || [];
+const MultipleChoiceSingle = ({ choices, question_detail_id, questionName, register }) => {
+    const choices = choices || [];
     return (
         <div>
             {choices.map((choice, index) => (

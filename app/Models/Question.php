@@ -13,13 +13,15 @@ class Question extends Model
     protected $fillable = [
         'course_id',
         'question_uid',
-        'question_detail_id',
         'difficulty_id',
         'test_type',
         'question',
         'difficulty_type',
         'difficulty_value',
         'discrimination_index',
+        'question_type',
+        'answer',
+        'choices',
         'created_at',
         'updated_at'
     ];
@@ -31,11 +33,6 @@ class Question extends Model
     public function assessment_items()
     {
         return $this->hasMany(AssessmentItem::class, 'question_id', 'question_id');
-    }
-
-    public function question_detail()
-    {
-        return $this->belongsTo(QuestionDetail::class, 'question_detail_id', 'question_detail_id');
     }
     
 }

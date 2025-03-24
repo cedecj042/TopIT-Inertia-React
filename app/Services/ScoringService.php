@@ -13,10 +13,10 @@ class ScoringService
         if (empty($participants_answer)) {
             return 0;
         }
-        $question = Question::with(['question_detail'])->findOrFail($question_id);
-        $correctAnswer = json_decode($question->question_detail->answer, true);
+        $question = Question::findOrFail($question_id);
+        $correctAnswer = json_decode($question->answer, true);
 
-        switch ($question->question_detail->type) {
+        switch ($question->type) {
             case 'Multiple Choice - Single':
                 return $this->scoreMultipleChoiceSingle($participants_answer, $correctAnswer);
 

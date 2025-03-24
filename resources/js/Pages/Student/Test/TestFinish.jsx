@@ -12,7 +12,7 @@ const TestFinish = ({ assessment }) => {
             <Navbar isLight={false} />
             <div className="container-fluid">
                 <div className="row min-vh-100">
-                    <div className="col-12 d-flex flex-row justify-content-center align-items-center mb-5 pb-5">
+                    <div className="col-12 d-flex flex-row justify-content-center align-items-center mb-5">
                         <div>
                             <img
                                 src="/assets/postpretest.svg"

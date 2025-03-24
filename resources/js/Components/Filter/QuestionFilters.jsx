@@ -28,9 +28,9 @@ export default function QuestionFilters({filters}){
             keyValue: filterState.difficulty,
         },
         {
-            data: filters.detail_types,
-            filterKey: "detail_types",
-            keyValue: filterState.detail_types,
+            data: filters.question_type,
+            filterKey: "question_type",
+            keyValue: filterState.question_type,
         },
         // {
         //     data: filters.test_types,
@@ -83,7 +83,7 @@ export default function QuestionFilters({filters}){
                             <button
                                 className="btn btn-light w-100"
                                 onClick={() =>
-                                    handleClearFilter(["course","difficulty","detail_types"])
+                                    handleClearFilter(["course","difficulty","question_type"])
                                 }
                             >
                                 Clear Filters

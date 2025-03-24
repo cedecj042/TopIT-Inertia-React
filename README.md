@@ -11,39 +11,44 @@ Enable integration with my default WSL distro
 ```
 5. Inside your Ubuntu terminal, clone this repository
 6. CD into the cloned repository
-7. Run this command to install composer dependences 
+7. Before running any container, make sure you create a network the same with FastApi Container
+```
+docker network create topit
+```
+8. Run this command to install composer dependences 
 ```
 docker run --rm \
+   --network topit \
    -u "$(id -u):$(id -g)" \
    -v "$(pwd):/var/www/html" \
    -w /var/www/html \
    laravelsail/php84-composer:latest \
    composer install --ignore-platform-reqs
 ```
-8. In your Ubuntu terminal (outside your repository and the directory when opening the ubuntu terminal), open the file ~/.bashrc and add the following at the bottom of the file
+9. In your Ubuntu terminal (outside your repository and the directory when opening the ubuntu terminal), open the file ~/.bashrc and add the following at the bottom of the file
 ```
 alias sail='sh $([ -f sail ] && echo sail || echo vendor/bin/sail)'
 ```
 and save it.
-9. Go back to the repository directory and copy the .env.example for your .env
+10. Go back to the repository directory and copy the .env.example for your .env
 ```
 cp .env.example .env
 ```
-10. Generate a new app key for laravel
+11. Generate a new app key for laravel
 ```
 sail artisan key:generate
 ```
-11. Install the node dependencies
+12. Install the node dependencies
 ```
 sail npm install
 ```
-12. Go back to the repository directory and run `sail up -d`
-13. Before running the app, make sure you had run `sail artisan migrate` and `sail artisan db:seed` if you dont want the existing database. 
+13. Go back to the repository directory and run `sail up -d`
+14. Before running the app, make sure you had run `sail artisan migrate` and `sail artisan db:seed` if you dont want the existing database. 
 Else, run the script for importing existing database backup with modules and questions
 ```
-./import_sql.sh
+sail mysql -u sail -p topit < sql_backup.sql
 ```
-14. Once finished, run all `sail npm run dev`, `sail artisan serve`, and `sail artisan queue:work`
+15. Once finished, run all `sail npm run dev`, `sail artisan serve`, and `sail artisan queue:work`
 
 
 ## Take Note of this commands

@@ -10,104 +10,31 @@ import MainLayout from "@/Layouts/MainLayout";
 import Navbar from "@/Components/Navigation/Navbar";
 import "../../../../css/student/students.css";
 import "../../../../css/student/welcome.css";
+import { data } from "autoprefixer";
 
-const Test = ({ assessment_item, thetaScores }) => {
-    const { register, handleSubmit, setValue, watch } = useForm({
-        defaultValues: {
-            answers: {},
-        },
-    });
-    const assessment_course = assessment_item.data.assessment_course;
-    const assessment = assessment_course.assessment;
+const Test = ({ test_item }) => {
+
+    const testItem = test_item.data;
     const { isProcessing, postRequest } = useRequest();
-
-    const [currentQuestionNumber, setCurrentQuestionNumber] = useState(1);
-
-    const [currentQuestion, setCurrentQuestion] = useState(
-        assessment_item.data.question
-    );
-    const answers = watch("answers");
-
-    // Add this in your useEffect
-    // Modify your useEffect hook
-    useEffect(() => {
-        if (assessment_item?.data?.question) {
-            setCurrentQuestion(assessment_item.data.question);
-
-            const testId = assessment_course.assessment_id;
-            const storedTestId = sessionStorage.getItem("currentTestId");
-
-            if (!storedTestId || storedTestId !== testId.toString()) {
-                // Reset question no. since this is a new test or first load
-                console.log("New test detected, resetting question number");
-                setCurrentQuestionNumber(1);
-                sessionStorage.setItem("currentQuestionNumber", "1");
-                sessionStorage.setItem("currentTestId", testId);
-            } else {
-                // Same test, get the stored question number
-                const storedNumber = sessionStorage.getItem("currentQuestionNumber");
-                if (storedNumber) {
-                    setCurrentQuestionNumber(parseInt(storedNumber));
-                }
-            }
+    const { data, watch,reset,register, } = useForm({
+        defaultValues: {
+            assessment_id: testItem.assessment_id,
+            assessment_item_id: testItem.assessment_item_id,
+            question_id: testItem.question_id,
+            participants_answer: []
         }
-    }, [assessment_item]);
+    });
 
     const onSubmit = (data) => {
-        // get the current question's answer
-        console.log("current answer: ", data);
         const answer = {
             assessment_id: assessment_course.assessment_id,
             assessment_item_id: assessment_item.data.assessment_item_id,
             question_id: assessment_item.data.question_id,
             answer: data.answers[currentQuestion.question_id],
         };
-
-        router.post(route("test.next-question"), answer, {
-            preserveState: false,
-            preserveScroll: true,
-            onSuccess: (page) => {
-                Object.keys(answers).forEach(questionId => {
-                    setValue(`answers.${questionId}`, null);
-                });
-                
-                setCurrentQuestion(page.props.assessment_item.data.question);
-                
-                if (page.props.assessment_item.data.question) {
-                    const newNumber = currentQuestionNumber + 1;
-                    setCurrentQuestionNumber(newNumber);
-                    sessionStorage.setItem('currentQuestionNumber', newNumber.toString());
-                } else {
-                    // Test is complete
-                    sessionStorage.removeItem('currentQuestionNumber');
-                    sessionStorage.removeItem('currentTestId');
-                }
-            },
-            onError: (errors) => {
-                console.error("Error submitting answer:", errors);
-            },
-        });
+        postRequest('test.submit',data,{preserveScroll: true});
     };
 
-    const isNextDisabled = () => {
-        const currentAnswer = answers[currentQuestion.question_id];
-        console.log("Current question object:", currentQuestion);
-
-        if (!currentQuestion.question_detail) {
-            console.error("Question detail is missing", currentQuestion);
-            return true;
-        }
-
-        switch (currentQuestion.question_detail.type) {
-            case "Multiple Choice - Single":
-            case "Identification":
-                return !currentAnswer;
-            case "Multiple Choice - Many":
-                return !currentAnswer || currentAnswer.length === 0;
-            default:
-                return true;
-        }
-    };
 
     const renderQuestion = () => {
         if (!currentQuestion.question_detail) {

@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Student;
 
 use App\Enums\AssessmentStatus;
+use App\Enums\ItemStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePretestRequest;
 use App\Http\Resources\AssessmentCourseResource;
 use App\Http\Resources\AssessmentResource;
 use App\Http\Resources\AssessmentReviewResource;
+use App\Http\Resources\TestCoursesResource;
 use App\Services\ScoringService;
 use App\Services\ThetaService;
 use Illuminate\Http\Request;
@@ -18,14 +20,9 @@ use Inertia\Inertia;
 
 use App\Models\Course;
 use App\Models\Student;
-use App\Models\Question;
 use App\Models\Assessment;
 use App\Models\AssessmentItem;
 use App\Models\AssessmentCourse;
-
-use App\Http\Resources\CourseResource;
-use App\Http\Resources\QuestionResource;
-use App\Http\Resources\QuestionReviewResource;
 use App\Http\Resources\StudentResource;
 
 
@@ -70,24 +67,18 @@ class PretestController extends Controller
         $existingPretest = $student->assessments()
             ->where('type', 'Pretest')
             ->where('status', 'In Progress')
-            ->with('assessment_courses.course', 'assessment_courses.assessment_items.question.question_detail')
+            ->with('assessment_courses.course', 'assessment_courses.assessment_items.question')
             ->first();
 
         if (!$existingPretest) {
             $courses = Course::with([
                 'questions' => function ($query) {
-                    $query->where('test_type', 'Pretest')
-                        ->with([
-                            'question_detail' => function ($query) {
-                                $query->select(['question_detail_id', 'choices', 'type']);
-                            }
-                        ]);
+                    $query->where('test_type', 'Pretest')->select(['choices', 'type']);
                 }
             ])->get();
 
             $totalItems = $courses->sum(fn($course) => $course->questions->count());
 
-            // Upsert assessment (Pretest)
             $assessmentData = [
                 'student_id' => $student->student_id,
                 'type' => 'Pretest',
@@ -127,6 +118,7 @@ class PretestController extends Controller
                 collect($course->questions)->map(fn($question) => [
                     'assessment_course_id' => $assessmentCourseIds[$course->course_id] ?? null,
                     'question_id' => $question->question_id,
+                    'status' => ItemStatus::IN_PROGRESS,
                     'created_at' => now(),
                 ])
             )->filter(fn($item) => $item['assessment_course_id'] !== null) // Ensure valid IDs
@@ -135,11 +127,12 @@ class PretestController extends Controller
             if (!empty($assessmentItems)) {
                 AssessmentItem::insert($assessmentItems);
             }
-            $existingPretest->load('assessment_courses.course', 'assessment_courses.assessment_items.question.question_detail');
+            $existingPretest->load('assessment_courses.course', 'assessment_courses.assessment_items.question');
         }
         return Inertia::render('Student/Pretest/Pretest', [
             'assessment_id' => $existingPretest->assessment_id,
-            'assessment_courses' => AssessmentCourseResource::collection($existingPretest->assessment_courses),
+            // 'assessment_courses' => AssessmentCourseResource::collection($existingPretest->assessment_courses),
+            'assessment_courses' => TestCoursesResource::collection($existingPretest->assessment_courses),
             'student' => $student
         ]);
     }
@@ -157,7 +150,7 @@ class PretestController extends Controller
                     'question_id' => $item['question_id'],
                     'participants_answer' => json_encode($item['participant_answer']),
                     'score' => $score,
-                    'theta_score' => '0.0',
+                    'status'=> ItemStatus::COMPLETED,
                     'updated_at' => now()
                 ];
             })
@@ -166,11 +159,11 @@ class PretestController extends Controller
         AssessmentItem::upsert(
             $assessmentItems,
             ['assessment_item_id', 'assessment_course_id', 'question_id'],
-            ['participants_answer', 'score', 'theta_score', 'updated_at']
+            ['participants_answer', 'score', 'updated_at']
         );
 
         $assessment_courses = $assessment->assessment_courses()->get();
-        $assessment_courses->each(function ($assessment_course) {
+        $assessment_courses->each(function ($assessment_course) use($assessment) {
             $responses = $assessment_course->assessment_items()->get()->map(function ($item) {
                 return [
                     'is_correct' => $item->score > 0,
@@ -183,15 +176,15 @@ class PretestController extends Controller
                 $assessmentCourse->initial_theta_score ?? 0.0,
                 $responses
             );
+            $this->thetaService->updateThetaForStudent(
+                $assessment->student_id, 
+                $assessment_course->course_id,
+                $updatedTheta
+            );
+
             $courseScore = $assessment_course->assessment_items()->sum('score');
             $courseItems = $assessment_course->total_items;
             $percentage = ($courseItems > 0) ? ($courseScore / $courseItems) * 100 : 0;
-            Log::info('Course Score: ' . $courseScore);
-            Log::info('Total Course Items: ' . $courseItems);
-            Log::info('Calculated Percentage: ' . $percentage);
-            Log::info('Assessment Items:', $assessment_course->assessment_items()->pluck('score')->toArray());
-            Log::info('Total Course Score: ' . $courseScore);
-
 
             $assessment_course->update([
                 'total_items' => $courseItems,
@@ -211,8 +204,6 @@ class PretestController extends Controller
             'total_items' => $totalItems,
             'total_score' => $totalScore,
             'percentage' => ($totalItems > 0) ? ($totalScore / $totalItems) * 100 : 0,
-            'initial_theta_score' => 0,
-            'final_theta_score' => 0
         ]);
 
         return redirect()->route('test.finish', $assessment->assessment_id);
