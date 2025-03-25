@@ -39,7 +39,7 @@ class PretestController extends Controller
         }
 
         if ($question_type = request('question_type')) {
-            $query->where('difficulty_type', $question_type);
+            $query->where('question_type', $question_type);
         }
         
 
@@ -89,7 +89,7 @@ class PretestController extends Controller
             $query->where('difficulty_type', $difficulty);
         }
         if ($question_type = request('question_type')) {
-            $query->where('difficulty_type', $question_type);
+            $query->where('question_type', $question_type);
         }
         
         
@@ -122,12 +122,12 @@ class PretestController extends Controller
     {
         $validated = $request->validated();
 
-        foreach ($validated['questions'] as $id) { // Access the 'questions' array
+        foreach ($validated['questions'] as $id) { 
             $question = Question::find($id);
 
             if ($question) {
                 $question->test_type = TestType::PRETEST->value;
-                $question->save(); // Save the updated model
+                $question->save();
             }
         }
 

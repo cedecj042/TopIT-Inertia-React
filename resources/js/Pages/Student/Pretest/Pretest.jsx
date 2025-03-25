@@ -13,7 +13,6 @@ import { toast } from "sonner";
 
 const Pretest = ({ assessment_id, assessment_courses }) => {
     const assessmentCourses = assessment_courses.data;
-    console.log(assessmentCourses);
 
     const [confirmationState, setConfirmationState] = useState({
         show: false,
@@ -148,6 +147,7 @@ const Pretest = ({ assessment_id, assessment_courses }) => {
                                             watch={watch}
                                             setValue={setValue}
                                             key={itemIndex}
+                                            type={"Pretest"}
                                         />
 
                                     ))

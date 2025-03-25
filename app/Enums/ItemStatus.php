@@ -5,6 +5,6 @@ namespace App\Enums;
 
 enum ItemStatus:string
 {
-    case IN_PROGRESS = 'in_progress';
-    case COMPLETED = 'completed';
+    case IN_PROGRESS = 'In Progress';
+    case COMPLETED = 'Completed';
 }

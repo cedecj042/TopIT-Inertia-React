@@ -33,7 +33,7 @@ class AssessmentReviewResource extends JsonResource
                         'question_id' => $item->question->question_id,
                         'question' => $item->question->question,
                         'choices' => json_decode($item->question->choices),
-                        'type' => $item->question->type,
+                        'question_type' => $item->question->question_type,
                         'answer' => json_decode($item->question->answer),
                     ]
                 ];

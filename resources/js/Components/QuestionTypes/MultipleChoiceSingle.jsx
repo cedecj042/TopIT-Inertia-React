@@ -1,7 +1,7 @@
 import React from 'react';
 
-const MultipleChoiceSingle = ({ choices, question_detail_id, questionName, register }) => {
-    const choices = choices || [];
+const MultipleChoiceSingle = ({ question, questionName, register }) => {
+    const choices = question.choices || [];
     return (
         <div>
             {choices.map((choice, index) => (
@@ -11,9 +11,9 @@ const MultipleChoiceSingle = ({ choices, question_detail_id, questionName, regis
                         className="form-check-input"
                         type="radio"
                         value={choice}
-                        id={`${question_detail.question_detail_id}-${index}`}
+                        id={`${question.question_id}-${index}`}
                     />
-                    <label className="form-check-label" htmlFor={`${question_detail.question_detail_id}-${index}`}>
+                    <label className="form-check-label" htmlFor={`${question.question_id}-${index}`}>
                         {choice}
                     </label>
                 </div>

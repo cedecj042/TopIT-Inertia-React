@@ -15,6 +15,7 @@ class StudentCourseTheta extends Model
     protected $fillable = [
         'student_id',
         'course_id',
+        'theta_score',
         'created_at',
         'updated_at'
     ];

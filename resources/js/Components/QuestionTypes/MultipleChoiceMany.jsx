@@ -1,8 +1,8 @@
 import React from 'react';
 
-const MultipleChoiceMany = ({ question_detail, questionName, setValue, watch }) => {
-    const choices = question_detail.choices || [];
-    const selectedAnswers = watch(questionName) || [];
+const MultipleChoiceMany = ({ question,questionName, setValue, watch }) => {
+    const choices = question.choices || [];
+    const selectedAnswers = Array.isArray(watch(questionName)) ? watch(questionName) : [];
 
     const handleChoiceChange = (choice, checked) => {
         let updatedAnswers = [...selectedAnswers];
@@ -24,11 +24,11 @@ const MultipleChoiceMany = ({ question_detail, questionName, setValue, watch }) 
                     <input
                         type="checkbox"
                         className="form-check-input"
-                        id={`${question_detail.question_detail_id}-${index}`}
+                        id={`${question.question_id}-${index}`}
                         checked={selectedAnswers.includes(choice)}
                         onChange={(e) => handleChoiceChange(choice, e.target.checked)}
                     />
-                    <label className="form-check-label" htmlFor={`${question_detail.question_detail_id}-${index}`}>
+                    <label className="form-check-label" htmlFor={`${question.question_id}-${index}`}>
                         {choice}
                     </label>
                 </div>

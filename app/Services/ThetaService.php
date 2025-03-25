@@ -59,7 +59,7 @@ class ThetaService
     {
         $theta = $initialTheta;
         $tolerance = 1e-5; // Convergence tolerance
-        $maxIterations =100; // Maximum number of iterations
+        $maxIterations = 100; // Maximum number of iterations
         $thetaMin = -5.0; // Lower bound for theta
         $thetaMax = 5.0;  // Upper bound for theta
 
@@ -94,7 +94,7 @@ class ThetaService
             // Clamp theta to be within the range [-5, 5]
             $theta = max($thetaMin, min($thetaMax, $theta));
             // $theta = max(-4.5, min(4.5, $theta));
-            
+
             // Check for convergence
             if (abs($delta) < $tolerance) {
                 break;
@@ -190,7 +190,7 @@ class ThetaService
             ->first();
 
         if ($studentCourseTheta) {
-            return $studentCourseTheta->theta_score; 
+            return $studentCourseTheta->theta_score;
         }
 
         return 0.0;
@@ -203,14 +203,8 @@ class ThetaService
     public function updateThetaForStudent(int $studentId, int $courseId, float $newTheta): void
     {
         StudentCourseTheta::updateOrCreate(
-            [
-                'student_id' => $studentId,
-                'course_id' => $courseId,
-            ],
-            [
-                'theta_score' => $newTheta,
-            ]
+            ['student_id' => $studentId, 'course_id' => $courseId],
+            ['theta_score' => $newTheta, 'updated_at' => now()]
         );
     }
-
 }

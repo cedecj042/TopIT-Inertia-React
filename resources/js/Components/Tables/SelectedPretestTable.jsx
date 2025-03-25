@@ -15,7 +15,6 @@ export default function SelectedPretestTable(
         const questions = selectedQuestions.map((question) => question.question_id);
         postRequest("admin.pretest.add", { questions: questions }, {
             onSuccess: (success) => {
-                console.log(success);
                 toast.success("Questions added to Pretest successfully.", { duration: 3000 });
                 setSelectedQuestions([]);
             },
@@ -79,11 +78,11 @@ export default function SelectedPretestTable(
                                     </div>
                                     <label>Total per Type:</label>
                                     <div className="d-grid grid-3 mb-3">
-                                        {Array.from(new Set(selectedQuestions.map(q => q.type))).map((type, index) => (
+                                        {Array.from(new Set(selectedQuestions.map(q => q.question_type))).map((type, index) => (
                                             <div className="px-3 py-2 bg-light rounded" key={index}>
                                                 <label className="text-secondary" style={{ fontSize: '.8rem' }}>{type}</label>
-                                                <p className="m-0">{selectedQuestions.filter(q => q.type === type).length > 0 ?
-                                                    selectedQuestions.filter(q => q.type === type).length :
+                                                <p className="m-0">{selectedQuestions.filter(q => q.question_type === type).length > 0 ?
+                                                    selectedQuestions.filter(q => q.question_type === type).length :
                                                     null
                                                 }</p>
                                             </div>

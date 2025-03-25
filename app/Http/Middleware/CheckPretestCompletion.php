@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Assessment;
 
@@ -13,19 +12,16 @@ class CheckPretestCompletion
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
      */
     public function handle(Request $request, Closure $next)
     {
-        $student = Auth::user()->userable;
+        $completed = Auth::user()->userable->pretest_completed;
 
-        $hasCompletedPretest = Assessment::where('student_id', $student->student_id)
-            ->where('type', 'Pretest')
-            ->where('status', 'Completed')
-            ->exists();
-
-        if (!$hasCompletedPretest) {
-            return redirect()->route('welcome')->with('error', 'You must complete the pretest before proceeding.');
+        if (!$completed) {
+            return redirect()->route('welcome')->with('message', 'You have not completed the pretest yet.');
         }
 
         return $next($request);

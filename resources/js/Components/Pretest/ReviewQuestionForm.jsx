@@ -8,7 +8,7 @@ const ReviewQuestionForm = ({ assessment_items }) => {
         const correctAnswer = question.answer;
 
         // Multiple Choice - Single
-        if (question.type === "Multiple Choice - Single") {
+        if (question.question_type === "Multiple Choice - Single") {
             const singleAnswer = item.participants_answer || "No answer provided";
             return (
                 <div>
@@ -38,7 +38,7 @@ const ReviewQuestionForm = ({ assessment_items }) => {
             );
         }
 
-        if (question.type === "Multiple Choice - Many") {
+        if (question.question_type === "Multiple Choice - Many") {
             const studentAnswerArray = Array.isArray(item.participants_answer)
                 ? item.participants_answer
                 : [];
@@ -76,7 +76,7 @@ const ReviewQuestionForm = ({ assessment_items }) => {
         }
 
         // Identification
-        if (question.type === "Identification") {
+        if (question.question_type === "Identification") {
             return (
                 <div>
                     <div className="mb-3 d-flex flex-row">

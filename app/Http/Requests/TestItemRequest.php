@@ -26,7 +26,7 @@ class TestItemRequest extends FormRequest
             'assessment_id' => 'required|exists:assessments,assessment_id',
             'assessment_item_id' => 'required|exists:assessment_items,assessment_item_id',
             'question_id' => 'required|exists:questions,question_id',
-            'particpants_answer' => 'required'
+            'participants_answer' => 'nullable'
         ];
     }
 }

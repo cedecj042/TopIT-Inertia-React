@@ -100,7 +100,6 @@ class CourseController extends Controller
         $validated = $request->validated();
 
         $prevCourse = Course::findOrFail($id);
-        Log::info('previous data', $prevCourse->toArray());
         if($prevCourse->title != $validated['course_title']){
             $exists = Course::where('title', $validated['course_title'])->exists();
             if ($exists) {

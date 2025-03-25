@@ -10,6 +10,7 @@ use App\Http\Resources\AssessmentCourseResource;
 use App\Http\Resources\AssessmentResource;
 use App\Http\Resources\AssessmentReviewResource;
 use App\Http\Resources\TestCoursesResource;
+use App\Models\StudentCourseTheta;
 use App\Services\ScoringService;
 use App\Services\ThetaService;
 use Illuminate\Http\Request;
@@ -72,8 +73,8 @@ class PretestController extends Controller
 
         if (!$existingPretest) {
             $courses = Course::with([
-                'questions' => function ($query) {
-                    $query->where('test_type', 'Pretest')->select(['choices', 'type']);
+                'questions' => function ($query): void {
+                    $query->where('test_type', 'Pretest');
                 }
             ])->get();
 
@@ -118,12 +119,14 @@ class PretestController extends Controller
                 collect($course->questions)->map(fn($question) => [
                     'assessment_course_id' => $assessmentCourseIds[$course->course_id] ?? null,
                     'question_id' => $question->question_id,
-                    'status' => ItemStatus::IN_PROGRESS,
+                    'status' => ItemStatus::IN_PROGRESS->value,
                     'created_at' => now(),
                 ])
-            )->filter(fn($item) => $item['assessment_course_id'] !== null) // Ensure valid IDs
-                ->toArray();
-
+            )
+            ->filter(fn($item) => $item['assessment_course_id'] !== null)
+            ->values()
+            ->toArray();
+            
             if (!empty($assessmentItems)) {
                 AssessmentItem::insert($assessmentItems);
             }
@@ -150,7 +153,7 @@ class PretestController extends Controller
                     'question_id' => $item['question_id'],
                     'participants_answer' => json_encode($item['participant_answer']),
                     'score' => $score,
-                    'status'=> ItemStatus::COMPLETED,
+                    'status'=> ItemStatus::COMPLETED->value,
                     'updated_at' => now()
                 ];
             })
@@ -205,6 +208,7 @@ class PretestController extends Controller
             'total_score' => $totalScore,
             'percentage' => ($totalItems > 0) ? ($totalScore / $totalItems) * 100 : 0,
         ]);
+        $assessment->student->update(['pretest_completed' => true]); 
 
         return redirect()->route('test.finish', $assessment->assessment_id);
     }

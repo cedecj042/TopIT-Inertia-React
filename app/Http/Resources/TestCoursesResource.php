@@ -19,7 +19,7 @@ class TestCoursesResource extends JsonResource
             'assessment_course_id' => $this->assessment_course_id,
             'course_id' => $this->course_id,
             'course' => new CourseResource($this->course),
-            'assessment_items' => TestItemResource::collection($this->whenLoaded($this->assessment_items)),
+            'assessment_items' => TestItemResource::collection($this->whenLoaded('assessment_items')),
             'assessment' => new AssessmentResource($this->whenLoaded('assessment'))
         ];
     }

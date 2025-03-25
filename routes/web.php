@@ -40,7 +40,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'student'])->group(function () {
     Route::get('/welcome', [StudentPretestController::class, 'welcome'])->name('welcome');
-    Route::middleware(['pretest.completed'])->group(function () { //registered users cannot proceed to dashboard if pretest not completed
+    Route::middleware(['pretest.completed', 'test.no_pending'])->group(function () {
         Route::redirect('', '/dashboard');
         Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
         Route::get('/profile', [StudentProfileController::class, 'showStudentDetails'])->name('profile');
@@ -55,20 +55,20 @@ Route::middleware(['auth', 'student'])->group(function () {
         Route::prefix('test')->name('test.')->group(function () {
             Route::get('/', [TestController::class, 'index'])->name('index');
             Route::get('/history', [TestController::class, 'history'])->name('history');
-
             Route::get('/course', [TestController::class, 'select'])->name('course');
             Route::post('/start', [TestController::class, 'start'])->name('start');
-            Route::get('/{assessment}', [TestController::class, 'show'])->name('page');
-            Route::post('/next-question', [TestController::class, 'nextQuestion'])->name('next-question');
 
-            Route::get('/finish/{assessment}', [TestController::class, 'finish'])->name('finish');
             Route::get('/review/{assessment}', [TestController::class, 'review'])->name('review');
         });
     });
-    Route::middleware('pretest.not_taken')->group(function () { //users who already completed the pretest cannot revisit the pretest pages
+    Route::get('/test/{assessment}', [TestController::class, 'show'])->name('test.show');
+    Route::put('/test/{assessment_item}/submit', [TestController::class, 'submit'])->name('test.submit');
+    Route::get('/finish/{assessment}', [TestController::class, 'finish'])->name('test.finish');
+
+    Route::middleware('pretest.not_taken')->group(function () {
         Route::get('/start', [StudentPretestController::class, 'startPretest'])->name('pretest.start');
         Route::put('/submit/{assessment}', [StudentPretestController::class, 'submit'])->name('pretest.submit');
-    });  
+    });
 
 });
 
@@ -134,12 +134,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::delete('/{id}', [AdminUserController::class, 'delete'])->name('delete');
 
     });
-    
-    Route::get('/report',[ReportController::class,'index'])->name('report');
+
+    Route::get('/report', [ReportController::class, 'index'])->name('report');
     // Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
-    Route::post('/profile/update',[AdminController::class,'update'])->name('profile.update');
+    Route::post('/profile/update', [AdminController::class, 'update'])->name('profile.update');
     Route::get('/student/{id}', [ReportController::class, 'student'])->name('student');
-    
+
 });
 
 Route::fallback(function () {

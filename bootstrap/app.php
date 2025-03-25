@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\CheckPretestCompletion;
+use App\Http\Middleware\EnsureNoPendingTest;
+use App\Http\Middleware\EnsurePretestNotTaken;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Foundation\Application;
@@ -24,8 +27,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'student' => \App\Http\Middleware\StudentAccess::class,
             'admin' => \App\Http\Middleware\AdminAccess::class,
             'guest' => RedirectIfAuthenticated::class,
-            'pretest.not_taken' => \App\Http\Middleware\EnsurePretestNotTaken::class,
-            'pretest.completed' =>\App\Http\Middleware\CheckPretestCompletion::class,
+            'pretest.completed' => CheckPretestCompletion::class,
+            'pretest.not_taken' => EnsurePretestNotTaken::class,
+            'test.no_pending' => EnsureNoPendingTest::class,
+            // 'test.has_no_pending' => PendingTest::class,
         ]);
         $middleware->validateCsrfTokens(except:[
             '/admin/store-processed-pdf',
