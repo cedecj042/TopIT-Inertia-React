@@ -1,6 +1,11 @@
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
+import '../../../../css/student/test.css';
 
 function Courses ({courses}) {
+
+    const handleClick = (courseId) => {
+        window.location.href = route("course.show", courseId);
+    };
 
     return (
         <>
@@ -14,7 +19,8 @@ function Courses ({courses}) {
                     {courses.map((course) => (
                         <div
                             key={course.course_id}
-                            className="card mb-3 border-0 shadow-sm rounded-4 overflow-hidden"
+                            className="card mb-3 border-1 shadow-sm rounded-4 overflow-hidden clickable"
+                            onClick={() => handleClick(course.course_id)}
                         >
                             <div className="card-body p-0">
                                 <div className="d-flex align-items-center">
@@ -30,17 +36,6 @@ function Courses ({courses}) {
                                             {course.title}
                                         </h5>
                                         <p>{course.description}</p>
-                                    </div>
-                                    <div className="px-3 d-flex align-items-center">
-                                        <a
-                                            className="btn btn-link p-3"
-                                            href={route(
-                                                "course.show",
-                                                course.course_id
-                                            )}
-                                        >
-                                            <i className="h3 bi bi-play-circle-fill"></i>
-                                        </a>
                                     </div>
                                 </div>
                             </div>

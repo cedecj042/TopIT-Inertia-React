@@ -33,7 +33,7 @@ function Module({ module }) {
     }, [module]);
 
     const handleBackClick = async () => {
-        getRequest("student-course-detail", module.data.course.course_id);
+        getRequest("course.show", module.data.course.course_id);
     };
 
     const highlightNavItem = (index) => {
@@ -50,17 +50,17 @@ function Module({ module }) {
         <>
             <div className="container-fluid p-5">
                 <div className="row" id="module-title">
-                    <div className="col-12 btn-toolbar mb-3">
+                    <div className="btn-toolbar mx-3 mb-3">
                         <button
                             className="btn btn-transparent"
                             disabled={isProcessing}
                             onClick={handleBackClick}
                         >
-                            <i className="bi bi-arrow-left"></i>
+                            <i className="bi bi-arrow-left"></i> Back
                         </button>
-                        <h5 className="fw-regular mb-0 align-content-center">
+                        {/* <h5 className="fw-regular mb-0 align-content-center">
                             Module Detail
-                        </h5>
+                        </h5> */}
                     </div>
                     <div className="col-md-12 col-lg-10 px-5 pt-3">
                         <div className="row mb-2">

@@ -1,8 +1,13 @@
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 import { Link } from "@inertiajs/react";
+import '../../../../css/student/test.css';
 
 function CourseDetail({ course }) {
     console.log(course);
+
+    const handleClick = (moduleId) => {
+        window.location.href = route("course.module", moduleId);
+    };
 
     return (
         <>
@@ -11,13 +16,13 @@ function CourseDetail({ course }) {
                     <div>
                         <Link
                             href={`/course`}
-                            className="btn btn-link text-dark text-decoration-none mb-2 p-0"
+                            className="btn btn-link text-dark text-decoration-none mb-4 p-0"
                         >
-                            <i className="bi bi-arrow-left"></i> Back to Courses
+                            <i className="bi bi-arrow-left"></i> Back
                         </Link>
                     </div>
                 </div>
-                <div className="row">
+                <div className="row mb-4">
                     <h3 className="fw-semibold">{course.title}</h3>
                     <p>{course.description}</p>
                 </div>
@@ -29,7 +34,8 @@ function CourseDetail({ course }) {
                             course.modules.map((module) => (
                                 <div
                                     key={module.module_id}
-                                    className="card mb-3 border-0 shadow-sm rounded-4 overflow-hidden"
+                                    className="card mb-3 border-1 shadow-sm rounded-4 overflow-hidden clickable"
+                                    onClick={() => handleClick(module.module_id)}
                                 >
                                     <div className="card-body p-0">
                                         <div className="d-flex align-items-center">
@@ -44,17 +50,6 @@ function CourseDetail({ course }) {
                                                 <h5 className="mb-0 fw-semibold">
                                                     {module.title}
                                                 </h5>
-                                            </div>
-                                            <div className="px-3 d-flex align-items-center">
-                                                <a
-                                                    className="btn btn-link p-3"
-                                                    href={route(
-                                                        "course.module",
-                                                        module.module_id
-                                                    )}
-                                                >
-                                                    <i className="h3 bi bi-play-circle-fill"></i>
-                                                </a>
                                             </div>
                                         </div>
                                     </div>

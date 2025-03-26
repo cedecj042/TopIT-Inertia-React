@@ -105,7 +105,7 @@ const TestReview = ({
                             >
                                 Previous
                             </button>
-                            {currentCourseIndex < assessment_courses.length - 1 && (
+                            {currentCourseIndex < assessmentCourses.length - 1 && (
                                 <button
                                     type="button"
                                     className="btn btn-primary"
