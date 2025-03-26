@@ -179,11 +179,9 @@ class PretestController extends Controller
                 $assessmentCourse->initial_theta_score ?? 0.0,
                 $responses
             );
-            $this->thetaService->updateThetaForStudent(
-                $assessment->student_id, 
-                $assessment_course->course_id,
-                $updatedTheta
-            );
+            
+            $currentCourseTheta = StudentCourseTheta::getCurrentTheta($assessment->student_id,$assessment_course->course_id)->first();
+            $currentCourseTheta->update(['theta_score'=>$updatedTheta,'updated_at' => now()]);
 
             $courseScore = $assessment_course->assessment_items()->sum('score');
             $courseItems = $assessment_course->total_items;

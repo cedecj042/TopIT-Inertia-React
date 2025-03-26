@@ -20,14 +20,28 @@ class StudentCourseTheta extends Model
         'updated_at'
     ];
 
-    public function student(){
-        return $this->belongsTo(Student::class,'student_id','student_id');
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'student_id', 'student_id');
     }
-    public function course(){
-        return $this->belongsTo(Course::class,'course_id','course_id');
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_id', 'course_id');
     }
 
-    public function saveThetaScore($query,$updatedTheta){
-        
+    public function scopeGetCurrentTheta($query, $student_id, $course_id)
+{
+    return $query->where('student_id', $student_id)
+                 ->where('course_id', $course_id);
+}
+    public function scopeByCourse($query, int $courseId)
+    {
+        return $query->where('course_id', $courseId);
     }
+
+    public function scopeByStudentAndCourse($query, int $studentId, int $courseId)
+    {
+        return $query->where('student_id', $studentId)->where('course_id', $courseId);
+    }
+
 }

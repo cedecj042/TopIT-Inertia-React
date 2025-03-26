@@ -14,7 +14,11 @@ class ScoringService
             return 0;
         }
         $question = Question::findOrFail($question_id);
-        $correctAnswer = json_decode($question->answer, true);
+        $correctAnswer = $question->answer;
+        $decodedAnswer = json_decode($correctAnswer, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            $correctAnswer = $decodedAnswer;
+        }
         switch ($question->question_type) {
             case 'Multiple Choice - Single':
                 return $this->scoreMultipleChoiceSingle($participants_answer, $correctAnswer);

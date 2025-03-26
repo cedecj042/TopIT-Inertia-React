@@ -12,21 +12,30 @@ import { toast } from "sonner";
 const Test = ({ test_item, item_count }) => {
 
     const testItem = test_item.data;
-    const [confirmState, setConfirmState] = useState(false);
     const { isProcessing, putRequest } = useRequest();
     const { data, watch, reset, register, formState: { errors },setError, setValue, getValues, handleSubmit } = useForm({
         defaultValues: {
             assessment_id: testItem.assessment.assessment_id,
             assessment_item_id: testItem.assessment_item_id,
-            question_id: testItem.question_id,
             participants_answer: []
         }
     });
+
+    useEffect(() => {
+        if (testItem) {
+            reset({
+                assessment_id: testItem.assessment.assessment_id,
+                assessment_item_id: testItem.assessment_item_id,
+                participants_answer: []
+            });
+        }
+    }, [testItem, reset]);
+
     const onSubmit = () => {
         const formData = getValues();
         putRequest('test.submit', testItem.assessment_item_id, formData, {
             onSuccess:() =>{
-
+                reset();
             },
             onError: (error)=>{
                 toast.error(error, {duration:300});

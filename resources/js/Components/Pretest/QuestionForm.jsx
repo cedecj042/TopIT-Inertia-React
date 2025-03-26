@@ -6,8 +6,8 @@ import MultipleChoiceMany from '../QuestionTypes/MultipleChoiceMany';
 const QuestionForm = ({ index, item, register, setValue, watch, type }) => {
     const renderQuestion = (item) => {
         const question = item.question;
-        const questionName = type === 'Pretest' 
-            ? `assessment_items[${item.assessment_course_id}_${item.assessment_item_id}].participant_answer` 
+        const questionName = type === 'Pretest'
+            ? `assessment_items[${item.assessment_course_id}_${item.assessment_item_id}].participant_answer`
             : 'participants_answer';
         switch (question.question_type) {
             case 'Multiple Choice - Single':
@@ -69,10 +69,16 @@ const QuestionForm = ({ index, item, register, setValue, watch, type }) => {
                         </>
                     )}
                     {type === "Test" && (
-                        <input
-                            type="hidden"
-                            {...register('assessment_id')}
-                        />
+                        <>
+                            <input
+                                type="hidden"
+                                {...register('assessment_id')}
+                            />
+                            <input
+                                type="hidden"
+                                {...register('assessment_item_id')}
+                            />
+                        </>
                     )}
                 </div>
             </div>

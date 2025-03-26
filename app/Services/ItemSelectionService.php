@@ -83,12 +83,12 @@ class ItemSelectionService
 
                 $fisherInfo = $this->calculateFisherInformation($theta, $a, $b);
 
-                Log::debug('Fisher Information calculated', [
-                    'theta' => $theta,
-                    'a' => $a,
-                    'b' => $b,
-                    'I(θ)' => $fisherInfo,
-                ]);
+                // Log::debug('Fisher Information calculated', [
+                //     'theta' => $theta,
+                //     'a' => $a,
+                //     'b' => $b,
+                //     'I(θ)' => $fisherInfo,
+                // ]);
 
                 // Store the item with its Fisher Information
                 $fisherInfoResults[] = [
@@ -139,10 +139,10 @@ class ItemSelectionService
 
             $maximumCourseItem = $this->getMaximumItem($theta, $filteredItems);
 
-            Log::debug('Item with maximum Fisher Information selected (course)', [
-                'theta' => $theta,
-                'selected_item' => $maximumCourseItem ?? null,
-            ]);
+            // Log::debug('Item with maximum Fisher Information selected (course)', [
+            //     'theta' => $theta,
+            //     'selected_item' => $maximumCourseItem ?? null,
+            // ]);
 
             return $maximumCourseItem;
         } catch (\Exception $e) {

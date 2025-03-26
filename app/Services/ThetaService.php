@@ -118,10 +118,8 @@ class ThetaService
     public function processAdaptiveTest(Student $student, Course $course, array $responses, int $maxItems = 20): void
     {
         // Retrieve the current theta for the student and course
-        $currentTheta = StudentCourseTheta::where('student_id', $student->id)
-            ->where('course_id', $course->id)
-            ->value('theta') ?? 0.0;
-
+        $studentCourseTheta = StudentCourseTheta::getCurrentTheta($student->student_id, $course->course_id)->first();
+        $currentTheta = $studentCourseTheta->theta_score ?? 0.0;
         // Process up to the maximum number of items
         $administeredResponses = [];
 
@@ -129,18 +127,12 @@ class ThetaService
             if ($index >= $maxItems) {
                 break;
             }
-
-            // Add the current response to the administered responses
             $administeredResponses[] = $response;
-
-            // Recalculate theta using the responses so far
             $currentTheta = $this->estimateThetaMLE($currentTheta, $administeredResponses);
         }
 
-        // Save the final theta to the database
-        $this->updateThetaForStudent($student->student_id, $course->course_id, $currentTheta);
+        $studentCourseTheta->update(['theta_score' => $currentTheta, 'updated_at' => now()]);
     }
-
 
 
     public function initializeThetaForStudent(Student $student)
@@ -148,17 +140,15 @@ class ThetaService
         $courses = Course::all();
 
         if ($courses->isNotEmpty()) {
-            $data = $courses->map(function ($course) use ($student) {
-                return [
-                    'student_id' => $student->student_id,
-                    'course_id' => $course->course_id,
-                    'theta_score' => 0.0,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-            })->toArray();
+            $data = $courses->map(fn($course) => [
+                'student_id' => $student->student_id,
+                'course_id' => $course->course_id,
+                'theta_score' => 0.0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])->toArray();
 
-            StudentCourseTheta::insert($data);
+            StudentCourseTheta::upsert($data, ['student_id', 'course_id'], ['theta_score', 'updated_at']);
         }
     }
 
@@ -168,43 +158,19 @@ class ThetaService
         $students = Student::all();
 
         if ($students->isNotEmpty()) {
-            $data = $students->map(function ($student) use ($course) {
-                return [
-                    'student_id' => $student->student_id,
-                    'course_id' => $course->course_id,
-                    'theta_score' => 0.0,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-            })->toArray();
+            $data = $students->map(fn($student) => [
+                'student_id' => $student->student_id,
+                'course_id' => $course->course_id,
+                'theta_score' => 0.0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])->toArray();
 
-            StudentCourseTheta::insert($data);
+            StudentCourseTheta::upsert($data, ['student_id', 'course_id'], ['theta_score', 'updated_at']);
         }
     }
 
-    public function getCurrentTheta(int $course_id, int $student_id)
-    {
 
-        $studentCourseTheta = StudentCourseTheta::where('student_id', $student_id)
-            ->where('course_id', $course_id)
-            ->first();
 
-        if ($studentCourseTheta) {
-            return $studentCourseTheta->theta_score;
-        }
 
-        return 0.0;
-    }
-    public function cleanupThetaForDeletedCourse(Course $course)
-    {
-        StudentCourseTheta::where('course_id', $course->course_id)->delete();
-    }
-
-    public function updateThetaForStudent(int $studentId, int $courseId, float $newTheta): void
-    {
-        StudentCourseTheta::updateOrCreate(
-            ['student_id' => $studentId, 'course_id' => $courseId],
-            ['theta_score' => $newTheta, 'updated_at' => now()]
-        );
-    }
 }

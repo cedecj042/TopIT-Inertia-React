@@ -6,8 +6,7 @@ use App\Enums\ItemStatus;
 use App\Models\Assessment;
 use App\Models\AssessmentItem;
 use App\Models\Question;
-use App\Models\Student;
-use App\Models\ThetaScoreLog;
+use App\Models\StudentCourseTheta;
 use Illuminate\Support\Facades\Auth;
 use Log;
 
@@ -38,18 +37,18 @@ class QuestionService
             // Step 2: Compute MMM probabilities for course selection
             $courseProbabilities = $this->calculateMMMProbabilities($courses);
 
-            Log::info("Final Normalized Course Probabilities:", $courseProbabilities);
+            // Log::info("Final Normalized Course Probabilities:", $courseProbabilities);
 
             // Step 3: Select a course based on MMM
             $selectedCourse = $this->weightedRandomSelect($courses, $courseProbabilities);
-            Log::info("Selected Course for the next question:", [
-                'course_id' => $selectedCourse->course_id,
-                'title' => $selectedCourse->title,
-                'probability' => round($courseProbabilities[$selectedCourse->course_id] ?? 0, 4)
-            ]);
+            // Log::info("Selected Course for the next question:", [
+            //     'course_id' => $selectedCourse->course_id,
+            //     'title' => $selectedCourse->title,
+            //     'probability' => round($courseProbabilities[$selectedCourse->course_id] ?? 0, 4)
+            // ]);
 
             // Step 4: Get the latest theta score of the course
-            $currentTheta = $this->getCurrentThetaForCourse($selectedCourse);
+            $currentTheta = StudentCourseTheta::getCurrentTheta( $assessment->student_id,$selectedCourse->course_id)->value('theta_score') ?? 0.0;;
 
             // Step 5: Retrieve available questions (excluding already answered)
             $availableQuestions = $this->getAvailableQuestions($selectedCourse);
@@ -75,7 +74,7 @@ class QuestionService
 
             Log::info("New question selected for assessment:", [
                 'assessment_item_id' => $assessmentItem->assessment_item_id,
-                'question_id' => $selectedItem['id'],
+                'question_id' => $assessmentItem->question_id,
                 'course_id' => $selectedCourse->course_id,
                 'theta' => $currentTheta,
             ]);
@@ -109,12 +108,12 @@ class QuestionService
             $probabilityAdjustment = max(0, $expectedProportion - $actualProportion);
             $courseProbabilities[$course->course_id] = $probabilityAdjustment;
 
-            Log::info("MMM Calculation for Course {$course->course_id}:", [
-                'totalquestionsanswered' => $totalQuestionsAnswered,
-                'expected_proportion' => round($expectedProportion, 4),
-                'actual_proportion' => round($actualProportion, 4),
-                'probability_adjustment' => round($probabilityAdjustment, 4)
-            ]);
+            // Log::info("MMM Calculation for Course {$course->course_id}:", [
+            //     'totalquestionsanswered' => $totalQuestionsAnswered,
+            //     'expected_proportion' => round($expectedProportion, 4),
+            //     'actual_proportion' => round($actualProportion, 4),
+            //     'probability_adjustment' => round($probabilityAdjustment, 4)
+            // ]);
         }
 
         // Normalize probabilities
@@ -141,31 +140,13 @@ class QuestionService
         return $courses->first();
     }
 
-    private function getCurrentThetaForCourse($selectedCourse)
-    {
-        $student = Student::find(Auth::user()->userable->student_id);
-        $courseTheta = $this->thetaService->getCurrentTheta($selectedCourse->course_id, $student->student_id);
-
-        $latestThetaLog = ThetaScoreLog::where('assessment_course_id', $selectedCourse->assessment_course_id)
-            ->orderBy('updated_at', 'desc')
-            ->first();
-
-        Log::warning("Latest theta log: " . json_encode($latestThetaLog));
-
-        // For the first question
-        if (!$latestThetaLog) {
-            Log::warning("No theta score logs found for course {$selectedCourse->course_id}.");
-            return $courseTheta;
-        }
-
-        return $latestThetaLog->new_theta_score;
-    }
 
     private function getAvailableQuestions($selectedCourse)
     {
         $answeredQuestions = $selectedCourse->assessment_items->pluck('question_id')->toArray();
         return Question::where('course_id', $selectedCourse->course_id)
             ->whereNotIn('question_id', $answeredQuestions)
+            ->where('test_type','Test')
             ->with(['course'])
             ->get();
     }

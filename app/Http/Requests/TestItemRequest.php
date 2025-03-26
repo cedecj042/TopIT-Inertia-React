@@ -25,7 +25,6 @@ class TestItemRequest extends FormRequest
         return [
             'assessment_id' => 'required|exists:assessments,assessment_id',
             'assessment_item_id' => 'required|exists:assessment_items,assessment_item_id',
-            'question_id' => 'required|exists:questions,question_id',
             'participants_answer' => 'nullable'
         ];
     }

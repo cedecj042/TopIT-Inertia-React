@@ -111,7 +111,7 @@ class TestController extends Controller
                 'course_id' => $course_id,
                 'total_items' => 0,
                 'total_score' => 0,
-                'initial_theta_score' => $this->thetaService->getCurrentTheta($course_id, $student->student_id),
+                'initial_theta_score' => StudentCourseTheta::getCurrentTheta($student->student_id,$course_id)->value('theta_score') ?? 0.0,
                 'final_theta_score' => 0,
                 'percentage' => 0,
                 'updated_at' => now(),
@@ -130,11 +130,9 @@ class TestController extends Controller
         return redirect()->route('test.show', ['assessment' => $assessment->assessment_id]);
     }
 
-    // for rendering the questions
     public function show(Assessment $assessment)
     {
 
-        // Ensure the correct type is passed
         if (!$assessment instanceof Assessment) {
             throw new \InvalidArgumentException('Expected an Assessment model instance.');
         }
@@ -157,7 +155,7 @@ class TestController extends Controller
 
         $validated = $request->validated();
 
-        $score = $this->scoringService->checkAnswer($validated['question_id'], $validated['participants_answer']);
+        $score = $this->scoringService->checkAnswer($assessment_item->question_id, $validated['participants_answer']);
         $assessment_item->update([
             'participants_answer' => json_encode($validated['participants_answer']),
             'score' => $score,
@@ -168,7 +166,7 @@ class TestController extends Controller
             'assessment_courses.assessment_items',
             'assessment_courses.theta_score_logs',
             'student'
-        ])->findOrFail($validated['assessment_id']);
+        ])->where('assessment_id', $validated['assessment_id'])->first();
 
         $responses = $assessment->assessment_courses->flatMap(function ($course) {
             return $course->assessment_items->map(function ($item) {
@@ -181,20 +179,18 @@ class TestController extends Controller
         })->toArray();
 
         $currentCourse = $assessment_item->assessment_course;
-        $previousTheta = $this->thetaService->getCurrentTheta(
-            $currentCourse->course_id,
-            $assessment->assessment_id
-        );
+        \Log::info('Fetching StudentCourseTheta:', [
+            'student_id' => $assessment->student_id,
+            'course_id'  => $currentCourse->course_id,
+        ]);
+        $currentCourseTheta = StudentCourseTheta::getCurrentTheta($assessment->student_id,$currentCourse->course_id)->first();
+        $previousTheta = $currentCourseTheta->theta_score;
+        
         $updatedTheta = $this->thetaService->estimateThetaMLE(
             $previousTheta ?? 0.0,
             $responses
         );
-
-        $this->thetaService->updateThetaForStudent(
-            $assessment->student_id,
-            $currentCourse->course_id,
-            $updatedTheta
-        );
+        $currentCourseTheta->update(['theta_score'=>$updatedTheta,'updated_at' => now()]);
 
         ThetaScoreLog::create([
             'assessment_course_id' => $currentCourse->assessment_course_id,
@@ -202,17 +198,14 @@ class TestController extends Controller
             'previous_theta_score' => $previousTheta,
             'new_theta_score' => $updatedTheta,
         ]);
-        session(['assessment_item_count' => session('assessment_item_count', 0) + 1]);
 
+
+        session(['assessment_item_count' => session('assessment_item_count', 0) + 1]);
 
         if ($this->terminationRuleService->shouldTerminateTest($assessment)) {
             $assessment_courses = $assessment->assessment_courses()->get();
-            $assessment_courses->each(function ($assessment_course) use ($assessment) {
+            $assessment_courses->each(function ($assessment_course) use ($assessment, $updatedTheta) {
 
-                $currentTheta = $this->thetaService->getCurrentTheta(
-                    $assessment_course->course_id,
-                    $assessment->assessment_id
-                );
                 $assessment_course->loadAggregate('assessment_items as courseScore', 'sum(score)');
                 $assessment_course->loadCount('assessment_items as courseItems');
                 $courseScore = $assessment_course->courseScore ?? 0;
@@ -222,10 +215,11 @@ class TestController extends Controller
                     'total_items' => $courseItems,
                     'total_score' => $courseScore,
                     'percentage' => $percentage,
-                    'final_theta_score' => $currentTheta,
+                    'final_theta_score' => $updatedTheta,
                     'updated_at' => now()
                 ]);
             });
+
             $totalScore = $assessment->assessment_courses()->sum('total_score');
             $totalItems = $assessment->assessment_courses()->sum('total_items');
 
@@ -242,7 +236,6 @@ class TestController extends Controller
             return redirect()->route('test.finish', ['assessment' => $assessment->assessment_id]);
         }
         return redirect()->route('test.show', $assessment->assessment_id)->with('message', 'success');
-
     }
 
     public function finish(Assessment $assessment)
