@@ -32,7 +32,7 @@ export default function TestHistoryList ({ tests = [] }) {
                                         {test.updated_at}
                                     </h6>
                                     <span
-                                        className="badge bg-light text-dark text-sm fw-medium"
+                                        className="badge text-dark text-sm fw-medium"
                                     >
                                         Score: {test.total_score} /{" "}
                                         {test.total_items} ({test.percentage}%)

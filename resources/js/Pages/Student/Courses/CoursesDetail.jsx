@@ -15,7 +15,7 @@ function CourseDetail({ course }) {
                 <div className="row">
                     <div>
                         <Link
-                            href={`/course`}
+                            href={route('course.index')}
                             className="btn btn-link text-dark text-decoration-none mb-4 p-0"
                         >
                             <i className="bi bi-arrow-left"></i> Back

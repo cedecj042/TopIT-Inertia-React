@@ -13,6 +13,7 @@ const TestReview = ({
 }) => {
 
     const assessmentCourses = assessment_courses.data;
+    console.log(assessmentCourses);
     const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
     const [selectedAssessmentCourse, setSelectedAssessmentCourse] = useState(assessmentCourses[currentCourseIndex]);
     useEffect(() => {
@@ -60,13 +61,13 @@ const TestReview = ({
                             <div className="row g-0 gap-3 mt-3">
                                 <Link
                                     href={route('dashboard')}
-                                    className="btn btn-primary col"
+                                    className="btn btn-primary col btn-hover-primary"
                                 >
                                     Dashboard
                                 </Link>
                                 <Link
                                     href={route('test.finish', assessment_id)}
-                                    className="btn btn-outline-primary  col"
+                                    className="btn btn-outline-primary col btn-hover-outline"
                                 >
                                     Summary
                                 </Link>

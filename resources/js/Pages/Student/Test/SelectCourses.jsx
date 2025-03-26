@@ -49,7 +49,7 @@ function SelectCourses({ courses }) {
                 <div className="d-flex">
                     <button
                         onClick={() => window.history.back()}
-                        className="btn btn-link text-dark text-decoration-none mb-2 p-0"
+                        className="btn btn-link text-dark text-decoration-none mb-2 p-0 "
                     >
                         <i className="bi bi-arrow-left"></i> Back
                     </button>
@@ -84,7 +84,7 @@ function SelectCourses({ courses }) {
                         ))}
                         <div className="text-center">
                             <button
-                                className="btn btn-primary p-3 pt-2 pb-2 mt-4"
+                                className="btn btn-primary p-3 pt-2 pb-2 mt-4 btn-hover-primary"
                                 onClick={handleStartTest}
                                 disabled={selectedCourses.length == 0 || isProcessing}
                             >

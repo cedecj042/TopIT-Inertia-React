@@ -8,6 +8,7 @@ use App\Http\Requests\StudentCourseChoiceRequest;
 use App\Http\Requests\TestItemRequest;
 use App\Http\Resources\AssessmentItemResource;
 use App\Http\Resources\AssessmentReviewResource;
+use App\Http\Resources\AssessmentFinishResource;
 use App\Http\Resources\CourseResource;
 
 use App\Http\Resources\TestItemResource;
@@ -240,10 +241,11 @@ class TestController extends Controller
 
     public function finish(Assessment $assessment)
     {
-        $assessment->load('assessment_courses');
+        $assessment->load('assessment_courses.course');
 
         return Inertia::render('Student/Test/TestFinish', [
             'assessment' => new AssessmentResource($assessment),
+            'assessment_courses' => AssessmentFinishResource::collection($assessment->assessment_courses),
             'title' => "Finish",
         ]);
     }
