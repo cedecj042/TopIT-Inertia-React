@@ -17,60 +17,67 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Log;
 use Carbon\Carbon;
+use Illuminate\Http\Response;
+use Carbon\CarbonPeriod;
 
 class StudentProfileController extends Controller
 {
- 
+
     public function showStudentDetails(Request $request)
     {
         $student = Auth::user()->userable;
-        $selectedMonth = $request->input('month', now()->format('Y-m'));
 
-        $progressData = $this->getCourseProgressData($student->student_id, $selectedMonth);
+        $startDate = $request->input('from', now()->startOfWeek()->format('Y-m-d'));
+        $endDate = $request->input('to', now()->endOfWeek()->format('Y-m-d'));
+
+        $progressData = $this->getCourseProgressData($student->student_id, $startDate, $endDate);
 
         return Inertia::render('Student/Profile', [
             'title' => 'Student Profile',
             'student' => new StudentResource($student),
-            'progressData' => ['original' => $progressData['progressData']],
-            'availableMonths' => $progressData['availableMonths'],
-            'selectedMonth' => $selectedMonth
+            'progressData' => $progressData,
+            'from' => $startDate,
+            'to' => $endDate
         ]);
     }
 
-    public function getCourseProgressData($studentId, $selectedMonth = null)
+    public function getCourseProgressData($studentId, $from = null, $to = null)
     {
-        $selectedMonth ?? now()->format('Y-m');
-        $currentDate = now()->format('Y-m-d');
 
-        $startOfMonth = Carbon::parse($selectedMonth)->startOfMonth();
-        $endOfMonth = Carbon::parse($selectedMonth)->endOfMonth();
+        try {
+            $startDate = Carbon::parse($from);
+            $endDate = Carbon::parse($to);
+        } catch (\Exception $e) {
+            $startDate = now()->startOfWeek();
+            $endDate = now()->endOfWeek();
+        }
 
-        $availableMonths = AssessmentCourse::whereHas('assessment', function ($query) use ($studentId) {
-            $query->where('student_id', $studentId);
-        })
-            ->distinct()
-            ->selectRaw('DATE_FORMAT(updated_at, "%Y-%m") as month')
-            ->orderBy('month', 'desc')
-            ->pluck('month');
+        // \Log::info('Received from:', ['from' => $startDate]);
+        // \Log::info('Received to:', ['to' => $endDate]);
 
         $thetaScores = AssessmentCourse::whereHas('assessment', function ($query) use ($studentId) {
             $query->where('student_id', $studentId);
         })
             ->select('course_id', 'final_theta_score', 'updated_at')
             ->with('course')
-            ->whereBetween('updated_at', [$startOfMonth, $endOfMonth])
+            ->whereBetween('updated_at', [$startDate, $endDate])
             ->orderBy('updated_at', 'asc')
             ->get();
 
+        $currentDate = now()->format('Y-m-d');
         $dateRange = [];
-        for ($date = $startOfMonth->copy(); $date <= $endOfMonth; $date->addDay()) {
-            $dateRange[] = $date->format('Y-m-d');
+
+        $rangeStart = clone $startDate;
+        while ($rangeStart <= $endDate) {
+            $dateRange[] = $rangeStart->format('Y-m-d');
+            $rangeStart->addDay();
         }
 
         $progressData = [
             'labels' => $dateRange,
             'datasets' => [],
-            'selectedMonth' => $selectedMonth
+            'from' => $startDate->format('Y-m-d'),
+            'to' => $endDate->format('Y-m-d')
         ];
 
         $thetaScores = $thetaScores->map(function ($item) {
@@ -84,13 +91,13 @@ class StudentProfileController extends Controller
             $data = [];
             $lastValidScore = null;
 
-            foreach ($dateRange as $label) {
-                if ($label > $currentDate) {
+            foreach ($dateRange as $date) {
+                if ($date > $currentDate) {
                     $data[] = null;
                     continue;
                 }
 
-                $dailyScores = $scores->where('date', $label);
+                $dailyScores = $scores->where('date', $date);
 
                 if ($dailyScores->isNotEmpty()) {
                     $currentScore = $dailyScores->avg('final_theta_score');
@@ -111,10 +118,7 @@ class StudentProfileController extends Controller
             ];
         }
 
-        return [
-            'progressData' => $progressData,
-            'availableMonths' => $availableMonths,
-        ];
+        return $progressData;
     }
 
     public function generateRandomColor()

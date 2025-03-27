@@ -20,10 +20,10 @@ ChartJS.register(
     Legend
 );
 
+
 export default function ProgressLineChart({ progressData }) {
-    const originalData = progressData?.original;
-    if (!originalData || !originalData.labels || originalData.labels.length === 0) {
-        return <p>Loading chart data...</p>;
+    if (!progressData || !progressData.labels || progressData.labels.length === 0) {
+        return;
     }
 
     const formatDateLabel = (dateString) => {
@@ -32,8 +32,8 @@ export default function ProgressLineChart({ progressData }) {
     };
 
     const data = {
-        labels: originalData.labels.map(formatDateLabel),
-        datasets: originalData.datasets.map(dataset => ({
+        labels: progressData.labels.map(formatDateLabel),
+        datasets: progressData.datasets.map(dataset => ({
             ...dataset,
             data: dataset.data
         })),
