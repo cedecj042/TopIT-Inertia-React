@@ -1,6 +1,6 @@
 import { useOtherState } from "@/Library/hooks";
 import "../../../css/filter.css";
-import OtherFilter from "./Filters/otherFilter";
+import OtherFilter from "./Filters/OtherFilter";
 import { useContext } from "react";
 import ContextProvider from "../Context/TableContext";
 

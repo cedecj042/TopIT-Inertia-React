@@ -27,24 +27,24 @@ class AdminController extends Controller
 
         if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
             $user = Auth::user();
-            $request->session()->regenerate();
-
+            
             if ($user->userable_type === 'App\Models\Admin') {
+                $request->session()->regenerate();
                 return redirect()->route('admin.dashboard')->with(['message' => 'Login Successfully!']);
             } else {
                 Auth::logout();
-                return redirect()->back()->withErrors(['error' => 'Access restricted to admins only.']);
+                return redirect()->route('admin.showLogin')->withErrors(['message' => 'Access restricted to admins only.']);
             }
         }
-        return redirect()->back()->withErrors( ['error'=>'The provided credentials do not match our records.']);
+        return redirect()->back()->withErrors(['error' => 'The provided credentials do not match our records.']);
     }
 
     public function update(AdminProfileEdit $request)
     {
         $validatedData = $request->validated();
-    
+
         $user = User::findOrFail($validatedData["user_id"]);
-        $admin = Admin::findOrFail($user->userable_id); 
+        $admin = Admin::findOrFail($user->userable_id);
 
         if ($request->hasFile('profile_image')) {
             if ($admin->profile_image && Storage::exists($admin->profile_image)) {
@@ -56,20 +56,20 @@ class AdminController extends Controller
         } else {
             $imageName = $admin->profile_image;
         }
-        
+
         $user->update([
             'email' => $validatedData['email'],
             'username' => $validatedData['username'],
         ]);
-    
+
         $admin->update([
             'firstname' => $validatedData['firstname'],
             'lastname' => $validatedData['lastname'],
             'profile_image' => $imageName,
         ]);
-    
+
         return back()->with('success', 'Profile Updated successfully!');
     }
-    
+
 
 }

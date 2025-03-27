@@ -8,6 +8,7 @@ export default function AdminForm({ onClose }) {
         handleSubmit,
         reset,
         watch,
+        setError,
         formState: { errors, isSubmitting },
     } = useForm();
 
@@ -31,7 +32,14 @@ export default function AdminForm({ onClose }) {
                 onClose();
             },
             onError:(error)=>{
-                toast.error(error.message, { duration: 3000 });
+                console.log(error)
+                if (error) {  
+                    Object.keys(error).forEach((key) => {
+                        setError(key, { type: "server", message: error[key] });  
+                    });
+                }
+                
+                toast.error("Please check your details. Unable to add coordinator.", { duration: 3000 });
             }
         });
     };

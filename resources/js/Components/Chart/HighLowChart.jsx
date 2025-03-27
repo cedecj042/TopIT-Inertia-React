@@ -56,15 +56,15 @@ export default function HighLowChart({ chartData }) {
         backgroundColor: colors[0],
         borderColor: borderColors[0],
         borderWidth: 1,
-        type: 'bar', // Explicitly specify bar type
+        type: 'line', // Explicitly specify bar type
       },
       {
         label: 'High Score',
-        data: chartData.high.map((high, idx) => high - chartData.low[idx]), // Difference between high and low score
+        data: chartData.high, // Difference between high and low score
         backgroundColor: colors[1],
         borderColor: borderColors[1],
         borderWidth: 1,
-        type: 'bar', // Explicitly specify bar type
+        type: 'line', // Explicitly specify bar type
       },
     ],
   };

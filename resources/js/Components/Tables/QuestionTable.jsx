@@ -16,7 +16,7 @@ export default function QuestionTable({
 }){ 
     const { state, dispatch,visibleColumns} = useContext(ContextProvider);
     const keyField = "question_id";
-    const {changeSort} = useSortState(dispatch);
+    const {toggleTableSort} = useSortState(dispatch);
     const { isProcessing, postRequest, deleteRequest } = useRequest();
 
     const [selectedQuestion, setSelectedQuestion] = useState();
@@ -88,7 +88,7 @@ export default function QuestionTable({
                 data={data}
                 visibleColumns={visibleColumns}
                 sortState={state.sortState}
-                changeSort={changeSort}
+                changeSort={toggleTableSort}
                 renderActions={renderActions}
                 keyField={keyField}
                 isRowClickable={true}

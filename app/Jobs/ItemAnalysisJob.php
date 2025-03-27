@@ -1,45 +1,73 @@
 <?php
 
-namespace App\Services;
+namespace App\Jobs;
 
 use App\Models\AssessmentItem;
 use App\Models\AssessmentCourse;
 use App\Models\Question;
+use App\Models\QuestionRecalibrationLog;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Queue\SerializesModels;
 
-class ItemAnalysisService
+class ItemAnalysisJob implements ShouldQueue, ShouldBeUnique
 {
-    public function analyze()
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    /**
+     * Execute the job.
+     */
+
+    public $tries = 1;
+    public function handle()
     {
         $validQuestionIds = AssessmentItem::select('question_id')
             ->groupBy('question_id')
-            ->havingRaw('COUNT(*) > 10')
-            ->pluck('question_id'); 
+            ->havingRaw('COUNT(*) > 5')
+            ->pluck('question_id');
 
-        $questions = Question::where('test_type', 'Test')
-            ->whereIn('question_id', $validQuestionIds)
+        $questions = Question::whereIn('question_id', $validQuestionIds)
             ->get();
 
-
         foreach ($questions as $question) {
-
             $difficultyValue = $this->calculateDifficulty($question);
             $discriminationIndex = $this->calculateDiscrimination($question);
 
-            // Recalibrate difficulty type
             $difficultyType = $this->recalibrateDifficultyType($difficultyValue);
 
-            // Update question record
-            // $question->update([
-            //     'difficulty_value' => $difficultyValue,
-            //     'discrimination_index' => $discriminationIndex,
-            //     'difficulty_type' => $difficultyType,
-            // ]);
+            if (
+                $difficultyValue === $question->difficulty_value &&
+                $discriminationIndex === $question->discrimination_index &&
+                $difficultyType === $question->difficulty_type
+            ) {
+                \Log::info("Skipping Question ID {$question->question_id} - No changes detected.");
+                continue;
+            }
 
-            \Log::info("Recalibrated Question ID: {$question->question_id}", [
+            QuestionRecalibrationLog::create([
+                'question_id' => $question->question_id,
+                'previous_difficulty_value' => $question->difficulty_value,
+                'previous_discrimination_index' => $question->discrimination_index,
+                'previous_difficulty_type' => $question->difficulty_type,
+                'new_difficulty_value' => $difficultyValue,
+                'new_discrimination_index' => $discriminationIndex,
+                'new_difficulty_type' => $difficultyType,
+                'created_at'=> now(),
+                'updated_at'=> now(),
+            ]);
+            
+            // Update question record
+            $question->update([
                 'difficulty_value' => $difficultyValue,
                 'discrimination_index' => $discriminationIndex,
                 'difficulty_type' => $difficultyType,
             ]);
+
+            
         }
     }
 
@@ -47,9 +75,7 @@ class ItemAnalysisService
     {
         $totalAttempts = AssessmentItem::where('question_id', $question->question_id)->count();
 
-        // Skip calculation if attempts are less than 10
-        if ($totalAttempts < 10) {
-            \Log::info("Skipping Question ID {$question->question_id} due to low response count.");
+        if ($totalAttempts < 5) {
             return null;
         }
 
@@ -57,13 +83,9 @@ class ItemAnalysisService
             ->where('score', '>', 0)
             ->count();
 
-        \Log::info("Difficulty calculation: {$question->question_id}", [
-            'total_attempts' => $totalAttempts,
-            'correct_attempts' => $correctAttempts
-        ]);
-
         return round($correctAttempts / $totalAttempts, 2);
     }
+
     private function calculateDiscrimination(Question $question)
     {
         $assessments = AssessmentCourse::orderBy('final_theta_score', 'desc')->get();
@@ -76,16 +98,13 @@ class ItemAnalysisService
 
         $topCorrect = $this->calculateCorrectPercentage($topAssessments, $question->question_id);
         $bottomCorrect = $this->calculateCorrectPercentage($bottomAssessments, $question->question_id);
-        \Log::info("Discirmination calculation: {$question->id}", [
-            'top_correct' => $topCorrect,
-            'bottom_correct' => $bottomCorrect
-        ]);
+
         return round($topCorrect - $bottomCorrect, 2);
     }
 
     private function calculateCorrectPercentage($assessments, $questionId)
     {
-        $assessmentCourseIds = $assessments->pluck('assessment_course_id'); // Get relevant course IDs
+        $assessmentCourseIds = $assessments->pluck('assessment_course_id');
 
         $total = AssessmentItem::whereIn('assessment_course_id', $assessmentCourseIds)
             ->where('question_id', $questionId)
@@ -93,12 +112,9 @@ class ItemAnalysisService
 
         $correct = AssessmentItem::whereIn('assessment_course_id', $assessmentCourseIds)
             ->where('question_id', $questionId)
-            ->where('score', '>', 0) // Check correctness via score
+            ->where('score', '>', 0)
             ->count();
-        // \Log::info("Correct Percentage calculation: {$questionId}", [
-        //     'total' => $total,
-        //     'correct' => $correct
-        // ]);
+
         return $total > 0 ? round($correct / $total, 2) : 0;
     }
 
@@ -115,5 +131,9 @@ class ItemAnalysisService
         } else {
             return 'Very Hard';
         }
+    }
+    public function middleware()
+    {
+        return [new WithoutOverlapping()];
     }
 }

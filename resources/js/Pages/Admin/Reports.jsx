@@ -7,8 +7,17 @@ import StudentFilters from "@/Components/Filter/StudentFilters";
 import StudentsTable from "@/Components/Tables/StudentsTable";
 import { INITIAL_STUDENT_STATE } from "@/Library/filterState";
 import { STUDENT_COLUMN, STUDENT_FILTER_COMPONENT } from "@/Library/constants";
+import BarChart from "@/Components/Chart/BarChart";
 
-function Reports({highlowData,students,queryParams,filters}){
+function Reports({
+    highlowData,
+    difficultyDistribution,
+    discriminationIndex,
+    students,
+    queryParams,
+    filters
+}){
+    console.log(discriminationIndex);
     return(
         <>
             <div className="container-fluid p-5">
@@ -34,6 +43,15 @@ function Reports({highlowData,students,queryParams,filters}){
                     </div>
                     <div className="col-12 chart-height p-2">
                         <HighLowChart chartData={highlowData}/>
+                    </div>
+                </div>
+                <div className="row justify-content-center mt-5 g-0">
+                    <h3 className="fw-bold mb-3">Question Report</h3>
+                    <div className="col-6 chart-height p-4">
+                        <BarChart chartData={difficultyDistribution} title={'Difficulty Distribution'}/>
+                    </div>
+                    <div className="col-6 chart-height p-4">
+                        <BarChart chartData={difficultyDistribution} title={'Difficulty Distribution'}/>
                     </div>
                 </div>
             </div>

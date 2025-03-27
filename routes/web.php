@@ -28,15 +28,13 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [StudentController::class, 'loginStudent'])->name('student.login');
     Route::get('/register', [StudentController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [StudentController::class, 'registerStudent'])->name('student.register');
-    Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
+    Route::get('/admin/login', [AdminController::class, 'showLoginForm'])->name('admin.showLogin');
     Route::post('/admin/login', [AdminController::class, 'loginAdmin'])->name('admin.login');
 });
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
-
-
 
 Route::middleware(['auth', 'student'])->group(function () {
     Route::get('/welcome', [StudentPretestController::class, 'welcome'])->name('welcome');
@@ -80,7 +78,6 @@ Route::post('/admin/update-module-status', [FastApiController::class, 'updateMod
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Courses
     Route::prefix('course')->name('course.')->group(function () {
         Route::get('/', [CourseController::class, 'index'])->name('index');
         Route::post('/add', [CourseController::class, 'add'])->name('add');
@@ -120,6 +117,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/generate/show', [QuestionController::class, 'show'])->name('show');
         Route::post('/generate', [QuestionController::class, 'generate'])->name('generate');
         Route::get('/courses', [QuestionController::class, 'courses'])->name('courses');
+        Route::get('/calibration',[QuestionController::class,'calibration'])->name('calibration');
+        Route::post('/calibrate',[QuestionController::class,'calibrate'])->name('calibrate');
     });
 
     Route::prefix('pretest')->name('pretest.')->group(function () {

@@ -114,3 +114,25 @@ export const INITIAL_TEST_STATE = (queryParams = {}) => ({
         return `${field}:${direction}`;
     })()
 });
+
+export const INITIAL_CALIBRATION_STATE = (queryParams = {}) => ({
+    filterState: {
+        course: queryParams?.course || "",
+        difficulty: queryParams?.difficulty || "",
+        question_type: queryParams?.question_type || "",
+        // test_type: queryParams?.test_type || "",
+    },
+    otherState: {
+        question: queryParams?.question || "",
+        items: queryParams?.items || "",
+    },
+    sortState: (() => {
+        if (queryParams?.sort) {
+            const [field, direction] = queryParams.sort.split(":"); 
+            return `${field || ""}:${direction || ""}`;
+        }
+        const field = queryParams?.field || "";
+        const direction = queryParams?.direction || "";
+        return `${field}:${direction}`;
+    })()
+});

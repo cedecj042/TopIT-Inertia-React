@@ -22,13 +22,13 @@ ChartJS.register(
     Colors
 );
 
-export default function BarChart({data}) {
+export default function BarChart({chartData,title}) {
     const data = {
-        labels: data.courses, // X-axis labels
+        labels: chartData.labels, 
         datasets: [
             {
-                label: data.labels,
-                data: data.data, // Y-axis values
+                label: chartData.counts,
+                data: chartData.data, // Y-axis values
                 backgroundColor: 'rgba(75, 192, 192, 0.5)', // Bar color
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1,
@@ -41,14 +41,15 @@ export default function BarChart({data}) {
         responsive: true,
         plugins: {
             legend: {
-                position: 'top', // Legend position
+                position: "top",
             },
             title: {
                 display: true,
-                text: 'Monthly Data', // Chart title
+                text: title,
             },
         },
     };
+
 
     return <Bar data={data} options={options} />
 }

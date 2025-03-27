@@ -9,7 +9,7 @@ export default function ColumnCheckbox({ columnKey,label, visible, onColumnChang
                 checked={visible}
                 onChange={(e) => onColumnChange(columnKey, e.target.checked)}
             />
-            <label className="form-check-label" htmlFor={`${columnKey}Check`}>
+            <label className="form-check-label" htmlFor={`${columnKey}Check`} onClick={(e)=>e.stopPropagation()}>
                 {label}
             </label>
         </div>

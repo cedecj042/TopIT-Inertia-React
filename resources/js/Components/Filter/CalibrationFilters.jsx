@@ -8,7 +8,7 @@ import TextInputFilter from "./Filters/TextInputFilter";
 import SelectFilter from "./Filters/SelectFilter";
 import OtherFilter from "./Filters/OtherFilter";
 
-export default function QuestionFilters({filters}){
+export default function CalibrationFilters({filters}){
     const { state, dispatch, visibleColumns, onColumnChange } =
         useContext(ContextProvider);
     const { handleClearSort } = useSortState(dispatch);
@@ -32,11 +32,6 @@ export default function QuestionFilters({filters}){
             filterKey: "question_type",
             keyValue: filterState.question_type,
         },
-        // {
-        //     data: filters.test_types,
-        //     filterKey: "test_types",
-        //     keyValue: filterState.test_types,
-        // },
     ];
     return (
         <>
@@ -45,12 +40,6 @@ export default function QuestionFilters({filters}){
                 initialState={INITIAL_QUESTION_STATE().filterState}
                 handleClearFunction={handleClearFilter}
                 label={"filter"}
-            />
-            <ClearFunction
-                currentState={sortState}
-                initialState={INITIAL_QUESTION_STATE().sortState}
-                handleClearFunction={handleClearSort}
-                label={"sort"}
             />
             <div className="row g-0 w-100">
                 <div className="col-lg-5 col-md-12 input-container mb-3">
@@ -75,6 +64,7 @@ export default function QuestionFilters({filters}){
                     <div
                         className="dropdown-menu p-3"
                         aria-labelledby="filterDropdown"
+                        onClick={(e)=>e.stopPropagation()}
                     >
                         {FILTER_DATA.map((filter, index) => (
                             <SelectFilter

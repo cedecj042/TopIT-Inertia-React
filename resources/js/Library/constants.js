@@ -32,10 +32,24 @@ export const QUESTION_COLUMN = [
     // {key:'question_id',label:'ID', sortable:false,visible:true},
     {key:'course.title',label:'Course', sortable:false,visible:true},
     {key:'question',label:'Question', sortable:false,visible:true},
-    {key:'difficulty_type',label:'Difficulty', sortable:false,visible:true},
     {key:'question_type',label:'Type', sortable:false,visible:true},
     {key:'choices',label:'Choices', sortable:false,visible:true},
-    {key:'answer',label:'Answer', sortable:false,visible:true}
+    {key:'answer',label:'Answer', sortable:false,visible:true},
+    {key:'difficulty_type',label:'Difficulty', sortable:false,visible:true},
+    {key:'difficulty_value',label:'Difficulty Value', sortable:true,visible:false},
+    {key:'discrimination_index',label:'Discrimination', sortable:true,visible:false},
+    {key:'total_count',label:'No. of Responses', sortable:true,visible:true}
+
+]
+
+export const CALIBRATION_COLUMN = [
+    // {key:'question_id',label:'ID', sortable:false,visible:true},
+    {key:'question',label:'Question', sortable:false,visible:true},
+    {key:'difficulty_type',label:'Difficulty', sortable:false,visible:true},
+    {key:'difficulty_value',label:'Difficulty Value', sortable:false,visible:true},
+    {key:'discrimination_index',label:'Discrimination', sortable:false,visible:true},
+    {key:'total_count',label:'No. of Responses', sortable:true,visible:true},
+    {key:'updated_at',label:'Updated At', sortable:true,visible:true}
 ]
 
 export const PRETEST_COLUMN = [
@@ -68,6 +82,7 @@ export const STUDENT_FILTER_COMPONENT = ["students","students.meta","filters","q
 export const COURSE_FILTER_COMPONENT = ["courses","courses.meta","queryParams"]
 export const MODULE_FILTER_COMPONENT = ["modules","modules.meta","filters","queryParams"]
 export const QUESTION_FILTER_COMPONENT = ["questions","questions.meta","filters","queryParams"]
+export const CALIBRATION_FILTER_COMPONENT = ["questions","questions.meta","filters","queryParams"]
 export const ADMIN_FILTER_COMPONENT = ["admins","admins.meta","queryParams"]
 
 

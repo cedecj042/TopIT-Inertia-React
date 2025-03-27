@@ -10,6 +10,7 @@ use App\Models\AssessmentCourse;
 use App\Models\Course;
 use App\Models\Student;
 use App\Models\StudentCourseTheta;
+use App\Models\ThetaScoreLog;
 use App\Services\QuestionService;
 use App\Services\ScoringService;
 use App\Services\TerminationRuleService;
@@ -89,23 +90,19 @@ class GenerateAssessmentJob implements ShouldQueue
         while (true) {
             $assessment->load('assessment_courses.assessment_items');
             $assessmentItem = $questionService->selectQuestion($assessment);
-            \Log::info("Selected Assessment Item: " . json_encode($assessmentItem));
 
             if (!$assessmentItem) {
-                \Log::info("No more questions available, terminating assessment.");
                 break;
             }
             $assessmentItem->load(['assessment_course.assessment']);
 
             $randomAnswer = $this->generateRandomAnswer($assessmentItem->question);
             $score = $scoringService->checkAnswer($assessmentItem->question_id, $randomAnswer);
-            \Log::info('Answer = ' . json_encode($randomAnswer) . "| Score: " . $score);
             $assessmentItem->update([
                 'participants_answer' => is_string($randomAnswer) ? json_encode($randomAnswer) : $randomAnswer,
                 'score' => $score,
                 'status' => ItemStatus::COMPLETED->value
             ]);
-            \Log::info("Assessment Courses: " . json_encode($assessment->assessment_courses));
             $responses = $assessment->assessment_courses->flatMap(function ($course) {
                 return $course->assessment_items->map(function ($item) {
                     return [
@@ -115,14 +112,18 @@ class GenerateAssessmentJob implements ShouldQueue
                     ];
                 });
             })->toArray();
-            \Log::info("Generated Responses for Theta Calculation: " . json_encode($responses));
 
             $currentCourse = $assessmentItem->assessment_course;
             $currentCourseTheta = StudentCourseTheta::getCurrentTheta($assessment->student_id, $currentCourse->course_id)->first();
             $previousTheta = $currentCourseTheta->theta_score ?? 0.0;
             $updatedTheta = $thetaService->estimateThetaMLE($previousTheta, $responses);
-            \Log::info("Theta Update - Course ID: {$currentCourse->course_id}, Previous Theta: {$previousTheta}, Updated Theta: {$updatedTheta} , CurrentThetaCourse " . json_encode($currentCourseTheta));
             $currentCourseTheta->update(['theta_score' => $updatedTheta, 'updated_at' => now()]);
+            ThetaScoreLog::create([
+                'assessment_course_id' => $currentCourse->assessment_course_id,
+                'assessment_item_id' => $assessmentItem->assessment_item_id,
+                'previous_theta_score' => $previousTheta,
+                'new_theta_score' => $updatedTheta,
+            ]);
             if ($terminationRuleService->shouldTerminateTest($assessment)) {
                 $assessment_courses = $assessment->assessment_courses()->get();
 
@@ -143,7 +144,6 @@ class GenerateAssessmentJob implements ShouldQueue
                     ]);
                 });
 
-                // Calculate total score and total items for the assessment
                 $totalScore = $assessment->assessment_courses()->sum('total_score');
                 $totalItems = $assessment->assessment_courses()->sum('total_items');
 

@@ -8,7 +8,7 @@ import { useSelectedQuestions } from "../Context/SelectedQuestionsProvider";
 export default function AddPretestTable({ data, filters, queryParams }) {
     const { state, dispatch, visibleColumns } = useContext(ContextProvider);
     const keyField = "question_id"; // Unique identifier for each question
-    const { changeSort } = useSortState(dispatch);
+    const { toggleTableSort } = useSortState(dispatch);
     const { selectedQuestions, setSelectedQuestions } = useSelectedQuestions();
     
     // Handle row selection toggle
@@ -46,7 +46,7 @@ export default function AddPretestTable({ data, filters, queryParams }) {
                 data={data}
                 visibleColumns={visibleColumns}
                 sortState={state.sortState}
-                changeSort={changeSort}
+                changeSort={toggleTableSort}
                 keyField={keyField}
                 isRowClickable={true}
                 handleClick={handleRowClick}

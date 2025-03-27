@@ -24,6 +24,9 @@ table tbody tr:nth-child(even) td{
 .w-6{
     width: 6rem;
 }
+.w-56{
+    width: 300px !important;
+}
 th{
     align-content: center;
     padding: .5rem 1rem !important;

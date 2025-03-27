@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\QuestionDifficulty;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StudentResource;
+use App\Models\Question;
+use App\Models\QuestionRecalibrationLog;
 use App\Models\Student;
 use App\Models\StudentCourseTheta;
 use Illuminate\Support\Facades\DB;
@@ -13,10 +16,11 @@ class ReportController extends Controller
 {
     //
 
-    public function index(){
+    public function index()
+    {
 
         $query = Student::query()
-        ->select(['student_id', 'firstname', 'lastname', 'year', 'school', 'created_at', DB::raw("CONCAT(students.firstname, ' ', students.lastname) AS name")]);
+            ->select(['student_id', 'firstname', 'lastname', 'year', 'school', 'created_at', DB::raw("CONCAT(students.firstname, ' ', students.lastname) AS name")]);
 
         $sort = request()->query('sort', ''); // Empty by default
         $sortField = $sortDirection = null;  // Initialize sortField and sortDirection as null
@@ -24,7 +28,7 @@ class ReportController extends Controller
         // Only split if $sort is not empty
         if (!empty($sort)) {
             [$sortField, $sortDirection] = explode(':', $sort);
-                
+
             // Ensure sortDirection is either 'asc' or 'desc', otherwise set it to null
             if (!in_array($sortDirection, ['asc', 'desc'])) {
                 $sortDirection = null;
@@ -46,7 +50,7 @@ class ReportController extends Controller
         }
 
         if (request('school')) {
-        $school = request('school');
+            $school = request('school');
             $query->where('school', $school);
         }
         if (!empty($sortField) && !empty($sortDirection)) {
@@ -56,26 +60,45 @@ class ReportController extends Controller
         $perPage = request('items', 5);
 
         $students = $query->paginate($perPage)->onEachSide(1);
-        
-        $thetaScores = DB::table('student_course_thetas')
-            ->join('courses', 'student_course_thetas.course_id', '=', 'courses.course_id')
-            ->select(
-                'courses.title as course_title', // Course title
-                'student_course_thetas.course_id', // Course ID
-                DB::raw('MAX(student_course_thetas.theta_score) as high_score'), // High score
-                DB::raw('MIN(student_course_thetas.theta_score) as low_score'), // Low score
-                DB::raw('AVG(student_course_thetas.theta_score) as avg_score')  // Average score
-            )
-            ->groupBy('student_course_thetas.course_id', 'courses.title') // Group by course ID and course title
-            ->get();
+
+        $thetaScores = StudentCourseTheta::with('course') // Assuming a relationship exists
+            ->selectRaw('course_id, MAX(theta_score) as high_score, MIN(theta_score) as low_score, AVG(theta_score) as avg_score')
+            ->groupBy('course_id')
+            ->get()
+            ->map(function ($theta) {
+                return [
+                    'course_title' => $theta->course->title ?? 'Unknown Course', // Avoid null issues
+                    'course_id' => $theta->course_id,
+                    'high_score' => $theta->high_score,
+                    'low_score' => $theta->low_score,
+                    'avg_score' => $theta->avg_score,
+                ];
+            });
 
         $highlowData = [
-            'labels' => $thetaScores->pluck('course_title')->toArray(), 
-            'high' => $thetaScores->pluck('high_score')->toArray(), 
-            'low' => $thetaScores->pluck('low_score')->toArray(),   
+            'labels' => $thetaScores->pluck('course_title')->toArray(),
+            'high' => $thetaScores->pluck('high_score')->toArray(),
+            'low' => $thetaScores->pluck('low_score')->toArray(),
             'avg' => $thetaScores->pluck('avg_score')->toArray(),
         ];
-        
+
+        $difficultyCounts = Question::selectRaw('difficulty_type, COUNT(*) as count')
+            ->groupBy('difficulty_type')
+            ->pluck('count', 'difficulty_type');
+
+        // Ensure all difficulty types are included in the response
+        $labels = [];
+        $counts = [];
+
+        foreach (QuestionDifficulty::cases() as $difficulty) {
+            $labels[] = $difficulty->value;
+            $counts[] = $difficultyCounts[$difficulty->value] ?? 0;
+        }
+        $difficultyDistribution = [
+            'labels'=> $labels,
+            'data'=> $counts
+        ];
+
         $schools = DB::table('students')->distinct()->pluck('school');
         $years = DB::table('students')->distinct()->orderBy('year', 'asc')->pluck('year');
         $filters = [
@@ -83,9 +106,22 @@ class ReportController extends Controller
             'years' => $years,
         ];
 
-        return Inertia::render('Admin/Reports',[
+        $discriminationIndex = QuestionRecalibrationLog::with('question:question_id,question')
+        ->select('question_id', 'previous_discrimination_index', 'new_discrimination_index')
+        ->get()
+        ->map(function ($log) {
+            return [
+                'question' => $log->question->question ?? 'Unknown',
+                'previous' => $log->previous_discrimination_index,
+                'new' => $log->new_discrimination_index,
+            ];
+        });
+
+        return Inertia::render('Admin/Reports', [
             'title' => 'Admin Reports',
             'highlowData' => $highlowData,
+            'difficultyDistribution' => $difficultyDistribution,
+            'discriminationIndex' => $discriminationIndex,
             'students' => StudentResource::collection($students),
             'queryParams' => request()->query() ?: null,
             'filters' => $filters,

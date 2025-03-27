@@ -34,5 +34,8 @@ class Question extends Model
     {
         return $this->hasMany(AssessmentItem::class, 'question_id', 'question_id');
     }
+    public function question_recalibration_logs(){
+        return $this->hasMany(QuestionRecalibrationLog::class,'question_id','question_id');
+    }
     
 }

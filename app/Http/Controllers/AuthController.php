@@ -16,7 +16,7 @@ class AuthController extends Controller
 
         if ($user && $user->userable_type === 'App\Models\Admin') {
             $user->userable->update(['last_login' => Carbon::now()]);
-            $redirectRoute = 'admin.login';
+            $redirectRoute = 'admin.showLogin';
         } else {
             $redirectRoute = 'login';
         }

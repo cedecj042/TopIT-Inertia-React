@@ -29,6 +29,9 @@ class QuestionResource extends JsonResource
             'question_type' => $this->question_type,
             'answer' => json_decode($this->answer),
             'choices' => json_decode($this->choices),
+            'total_count' => $this->assessment_items_count,
+            'correct_count' => $this->correct_count,
+            'incorrect_count' => $this->incorrect_count,
             'course' => new CourseResource($this->whenLoaded('course')),
         ];
     }

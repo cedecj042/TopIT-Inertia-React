@@ -7,7 +7,3 @@ use Illuminate\Support\Facades\Artisan;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
-
-Schedule::command('item-analysis:run')
-    ->twiceMonthly(1, 15)
-    ->at('00:00'); 

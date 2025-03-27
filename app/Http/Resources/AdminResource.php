@@ -21,7 +21,7 @@ class AdminResource extends JsonResource
             'lastname' => $this->lastname,
             'profile_image' => $this->profile_image,
             'last_login' => (new Carbon($this->last_login))->format('F d, Y h:i A'),
-            'created_at' =>(new Carbon($this->created_at))->format('F d, Y'),
+            'created_at' =>(new Carbon($this->created_at))->format('Y-m-d'),
         ];
     }
 }
