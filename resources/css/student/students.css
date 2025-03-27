@@ -1,6 +1,17 @@
 .btn-primary{
     background-color: #0757C6 !important;
 }
+.btn-hover-primary:hover {
+    background-color: #144891 !important;
+    color: white !important;
+    transition: background-color 0.3s ease;
+}
+
+.btn-hover-outline:hover {
+    background-color: #0757C6 !important;
+    color: white !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
 ::placeholder {
     font-size: 0.9rem;
     opacity: 0.5;

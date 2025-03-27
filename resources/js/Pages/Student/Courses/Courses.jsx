@@ -1,6 +1,11 @@
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
+import '../../../../css/student/test.css';
 
 function Courses ({courses}) {
+
+    const handleClick = (courseId) => {
+        window.location.href = route("course.show", courseId);
+    };
 
     return (
         <>
@@ -10,11 +15,12 @@ function Courses ({courses}) {
                 </div>
             </div>
             <div className="px-md-5">
-                <div className="course-list mx-auto" style={{ width: "100%" }}>
+                <div className="course-list w-100">
                     {courses.map((course) => (
                         <div
                             key={course.course_id}
-                            className="card mb-3 border-0 shadow-sm rounded-4 overflow-hidden"
+                            className="card mb-3 border-1 shadow-sm rounded-4 overflow-hidden clickable"
+                            onClick={() => handleClick(course.course_id)}
                         >
                             <div className="card-body p-0">
                                 <div className="d-flex align-items-center">
@@ -25,22 +31,11 @@ function Courses ({courses}) {
                                             height: "90px",
                                         }}
                                     ></div>
-                                    <div className="flex-grow-1 px-3 py-2">
-                                        <h5 className="mt-3 mb-0 fw-semibold">
+                                    <div className="flex-grow-1 px-3">
+                                        <div className="h5 mb-0 fw-semibold">
                                             {course.title}
-                                        </h5>
-                                        <p>{course.description}</p>
-                                    </div>
-                                    <div className="px-3 d-flex align-items-center">
-                                        <a
-                                            className="btn btn-link p-3"
-                                            href={route(
-                                                "course.show",
-                                                course.course_id
-                                            )}
-                                        >
-                                            <i className="h3 bi bi-play-circle-fill"></i>
-                                        </a>
+                                        </div>
+                                        {course.description}
                                     </div>
                                 </div>
                             </div>

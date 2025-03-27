@@ -49,9 +49,9 @@ const Test = ({ test_item, item_count }) => {
             <div className="min-vh-100 d-flex align-items-center">
                 <div className="container mb-6">
                     <div className="row justify-content-center">
-                        <div className="col-12 col-md-8 col-lg-6">
-                            <h1 className="h3 mb-2">{testItem.course.title}</h1>
-                            <p className="text-muted small">
+                        <div className="col-9">
+                            <h1 className="h4 mb-2">{testItem.course.title}</h1>
+                            <p className="text-muted small mb-4">
                                 {testItem.assessment.updated_at}{" "}
                                 <span className="ms-2">
                                     {testItem.assessment.start_time}
@@ -68,7 +68,7 @@ const Test = ({ test_item, item_count }) => {
                                 <div className="text-end mt-5">
                                     <button
                                         type="submit"
-                                        className="btn btn-primary px-4"
+                                        className="btn btn-primary px-4 btn-hover-primary"
                                         disabled={isProcessing}
                                     >
                                         Next

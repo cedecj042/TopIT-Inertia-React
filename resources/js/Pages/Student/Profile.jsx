@@ -6,17 +6,49 @@ import Modal from "@/Components/Modal/Modal";
 import StudentProfileForm from "@/Components/Forms/StudentProfileForm";
 import "../../../css/profile.css";
 import ProgressLineChart from "@/Components/Chart/ProgressLineChart";
+import DateRangeFilter from "@/Components/Filter/Filters/DateRangeFilter";
 
-function Profile({ student, progressData, availableMonths, selectedMonth }) {
+
+function Profile({ student, progressData, from, to }) {
+    const isEmpty = !progressData || !progressData.labels || progressData.labels.length === 0;
     const [showModal, setShowModal] = useState(false);
     const studentData = student.data;
     const openModal = () => setShowModal(true);
     const closeModal = () => setShowModal(false);
 
-    const handleMonthChange = (month) => {
+    function getCurrentWeekDates() {
+        const now = new Date();
+        const dayOfWeek = now.getDay(); 
+        const startDate = new Date(now);
+        startDate.setDate(
+            now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)
+        ); // monday
+    
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6); // Sunday
+    
+        return {
+            from: startDate.toLocaleDateString('en-CA'), 
+            to: endDate.toLocaleDateString('en-CA'),
+        };
+    }
+    
+    const defaultDates = getCurrentWeekDates();
+
+    const handleDateChange = (type, value) => {
+        const formatDate = (date) => {
+            if (!date) return '';
+            const d = new Date(date);
+            // Convert to YYYY-MM-DD format (en-CA gives this format)
+            return d.toLocaleDateString('en-CA'); 
+        };
+    
         router.get(
             route("profile"),
-            { month },
+            {
+                from: type === "from" ? formatDate(value) : formatDate(from),
+                to: type === "to" ? formatDate(value) : formatDate(to),
+            },
             {
                 preserveState: true,
                 preserveScroll: true,
@@ -24,14 +56,16 @@ function Profile({ student, progressData, availableMonths, selectedMonth }) {
         );
     };
 
-    // Format months to "Month Year" format
-    const formatMonthYear = (monthYear) => {
-        const [year, month] = monthYear.split("-");
-        const date = new Date(year, month - 1);
-        return date.toLocaleString("default", {
-            month: "long",
-            year: "numeric",
-        });
+    const handleDateClear = () => {
+        const { from, to } = getCurrentWeekDates();
+        router.get(
+            route("profile"),
+            { from, to },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            }
+        );
     };
 
     return (
@@ -42,7 +76,7 @@ function Profile({ student, progressData, availableMonths, selectedMonth }) {
                         <h3 className="fw-bold mb-0">Your Profile</h3>
                         <button
                             type="button"
-                            className="btn btn-primary p-3 pt-2 pb-2"
+                            className="btn btn-primary p-3 pt-2 pb-2 btn-hover-primary"
                             onClick={openModal}
                         >
                             Edit Profile
@@ -50,27 +84,37 @@ function Profile({ student, progressData, availableMonths, selectedMonth }) {
                     </div>
                     <StudentProfile student={studentData} />
                     <div className="row w-100 px-5 mb-3">
-                        <div className="d-flex justify-content-between align-items-center mb-3">
-                        <h5 className="fw-semibold fs-5">Monthly Progress</h5>
-                            <div>
-                                <select
-                                    className="form-select"
-                                    value={selectedMonth}
-                                    onChange={(e) =>
-                                        handleMonthChange(e.target.value)
-                                    }
-                                    style={{ width: "200px" }} 
-                                >
-                                    {availableMonths.map((month) => (
-                                        <option key={month} value={month}>
-                                            {formatMonthYear(month)}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                        <div className="d-flex align-items-center mb-3">
+                            <h5 className="fw-semibold fs-5">Progress</h5>
                         </div>
+                        <div style={{ width: "300px" }}>
+                                <DateRangeFilter
+                                    from={from || defaultDates.from}
+                                    to={to || defaultDates.to}
+                                    onDateChange={handleDateChange}
+                                    onDateClear={handleDateClear}
+                                />
+                            </div>
                         <div className="chart-container position-relative">
                             <ProgressLineChart progressData={progressData} />
+                            {isEmpty && (
+                                <div
+                                    className="alert alert-light p-5 no-data d-flex flex-column"
+                                    role="alert"
+                                >
+                                    <img
+                                        src="/assets/sad-cloud.svg"
+                                        alt="sad cloud"
+                                    />
+                                    <label
+                                        htmlFor=""
+                                        className="text-secondary mt-3 text-center"
+                                    >
+                                        It seems like there is no data
+                                        available.
+                                    </label>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -79,7 +123,7 @@ function Profile({ student, progressData, availableMonths, selectedMonth }) {
                     show={showModal}
                     onClose={closeModal}
                     modalTitle={"Edit Profile"}
-                    modalSize={'modal-lg'}
+                    modalSize={"modal-lg"}
                 >
                     <StudentProfileForm
                         student={studentData}
