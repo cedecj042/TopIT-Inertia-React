@@ -90,7 +90,7 @@ const TestReview = ({
                                 </h5>
                                 <small className="text-muted">
                                     Course {currentCourseIndex + 1} of{" "}
-                                    {assessment_courses.length}
+                                    {assessmentCourses.length}
                                 </small>
                             </div>
                         </div>

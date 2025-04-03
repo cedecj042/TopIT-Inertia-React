@@ -44,10 +44,19 @@ const QuestionForm = ({ index, item, register, setValue, watch, type }) => {
     };
     return (
         <>
-            <div className="card mb-4 shadow-sm">
-                <div className="card-body">
-                    <h5 className="card-title">Question {index + 1}</h5>
-                    <p className="card-text">{item.question.question}</p>
+            <div className="card mb-4 border-1">
+                <div className="card-header border-1 bg-light text-dark rounded-top-3 py-3 px-4">
+                    <div className="d-flex justify-content-between align-items-center">
+                        <h5 className="card-title mb-0 fw-semibold fs-5">
+                        Question {index + 1}
+                        </h5>
+                        <span className="badge rounded-pill bg-secondary text-white question-type-badge px-3 py-2">
+                        {item.question.question_type}
+                        </span>
+                    </div>
+                </div>
+            <div className="card-body pt-3 p-2 px-4">
+                <p className="card-text fs-5 mb-3 text-dark">{item.question.question}</p>
                     {renderQuestion(item, index)}
                     {type === "Pretest" && (
                         <>

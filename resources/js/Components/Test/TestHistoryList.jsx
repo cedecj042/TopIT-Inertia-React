@@ -1,5 +1,5 @@
-import { useRequest } from "@/Library/hooks";
 import '../../../css/student/test.css';
+import { useRequest } from "@/Library/hooks";
 
 export default function TestHistoryList ({ tests = [] }) {
     const isEmpty = !Array.isArray(tests) || tests.length === 0;;
@@ -26,13 +26,13 @@ export default function TestHistoryList ({ tests = [] }) {
                                         </small>
                                     </p>
                                     <h6
-                                        className="card-title mb-2 mt-2"
+                                        className="card-title mb-2 mt-2 fw-semibold"
                                         style={{ fontSize: "1.2rem" }}
                                     >
                                         {test.updated_at}
                                     </h6>
                                     <span
-                                        className="badge text-dark text-sm fw-medium"
+                                        className="badge bg-secondary text-light text-sm fw-medium"
                                     >
                                         Score: {test.total_score} /{" "}
                                         {test.total_items} ({test.percentage}%)

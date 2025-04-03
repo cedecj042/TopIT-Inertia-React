@@ -23,12 +23,7 @@ class ItemSelectionService
         try {
             $exponent = -$a * ($theta - $b);
             $probability = 1 / (1 + exp($exponent));
-            // Log::debug('Probability calculated', [
-            //     'theta' => $theta,
-            //     'a' => $a,
-            //     'b' => $b,
-            //     'P(θ)' => $probability,
-            // ]);
+            
 
             return $probability;
         } catch (\Exception $e) {
@@ -49,18 +44,18 @@ class ItemSelectionService
      */
     public function calculateFisherInformation(float $theta, float $a, float $b): float
     {
-        try {
             // P(θ)
             $pTheta = $this->calculateProbability($theta, $a, $b);
 
             // Fisher Information I(θ)
             $fisherInformation = pow($a, 2) * $pTheta * (1 - $pTheta);
 
+            // Log::debug('Probability calculated', [
+            //     'P(θ)' => $pTheta,
+            // ]);
+
             return $fisherInformation;
-        } catch (\Exception $e) {
-            Log::error('Error in calculateFisherInformation: ' . $e->getMessage());
-            return 0.0;
-        }
+
     }
 
     /**
@@ -139,10 +134,10 @@ class ItemSelectionService
 
             $maximumCourseItem = $this->getMaximumItem($theta, $filteredItems);
 
-            // Log::debug('Item with maximum Fisher Information selected (course)', [
-            //     'theta' => $theta,
-            //     'selected_item' => $maximumCourseItem ?? null,
-            // ]);
+            Log::debug('Item with maximum Fisher Information selected (course)', [
+                'theta' => $theta,
+                'selected_item' => $maximumCourseItem ?? null,
+            ]);
 
             return $maximumCourseItem;
         } catch (\Exception $e) {

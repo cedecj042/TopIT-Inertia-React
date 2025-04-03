@@ -48,7 +48,7 @@ class QuestionService
             // ]);
 
             // Step 4: Get the latest theta score of the course
-            $currentTheta = StudentCourseTheta::getCurrentTheta( $assessment->student_id,$selectedCourse->course_id)->value('theta_score') ?? 0.0;;
+            $currentTheta = StudentCourseTheta::getCurrentTheta($assessment->student_id, $selectedCourse->course_id)->value('theta_score') ?? 0.0;
 
             // Step 5: Retrieve available questions (excluding already answered)
             $availableQuestions = $this->getAvailableQuestions($selectedCourse);
@@ -68,7 +68,7 @@ class QuestionService
 
             // Step 7: Create assessment item for the selected item
             $assessmentItem = $this->createAssessmentItem($selectedCourse, $selectedItem);
-          
+            
             // Eager load relationships
             $assessmentItem->load(['question']);
 
@@ -146,7 +146,7 @@ class QuestionService
         $answeredQuestions = $selectedCourse->assessment_items->pluck('question_id')->toArray();
         return Question::where('course_id', $selectedCourse->course_id)
             ->whereNotIn('question_id', $answeredQuestions)
-            ->where('test_type','Test')
+            ->where('test_type', 'Test')
             ->with(['course'])
             ->get();
     }
@@ -194,7 +194,7 @@ class QuestionService
             'assessment_course_id' => $selectedCourse->assessment_course_id,
             'question_id' => $selectedItem['id'],
             'participants_answer' => null,
-            'status'=> ItemStatus::IN_PROGRESS,
+            'status' => ItemStatus::IN_PROGRESS,
             'score' => 0,
         ]);
 

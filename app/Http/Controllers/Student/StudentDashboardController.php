@@ -37,12 +37,21 @@ class StudentDashboardController extends Controller
             ->take(3)
             ->get();
 
+        $courseCards = $coursesTheta->map(function ($courseTheta) {
+            return [
+                'course_id' => $courseTheta->course_id,
+                'title' => $courseTheta->course->title,
+                'theta_score' => $courseTheta->theta_score,
+            ];
+        });
+
 
         return Inertia::render('Student/Dashboard', [
             'title' => 'Student Dashboard',
             // 'auth' => $studentId, removed since navbar wont display if naa ni
             'thetaScore' => $thetaScoreData,
-            'tests' => AssessmentResource::collection($tests)
+            'tests' => AssessmentResource::collection($tests),
+            'courseCards' => $courseCards
         ]);
     }
 }
