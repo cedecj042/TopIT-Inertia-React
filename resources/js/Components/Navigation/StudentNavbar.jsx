@@ -11,7 +11,7 @@ export default function StudentNavbar(){
         <div className="col-12">
             <nav className="navbar navbar-custom d-flex justify-content-end">
                 <div className="d-flex flex-row pe-5 py2 gap-3">
-                    <span className="ms-2">
+                    <span className="ms-2 pt-1">
                         Hi, {auth.user && auth.user.username}
                     </span>
                     <div className="bg-dark-subtle rounded-circle">

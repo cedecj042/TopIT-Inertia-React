@@ -4,29 +4,42 @@ import "rsuite/dist/rsuite.min.css";
 import "../../../../css/date.css";
 
 export default function DateRangeFilter({ from, to, onDateChange, onDateClear }) {
-    // Ensure initial values are formatted as yyyy-MM-dd
-    const formatDate = (date) => (date ? date.toISOString().split('T')[0] : "");
+
+    const createLocalDate = (dateString) => {
+        if (!dateString) return null;
+        const [year, month, day] = dateString.split('-');
+        return new Date(year, month - 1, day);
+    };
+
+    const formatDate = (date) => {
+        if (!date) return "";
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
 
     const [dateRange, setDateRange] = useState([
-        from ? new Date(from) : null,
-        to ? new Date(to) : null,
+        createLocalDate(from),
+        createLocalDate(to),
     ]);
 
     useEffect(() => {
         setDateRange([
-            from ? new Date(from) : null,
-            to ? new Date(to) : null,
+            createLocalDate(from),
+            createLocalDate(to),
         ]);
     }, [from, to]);
 
-    const handleDateChange= (value) => {
+    const handleDateChange = (value) => {
         if (value) {
             const [selectedFrom, selectedTo] = value;
-            const formattedFrom = formatDate(selectedFrom);
-            const formattedTo = formatDate(selectedTo);
             setDateRange([selectedFrom, selectedTo]);
             if (onDateChange) {
-                onDateChange(formattedFrom, formattedTo); 
+                onDateChange(
+                    selectedFrom ? formatDate(selectedFrom) : "",
+                    selectedTo ? formatDate(selectedTo) : ""
+                ); 
             }
         }
     };
@@ -41,3 +54,4 @@ export default function DateRangeFilter({ from, to, onDateChange, onDateClear })
         />
     );
 }
+

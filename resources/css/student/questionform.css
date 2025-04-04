@@ -1,0 +1,27 @@
+/* .question-type-badge {
+    background-color: #0757C6 !important;
+} */
+
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card-text {
+    line-height: 1.6;
+    /* font-size: 54px;; */
+}
+
+.choices {
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .test-header h1 {
+        font-size: 1.8rem;
+    }
+}

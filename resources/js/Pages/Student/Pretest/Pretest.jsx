@@ -9,6 +9,7 @@ import QuestionForm from "@/Components/Pretest/QuestionForm";
 import Modal from "@/Components/Modal/Modal";
 import "../../../../css/student/students.css";
 import "../../../../css/student/welcome.css";
+import "../../../../css/student/questionform.css";
 import { toast } from "sonner";
 
 const Pretest = ({ assessment_id, assessment_courses }) => {

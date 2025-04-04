@@ -22,7 +22,7 @@ function TestPage(props) {
                     </div>
                     <div className="col-md-3 offset-md-1">
                         <h2 className="fw-bold mb-3">Ready for a test?</h2>
-                        <p className="text-muted mb-4">
+                        <p className="text-muted fs-6 mb-4">
                             This type of testing implements the Computerized
                             Adaptive Testing algorithm, which adapts to your
                             ability level from the different courses. Take a

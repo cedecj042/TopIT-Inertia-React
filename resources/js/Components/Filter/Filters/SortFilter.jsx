@@ -2,8 +2,6 @@ import SelectInput from "../../SelectInput";
 import { formatFilterKey } from "../../../Library/utils";
 
 export default function SortFilter({ currentSort, filterKey, onSortChange,sortingOptions }) {
-
-
     const handleSortChange = (e) => {
         const selectedOption = sortingOptions.find(
             (option) => option.label === e.target.value

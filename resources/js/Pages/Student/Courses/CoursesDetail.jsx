@@ -1,6 +1,6 @@
 import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 import { Link } from "@inertiajs/react";
-import '../../../../css/student/test.css';
+import "../../../../css/student/test.css";
 
 function CourseDetail({ course }) {
 
@@ -14,7 +14,7 @@ function CourseDetail({ course }) {
                 <div className="row">
                     <div>
                         <Link
-                            href={route('course.index')}
+                            href={route("course.index")}
                             className="btn btn-link text-dark text-decoration-none mb-4 p-0"
                         >
                             <i className="bi bi-arrow-left"></i> Back
@@ -33,7 +33,9 @@ function CourseDetail({ course }) {
                                 <div
                                     key={module.module_id}
                                     className="card mb-3 border-1 shadow-sm rounded-4 overflow-hidden clickable"
-                                    onClick={() => handleClick(module.module_id)}
+                                    onClick={() =>
+                                        handleClick(module.module_id)
+                                    }
                                 >
                                     <div className="card-body p-0">
                                         <div className="d-flex align-items-center">
@@ -54,13 +56,27 @@ function CourseDetail({ course }) {
                                 </div>
                             ))
                         ) : (
-                            <p>No modules available for this course.</p>
+                            <div
+                                className="alert alert-light p-5 no-data d-flex flex-column"
+                                role="alert"
+                            >
+                                <img
+                                    src="/assets/sad-cloud.svg"
+                                    alt="sad cloud"
+                                />
+                                <label
+                                    htmlFor=""
+                                    className="text-secondary mt-3 text-center"
+                                >
+                                    There are no modules for this course.
+                                </label>
+                            </div>
                         )}
                     </div>
                 </div>
             </div>
         </>
     );
-};
+}
 
 export default StudentContent(CourseDetail);

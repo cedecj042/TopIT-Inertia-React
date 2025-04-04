@@ -5,7 +5,7 @@ const MultipleChoiceSingle = ({ question, questionName, register }) => {
     return (
         <div>
             {choices.map((choice, index) => (
-                <div key={index} className="form-check mb-2">
+                <div key={index} className="form-check mb-2 choices">
                     <input
                         {...register(questionName)}
                         className="form-check-input"

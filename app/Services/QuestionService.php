@@ -48,7 +48,7 @@ class QuestionService
             // ]);
 
             // Step 4: Get the latest theta score of the course
-            $currentTheta = StudentCourseTheta::getCurrentTheta( $assessment->student_id,$selectedCourse->course_id)->value('theta_score') ?? 0.0;;
+            $currentTheta = StudentCourseTheta::getCurrentTheta($assessment->student_id, $selectedCourse->course_id)->value('theta_score') ?? 0.0;
 
             // Step 5: Retrieve available questions (excluding already answered)
             $availableQuestions = $this->getAvailableQuestions($selectedCourse);
@@ -72,12 +72,12 @@ class QuestionService
             // Eager load relationships
             $assessmentItem->load(['question']);
 
-            Log::info("New question selected for assessment:", [
-                'assessment_item_id' => $assessmentItem->assessment_item_id,
-                'question_id' => $assessmentItem->question_id,
-                'course_id' => $selectedCourse->course_id,
-                'theta' => $currentTheta,
-            ]);
+            // Log::info("New question selected for assessment:", [
+            //     'assessment_item_id' => $assessmentItem->assessment_item_id,
+            //     'question_id' => $assessmentItem->question_id,
+            //     'course_id' => $selectedCourse->course_id,
+            //     'theta' => $currentTheta,
+            // ]);
             // Step 8: SEM calculation for the course
             $this->calculateCourseSEM($selectedCourse, $currentTheta);
 
@@ -146,7 +146,7 @@ class QuestionService
         $answeredQuestions = $selectedCourse->assessment_items->pluck('question_id')->toArray();
         return Question::where('course_id', $selectedCourse->course_id)
             ->whereNotIn('question_id', $answeredQuestions)
-            ->where('test_type','Test')
+            ->where('test_type', 'Test')
             ->with(['course'])
             ->get();
     }
@@ -182,8 +182,6 @@ class QuestionService
 
         Log::debug('SEM Calculation:', [
             'course_id' => $selectedCourse->course_id,
-            'total_items' => count($allCourseItems),
-            'theta' => $currentTheta,
             'sem' => $sem,
         ]);
     }

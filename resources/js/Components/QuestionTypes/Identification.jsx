@@ -2,7 +2,7 @@ import React from 'react';
 
 const Identification = ({ questionName, register }) => {
     return (
-        <div className="mb-3">
+        <div className="mb-3 choices">
             <input
                 {...register(questionName)}
                 type="text"

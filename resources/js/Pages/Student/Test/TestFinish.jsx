@@ -2,7 +2,7 @@ import { Head, Link } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout";
 import Navbar from "@/Components/Navigation/Navbar";
 import "../../../../css/student/students.css";
-import "../../../../css/student/welcome.css";
+// import "../../../../css/student/welcome.css";
 
 const TestFinish = ({ assessment, assessment_courses }) => {
     const assessmentData = assessment.data;

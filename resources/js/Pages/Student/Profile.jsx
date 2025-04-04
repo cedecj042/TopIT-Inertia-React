@@ -55,7 +55,12 @@ function Profile({ student, progressData, from, to }) {
     };
 
     const updateDateRange = (from, to) => {
-        router.get(route("profile"),{ from: from, to: to },{ preserveState: true, preserveScroll: true });
+
+        router.get(
+            route("profile"),
+            { from: from, to: to },
+            { preserveState: true, preserveScroll: true }
+        );
     };
 
     const handlePrev = () => {
@@ -117,19 +122,22 @@ function Profile({ student, progressData, from, to }) {
 
                     <div className="d-flex gap-2 mb-3">
                         <button
-                            className={`btn ${activeFilter === "weekly"
+
+                            className={`btn ${
+                                activeFilter === "weekly"
                                     ? "btn-primary"
                                     : "btn-outline-primary"
-                                }`}
+                            }`}
                             onClick={() => handleFilterChange("weekly")}
                         >
                             Weekly
                         </button>
                         <button
-                            className={`btn ${activeFilter === "monthly"
+                            className={`btn ${
+                                activeFilter === "monthly"
                                     ? "btn-primary"
                                     : "btn-outline-primary"
-                                }`}
+                            }`}
                             onClick={() => handleFilterChange("monthly")}
                         >
                             Monthly
