@@ -103,14 +103,12 @@ class GenerateAssessmentJob implements ShouldQueue
                 'score' => $score,
                 'status' => ItemStatus::COMPLETED->value
             ]);
-            $responses = $assessment->assessment_courses->flatMap(function ($course) {
-                return $course->assessment_items->map(function ($item) {
-                    return [
-                        'is_correct' => $item->score > 0,
-                        'discrimination' => $item->question->discrimination_index ?? 1.0,
-                        'difficulty' => $item->question->difficulty_value ?? 0.0,
-                    ];
-                });
+            $responses = $assessmentItem->assessment_course->assessment_items->map(function ($item) {
+                return [
+                    'is_correct' => $item->score > 0,
+                    'discrimination' => $item->question->discrimination_index ?? 1.0,
+                    'difficulty' => $item->question->difficulty_value ?? 0.0,
+                ];
             })->toArray();
 
             $currentCourse = $assessmentItem->assessment_course;
@@ -127,7 +125,8 @@ class GenerateAssessmentJob implements ShouldQueue
             if ($terminationRuleService->shouldTerminateTest($assessment)) {
                 $assessment_courses = $assessment->assessment_courses()->get();
 
-                $assessment_courses->each(function ($assessment_course) use ($updatedTheta) {
+                $assessment_courses->each(function ($assessment_course) use ($assessment) {
+                    $currentCourseTheta = StudentCourseTheta::getCurrentTheta($assessment->student_id, $assessment_course->course_id)->first();
                     $assessment_course->loadAggregate('assessment_items as courseScore', 'sum(score)');
                     $assessment_course->loadCount('assessment_items as courseItems');
 
@@ -139,7 +138,7 @@ class GenerateAssessmentJob implements ShouldQueue
                         'total_items' => $courseItems,
                         'total_score' => $courseScore,
                         'percentage' => $percentage,
-                        'final_theta_score' => $updatedTheta,
+                        'final_theta_score' => $currentCourseTheta->theta_score,
                         'updated_at' => now()
                     ]);
                 });

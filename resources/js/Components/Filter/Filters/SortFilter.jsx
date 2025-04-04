@@ -1,16 +1,7 @@
 import SelectInput from "../../SelectInput";
 import { formatFilterKey } from "../../../Library/utils";
 
-export default function SortFilter({ currentSort, filterKey, onSortChange }) {
-    const sortingOptions = [
-        { value: "created_at:asc", label: "Date (Oldest)" },
-        { value: "created_at:desc", label: "Date (Latest)" },
-        { value: "total_score:asc", label: "Total Score (Lowest)" },
-        { value: "total_score:desc", label: "Total Score (Highest)" },
-        { value: "total_items:asc", label: "Total Items (Lowest)" },
-        { value: "total_items:desc", label: "Total Items (Highest)" },
-    ];
-
+export default function SortFilter({ currentSort, filterKey, onSortChange,sortingOptions }) {
     const handleSortChange = (e) => {
         const selectedOption = sortingOptions.find(
             (option) => option.label === e.target.value

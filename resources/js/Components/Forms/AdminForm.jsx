@@ -32,7 +32,6 @@ export default function AdminForm({ onClose }) {
                 onClose();
             },
             onError:(error)=>{
-                console.log(error)
                 if (error) {  
                     Object.keys(error).forEach((key) => {
                         setError(key, { type: "server", message: error[key] });  

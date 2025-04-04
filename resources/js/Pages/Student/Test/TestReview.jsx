@@ -13,7 +13,6 @@ const TestReview = ({
 }) => {
 
     const assessmentCourses = assessment_courses.data;
-    console.log(assessmentCourses);
     const [currentCourseIndex, setCurrentCourseIndex] = useState(0);
     const [selectedAssessmentCourse, setSelectedAssessmentCourse] = useState(assessmentCourses[currentCourseIndex]);
     useEffect(() => {

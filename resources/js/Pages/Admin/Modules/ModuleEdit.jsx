@@ -73,7 +73,6 @@ function ModuleEdit({ module, queryParams = {} }) {
 
     // Automatically set activeContent based on queryParams when the component mounts or queryParams changes
     useEffect(() => {
-        console.log("safeQueryParams:", safeQueryParams);
         if (safeQueryParams.contentableType && safeQueryParams.contentableId) {
             const contentData = getContentByTypeAndId(safeQueryParams.contentableType, safeQueryParams.contentableId);
             if (contentData) {

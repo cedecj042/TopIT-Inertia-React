@@ -30,10 +30,10 @@ class StudentCourseTheta extends Model
     }
 
     public function scopeGetCurrentTheta($query, $student_id, $course_id)
-{
-    return $query->where('student_id', $student_id)
-                 ->where('course_id', $course_id);
-}
+    {
+        return $query->where('student_id', $student_id)
+            ->where('course_id', $course_id);
+    }
     public function scopeByCourse($query, int $courseId)
     {
         return $query->where('course_id', $courseId);

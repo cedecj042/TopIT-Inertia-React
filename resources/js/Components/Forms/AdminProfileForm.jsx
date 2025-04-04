@@ -53,7 +53,6 @@ export default function AdminProfileForm({ onclose, auth }) {
 
         postRequest("admin.profile.update",formData, {
             onSuccess: (data) => {
-                console.log(data)
                 toast.success("Profile updated successfully!");
                 onclose();
             },

@@ -2,25 +2,29 @@ import React from "react";
 import { Line } from "react-chartjs-2";
 import { Chart as ChartJS, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend } from "chart.js";
 
-// Register Chart.js components
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-const DiscriminationIndexChart = ({ data }) => {
+export default function ProgressIndexChart({ 
+    data, 
+    title, 
+    metricKeys,
+    yAxisRange 
+}){
     const chartData = {
-        labels: data.map((q) => q.question), // X-axis: Question labels
+        labels: data.map((_, index) => `Q${index + 1}`), 
         datasets: [
             {
-                label: "Previous Discrimination Index",
-                data: data.map((q) => q.previous), // Y-axis: Previous values
-                borderColor: "rgba(255, 99, 132, 1)", // Red color
+                label: `Previous ${title}`,
+                data: data.map(q => q[metricKeys.previous]),
+                borderColor: "rgba(255, 99, 132, 1)",
                 backgroundColor: "rgba(255, 99, 132, 0.2)",
                 fill: false,
                 tension: 0.3,
             },
             {
-                label: "New Discrimination Index",
-                data: data.map((q) => q.new), // Y-axis: New values
-                borderColor: "rgba(54, 162, 235, 1)", // Blue color
+                label: `New ${title}`,
+                data: data.map(q => q[metricKeys.new]),
+                borderColor: "rgba(54, 162, 235, 1)",
                 backgroundColor: "rgba(54, 162, 235, 0.2)",
                 fill: false,
                 tension: 0.3,
@@ -30,16 +34,23 @@ const DiscriminationIndexChart = ({ data }) => {
 
     const options = {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: { position: "top" },
             tooltip: { enabled: true },
+            title: { display: false, text: title },
         },
         scales: {
-            y: { beginAtZero: true },
+            y: {
+                min: yAxisRange.min,
+                max: yAxisRange.max,
+            },
+            x: {
+                ticks: { display: false },
+            },
         },
     };
 
     return <Line data={chartData} options={options} />;
 };
 
-export default DiscriminationIndexChart;

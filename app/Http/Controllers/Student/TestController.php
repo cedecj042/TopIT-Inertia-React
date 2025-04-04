@@ -188,14 +188,12 @@ class TestController extends Controller
             'student'
         ])->where('assessment_id', $validated['assessment_id'])->first();
 
-        $responses = $assessment->assessment_courses->flatMap(function ($course) {
-            return $course->assessment_items->map(function ($item) {
-                return [
-                    'is_correct' => $item->score > 0,
-                    'discrimination' => $item->question->discrimination_index ?? 1.0,
-                    'difficulty' => $item->question->difficulty_value ?? 0.0,
-                ];
-            });
+        $responses = $responses = $assessment_item->assessment_course->assessment_items->map(function ($item) {
+            return [
+                'is_correct' => $item->score > 0,
+                'discrimination' => $item->question->discrimination_index ?? 1.0,
+                'difficulty' => $item->question->difficulty_value ?? 0.0,
+            ];
         })->toArray();
 
         $currentCourse = $assessment_item->assessment_course;

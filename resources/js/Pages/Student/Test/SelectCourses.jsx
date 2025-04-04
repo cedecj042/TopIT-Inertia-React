@@ -37,7 +37,6 @@ function SelectCourses({ courses }) {
         const data = { courses: selectedCourses };
         postRequest("test.start", data, {
             onSuccess: (data) => {
-                console.log(data);
                 toast.success("Test Started! Goodluck", { duration: 3000 });
             },
             onError: (error) => {

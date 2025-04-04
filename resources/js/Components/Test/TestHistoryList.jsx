@@ -1,49 +1,80 @@
 import '../../../css/student/test.css';
 import { useRequest } from "@/Library/hooks";
 
-export default function TestHistoryList ({ tests = [] }) {
+export default function TestHistoryList({ tests = [] }) {
     const isEmpty = !Array.isArray(tests) || tests.length === 0;;
-    const {isProcessing,getRequest} = useRequest();
-    const handleClick = (id)=>{
-        getRequest('test.finish',id,{})
+    const { isProcessing, getRequest } = useRequest();
+    const handleClick = (id) => {
+        getRequest('admin.assessments.show', id, {})
     }
     return (
         <div>
-            <div className="row g-1">
-                {tests.map((test, index) => (
-                    <div key={index} className="col-12">
-                        <div className="card border-1 rounded-4 my-1 py-1 clickable"
-                            onClick={() => handleClick(test.assessment_id)}
-                        >
-                            <div className="card-body py-2 fs-6 d-flex justify-content-between align-items-center">
-                                <div>
-                                    <p className="card-text mb-0">
-                                        <small
-                                            className="text-muted text-sm"
-                                        >
-                                            Started: {test.start_time} | Ended:{" "}
-                                            {test.end_time}
-                                        </small>
-                                    </p>
-                                    <h6
-                                        className="card-title mb-2 mt-2 fw-semibold"
-                                        style={{ fontSize: "1.2rem" }}
-                                    >
-                                        {test.updated_at}
-                                    </h6>
-                                    <span
-                                        className="badge bg-secondary text-light text-sm fw-medium"
-                                    >
-                                        Score: {test.total_score} /{" "}
-                                        {test.total_items} ({test.percentage}%)
-                                    </span>
+            {!isEmpty ? (
+                <div className="row px-2">
+                    {tests.map((test, index) => (
+                        <div key={index} className="col-12 p-0">
+                            <div className="card border-1 rounded-4 my-1 py-1 clickable w-100"
+                                onClick={() => handleClick(test.assessment_id)}
+                            >
+                                <div className="card-body px-4 py-2 d-flex align-items-center w-100">
+                                    <div className="row  flex-grow-1">
+                                        <div className="d-flex flex-row justify-content-between w-100">
+                                            <div>
+                                                <p className="mb-0">
+                                                    <small
+                                                        className="text-muted text-sm"
+                                                    >
+                                                        {test.created_at}: {test.start_time} - {test.end_time}
+                                                    </small>
+                                                </p>
+                                                <h6
+                                                    className="card-title my-2 align-content-center"
+                                                >
+                                                    Assessment #{test.assessment_id}
+                                                </h6>
+                                                <div
+                                                    className="d-flex flex-row flex-wrap gap-2"
+                                                >
+                                                    {test.courses.length > 0 && (
+                                                        test.courses.map((course, index) => (
+                                                            <span
+                                                                key={course + "_" + index}
+                                                                className="badge align-content-center text-secondary fw-semibold rounded-pill bg-light"
+                                                            >
+                                                                {course.length > 25 ? course.slice(0, 25) + '...' : course}
+                                                            </span>
+                                                        ))
+                                                    )}
+
+                                                </div>
+                                            </div>
+                                            <div className="d-flex flex-column justify-content-center gap-1 list-status">
+                                                <small
+                                                    className="text-muted text-sm"
+                                                >
+                                                    {test.type}
+                                                </small>
+                                                <h6
+                                                    className="align-content-center fw-semibold text-success p-0"
+                                                >
+                                                    {Math.floor(test.percentage)}%
+                                                </h6>
+                                                <span
+                                                    className="badge align-content-center text-start text-dark text-muted p-0"
+                                                >
+                                                    {test.total_score} /{" "}
+                                                    {test.total_items}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                ))}
-            </div>
-            {isEmpty && (
+                    ))}
+                </div>
+            ) : (
                 <div
                     className="alert alert-light p-5 no-data d-flex flex-column"
                     role="alert"

@@ -55,7 +55,7 @@ function Profile({ student, progressData, from, to }) {
     };
 
     const updateDateRange = (from, to) => {
-        console.log("Updating date range:", from, "to", to);
+
         router.get(
             route("profile"),
             { from: from, to: to },
@@ -122,6 +122,7 @@ function Profile({ student, progressData, from, to }) {
 
                     <div className="d-flex gap-2 mb-3">
                         <button
+
                             className={`btn ${
                                 activeFilter === "weekly"
                                     ? "btn-primary"

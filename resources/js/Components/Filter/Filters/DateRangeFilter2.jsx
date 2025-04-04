@@ -4,6 +4,7 @@ import "rsuite/dist/rsuite.min.css";
 import "../../../../css/date.css";
 
 export default function DateRangeFilter({ from, to, onDateChange, onDateClear }) {
+
     const createLocalDate = (dateString) => {
         if (!dateString) return null;
         const [year, month, day] = dateString.split('-');
@@ -53,3 +54,4 @@ export default function DateRangeFilter({ from, to, onDateChange, onDateClear })
         />
     );
 }
+

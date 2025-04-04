@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useEffect, useReducer, useRef } from "react";
 import { router } from "@inertiajs/react";
-import { useColumnVisibility } from "@/Library/hooks";
+import { useColumnVisibility, useRequest } from "@/Library/hooks";
 
 const ContextProvider = createContext();
 
@@ -51,6 +51,7 @@ export const TableContext = ({
     children,
     initialState,
     routeName,
+    routeId = null,
     components,
     column = []
 }) => {
@@ -73,7 +74,7 @@ export const TableContext = ({
                 Object.entries(combinedState).filter(([key, value]) => value !== "")
             );
     
-            router.get(route(routeName), filteredParams, {
+            router.get(route(routeName, routeId ? { id:routeId } : {}), filteredParams, {
                 preserveScroll: true,
                 preserveState: true,
                 replace: true,

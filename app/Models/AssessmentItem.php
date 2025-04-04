@@ -20,6 +20,7 @@ class AssessmentItem extends Model
         'participants_answer',
         'score',
         'status',
+        'previous_theta_score',
         'created_at',
         'updated_at'
     ];
@@ -41,9 +42,5 @@ class AssessmentItem extends Model
     {
         return $query->where('status', $status);
     }
-    // public function scopeGetCurrentItem($query, $assessment)
-    // {
-    //     return 
-    // }
 
 }

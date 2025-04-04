@@ -83,14 +83,7 @@ export default function CourseTable({ data,queryParams }) {
 
     const viewCourse = (e, course) => {
         e.preventDefault();
-        getRequest("admin.course.detail", {id:course.course_id }, {
-            onSuccess: (success) => {
-                console.log(success);
-            },
-            onError: (error) => {
-                console.log(error);
-            },
-        });
+        getRequest("admin.course.detail", {id:course.course_id }, {});
     };
 
     return (

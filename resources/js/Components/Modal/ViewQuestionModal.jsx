@@ -8,7 +8,7 @@ export default function ViewQuestionModal({ question }) {
             <div className="modal-body">
                 <div className="d-flex flex-column p-3">
                     {/* <label htmlFor="">Question:</label> */}
-                    <h5 className="fw-semibold">{question.question}</h5>
+                    <h5 className="fw-medium mb-3">{question.question}</h5>
                     {question?.choices && (
                         Array.isArray(question.choices) ? (
                             <ol type="a">

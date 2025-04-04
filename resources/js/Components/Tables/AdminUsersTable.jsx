@@ -30,7 +30,6 @@ export default function AdminUsersTable({ data, visibleColumns }) {
                 closeModal();
             },
             onError: (error) => {
-                console.log(error);
                 toast.error("Failed to delete coordinator", { duration: 3000 });
             },
         });

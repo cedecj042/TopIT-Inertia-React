@@ -127,7 +127,7 @@ export default function AdminNavbar({ title }) {
                                 </Link>
                             </li>
                             <li className="w-100">
-                                <Link href={route('admin.question.calibration')} className={`nav-link text-white py-3 ps-5 d-flex align-items-center gap-1 ${title === 'Admin Recalibration Logs' ? 'active' : ''}`}>
+                                <Link href={route('admin.recalibration.index')} className={`nav-link text-white py-3 ps-5 d-flex align-items-center gap-1 ${title === 'Admin Recalibration' ? 'active' : ''}`}>
                                     <span className="material-symbols-outlined">tune</span>
                                     <span className="ms-1 d-none d-sm-inline fs-6">Recalibration Logs</span>
                                 </Link>

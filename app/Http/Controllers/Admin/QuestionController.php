@@ -9,18 +9,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\EditQuestionRequest;
 use App\Http\Requests\GenerateQuestionRequest;
 use App\Http\Resources\CourseResource;
-use App\Http\Resources\QuestionRecalibrationLogResource;
 use App\Http\Resources\QuestionResource;
 use App\Jobs\GenerateQuestionJob;
-use App\Jobs\ItemAnalysisJob;
 use App\Jobs\ProcessQuestionsJob;
 use App\Models\Course;
 use App\Models\Question;
-use App\Models\QuestionRecalibrationLog;
-use DB;
 use Illuminate\Http\Request;
-use Illuminate\Queue\Jobs\Job;
-use Illuminate\Support\Facades\Queue;
 use Inertia\Inertia;
 
 class QuestionController extends Controller
@@ -174,102 +168,5 @@ class QuestionController extends Controller
         return redirect()->back()->with('success', 'Deleted Successfully');
     }
 
-    public function calibration()
-    {
-        $query = QuestionRecalibrationLog::with([
-            'question' => function ($q) {
-                $q->with(['course'])
-                    ->withCount('assessment_items');
-            }
-        ]);
-
-        $sort = request()->query('sort', '');
-        $sortField = $sortDirection = null;
-
-        // Only split if $sort is not empty
-        if (!empty($sort)) {
-            [$sortField, $sortDirection] = explode(':', $sort);
-
-            if (!in_array($sortDirection, ['asc', 'desc'])) {
-                $sortDirection = null;
-            }
-        }
-        if ($search = request('question')) {
-            $search = strtolower($search);
-
-            $query->whereHas('question', function ($q) use ($search) {
-                $q->whereRaw('LOWER(question) LIKE ?', ['%' . $search . '%'])
-                    ->orWhereRaw('LOWER(answer) LIKE ?', ['%' . $search . '%']);
-            });
-        }
-        if ($question_type = request('question_type')) {
-            $query->whereHas('question', function ($q) use ($question_type) {
-                $q->where('question_type', $question_type);
-            });
-        }
-        if ($courseTitle = request('course')) {
-            $query->whereHas('question.course', function ($q) use ($courseTitle) {
-                $q->where('title', 'like', '%' . $courseTitle . '%');
-            });
-        }
-        if ($difficulty = request('difficulty')) {
-            $query->where('previous_difficulty_type', $difficulty)->orWhere('new_difficulty_type', $difficulty);
-        }
-        if ($question_type = request('question_type')) {
-            $query->whereHas('question', function ($q) use ($question_type) {
-                $q->where('question_type', $question_type);
-            });
-        }
-
-        if (!empty($sortField) && !empty($sortDirection)) {
-            if ($sortField === 'total_count') {
-                $query->orderByRaw('(SELECT COUNT(*) FROM assessment_items WHERE assessment_items.question_id = question_recalibration_logs.question_id) ' . $sortDirection);
-            } else {
-                $query->orderBy($sortField, $sortDirection);
-            }
-        }
-
-        $perPage = request('items', 5);
-        $questions = $query->paginate($perPage)->onEachSide(1);
-
-        $title = Course::select('title')->distinct()->pluck('title');
-        $difficulty = array_map(fn($case) => $case->value, QuestionDifficulty::cases());
-        $questionTypes = collect(QuestionType::cases())->map(function ($case) {
-            return $case->value;
-        })->toArray();
-
-        $testTypes = collect(TestType::cases())->map(function ($case) {
-            return $case->value;
-        })->toArray();
-
-        // Add all filters to the filters array
-        $filters = [
-            'courses' => $title,
-            'difficulty' => $difficulty,
-            'question_type' => $questionTypes
-        ];
-
-        return Inertia::render('Admin/Questions/Calibration', [
-            'filters' => $filters,
-            'questions' => QuestionRecalibrationLogResource::collection($questions),
-            'title' => 'Admin Recalibration Logs'
-        ]);
-    }
-
-    public function calibrate()
-    {
-        $exists = DB::table('jobs')
-            ->where('queue', 'recalibration')
-            ->where('payload', 'like', '%ItemAnalysisJob%')
-            ->exists();
-        \Log::info($exists);
-        if ($exists) {
-            return redirect()->back()->withErrors(['message' => 'A recalibration job is already running.']);
-        }
-        ItemAnalysisJob::dispatch()->onQueue('recalibration');
-
-        return redirect()->back()->with(['message' => 'Recalibration job started successfully.']);
-
-    }
 
 }
