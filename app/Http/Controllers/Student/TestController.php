@@ -78,7 +78,18 @@ class TestController extends Controller
 
     public function select()
     {
-        $courses = Course::all();
+        // Added to can only select course with greater than 50 questions
+        $courses = Course::withCount([
+            'questions' => function ($query) {
+                $query->where('test_type', 'TEST');
+            }
+        ])
+            ->having('questions_count', '>=', 10)
+            ->get();
+
+        if ($courses->isEmpty()) {
+            return back()->with('error', 'No courses currently have enough questions for testing.');
+        }
 
         return Inertia::render('Student/Test/SelectCourses', [
             'title' => 'Student Test',
@@ -94,6 +105,8 @@ class TestController extends Controller
         if (empty($validated['courses'])) {
             return back()->with('error', 'Please select courses before starting the test.');
         }
+
+        Log::info("===!!! NEW TEST !!!===");
 
         // Create a new assessment record
         $assessment = Assessment::create([
@@ -112,7 +125,7 @@ class TestController extends Controller
                 'course_id' => $course_id,
                 'total_items' => 0,
                 'total_score' => 0,
-                'initial_theta_score' => StudentCourseTheta::getCurrentTheta($student->student_id,$course_id)->value('theta_score') ?? 0.0,
+                'initial_theta_score' => StudentCourseTheta::getCurrentTheta($student->student_id, $course_id)->value('theta_score') ?? 0.0,
                 'final_theta_score' => 0,
                 'percentage' => 0,
                 'updated_at' => now(),
@@ -142,6 +155,12 @@ class TestController extends Controller
             ->first();
         if (!$assessmentItem) {
             $assessmentItem = $this->questionService->selectQuestion($assessment);
+            // if (!$assessmentItem) {
+            //     // No questions available - redirect with error
+            //     return redirect()
+            //         ->route('dashboard')
+            //         ->with('error', 'No more questions available for this assessment');
+            // }
             $assessmentItem->load(['assessment_course.assessment']);
         }
 
@@ -180,24 +199,33 @@ class TestController extends Controller
         })->toArray();
 
         $currentCourse = $assessment_item->assessment_course;
+        
+        $currentCourseTheta = StudentCourseTheta::getCurrentTheta($assessment->student_id, $currentCourse->course_id)->first();
+        $previousTheta = $currentCourseTheta->theta_score;
+
         \Log::info('Fetching StudentCourseTheta:', [
             'student_id' => $assessment->student_id,
-            'course_id'  => $currentCourse->course_id,
+            'course_id' => $currentCourse->course_id,
+            'previous_theta' => $previousTheta,
         ]);
-        $currentCourseTheta = StudentCourseTheta::getCurrentTheta($assessment->student_id,$currentCourse->course_id)->first();
-        $previousTheta = $currentCourseTheta->theta_score;
-        
+
         $updatedTheta = $this->thetaService->estimateThetaMLE(
             $previousTheta ?? 0.0,
             $responses
         );
-        $currentCourseTheta->update(['theta_score'=>$updatedTheta,'updated_at' => now()]);
+        $currentCourseTheta->update(['theta_score' => $updatedTheta, 'updated_at' => now()]);
 
         ThetaScoreLog::create([
             'assessment_course_id' => $currentCourse->assessment_course_id,
             'assessment_item_id' => $assessment_item->assessment_item_id,
             'previous_theta_score' => $previousTheta,
             'new_theta_score' => $updatedTheta,
+        ]);
+
+        \Log::info('Updated StudentCourseTheta:', [
+            'student_id' => $assessment->student_id,
+            'course_id' => $currentCourse->course_id,
+            'new_theta' => $updatedTheta,
         ]);
 
 

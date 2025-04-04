@@ -3,12 +3,12 @@ import { formatFilterKey } from "../../../Library/utils";
 
 export default function SortFilter({ currentSort, filterKey, onSortChange }) {
     const sortingOptions = [
-        { value: "created_at:asc", label: "Date (A-Z)" },
-        { value: "created_at:desc", label: "Date (Z-A)" },
-        { value: "total_score:asc", label: "Total Score (A-Z)" },
-        { value: "total_score:desc", label: "Total Score (Z-A)" },
-        { value: "total_items:asc", label: "Total Items (A-Z)" },
-        { value: "total_items:desc", label: "Total Items (Z-A)" },
+        { value: "created_at:asc", label: "Date (Oldest)" },
+        { value: "created_at:desc", label: "Date (Latest)" },
+        { value: "total_score:asc", label: "Total Score (Lowest)" },
+        { value: "total_score:desc", label: "Total Score (Highest)" },
+        { value: "total_items:asc", label: "Total Items (Lowest)" },
+        { value: "total_items:desc", label: "Total Items (Highest)" },
     ];
 
     const handleSortChange = (e) => {
