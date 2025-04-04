@@ -64,14 +64,17 @@ return new class extends Migration
             $table->timestamps();
         });
         Schema::create('question_recalibration_logs', function (Blueprint $table) {
-            $table->id('recalibration_log_id');
+            $table->id('log_id');
             $table->foreignId('question_id')->references('question_id')->on('questions')->cascadeOnDelete();
+            $table->foreignID('recalibration_id')->references('recalibration_id')->on('recalibrations')->cascadeOnDelete();
             $table->enum('previous_difficulty_type',['Very Easy','Easy','Average','Hard','Very Hard']);
             $table->enum('new_difficulty_type',['Very Easy','Easy','Average','Hard','Very Hard']);
             $table->float('previous_difficulty_value');
             $table->float('new_difficulty_value');
             $table->float('previous_discrimination_index');
             $table->float('new_discrimination_index');
+            $table->float('standard_error_discrimination');
+            $table->float('standard_error_difficulty');
             $table->timestamps();
         });
     }

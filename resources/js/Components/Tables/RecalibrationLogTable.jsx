@@ -1,17 +1,14 @@
 import { useContext, useState } from "react";
 import ContextProvider from "../Context/TableContext";
 import Table from "./Table";
-import { useColumnVisibility, useRequest, useSortState } from "@/Library/hooks";
+import { useRequest, useSortState } from "@/Library/hooks";
 import Modal from "../Modal/Modal";
-import DeleteForm from "../Forms/DeleteForm";
-import ViewQuestionModal from "../Modal/ViewQuestionModal";
-import EditQuestionForm from "../Forms/EditQuestionForm";
-import { toast } from "sonner";
 import ColumnSortable from "../Filter/Filters/ColumnSortable";
 import { getColumnValue } from "@/Library/utils";
+import ViewLogModal from "../Modal/ViewLogModal";
 
 
-export default function CalibrationLogTable({
+export default function RecalibrationLogTable({
     data,
     filters,
     queryParams,
@@ -20,21 +17,21 @@ export default function CalibrationLogTable({
     const keyField = "question_id";
     const { toggleTableSort } = useSortState(dispatch);
     const { isProcessing, postRequest, deleteRequest } = useRequest();
-    const [selectedQuestion, setSelectedQuestion] = useState();
+    const [selectedLog, setSelectedLog] = useState();
     const [activeModal, setActiveModal] = useState(null);
 
     const openModal = (modalType, log) => {
-        setSelectedQuestion(log.question_data);
+        setSelectedLog(log);
         setActiveModal(modalType);
     };
     const closeModal = () => {
         setActiveModal(null);
-        setSelectedQuestion(null);
+        setSelectedLog(null);
     };
 
     const viewQuestion = (e, rowData) => {
         e.preventDefault();
-        openModal("view", rowData); 
+        openModal("view", rowData);
     };
 
     return (
@@ -90,15 +87,20 @@ export default function CalibrationLogTable({
                                         column.visible && (
                                             <td key={column.key} className="align-content-center">
                                                 {["discrimination_index", "difficulty_type", "difficulty_value"].includes(column.key) ? (
-                                                    <>
-                                                        <span className="text-danger fw-semibold">
-                                                            {getColumnValue(rowData, "previous_" + column.key)}
-                                                        </span>
-                                                        {" → "}
-                                                        <span className="text-success fw-semibold">
-                                                            {getColumnValue(rowData, "new_" + column.key)}
-                                                        </span>
-                                                    </>
+                                                    (() => {
+                                                        const prevValue = getColumnValue(rowData, "previous_" + column.key);
+                                                        const newValue = getColumnValue(rowData, "new_" + column.key);
+
+                                                        return prevValue === newValue ? (
+                                                            <span className="fw-medium">{prevValue}</span>
+                                                        ) : (
+                                                            <>
+                                                                <span className="text-danger fw-semibold">{prevValue}</span>
+                                                                {" → "}
+                                                                <span className="text-success fw-semibold">{newValue}</span>
+                                                            </>
+                                                        );
+                                                    })()
                                                 ) : (
                                                     getColumnValue(rowData, column.key)
                                                 )}
@@ -119,8 +121,8 @@ export default function CalibrationLogTable({
                 modalTitle={`${activeModal?.charAt(0).toUpperCase() + activeModal?.slice(1)} Question`}
                 modalSize={'modal-lg'}
             >
-                {activeModal === "view" && selectedQuestion && (
-                    <ViewQuestionModal onClose={closeModal} question={selectedQuestion} />
+                {activeModal === "view" && selectedLog && (
+                    <ViewLogModal onClose={closeModal} log={selectedLog} />
                 )}
 
             </Modal>

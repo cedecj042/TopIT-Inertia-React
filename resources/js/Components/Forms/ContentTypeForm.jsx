@@ -191,7 +191,6 @@ export default function ContentTypeForm({
                     closeModal();
                 },
                 onError: (error) => {
-                    console.log(error);
                     toast.error("Failed to add new content.");
                 },
             },{

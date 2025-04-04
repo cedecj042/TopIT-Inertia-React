@@ -145,7 +145,6 @@ export const useRequest = () => {
             toast.success("Request successful", { duration: 3000 });
         },
         onError: (error) => {
-            console.log(error)
             toast.error("Unexpected error", { duration: 3000 });
         },
         onFinish: () => {

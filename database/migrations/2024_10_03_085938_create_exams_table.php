@@ -40,6 +40,7 @@ return new class extends Migration
             $table->foreignID('question_id')->references('question_id')->on('questions')->cascadeOnDelete();
             $table->json('participants_answer')->nullable();
             $table->enum('status',['In Progress','Completed'])->default('In Progress');
+            $table->float('previous_theta_score');
             $table->integer( 'score')->default(0);
             $table->timestamps();
         });

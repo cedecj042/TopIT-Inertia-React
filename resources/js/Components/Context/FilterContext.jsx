@@ -50,6 +50,7 @@ export const FilterContext = ({
     children,
     initialState,
     routeName,
+    routeId = null,
     components,
 }) => {
     const [state, dispatch] = useReducer(reducer, initialState);
@@ -70,7 +71,7 @@ export const FilterContext = ({
                 Object.entries(combinedState).filter(([key, value]) => value !== "")
             );
     
-            router.get(route(routeName), filteredParams, {
+            router.get(route(routeName, routeId ? { id:routeId } : {}), filteredParams, {
                 preserveScroll: true,
                 preserveState: true,
                 replace: true,

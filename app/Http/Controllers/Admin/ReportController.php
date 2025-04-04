@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\QuestionDifficulty;
+use App\Enums\QuestionType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StudentResource;
+use App\Models\AssessmentCourse;
+use App\Models\Course;
 use App\Models\Question;
 use App\Models\QuestionRecalibrationLog;
 use App\Models\Student;
@@ -82,22 +85,6 @@ class ReportController extends Controller
             'avg' => $thetaScores->pluck('avg_score')->toArray(),
         ];
 
-        $difficultyCounts = Question::selectRaw('difficulty_type, COUNT(*) as count')
-            ->groupBy('difficulty_type')
-            ->pluck('count', 'difficulty_type');
-
-        // Ensure all difficulty types are included in the response
-        $labels = [];
-        $counts = [];
-
-        foreach (QuestionDifficulty::cases() as $difficulty) {
-            $labels[] = $difficulty->value;
-            $counts[] = $difficultyCounts[$difficulty->value] ?? 0;
-        }
-        $difficultyDistribution = [
-            'labels'=> $labels,
-            'data'=> $counts
-        ];
 
         $schools = DB::table('students')->distinct()->pluck('school');
         $years = DB::table('students')->distinct()->orderBy('year', 'asc')->pluck('year');
@@ -106,22 +93,13 @@ class ReportController extends Controller
             'years' => $years,
         ];
 
-        $discriminationIndex = QuestionRecalibrationLog::with('question:question_id,question')
-        ->select('question_id', 'previous_discrimination_index', 'new_discrimination_index')
-        ->get()
-        ->map(function ($log) {
-            return [
-                'question' => $log->question->question ?? 'Unknown',
-                'previous' => $log->previous_discrimination_index,
-                'new' => $log->new_discrimination_index,
-            ];
-        });
 
         return Inertia::render('Admin/Reports', [
             'title' => 'Admin Reports',
             'highlowData' => $highlowData,
-            'difficultyDistribution' => $difficultyDistribution,
-            'discriminationIndex' => $discriminationIndex,
+            'difficultyDistribution' => $this->getQuestionData(),
+            'questionLogsData' => $this->getQuestionComparisonData(),
+            'totalAssessmentCourses' => $this->getTotalAssessmentCourses(),
             'students' => StudentResource::collection($students),
             'queryParams' => request()->query() ?: null,
             'filters' => $filters,
@@ -131,15 +109,13 @@ class ReportController extends Controller
     {
         $student = Student::find($studentId);
 
-        // Fetch StudentCourseTheta data with courses
         $coursesTheta = StudentCourseTheta::where('student_id', $studentId)
-            ->with('course') // Eager load the course relationship
+            ->with('course')
             ->get();
 
-        // Prepare data for the ThetaScoreLine component
         $thetaScoreData = [
-            'labels' => $coursesTheta->pluck('course.title')->toArray(), // Get course titles
-            'data' => $coursesTheta->pluck('theta_score')->toArray(), // Get theta scores
+            'labels' => $coursesTheta->pluck('course.title')->toArray(),
+            'data' => $coursesTheta->pluck('theta_score')->toArray(),
         ];
 
         return Inertia::render('Admin/Student', [
@@ -149,5 +125,78 @@ class ReportController extends Controller
             'theta_score' => $thetaScoreData, // Pass structured data for the chart
         ]);
     }
+    public function getQuestionComparisonData()
+    {
+        $logs = QuestionRecalibrationLog::with('question')
+            ->latest('created_at')
+            ->limit(30)
+            ->get();
+
+        $chartData = $logs->map(function ($log) {
+            return [
+                'question' => $log->question->question ?? 'Unknown',
+                'previous_discrimination_index' => $log->previous_discrimination_index,
+                'new_discrimination_index' => $log->new_discrimination_index,
+                'previous_difficulty_value' => $log->previous_difficulty_value,
+                'new_difficulty_value' => $log->new_difficulty_value,
+            ];
+        });
+
+        return $chartData;
+    }
+    private function getQuestionData()
+    {
+        $difficultyCounts = Question::selectRaw('difficulty_type, COUNT(*) as count')
+            ->groupBy('difficulty_type')
+            ->pluck('count', 'difficulty_type');
+
+        $questionTypeCounts = Question::selectRaw('difficulty_type, question_type, COUNT(*) as count')
+            ->groupBy('difficulty_type', 'question_type')
+            ->get()
+            ->groupBy('difficulty_type');
+
+        $labels = QuestionDifficulty::cases();
+        $totalCounts = [];
+        $questionTypeData = [];
+
+        // Initialize questionTypeData as an array of arrays
+        foreach (QuestionType::cases() as $type) {
+            $questionTypeData[$type->value] = [];
+        }
+
+        foreach ($labels as $difficulty) {
+            $difficultyValue = $difficulty->value;
+            $totalCounts[] = $difficultyCounts[$difficultyValue] ?? 0;
+
+            foreach (QuestionType::cases() as $type) {
+                $questionTypeData[$type->value][] = isset($questionTypeCounts[$difficultyValue])
+                    ? $questionTypeCounts[$difficultyValue]->where('question_type', $type->value)->sum('count')
+                    : 0;
+            }
+        }
+
+        return [
+            'labels' => array_map(fn($d) => $d->value, $labels),
+            'totalCounts' => $totalCounts,
+            'questionTypeData' => $questionTypeData
+        ];
+    }
+
+    private function getTotalAssessmentCourses()
+    {
+        $courses = Course::all()->pluck('title'); // Get all course names as labels
+        $courseCounts = Course::withCount('assessment_courses') // Count related assessment courses
+            ->get()
+            ->pluck('assessment_courses_count', 'title');
+
+        return [
+            'labels' => $courses->toArray(),  // X-axis: All course names
+            'data' => $courses->map(fn($name) => $courseCounts[$name] ?? 0)->toArray(), // Y-axis: Total courses taken (0 if none)
+        ];
+    }
+
+
+
+
 
 }

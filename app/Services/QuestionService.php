@@ -65,9 +65,9 @@ class QuestionService
                 $selectedCourse->course_id,
                 $items
             );
-
+            $previous_theta = StudentCourseTheta::getCurrentTheta($assessment->student_id,$selectedCourse->course_id)->value('theta_score');
             // Step 7: Create assessment item for the selected item
-            $assessmentItem = $this->createAssessmentItem($selectedCourse, $selectedItem);
+            $assessmentItem = $this->createAssessmentItem($selectedCourse, $selectedItem,$previous_theta);
           
             // Eager load relationships
             $assessmentItem->load(['question']);
@@ -188,13 +188,14 @@ class QuestionService
         ]);
     }
 
-    private function createAssessmentItem($selectedCourse, $selectedItem)
+    private function createAssessmentItem($selectedCourse, $selectedItem,$previous_theta)
     {
         $assessmentItem = AssessmentItem::create([
             'assessment_course_id' => $selectedCourse->assessment_course_id,
             'question_id' => $selectedItem['id'],
             'participants_answer' => null,
             'status'=> ItemStatus::IN_PROGRESS,
+            'previous_theta_score'=> $previous_theta,
             'score' => 0,
         ]);
 

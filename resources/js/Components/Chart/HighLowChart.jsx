@@ -76,10 +76,10 @@ export default function HighLowChart({ chartData }) {
       legend: {
         position: 'top',
       },
-      title: {
-        display: true,
-        text: 'Theta Scores per Course (High, Low, and Average)',
-      },
+      // title: {
+      //   display: true,
+      //   text: 'Theta Scores per Course (High, Low, and Average)',
+      // },
     },
     scales: {
       y: {

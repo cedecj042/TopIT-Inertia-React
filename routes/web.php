@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AssessmentController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\FastApiController;
 use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\PdfController;
 use App\Http\Controllers\Admin\QuestionController;
+use App\Http\Controllers\Admin\RecalibrationController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
@@ -117,8 +119,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/generate/show', [QuestionController::class, 'show'])->name('show');
         Route::post('/generate', [QuestionController::class, 'generate'])->name('generate');
         Route::get('/courses', [QuestionController::class, 'courses'])->name('courses');
-        Route::get('/calibration',[QuestionController::class,'calibration'])->name('calibration');
-        Route::post('/calibrate',[QuestionController::class,'calibrate'])->name('calibrate');
+    });
+    Route::prefix('recalibration')->name('recalibration.')->group(function(){
+        Route::get('/',[RecalibrationController::class,'index'])->name('index');
+        Route::get('/show/{id}',[RecalibrationController::class,'show'])->name('logs');
+        Route::post('/recalibrate',[RecalibrationController::class,'recalibrate'])->name('recalibrate');
+    });
+    Route::prefix('assessments')->name('assessments.')->group(function(){
+        Route::get('/',[AssessmentController::class,'index'])->name('index');
+        Route::get('/{assessment}',[AssessmentController::class,'show'])->name('show');
     });
 
     Route::prefix('pretest')->name('pretest.')->group(function () {

@@ -8,7 +8,7 @@ import TextInputFilter from "./Filters/TextInputFilter";
 import SelectFilter from "./Filters/SelectFilter";
 import OtherFilter from "./Filters/OtherFilter";
 
-export default function CalibrationFilters({filters}){
+export default function RecalibrationLogFilters({filters}){
     const { state, dispatch, visibleColumns, onColumnChange } =
         useContext(ContextProvider);
     const { handleClearSort } = useSortState(dispatch);

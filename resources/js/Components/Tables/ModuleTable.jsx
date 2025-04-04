@@ -7,7 +7,6 @@ import Modal from "../Modal/Modal";
 import { toast } from "sonner";
 
 export default function ModuleTable({ data, queryParams }) {
-    console.log(queryParams)
     const keyField = "module_id";
     const { state, dispatch, visibleColumns } = useContext(ContextProvider);
     const { toggleTableSort } = useSortState(dispatch);
@@ -54,17 +53,7 @@ export default function ModuleTable({ data, queryParams }) {
 
     const editModule = (e, module_id) => {
         e.stopPropagation();
-        getRequest("admin.module.edit", module_id, {
-            onSuccess: (success) => {
-                console.log(success);
-            },
-            onError: (error) => {
-                console.log(error);
-            },
-        },{
-            // preserveScroll: true,
-            // preserveState: true,
-        });
+        getRequest("admin.module.edit", module_id, {});
     };
 
     const deleteModule = (module_id) => {
@@ -81,18 +70,7 @@ export default function ModuleTable({ data, queryParams }) {
 
     const viewModule = (e, module) => {
         e.preventDefault();
-        getRequest("admin.module.detail", { id: module.module_id, ...queryParams }, {
-            onSuccess: (success) => {
-                console.log(success);
-            },
-            onError: (error) => {
-                console.log(error);
-                // toast.error(error, { duration: 3000 });
-            },
-        },{
-            // preserveScroll: true,
-            // preserveState: true,
-        });
+        getRequest("admin.module.detail", { id: module.module_id, ...queryParams }, {});
     };
 
     return (

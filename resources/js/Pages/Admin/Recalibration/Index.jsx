@@ -1,27 +1,29 @@
+import RecalibrationContent from "@/Components/Content/RecalibrationContent";
+import { FilterContext } from "@/Components/Context/FilterContext";
 import { TableContext } from "@/Components/Context/TableContext";
-import CalibrationFilters from "@/Components/Filter/CalibrationFilters";
+import RecalibrationFilters from "@/Components/Filter/RecalibrationFilters";
+import RecalibrationLogFilters from "@/Components/Filter/RecalibrationLogFilters";
+import CalibrationFilters from "@/Components/Filter/RecalibrationLogFilters";
 import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import Modal from "@/Components/Modal/Modal";
 import Pagination from "@/Components/Pagination";
-import CalibrationLogTable from "@/Components/Tables/CalibrationLogTable";
-import { CALIBRATION_COLUMN, CALIBRATION_FILTER_COMPONENT } from "@/Library/constants";
-import { INITIAL_CALIBRATION_STATE } from "@/Library/filterState";
+import { INITIAL_RECALIBRATION_STATE } from "@/Library/filterState";
 import { useRequest } from "@/Library/hooks";
 import { useState } from "react";
 import { toast } from "sonner";
 
-function Calibration({ questions, filters, queryParams = {} }) {
+function Index({ recalibrations, filters, queryParams = {} }) {
     const [openModal, setOpenModal] = useState(false);
-
-    const {isProcessing,postRequest} = useRequest();
-    const recalibrate = () =>{
-        postRequest('admin.question.calibrate',{},{
-            onSuccess: () =>{
-                toast.success('Processing recalibration of questions...',{duration:3000});
+    const recalibrationsList= recalibrations.data;
+    const { isProcessing, postRequest } = useRequest();
+    const recalibrate = () => {
+        postRequest('admin.recalibration.recalibrate', {}, {
+            onSuccess: () => {
+                toast.success('Processing recalibration of questions...', { duration: 3000 });
                 setOpenModal(false);
             },
             onError: (error) => {
-                toast.error(error.message ?? "Unable to recalibrate questions.",{duration:3000});
+                toast.error(error.message ?? "Unable to recalibrate questions.", { duration: 3000 });
             }
         });
     }
@@ -42,21 +44,16 @@ function Calibration({ questions, filters, queryParams = {} }) {
                     </div>
                     <div className="row mt-2 p-0">
                         <div className="d-flex flex-column col-12">
-                            <h5 className="fw-semibold mb-3">Log History</h5>
-                            <TableContext
-                                initialState={INITIAL_CALIBRATION_STATE(queryParams)}
-                                routeName={"admin.question.calibration"}
-                                components={CALIBRATION_FILTER_COMPONENT}
-                                column={CALIBRATION_COLUMN}
+                            <h5 className="fw-semibold mb-3">Recalibration History</h5>
+                            <FilterContext
+                                initialState={INITIAL_RECALIBRATION_STATE(queryParams)}
+                                routeName={'admin.recalibration.index'}
+                                components={recalibrations}
                             >
-                                <CalibrationFilters filters={filters} />
-                                <CalibrationLogTable
-                                    data={questions.data}
-                                    filters={filters}
-                                    queryParams={queryParams}
-                                />
-                            </TableContext>
-                            <Pagination links={questions.meta.links} queryParams={queryParams} />
+                                <RecalibrationFilters filters={filters}/>
+                                <RecalibrationContent recalibration={recalibrationsList} />
+                            </FilterContext>
+                            <Pagination links={recalibrations.meta.links} queryParams={queryParams} />
                         </div>
                     </div>
                 </div>
@@ -74,7 +71,7 @@ function Calibration({ questions, filters, queryParams = {} }) {
                     <div className="d-flex justify-content-end gap-2">
                         <button
                             className="btn btn-secondary"
-                            onClick={()=>setOpenModal(false)}
+                            onClick={() => setOpenModal(false)}
                         >
                             Cancel
                         </button>
@@ -95,4 +92,4 @@ function Calibration({ questions, filters, queryParams = {} }) {
 }
 
 
-export default AdminContent(Calibration);
+export default AdminContent(Index);

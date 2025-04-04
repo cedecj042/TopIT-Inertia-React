@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { toast } from "sonner";
 export default function EditQuestionForm({ question, onClose, filters }) {
-    console.log(question.difficulty_value)
     const {
         register,
         handleSubmit,

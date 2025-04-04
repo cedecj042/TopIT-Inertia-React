@@ -29,6 +29,7 @@ class AssessmentResource extends JsonResource
             'status' => $this->status,
             'created_at' => Carbon::parse($this->created_at)->format('F j, Y'), 
             'updated_at' => Carbon::parse($this->updated_at)->format('F j, Y'), 
+            'courses' => $this->assessment_courses()->with('course:title,course_id')->get()->pluck('course.title')->filter(),
             'assessment_courses'=> AssessmentCourseResource::collection($this->whenLoaded('assessment_courses')),
         ];
     }

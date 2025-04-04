@@ -42,7 +42,7 @@ export const QUESTION_COLUMN = [
 
 ]
 
-export const CALIBRATION_COLUMN = [
+export const RECALIBRATION_LOG_COLUMN = [
     // {key:'question_id',label:'ID', sortable:false,visible:true},
     {key:'question',label:'Question', sortable:false,visible:true},
     {key:'difficulty_type',label:'Difficulty', sortable:false,visible:true},
@@ -82,7 +82,7 @@ export const STUDENT_FILTER_COMPONENT = ["students","students.meta","filters","q
 export const COURSE_FILTER_COMPONENT = ["courses","courses.meta","queryParams"]
 export const MODULE_FILTER_COMPONENT = ["modules","modules.meta","filters","queryParams"]
 export const QUESTION_FILTER_COMPONENT = ["questions","questions.meta","filters","queryParams"]
-export const CALIBRATION_FILTER_COMPONENT = ["questions","questions.meta","filters","queryParams"]
+export const RECALIBRATION_FILTER_COMPONENT = ["questions","questions.meta","filters","queryParams"]
 export const ADMIN_FILTER_COMPONENT = ["admins","admins.meta","queryParams"]
 
 
@@ -93,3 +93,19 @@ export const ContentTypes = {
     TEXT: "Text",
     HEADER: "Header",
 };
+
+
+export const TEST_SORTING_OPTIONS = [
+    { value: "created_at:asc", label: "Date (A-Z)" },
+    { value: "created_at:desc", label: "Date (Z-A)" },
+    { value: "total_score:asc", label: "Total Score (A-Z)" },
+    { value: "total_score:desc", label: "Total Score (Z-A)" },
+    { value: "total_items:asc", label: "Total Items (A-Z)" },
+    { value: "total_items:desc", label: "Total Items (Z-A)" },
+];
+export const RECALIBRATION_SORTING_OPTIONS = [
+    { value: "created_at:asc", label: "Date (A-Z)" },
+    { value: "created_at:desc", label: "Date (Z-A)" },
+    { value: "total_question_logs:asc", label: "Total Questions (A-Z)" },
+    { value: "total_question_logs:desc", label: "Total Questions (Z-A)" },
+];

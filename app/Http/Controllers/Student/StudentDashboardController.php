@@ -22,16 +22,15 @@ class StudentDashboardController extends Controller
 
         // Fetch StudentCourseTheta data with courses
         $coursesTheta = StudentCourseTheta::where('student_id', $studentId)
-            ->with('course') // Eager load the course relationship
+            ->with('course')
             ->get();
 
         // Prepare data for the ThetaScoreLine component
         $thetaScoreData = [
-            'labels' => $coursesTheta->pluck('course.title')->toArray(), // Get course titles
-            'data' => $coursesTheta->pluck('theta_score')->toArray(), // Get theta scores
+            'labels' => $coursesTheta->pluck('course.title')->toArray(), 
+            'data' => $coursesTheta->pluck('theta_score')->toArray(), 
         ];
 
-        // Get 3 recent test history
         $tests = Assessment::where('student_id', $studentId)
             ->orderBy('updated_at', 'desc')
             ->take(3)
@@ -40,7 +39,6 @@ class StudentDashboardController extends Controller
 
         return Inertia::render('Student/Dashboard', [
             'title' => 'Student Dashboard',
-            // 'auth' => $studentId, removed since navbar wont display if naa ni
             'thetaScore' => $thetaScoreData,
             'tests' => AssessmentResource::collection($tests)
         ]);

@@ -11,13 +11,10 @@ export default function SectionContent({ sections }) {
                         <div className="section p-4 bg-light mb-4 rounded" key={index} id={`section-${index}`}>
                             <h5 className="section-title fw-semibold">{section.title}</h5>
 
-                            {/* Render merged and sorted content */}
                             {section.contents.map((item, idx) => {
-                                // console.log(item);
                                 return <ContentItem key={idx} item={item} />;
                             })}
 
-                            {/* Render subsections if available */}
                             {section.subsections &&
                                 section.subsections.length > 0 && (
                                     <SubsectionContent

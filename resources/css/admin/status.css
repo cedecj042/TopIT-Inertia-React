@@ -9,6 +9,11 @@
     color: rgb(14, 75, 141);
 }
 
+.status-pending {
+    background-color: rgb(233, 229, 224);
+    color: rgb(169, 117, 20);
+}
+
 .status-uploading {
     background-color: rgb(234, 234, 234);
     color: rgb(97, 97, 97);

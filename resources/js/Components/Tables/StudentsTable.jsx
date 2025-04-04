@@ -13,18 +13,7 @@ export default function StudentsTable({
     const {getRequest,isProcessing} = useRequest();
     const onClick = (e, rowData) => {
         e.preventDefault();
-        getRequest(
-            "admin.student", // The route name
-            { id: rowData[keyField], ...queryParams }, // Params for the route
-            {
-                onSuccess: (page) => {
-                    console.log("Request successful", page);
-                },
-                onError: (error) => {
-                    console.error("Request failed", error);
-                },
-            },
-        );
+        getRequest("admin.student",{ id: rowData[keyField], ...queryParams },{});
     };
     
     return (

@@ -7,7 +7,6 @@ import "../../../../css/student/welcome.css";
 const TestFinish = ({ assessment, assessment_courses }) => {
     const assessmentData = assessment.data;
     const assessmentCourses = assessment_courses.data;
-    console.log(assessmentCourses);
     return (
         <>
             <Head title="Finish" />

@@ -81,3 +81,21 @@ tr td ul {
 a {
     text-decoration: none !important;
 }
+
+.hover-highlight:hover{
+    background-color: rgba(0, 0, 0, .035) !important;
+    cursor: pointer;
+}
+
+.clickable{
+    cursor: pointer;
+}
+.clickable:hover{
+    background-color: #eff1f4 !important;
+}
+.clickable:active{
+    background-color: #dfe4eb !important;
+}
+.list-status {
+    min-width: 3rem;
+}

@@ -22,7 +22,6 @@ const PretestReview = ({
     // const questionsForCurrentCourse = courses.questions?.[currentCourseIndex]?.questions || [];
     const totalCourses = courses.length;
 
-    // console.log("Questions: ", courses.questions);
 
     const handleNextCourse = () => {
         if (currentCourseIndex < courses.data.length - 1) {

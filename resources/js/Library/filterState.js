@@ -100,6 +100,7 @@ export const INITIAL_TEST_STATE = (queryParams = {}) => ({
     filterState: {
         course: queryParams?.course || "",
         test_types: queryParams?.test_types || "",
+        status:queryParams?.status || "",
     },
     dateState : {
         from: queryParams?.from || "",
@@ -115,7 +116,7 @@ export const INITIAL_TEST_STATE = (queryParams = {}) => ({
     })()
 });
 
-export const INITIAL_CALIBRATION_STATE = (queryParams = {}) => ({
+export const INITIAL_RECALIBRATION_LOG_STATE = (queryParams = {}) => ({
     filterState: {
         course: queryParams?.course || "",
         difficulty: queryParams?.difficulty || "",
@@ -131,6 +132,25 @@ export const INITIAL_CALIBRATION_STATE = (queryParams = {}) => ({
             const [field, direction] = queryParams.sort.split(":"); 
             return `${field || ""}:${direction || ""}`;
         }
+        const field = queryParams?.field || "";
+        const direction = queryParams?.direction || "";
+        return `${field}:${direction}`;
+    })()
+});
+
+export const INITIAL_RECALIBRATION_STATE = (queryParams = {}) => ({
+    filterState: {
+        status: queryParams?.status || "",
+    },
+    dateState : {
+        from: queryParams?.from || "",
+        to: queryParams?.to || "",
+    },
+    otherState: {
+        admin: queryParams?.admin || "",
+        items: queryParams?.items || "",
+    },
+    sortState: (() => {
         const field = queryParams?.field || "";
         const direction = queryParams?.direction || "";
         return `${field}:${direction}`;

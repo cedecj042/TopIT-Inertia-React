@@ -8,6 +8,7 @@ import ClearFunction from "./Filters/ClearFunction";
 import { INITIAL_TEST_STATE } from "@/Library/filterState";
 import DateRangeFilter from "./Filters/DateRangeFilter";
 import SortFilter from "./Filters/SortFilter";
+import { TEST_SORTING_OPTIONS } from "@/Library/constants";
 
 export default function TestFilters({ filters }) {
     const { state, dispatch } = useContext(FilterProvider);
@@ -28,9 +29,13 @@ export default function TestFilters({ filters }) {
             filterKey: "test_types",
             keyValue: filterState.test_types,
         },
+        {
+            data: filters.status,
+            filterKey: "status",
+            keyValue: filterState.status,
+        },
     ];
 
-    console.log(dateState)
     return (
         <>
             <ClearFunction
@@ -88,7 +93,7 @@ export default function TestFilters({ filters }) {
                                 <button
                                     className="btn btn-light w-100"
                                     onClick={() =>
-                                        handleClearFilter(["course", "test_types"])
+                                        handleClearFilter(["course", "test_types","status"])
                                     }
                                 >
                                     Clear Filters
@@ -101,6 +106,7 @@ export default function TestFilters({ filters }) {
                             onSortChange={(field, direction) => changeDropdownSort(field, direction)}
                             filterKey={"sort"}
                             currentSort={sortState}
+                            sortingOptions={TEST_SORTING_OPTIONS}
                         />
                     </div>
                     <div className="col-md-3 col-lg-1">

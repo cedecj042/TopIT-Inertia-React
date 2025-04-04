@@ -3,7 +3,6 @@ import { Link } from "@inertiajs/react";
 import '../../../../css/student/test.css';
 
 function CourseDetail({ course }) {
-    console.log(course);
 
     const handleClick = (moduleId) => {
         window.location.href = route("course.module", moduleId);
@@ -29,7 +28,6 @@ function CourseDetail({ course }) {
                 <div className="row">
                     <h5>List of Modules</h5>
                     <div className="course-list mx-auto" style={{ width: "100%" }}>
-                        {/* Check if there are modules */}
                         {course.modules && course.modules.length > 0 ? (
                             course.modules.map((module) => (
                                 <div
