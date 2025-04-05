@@ -17,7 +17,7 @@ function Dashboard({ thetaScore, tests, courseCards }) {
 
                     <AbilityEstimateCards courses={courseCards}/>
 
-                    <h5 className="fw-semibold">Theta Scores Chart</h5>
+                    <h5 className="fw-semibold">Ability Scores Chart</h5>
                     <div className="row w-100 px-5 mb-3">
                         <div className="chart-container">
                             <ThetaScoreLine thetaScoreData={thetaScore} />

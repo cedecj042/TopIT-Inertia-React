@@ -25,7 +25,7 @@ function AbilityEstimateCards({ courses }) {
                                     </h5>
                                     <div className="d-flex align-items-center mt-3">
                                         <span className="me-2">
-                                            Theta Score:
+                                            Ability Score:
                                         </span>
                                         <span
                                             className={`badge badge-course bg-${scoreClass} rounded-pill fs-7`}

@@ -13,21 +13,24 @@ function SelectCourses({ courses }) {
             if (prevSelected.includes(courseId)) {
                 // Deselect course if already selected
                 return prevSelected.filter((id) => id !== courseId);
-            } else if (prevSelected.length < 3) {
-                // Add course only if less than 3 are selected
+            } else if (prevSelected.length < courses.data.length) {
+                // Add course
                 return [...prevSelected, courseId];
-            } else {
-                // Provide feedback if limit is reached
-                toast.error("You can only select up to 3 courses.", {
-                    duration: 3000,
-                });
-                return prevSelected;
             }
         });
     };
+
+    const handleSelectAll = () => {
+        if (selectedCourses.length === courses.data.length) {
+            setSelectedCourses([]);
+        } else {
+            const allCourseIds = courses.data.map(course => course.course_id);
+            setSelectedCourses(allCourseIds);
+        }
+    };
+
     const handleStartTest = () => {
         if (selectedCourses.length === 0) {
-            // alert("Please select at least one course to proceed.");
             toast.error("Please select at least one course to proceed.", {
                 duration: 3000,
             });
@@ -37,6 +40,7 @@ function SelectCourses({ courses }) {
         const data = { courses: selectedCourses };
         postRequest("test.start", data, {
             onSuccess: (data) => {
+                console.log(data);
                 toast.success("Test Started! Goodluck", { duration: 3000 });
             },
             onError: (error) => {
@@ -67,6 +71,28 @@ function SelectCourses({ courses }) {
             <div className="row align-items-start mt-4 gx-4 px-5">
                 <div className="col-md-6 mb-4">
                     <div className="d-flex flex-column gap-3">
+                        <div className="input-group">
+                            <div className="input-group-text gap-2 flex-grow-1 p-3 border-1 rounded-4 bg-light">
+                                <input
+                                    className="form-check-input mt-0"
+                                    type="checkbox"
+                                    checked={selectedCourses.length === courses.data.length}
+                                    onChange={handleSelectAll}
+                                    id="selectAll"
+                                />
+                                <label
+                                    htmlFor="selectAll"
+                                    className="flex-grow-1 text-start fw-semibold"
+                                    role="button"
+                                >
+                                    Select All
+                                </label>
+                                <span className="text-muted ms-auto">
+                                    {selectedCourses.length} of {courses.data.length} courses selected
+                                </span>
+                            </div>
+                        </div>
+                        
                         {courses.data.map((course) => (
                             <div className="input-group" key={course.course_id}>
                                 <div
@@ -103,9 +129,9 @@ function SelectCourses({ courses }) {
                             <button
                                 className="btn btn-primary px-4 pt-2 pb-2 btn-hover-primary"
                                 onClick={handleStartTest}
-                                disabled={
-                                    selectedCourses.length == 0 || isProcessing
-                                }
+                                // disabled={
+                                //     selectedCourses.length == 0 || isProcessing
+                                // }
                             >
                                 Start Test
                             </button>

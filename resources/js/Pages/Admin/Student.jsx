@@ -27,7 +27,7 @@ function Student({ student, theta_score, queryParams }) {
                 </div>
                 <div className="row w-100 px-5 mb-3">
                     <h5 className="fw-semibold">
-                        Theta Scores per Course
+                        Ability Scores per Course
                     </h5>
                     <div className="col-12 chart-height">
                         <ThetaScoreLine thetaScoreData={theta_score} />;

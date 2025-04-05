@@ -59,7 +59,7 @@ const TestFinish = ({ assessment, assessment_courses }) => {
                                     <div className="card-body">
                                         <div className="d-flex justify-content-between">
                                             <span className="fw-bold">Course </span>
-                                            <span className="fw-bold">Theta Score</span>
+                                            <span className="fw-bold">Ability Score</span>
                                         </div>
                                         <hr className="my-2" />
                                         {assessmentCourses.map((course, index) => (

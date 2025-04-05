@@ -58,7 +58,7 @@ function Reports({
                         <AssessmentCourseBarChart chartData={totalAssessmentCourses} title="Total Courses Taken Per Assessment" />;
                     </div>
                     <div className="col-12 chart-height p-4 mt-5">
-                        <h6 className="text-center fw-semibold">Theta Scores per Course (High, Low, and Average)</h6>
+                        <h6 className="text-center fw-semibold">Ability Scores per Course (High, Low, and Average)</h6>
                         <HighLowChart chartData={highlowData} />
                     </div>
 

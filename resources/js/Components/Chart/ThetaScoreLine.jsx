@@ -29,7 +29,7 @@ export default function ThetaScoreLine({ thetaScoreData }) {
         ), 
         datasets: [
             {
-                label: 'Theta Score per Course',
+                label: 'Ability Score per Course',
                 data: thetaScoreData.data, 
                 borderColor: colors,
                 backgroundColor: 'rgba(75, 192, 192, 0.2)', 
@@ -49,7 +49,7 @@ export default function ThetaScoreLine({ thetaScoreData }) {
             },
             title: {
                 display: true,
-                text: 'Theta Score per Course',
+                text: 'Ability Score per Course',
             },
         },
         scales: {

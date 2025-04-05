@@ -12,7 +12,7 @@ const AbilityEstimateLegend = () => {
         </div>
         <div className="legend-item">
           <span className="legend-color bg-medium"></span>
-          <span>Average (-3 - +3)</span>
+          <span>Average (-2.9 - +2.9)</span>
         </div>
         <div className="legend-item">
           <span className="legend-color bg-high"></span>

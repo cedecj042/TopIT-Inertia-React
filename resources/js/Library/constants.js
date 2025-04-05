@@ -72,7 +72,7 @@ export const ADMIN_COLUMN = [
 
 export const STUDENT_THETA_SCORE_COLUMN = [
     {key:'course.title',label:'Course', sortable:false,visible:true},
-    {key:'theta_score',label:'Theta Score', sortable:false,visible:true},
+    {key:'theta_score',label:'Ability Score', sortable:false,visible:true},
     {key:'created_at',label:'Created At', sortable:false,visible:true},
     {key:'updated_at',label:'Updated At', sortable:false,visible:true}
 ]
