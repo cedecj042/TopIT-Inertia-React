@@ -50,6 +50,25 @@ function Logs({recalibration_id,questions,filters, queryParams = {} }) {
                         </div>
                     </div>
                 </div>
+                <div className="d-flex justify-content-end">
+                    <div className="text-muted small mt-2 mb-4 w-100">
+                        <p className="mb-1" style={{ maxWidth: "550px", lineHeight: "1.5",}}>
+                            <strong>About Discrimination:</strong>{" "}
+                            High discrimination (near 2) indicates that the item
+                            can effectively distinguish between the ability score range.
+                            Lower discrimination means the item poorly distinguishes 
+                            between the ability range.
+                        </p>
+                    </div>
+                    <div className="text-muted small mt-2 mb-4 w-100">
+                        <p className="mb-1" style={{ maxWidth: "550px", lineHeight: "1.5",}}>
+                            <strong>About Difficulty:</strong>{" "}
+                            Difficulty indicates the ability level at which an examinee has a 50% probability
+                            of answering the item correctly. It ranges from very easy (-5.0:-3.0), easy (-2.9:-1.0),
+                            average (-0.9:1.0), hard (1.1:3.0), very hard (3.1:5.0).
+                        </p>
+                    </div>
+                </div>
             </div>
         </>
     );

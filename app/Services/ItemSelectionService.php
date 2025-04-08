@@ -73,16 +73,16 @@ class ItemSelectionService
 
             // Step 1: Calculate Fisher Information for all items
             foreach ($items as $item) {
-                $a = $item['a'] ?? 1.0; // Default discrimination
-                $b = $item['b'] ?? 0.0; // Default difficulty
+                $a = $item['a'] ?? 1.0; 
+                $b = $item['b'] ?? 0.0; 
 
                 $fisherInfo = $this->calculateFisherInformation($theta, $a, $b);
 
                 // Log::debug('Fisher Information calculated', [
-                //     'theta' => $theta,
                 //     'a' => $a,
                 //     'b' => $b,
                 //     'I(θ)' => $fisherInfo,
+                //     'theta' => $theta,
                 // ]);
 
                 // Store the item with its Fisher Information
@@ -95,11 +95,13 @@ class ItemSelectionService
             // Step 2: Select the item with the maximum Fisher Information
             $selectedItem = collect($fisherInfoResults)->sortByDesc('fisher_information')->first();
 
-            // Log::debug('Item with maximum Fisher Information selected', [
-            //     'theta' => $theta,
-            //     'selected_item' => $selectedItem['item'] ?? null,
-            //     'max_fisher_info' => $selectedItem['fisher_information'] ?? null,
-            // ]);
+            Log::debug('Item with maximum Fisher Information selected', [
+                // 'selected_item' => $selectedItem['item'],
+                'max_fisher_info' => $selectedItem['fisher_information'],
+                'b (difficulty)' => $selectedItem['item']['b'],
+                'a (discrimination)' => $selectedItem['item']['a'],
+                'theta' => $theta,
+            ]);
 
             return $selectedItem['item'] ?? null;
         } catch (\Exception $e) {
@@ -133,12 +135,7 @@ class ItemSelectionService
             }
 
             $maximumCourseItem = $this->getMaximumItem($theta, $filteredItems);
-
-            Log::debug('Item with maximum Fisher Information selected (course)', [
-                'theta' => $theta,
-                'selected_item' => $maximumCourseItem ?? null,
-            ]);
-
+            
             return $maximumCourseItem;
         } catch (\Exception $e) {
             Log::error('Error in getMaximumItemByCourse: ' . $e->getMessage());

@@ -65,10 +65,10 @@ class QuestionService
                 $selectedCourse->course_id,
                 $items
             );
-            $previous_theta = StudentCourseTheta::getCurrentTheta($assessment->student_id,$selectedCourse->course_id)->value('theta_score');
+            $previous_theta = StudentCourseTheta::getCurrentTheta($assessment->student_id, $selectedCourse->course_id)->value('theta_score');
             // Step 7: Create assessment item for the selected item
-            $assessmentItem = $this->createAssessmentItem($selectedCourse, $selectedItem,$previous_theta);
-          
+            $assessmentItem = $this->createAssessmentItem($selectedCourse, $selectedItem, $previous_theta);
+
             // Eager load relationships
             $assessmentItem->load(['question']);
 
@@ -79,6 +79,7 @@ class QuestionService
             //     'theta' => $currentTheta,
             // ]);
             // Step 8: SEM calculation for the course
+
             $this->calculateCourseSEM($selectedCourse, $currentTheta);
 
             return $assessmentItem;
@@ -94,9 +95,14 @@ class QuestionService
 
     private function calculateMMMProbabilities($courses)
     {
-        $totalQuestionsAnswered = $courses->sum(fn($course) => $course->assessment_items->count());
+        // Get current total questions
+        $totalQuestionsAnswered = AssessmentItem::whereIn(
+            'assessment_course_id',
+            $courses->pluck('assessment_course_id')
+        )->count();
         $courseProbabilities = [];
 
+        // Loop through each course
         foreach ($courses as $course) {
             $expectedProportion = 1 / $courses->count();
 
@@ -104,34 +110,39 @@ class QuestionService
                 ? $course->assessment_items->count() / $totalQuestionsAnswered
                 : 0;
 
-            // Adjust probabilities
+            // Subtract to adjust probabilities
             $probabilityAdjustment = max(0, $expectedProportion - $actualProportion);
             $courseProbabilities[$course->course_id] = $probabilityAdjustment;
 
+        }
+
+        // Normalize probabilities
+        $probabilitySum = array_sum($courseProbabilities);
+        foreach ($courseProbabilities as $courseId => $probability) {
+            $courseProbabilities[$courseId] = $probabilitySum > 0 ? 
+            $probability / $probabilitySum : 1 / count($courses);
+        }
+
+        return $courseProbabilities;
+    }
+
+    
             // Log::info("MMM Calculation for Course {$course->course_id}:", [
             //     'totalquestionsanswered' => $totalQuestionsAnswered,
             //     'expected_proportion' => round($expectedProportion, 4),
             //     'actual_proportion' => round($actualProportion, 4),
             //     'probability_adjustment' => round($probabilityAdjustment, 4)
             // ]);
-        }
 
-        // Normalize probabilities
-        $probabilitySum = array_sum($courseProbabilities);
-        foreach ($courseProbabilities as $courseId => $probability) {
-            $courseProbabilities[$courseId] = $probabilitySum > 0 ? $probability / $probabilitySum : 1 / count($courses);
-        }
-
-        return $courseProbabilities;
-    }
-
-    private function weightedRandomSelect($courses, $weights)
+    private function weightedRandomSelect($courses, $courseProbabilities)
     {
-        $rand = mt_rand() / mt_getrandmax(); // Get a random float between 0 and 1
+        // Get a random float between 0 and 1
+        $rand = mt_rand() / mt_getrandmax(); 
         $cumulative = 0.0;
 
+        // Form cumulative distribution
         foreach ($courses as $course) {
-            $cumulative += $weights[$course->course_id] ?? 0;
+            $cumulative += $courseProbabilities[$course->course_id] ?? 0;
             if ($rand <= $cumulative) {
                 return $course;
             }
@@ -186,14 +197,14 @@ class QuestionService
         ]);
     }
 
-    private function createAssessmentItem($selectedCourse, $selectedItem,$previous_theta)
+    private function createAssessmentItem($selectedCourse, $selectedItem, $previous_theta)
     {
         $assessmentItem = AssessmentItem::create([
             'assessment_course_id' => $selectedCourse->assessment_course_id,
             'question_id' => $selectedItem['id'],
             'participants_answer' => null,
-            'status'=> ItemStatus::IN_PROGRESS,
-            'previous_theta_score'=> $previous_theta,
+            'status' => ItemStatus::IN_PROGRESS,
+            'previous_theta_score' => $previous_theta,
             'score' => 0,
         ]);
 
@@ -203,5 +214,33 @@ class QuestionService
         ]);
 
         return $assessmentItem;
+    }
+
+    public function calculateProportionalityIndex(Assessment $assessment): float
+    {
+        $courses = $assessment->assessment_courses;
+        $courseCount = $courses->count();
+        $totalQuestions = AssessmentItem::whereIn(
+            'assessment_course_id',
+            $courses->pluck('assessment_course_id')
+        )->count();
+
+
+        $expected = 1 / $courseCount; 
+        $sumSquaredDifferences = 0;
+
+        foreach ($courses as $course) {
+            $actual = $course->assessment_items->count() / $totalQuestions;
+            $difference = $actual - $expected;
+            $sumSquaredDifferences += pow($difference, 2);
+        }
+
+        // Calculate Root Mean Square Deviation (RMSD)
+        $rmsd = sqrt($sumSquaredDifferences / $courseCount);
+
+        // Convert RMSD to proportionality index (1 - RMSD)
+        $pi = 1 - $rmsd;
+        
+        return max(0, min(1, $pi));
     }
 }

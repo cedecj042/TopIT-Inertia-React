@@ -61,10 +61,10 @@ function SelectCourses({ courses }) {
                     </button>
                 </div>
                 <h3 className="fw-bold mb-2 mt-3">
-                    We'll personalize your test with your selected topic.
+                    We'll personalize your test with your selected course.
                 </h3>
                 <p className="text-muted">
-                    Please select the course you want to take up to 3 courses.
+                    Please select at least one course you want to take up.
                 </p>
             </div>
 

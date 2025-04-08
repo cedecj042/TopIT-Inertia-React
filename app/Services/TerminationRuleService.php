@@ -8,7 +8,8 @@ use App\Models\AssessmentItem;
 
 class TerminationRuleService
 {
-    public const MAX_QUESTIONS = 10;
+    public const MAX_QUESTIONS = 5;
+    public const MAX_QUESTIONS_TOTAL = 12; 
     public function shouldTerminateTest(Assessment $assessment): bool
     {
         $maxQuestionsPerCourse = self::MAX_QUESTIONS;
@@ -24,6 +25,23 @@ class TerminationRuleService
         ]);
 
         return $allCoursesTerminated;
+    }
+
+    // public function totalQuestionsLimitReached(Assessment $assessment): bool
+    // {
+    //     $courses = $assessment->assessment_courses;
+    //     $totalQuestions = AssessmentItem::whereIn(
+    //         'assessment_course_id', 
+    //         $courses->pluck('assessment_course_id')
+    //     )->count();
+    //     $limitReached = $totalQuestions >= self::MAX_QUESTIONS_TOTAL;
+
+    //     return $limitReached;
+    // }
+
+    public function fixedLength(Assessment $assessment): bool {
+        $maxQuestions = self::MAX_QUESTIONS;
+
     }
 
     public function getTerminationReason(): string

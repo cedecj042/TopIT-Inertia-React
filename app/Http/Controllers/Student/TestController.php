@@ -269,6 +269,12 @@ class TestController extends Controller
     {
         $assessment->load('assessment_courses.course');
 
+        $pi = $this->questionService->calculateProportionalityIndex($assessment);
+        // Log::debug('Content Balance Check:', [
+        //     'assessment_id' => $assessment->id,
+        //     'proportionality_index' => round($pi, 3),
+        // ]);
+
         return Inertia::render('Student/Test/TestFinish', [
             'assessment' => new AssessmentResource($assessment),
             'assessment_courses' => AssessmentFinishResource::collection($assessment->assessment_courses),

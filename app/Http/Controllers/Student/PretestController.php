@@ -77,8 +77,13 @@ class PretestController extends Controller
                     $query->where('test_type', 'Pretest');
                 }
             ])->get();
+            
 
-            $totalItems = $courses->sum(fn($course) => $course->questions->count());
+            $filtered_courses = $courses->filter(function($course) {
+                return $course->questions->isNotEmpty();
+            });
+
+            $totalItems = $filtered_courses->sum(fn($course) => $course->questions->count());
 
             $assessmentData = [
                 'student_id' => $student->student_id,
@@ -95,7 +100,7 @@ class PretestController extends Controller
                 'type' => 'Pretest',
             ], $assessmentData);
 
-            $assessmentCourses = collect($courses)->map(fn($course) => [
+            $assessmentCourses = collect($filtered_courses)->map(fn($course) => [
                 'assessment_id' => $existingPretest->assessment_id,
                 'course_id' => $course->course_id,
                 'total_items' => $course->questions->count(),
@@ -114,7 +119,7 @@ class PretestController extends Controller
             $assessmentCourseIds = AssessmentCourse::where('assessment_id', $existingPretest->assessment_id)
                 ->pluck('assessment_course_id', 'course_id');
 
-            $assessmentItems = collect($courses)->flatMap(
+            $assessmentItems = collect($filtered_courses)->flatMap(
                 fn($course) =>
                 collect($course->questions)->map(fn($question) => [
                     'assessment_course_id' => $assessmentCourseIds[$course->course_id] ?? null,
