@@ -47,7 +47,7 @@ function AdminUsers({admins,queryParams={}}){
                                 <AdminUsersTable data={admins.data}
                                     visibleColumns={visibleColumns}
                                 />
-                                <Pagination links={admins.meta.links} />
+                                <Pagination links={admins.meta.links} queryParams={queryParams}  />
                             </TableContext>
                         </div>
                     </div>

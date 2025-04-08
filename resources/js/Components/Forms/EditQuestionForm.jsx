@@ -2,6 +2,7 @@ import { useRequest } from "@/Library/hooks";
 import { useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { toast } from "sonner";
+
 export default function EditQuestionForm({ question, onClose, filters }) {
     const {
         register,
@@ -16,14 +17,14 @@ export default function EditQuestionForm({ question, onClose, filters }) {
             question: question?.question || '',
             answer: question?.answer || [],
             choices: question?.choices?.map(choice => ({ value: choice })) || [],
+            test_type: question?.test_type || '',
             difficulty: question?.difficulty_type || '',
             difficulty_value: question?.difficulty_value || '',
             question_type: question?.question_type || '',
             discrimination_index: question?.discrimination_index || '',
-            course: question?.course?.title || '',
+            course_title: question?.course?.title || '',
         },
     });
-
     const { fields, append, remove } = useFieldArray({ control, name: "choices" });
     const type = watch("question_type");
     const answer = watch("answer");
@@ -44,7 +45,6 @@ export default function EditQuestionForm({ question, onClose, filters }) {
         }
     }, [type, setValue, watch]);
 
-    // Check if a choice is a correct answer
     const isCorrectAnswer = (choice) => {
         const currentAnswer = watch("answer");
         if (type === "Multiple Choice - Many") {
@@ -53,7 +53,6 @@ export default function EditQuestionForm({ question, onClose, filters }) {
         return currentAnswer === choice;
     };
 
-    // Handle answer selection
     const handleAnswerChange = (choice, checked) => {
         const currentAnswer = watch("answer");
 
@@ -96,14 +95,14 @@ export default function EditQuestionForm({ question, onClose, filters }) {
                     <div className="mb-2">
                         <label htmlFor="question" className="form-label">Question</label>
                         <textarea
-                            rows={2}
+                            rows={4}
                             className="form-control"
                             id="question"
                             {...register("question", { required: "Question is required" })}
                         />
                         {errors.question && <p className="text-danger">{errors.question.message}</p>}
                     </div>
-                    
+
                     <input type="hidden" {...register("question_id")} />
 
                     {/* Choices Section */}
@@ -174,13 +173,23 @@ export default function EditQuestionForm({ question, onClose, filters }) {
 
                     {/* Additional Details */}
                     <label htmlFor="" className="mb-2  form-label">Details</label>
-                    <div className="mb-3">
-                        <label className="form-label">Question Type</label>
-                        <select className="form-select" {...register("question_detail_type")}>
-                            {filters.question_type.map((type, index) => (
-                                <option value={type} key={index}>{type}</option>
-                            ))}
-                        </select>
+                    <div className="d-grid grid-2">
+                        <div className="mb-3">
+                            <label className="form-label">Question Type</label>
+                            <select className="form-select" {...register("question_detail_type")}>
+                                {filters.question_type.map((type, index) => (
+                                    <option value={type} key={index}>{type}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="mb-3">
+                            <label className="form-label">Test Type</label>
+                            <select className="form-select" {...register("test_type")}>
+                                {filters.test_type.map((type, index) => (
+                                    <option value={type} key={index}>{type}</option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                     <div className="d-grid grid-3">
                         <div className="mb-2">
@@ -231,7 +240,7 @@ export default function EditQuestionForm({ question, onClose, filters }) {
                     </div>
                     <div className="mb-3 col">
                         <label className="form-label">Course</label>
-                        <select className="form-select" {...register("course")}>
+                        <select className="form-select" {...register("course_title")}>
                             {filters.courses.map((type, index) => (
                                 <option value={type} key={index}>{type}</option>
                             ))}

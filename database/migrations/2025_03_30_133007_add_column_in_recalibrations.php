@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('recalibrations', function (Blueprint $table) {
-            $table->integer('total_iterations')->nullable();
-            $table->enum('convergence_status',['All','Some','None'])->nullable();
-        });
+        // Schema::table('recalibrations', function (Blueprint $table) {
+        //     $table->integer('total_iterations')->nullable();
+        //     $table->enum('convergence_status',['All','Some','None'])->nullable();
+        // });
     }
 
     /**

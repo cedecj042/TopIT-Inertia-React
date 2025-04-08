@@ -6,13 +6,11 @@ use App\Enums\QuestionDifficulty;
 use App\Enums\QuestionType;
 use App\Enums\TestType;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\PretestRequest;
+use App\Http\Requests\BulkQuestionRequest;
 use App\Http\Resources\QuestionResource;
 use App\Models\Course;
 use App\Models\Question;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Log;
 
 class PretestController extends Controller
 {
@@ -25,6 +23,17 @@ class PretestController extends Controller
                 $q->whereRaw('LOWER(question) LIKE ?', ['%' . strtolower($search) . '%'])
                   ->orWhereRaw('LOWER(answer) LIKE ?', ['%' . strtolower($search) . '%']);
             });
+        }
+        $sort = request()->query('sort', '');
+        $sortField = $sortDirection = null;
+
+        // Only split if $sort is not empty
+        if (!empty($sort)) {
+            [$sortField, $sortDirection] = explode(':', $sort);
+
+            if (!in_array($sortDirection, ['asc', 'desc'])) {
+                $sortDirection = null;
+            }
         }
         
 
@@ -41,14 +50,21 @@ class PretestController extends Controller
         if ($question_type = request('question_type')) {
             $query->where('question_type', $question_type);
         }
-        
+
+        if (!empty($sortField) && !empty($sortDirection)) {
+            $query->orderBy($sortField, $sortDirection);
+        }
 
         $perPage = request('items', 5);
         $questions = $query->paginate($perPage)->onEachSide(1);
 
         $title = Course::select('title')->distinct()->pluck('title');
         $difficulty = QuestionDifficulty::cases();
-        $questionTypes = collect(QuestionType::cases())->map(function ($case) {
+        $questionTypes = collect(QuestionType::cases())->map(function ($case) {http://localhost/admin/pretest
+            return $case->value;
+        })->toArray();
+
+        $testTypes = collect(TestType::cases())->map(function ($case) {
             return $case->value;
         })->toArray();
 
@@ -56,7 +72,8 @@ class PretestController extends Controller
         $filters = [
             'courses' => $title,
             'difficulty' => $difficulty,
-            'question_type' => $questionTypes
+            'question_type' => $questionTypes,
+            'test_type' => $testTypes,	
         ];
         
         return Inertia::render('Admin/Questions/Pretest', [
@@ -107,7 +124,7 @@ class PretestController extends Controller
         $filters = [
             'courses' => $title,
             'difficulty' => $difficulty,
-            'question_type' => $questionTypes
+            'question_type' => $questionTypes,
         ];
         
         return Inertia::render('Admin/Questions/AddPretest',[
@@ -118,7 +135,7 @@ class PretestController extends Controller
         ]);
         
     }
-    public function add(PretestRequest $request)
+    public function add(BulkQuestionRequest $request)
     {
         $validated = $request->validated();
 

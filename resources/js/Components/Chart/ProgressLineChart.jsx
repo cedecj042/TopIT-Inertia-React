@@ -35,7 +35,8 @@ export default function ProgressLineChart({ progressData }) {
         labels: progressData.labels.map(formatDateLabel),
         datasets: progressData.datasets.map(dataset => ({
             ...dataset,
-            data: dataset.data
+            data: dataset.data,
+            tension:0.0
         })),
     };
 

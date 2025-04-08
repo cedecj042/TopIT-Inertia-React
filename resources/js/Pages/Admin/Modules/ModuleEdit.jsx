@@ -48,7 +48,6 @@ function ModuleEdit({ module, queryParams = {} }) {
             }
         }
         if (type === "Subsection") {
-
             for (const lesson of module.data.lessons) {
                 for (const section of lesson.sections) {
                     const subsection = section.subsections.find(sub => sub.subsection_id === id);
@@ -71,19 +70,22 @@ function ModuleEdit({ module, queryParams = {} }) {
         };
     });
 
-    // Automatically set activeContent based on queryParams when the component mounts or queryParams changes
+
     useEffect(() => {
         if (safeQueryParams.contentableType && safeQueryParams.contentableId) {
-            const contentData = getContentByTypeAndId(safeQueryParams.contentableType, safeQueryParams.contentableId);
+            const contentData = getContentByTypeAndId(safeQueryParams.contentableType, parseInt(safeQueryParams.contentableId));
             if (contentData) {
                 setActiveContent({
                     content: contentData,
                     type: safeQueryParams.contentableType,
-                    id: safeQueryParams.contentableId,
+                    id: parseInt(safeQueryParams.contentableId),
                 });
+                handleTabClick(contentData, safeQueryParams.contentableType);
             }
         }
+
     }, [module, safeQueryParams]);
+
 
     const handleBackClick = async () => {
         getRequest("admin.module.index", {},{

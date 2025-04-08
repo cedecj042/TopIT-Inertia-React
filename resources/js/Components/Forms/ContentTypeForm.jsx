@@ -10,6 +10,7 @@ import DeleteForm from "./DeleteForm";
 import { useForm } from "react-hook-form";
 import ContentForm from "./ContentForm";
 import { replace } from "react-router-dom";
+import ImageZoomModal from "../Modal/ImageZoomModal";
 
 export default function ContentTypeForm({
     content,
@@ -31,7 +32,6 @@ export default function ContentTypeForm({
             contentableId: contentableId,
         },
     });
-
     const contents = watch("contents"); // Watch the contents array
     const [initialContents, setInitialContents] = useState(contents);
 
@@ -55,7 +55,6 @@ export default function ContentTypeForm({
         );
         onOrderChange(false); // Reset unsaved changes status
     }, [content, contentableId, contentableType, setValue]);
-
 
     const handleDragEnd = (event) => {
         const { active, over } = event;
@@ -131,6 +130,7 @@ export default function ContentTypeForm({
     const closeModal = () => {
         setSelectedContent(null);
         setShowModal(false);
+        setPreviewFile("");
     };
     const showDeleteModal = () => {
         setDeleteModal(true);
@@ -146,6 +146,15 @@ export default function ContentTypeForm({
     const closeDeleteConfirmation = () => {
         setDeleteConfirmation({ show: false, contentId: null });
     };
+
+    const [isZoomOpen, setIsZoomOpen] = useState(false);
+    const [previewFile, setPreviewFile] = useState("");
+
+    useEffect(() => {
+        if(selectedContent){
+            setPreviewFile(selectedContent.file_path);
+        }
+    },[selectedContent]);
 
     
     const editContent = async (data) => {
@@ -314,7 +323,6 @@ export default function ContentTypeForm({
                 </div>
             </form>
 
-            {/* Add/Edit Modal */}
             <Modal
                 show={showModal}
                 modalTitle={
@@ -329,7 +337,7 @@ export default function ContentTypeForm({
                             caption: "",
                             description: "",
                             file_name: "",
-                            file_path: "",
+                            file_path: previewFile ?? "",
                             order: contents.length + 1,
                             type: ContentTypes.TEXT,
                         }
@@ -339,10 +347,12 @@ export default function ContentTypeForm({
                     handleFormSubmit={
                         selectedContent ? editContent : addContent
                     }
+                    setPreviewFile={setPreviewFile}
+                    handleZoomOpen={() => setIsZoomOpen(true)}
+                    setIsZoomOpen={setIsZoomOpen}
                 />
             </Modal>
 
-            {/* Delete Confirmation for contents Modal */}
             <Modal
                 show={deleteConfirmation.show}
                 modalTitle="Confirm Delete"
@@ -356,7 +366,6 @@ export default function ContentTypeForm({
                 />
             </Modal>
 
-            {/* Delete Confirmation for types Modal */}
             <Modal
                 show={deleteModal}
                 modalTitle="Confirm Delete"
@@ -369,7 +378,7 @@ export default function ContentTypeForm({
                     isProcessing={isProcessing}
                 />
             </Modal>
-
+            <ImageZoomModal imageSrc={previewFile || ""} isOpen={isZoomOpen} onClose={() => setIsZoomOpen(false)} />
             
         </>
     );

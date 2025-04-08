@@ -9,7 +9,6 @@ import { FilterContext } from "@/Components/Context/FilterContext";
 
 const TestHistoryPage = ({ tests = [],queryParams={},filters}) => {
     const testsData = tests.data || [];
-
     return (
         <>
             <main className="row p-3">
@@ -43,7 +42,7 @@ const TestHistoryPage = ({ tests = [],queryParams={},filters}) => {
                 
                 <div className="row mt-2">
                     <div className="col-12">
-                        <Pagination links={tests.meta.links} />
+                        <Pagination links={tests.meta.links}  queryParams={queryParams} />
                     </div>
                 </div>
             </main>

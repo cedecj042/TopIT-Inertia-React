@@ -12,7 +12,6 @@ import { toast } from "sonner";
 
 const Test = ({ test_item, item_count }) => {
     const testItem = test_item.data;
-    console.log(testItem);
     const { isProcessing, putRequest } = useRequest();
     const {
         data,

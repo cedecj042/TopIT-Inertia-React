@@ -155,12 +155,9 @@ class TestController extends Controller
             ->first();
         if (!$assessmentItem) {
             $assessmentItem = $this->questionService->selectQuestion($assessment);
-            // if (!$assessmentItem) {
-            //     // No questions available - redirect with error
-            //     return redirect()
-            //         ->route('dashboard')
-            //         ->with('error', 'No more questions available for this assessment');
-            // }
+            if (!$assessmentItem) {
+                return redirect()->route('dashboard')->with('error', 'No more questions available for this assessment');
+            }
             $assessmentItem->load(['assessment_course.assessment']);
         }
 
@@ -207,9 +204,9 @@ class TestController extends Controller
             'previous_theta' => $previousTheta,
         ]);
 
-        $updatedTheta = $this->thetaService->estimateThetaMLE(
+        $updatedTheta = $this->thetaService->estimateThetaMAP(
+            $responses,
             $previousTheta ?? 0.0,
-            $responses
         );
         $currentCourseTheta->update(['theta_score' => $updatedTheta, 'updated_at' => now()]);
 

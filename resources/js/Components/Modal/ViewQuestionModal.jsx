@@ -2,13 +2,81 @@ import PieChart from "../Chart/PieGraphChart";
 
 
 export default function ViewQuestionModal({ question }) {
+
     const total = question.incorrect_count + question.correct_count;
+
+    // const codeRegex = /`([^`]+)`/;
+    // const match = question.question.match(codeRegex);
+
+    // const codeSnippet = match ? match[1] : null;
+    // const questionText = match
+    //     ? question.question.replace(codeRegex, "").trim()
+    //     : question.question;
+    function preprocessQuestion(raw) {
+        return raw
+            .replace(/\\`\\`\\`/g, "```")   // Unescape triple backticks
+            .replace(/\\t/g, "    ")        // Convert escaped tabs to spaces
+            .replace(/```(\w+)? (.*?)```/g, (_, lang, code) => {
+                // Handle inline code blocks like ```python print("Hi") ```
+                const formatted = code
+                    .replace(/(?<!\n)(if|for|while|def|else|elif|print|return|instruction)/g, "\n$1") // crude newline before Python blocks
+                    .replace(/\s{2,}/g, " "); // collapse extra spacing
+                return `\`\`\`${lang ?? ""}\n${formatted.trim()}\n\`\`\``;
+            });
+    }
+    const cleanedQuestion = preprocessQuestion(question.question);
+    const parts = [];
+    const blockRegex = /```(?:([\w]+)?\n)?([\s\S]*?)```|((?:^\s*\|.*\|\s*\n?)+)/gm;
+
+
+    let lastIndex = 0;
+    let match;
+
+    while ((match = blockRegex.exec(cleanedQuestion)) !== null) {
+        const index = match.index;
+        if (index > lastIndex) {
+            parts.push({
+                type: 'text',
+                content: cleanedQuestion.slice(lastIndex, index).trim()
+            });
+        }
+    
+        if (match[2]) {
+            parts.push({
+                type: 'code',
+                language: match[1],
+                content: match[2].trim()
+            });
+        } else if (match[3]) {
+            parts.push({
+                type: 'table',
+                content: match[3].trim()
+            });
+        }
+    
+        lastIndex = blockRegex.lastIndex;
+    }
+    
+    if (lastIndex < cleanedQuestion.length) {
+        parts.push({
+            type: 'text',
+            content: cleanedQuestion.slice(lastIndex).trim()
+        });
+    }
+
     return (
         <>
             <div className="modal-body">
                 <div className="d-flex flex-column p-3">
-                    {/* <label htmlFor="">Question:</label> */}
-                    <h5 className="fw-medium mb-3">{question.question}</h5>
+                    {parts.map((part, index) => (
+                        part.type === 'text' ? (
+                            <h5 key={index} className="mb-3">{part.content}</h5>
+                        ) : (
+                            <pre key={index} className="bg-dark text-light p-2 rounded">
+                                <code lang={part.language}>{part.content}</code>
+                            </pre>
+                        )
+                    ))}
                     {question?.choices && (
                         Array.isArray(question.choices) ? (
                             <ol type="a">

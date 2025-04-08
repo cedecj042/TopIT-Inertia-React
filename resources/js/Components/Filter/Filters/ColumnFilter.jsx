@@ -3,7 +3,7 @@ import ColumnCheckbox from "./ColumnCheckbox";
 export default function ColumnFilter({ onColumnChange, visibleColumns }) {
     return (
         <>
-            <div className="dropdown">
+            <div className="dropdown d-flex justify-content-end pe-3">
                 <button
                     className="btn btn-transparent dropdown-toggle"
                     type="button"

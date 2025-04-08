@@ -1,14 +1,14 @@
 import { useForm, Controller } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { ContentTypes } from "@/Library/constants";
+import ImageZoomModal from "../Modal/ImageZoomModal";
 
-export default function ContentForm({ contentData, onClose, handleFormSubmit, isProcessing }) {
+export default function ContentForm({ contentData, onClose, handleFormSubmit, isProcessing, setPreviewFile, setIsZoomOpen }) {
     const { register, handleSubmit, setValue, control, watch } = useForm({
         defaultValues: contentData,
     });
 
-    const [previewFile, setPreviewFile] = useState(contentData.file_path || ""); // State for preview
-    const type = watch("type"); // Watch the type field to conditionally display fields
+    const type = watch("type");
 
     useEffect(() => {
         if (contentData) {
@@ -23,17 +23,16 @@ export default function ContentForm({ contentData, onClose, handleFormSubmit, is
             setValue("file_name", "");
             setValue("file_path", "");
             setValue("caption", "");
-            setPreviewFile(""); // Clear preview if type changes to text or header
+            setPreviewFile("");
         }
     }, [type, setValue]);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setPreviewFile(URL.createObjectURL(file)); // Set the preview to the new file
+            setPreviewFile(URL.createObjectURL(file)); 
         }
     };
-
     return (
         <>
             <form onSubmit={handleSubmit(handleFormSubmit)}>
@@ -52,18 +51,21 @@ export default function ContentForm({ contentData, onClose, handleFormSubmit, is
                             </div>
 
                             {/* Display preview of existing file or newly selected file */}
-                            {previewFile && (
+                            {contentData.file_path && (
                                 <div className="mb-2">
                                     <label className="form-label text-dark">Current File:</label>
                                     <div className="d-flex align-items-center">
-                                        {/* Show thumbnail if the file is an image */}
                                         {contentData.file_path && /\.(jpg|jpeg|png|gif)$/i.test(contentData.file_path) ? (
-                                            <img
-                                                src={previewFile}
-                                                alt="preview"
-                                                className="img-thumbnail me-2"
-                                                style={{ width: "80px", height: "80px", objectFit: "cover" }}
-                                            />
+                                            <>
+                                                <img
+                                                    src={contentData.file_path}
+                                                    alt="preview"
+                                                    className="img-thumbnail me-2"
+                                                    style={{ width: "80px", height: "80px", objectFit: "cover", cursor: "zoom-in" }}
+                                                    onClick={() => setIsZoomOpen(true)}
+                                                />
+                                                
+                                            </>
                                         ) : (
                                             <small className="text-muted">{contentData.file_name || "Uploaded file"}</small>
                                         )}

@@ -10,7 +10,7 @@ import DateRangeFilter from "./Filters/DateRangeFilter";
 import SortFilter from "./Filters/SortFilter";
 import { TEST_SORTING_OPTIONS } from "@/Library/constants";
 
-export default function TestFilters({ filters }) {
+export default function AssessmentFilters({ filters }) {
     const { state, dispatch } = useContext(FilterProvider);
     const { handleClearFilter, handleFilterChange } = useFilterState(dispatch);
     const { handleInputChange, handleOtherChange, onKeyPress } = useOtherState(dispatch);
@@ -28,6 +28,11 @@ export default function TestFilters({ filters }) {
             data: filters.test_types,
             filterKey: "test_types",
             keyValue: filterState.test_types,
+        },
+        {
+            data: filters.status,
+            filterKey: "status",
+            keyValue: filterState.status,
         },
     ];
 

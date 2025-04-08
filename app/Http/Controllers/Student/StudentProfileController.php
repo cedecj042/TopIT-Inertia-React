@@ -22,7 +22,18 @@ use Carbon\CarbonPeriod;
 
 class StudentProfileController extends Controller
 {
-
+    protected $colors = [
+        'rgb(202,62,122)', // Vibrant Blue
+        'rgb(0,166,231)',  // Vibrant Red
+        'rgb(74,193,192)', // Vibrant Green
+        'rgb(254,206,109)', // Vibrant Yellow
+        'rgb(55,69,127)', // Vibrant Violet
+        'rgb(254,120,89)', // Vibrant Pink
+    ];
+    public function getColor($index)
+    {
+        return $this->colors[$index % count($this->colors)];
+    }
     public function showStudentDetails(Request $request)
     {
         $student = Auth::user()->userable;
@@ -58,10 +69,10 @@ class StudentProfileController extends Controller
         $thetaScores = AssessmentCourse::whereHas('assessment', function ($query) use ($studentId) {
             $query->where('student_id', $studentId);
         })
-            ->select('course_id', 'final_theta_score', 'updated_at')
+            ->select('course_id', 'final_theta_score', 'created_at')
             ->with('course')
-            ->whereBetween('updated_at', [$startDate, $endDate])
-            ->orderBy('updated_at', 'asc')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'asc')
             ->get();
 
         $currentDate = now()->format('Y-m-d');
@@ -81,12 +92,12 @@ class StudentProfileController extends Controller
         ];
 
         $thetaScores = $thetaScores->map(function ($item) {
-            $item->date = $item->updated_at->format('Y-m-d');
+            $item->date = $item->created_at->format('Y-m-d');
             return $item;
         });
 
         $groupedScores = $thetaScores->groupBy('course.title');
-
+        $i=0;
         foreach ($groupedScores as $courseTitle => $scores) {
             $data = [];
             $lastValidScore = null;
@@ -111,19 +122,15 @@ class StudentProfileController extends Controller
             $progressData['datasets'][] = [
                 'label' => $courseTitle,
                 'data' => $data,
-                'borderColor' => $this->generateRandomColor(),
-                'backgroundColor' => 'rgba(75, 192, 192, 0.2)',
+                'borderColor' => $this->getColor($i),
+                'backgroundColor' => str_replace('1)', '0.2)', $this->getColor($i)),
                 'tension' => 0.3,
                 'showLine' => true,
             ];
+            $i++;
         }
 
         return $progressData;
-    }
-
-    public function generateRandomColor()
-    {
-        return sprintf('rgba(%d, %d, %d, 1)', rand(0, 255), rand(0, 255), rand(0, 255));
     }
 
     public function editProfile(StudentProfileRequest $request)

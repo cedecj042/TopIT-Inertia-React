@@ -1,10 +1,24 @@
 import { useRequest } from "@/Library/hooks";
 import '../../../css/student/test.css';
+import Modal from "../Modal/Modal";
+import { useState } from "react";
+import AssessmentDetailsModal from "./AssessmentDetails";
 
 export default function AssessmentList({ tests = [] }) {
     const isEmpty = !Array.isArray(tests) || tests.length === 0;;
     const { isProcessing, getRequest } = useRequest();
-    const handleClick = (id) => {getRequest('admin.assessments.index', id, {})}
+    // const handleClick = (id) => { getRequest('admin.assessments.show', id, {}) }
+
+    const [openModal, setOpenModal]= useState(false);
+    const [selectedTest, setSelectedTest] = useState(null);
+    const handleClick = (test) =>{
+        setOpenModal(true);
+        setSelectedTest(test);
+    }
+    const handleCloseModal = () => {
+        setOpenModal(false);
+        setSelectedTest(null); 
+    };
     return (
         <div>
             {!isEmpty ? (
@@ -12,7 +26,7 @@ export default function AssessmentList({ tests = [] }) {
                     {tests.map((test, index) => (
                         <div key={index} className="col-12">
                             <div className="card border-1 rounded-4 my-1 py-1 clickable w-100"
-                                onClick={() => handleClick(test.assessment_id)}
+                                onClick={() => handleClick(test)}
                             >
                                 <div className="card-body px-4 py-2 d-flex align-items-center w-100">
                                     <div className="row  flex-grow-1">
@@ -83,6 +97,16 @@ export default function AssessmentList({ tests = [] }) {
                     </label>
                 </div>
             )}
+            <Modal
+                show={openModal}
+                onClose={handleCloseModal}
+                modalTitle={`Assessment Details - ID #${selectedTest?.assessment_id ?? ''}`}
+                modalSize="modal-xl" 
+            >
+                {/* Render the details component only when a test is selected */}
+                {selectedTest && <AssessmentDetailsModal test={selectedTest} />}
+            </Modal>
+
         </div>
     );
 };

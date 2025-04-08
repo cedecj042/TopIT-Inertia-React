@@ -9,8 +9,10 @@ import { INITIAL_STUDENT_STATE } from "@/Library/filterState";
 import { STUDENT_COLUMN, STUDENT_FILTER_COMPONENT } from "@/Library/constants";
 import BarChart from "@/Components/Chart/BarChart";
 import ProgressIndexChart from "@/Components/Chart/ProgressIndexChart";
-import { Link } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import AssessmentCourseBarChart from "@/Components/Chart/AssessmentCourseBarChart";
+import { useEffect, useState } from "react";
+import SelectInput from "@/Components/SelectInput";
 
 function Reports({
     highlowData,
@@ -18,9 +20,26 @@ function Reports({
     questionLogsData,
     totalAssessmentCourses,
     students,
-    queryParams,
-    filters
+    queryParams = {},
+    filters,
+    courses
 }) {
+    const [courseState, setCourseState] = useState();
+
+    useEffect(() => {
+        if (courseState) {
+            handleChangeFilter();
+        }
+    }, [courseState]);
+    useEffect(() => {
+        if (queryParams?.question_course) {
+            setCourseState(queryParams.question_course);
+        }
+    }, [queryParams?.question_course]);
+    const handleChangeFilter = () => {
+        router.get(route('admin.report'), { ...queryParams, question_course: courseState }, { preserveState: true, preserveScroll: true, replace: true })
+    }
+
     return (
         <>
             <div className="container-fluid p-5">
@@ -41,7 +60,7 @@ function Reports({
                                 queryParams={queryParams}
                             />
                         </TableContext>
-                        <Pagination links={students.meta.links} />
+                        <Pagination links={students.meta.links} queryParams={queryParams}  />
 
                     </div>
                 </div>
@@ -64,8 +83,24 @@ function Reports({
 
                 </div>
                 <div className="row justify-content-center mt-5 g-0">
+                    <h5 className="fw-bold mb-0 align-content-center mb-3">Question Report</h5>
                     <div className="d-flex justify-content-between">
-                        <h5 className="fw-bold mb-0 align-content-center">Question Report</h5>
+                        <div className="d-flex flex-row align-items-center gap-3">
+                            <label htmlFor="">Course</label>
+                            <SelectInput
+                                onChange={(e) => setCourseState(e.target.value)}
+                                value={courseState}
+                                className={`form-select ${courseState === "" ? 'text-secondary' : ''}`}
+                                id="courseSelect"
+                            >
+                                <option value="">All Courses</option>
+                                {courses.map((item) => (
+                                    <option key={item.course_id} value={item.course_id}>
+                                        {item.title}
+                                    </option>
+                                ))}
+                            </SelectInput>
+                        </div>
                         <Link href={route('admin.question.index')} className="btn btn-outline-primary">View Question Bank</Link>
                     </div>
                     <div className="col-12 chart-height p-4">

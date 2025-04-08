@@ -139,7 +139,9 @@ class RecalibrationController extends Controller
         if (!empty($sortField) && !empty($sortDirection)) {
             if ($sortField === 'total_count') {
                 $query->orderByRaw('(SELECT COUNT(*) FROM assessment_items WHERE assessment_items.question_id = question_recalibration_logs.question_id) ' . $sortDirection);
-            } else {
+            } else if ($sortField === "discrimination_index" || $sortField === "difficulty_value") {
+                $query->orderBy('new_' . $sortField, $sortDirection);
+            }else {
                 $query->orderBy($sortField, $sortDirection);
             }
         }

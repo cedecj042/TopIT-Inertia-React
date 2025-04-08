@@ -14,13 +14,19 @@ export default function Table({
     handleClick = null, // Row click handler
     isSelectable = false, // Enables the checkbox column
     renderCheckbox = null, // Function to render checkboxes for selection
+    renderSelectAllCheckbox = null
 }) {
     return (
         <div className="table-header overflow-x-auto">
             <table className="table students-table">
                 <thead>
                     <tr>
-                        {isSelectable && <th className="text-left">Select</th>}
+                        {/* {isSelectable && <th className="text-left">Select</th>} */}
+                        {isSelectable && (
+                            <th className="text-left align-middle">
+                                {renderSelectAllCheckbox && renderSelectAllCheckbox()}
+                            </th>
+                        )}
                         {visibleColumns.map((column) => {
                             if (column.visible) {
                                 return column.sortable ? (

@@ -52,11 +52,11 @@ export default function Modal({ modalTitle, modalSize = null, onClose, show, chi
 
     if (!show) return null;
 
-    const handleBackdropClick = (e) => {
-        if (e.target.classList.contains("modal")) {
-            onClose();
-        }
-    };
+    // const handleBackdropClick = (e) => {
+    //     if (e.target.classList.contains("modal")) {
+    //         onClose();
+    //     }
+    // };
 
     return (
         <div
@@ -66,7 +66,7 @@ export default function Modal({ modalTitle, modalSize = null, onClose, show, chi
             aria-labelledby="modalLabel"
             role="dialog"
             aria-hidden="true"
-            onClick={handleBackdropClick}
+            // onClick={handleBackdropClick}
         >
             <div className={`modal-dialog modal-dialog-centered modal-dialog-scrollable ${modalSize}`}>
                 <div className="modal-content" ref={contentRef}>

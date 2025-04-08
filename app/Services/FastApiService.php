@@ -132,7 +132,10 @@ class FastApiService
 
             // Check the response status and log or handle accordingly
             if ($response->successful()) {
-                // Handle success
+                Log::info('Request success', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
             } else {
                 // Handle failure
                 Log::error('Request failed', [
@@ -148,6 +151,9 @@ class FastApiService
             ]);
         }
     }
+    public function updateQuestion(string $question_uid, array $data){
+        return Http::delete("{$this->baseUrl}/update_question/{$question_uid}",$data);
+    }
     public function deleteCourse(int $course_id)
     {
         return Http::delete("{$this->baseUrl}/delete_course/{$course_id}");
@@ -159,6 +165,9 @@ class FastApiService
     public function deleteQuestion(string $question_uid)
     {
         return Http::delete("{$this->baseUrl}/delete_question/{$question_uid}");
+    }
+    public function bulkDeleteQuestions(array $question_uids){
+        return Http::post("{$this->baseUrl}/bulk_delete_questions/", $question_uids);
     }
     public function broadcastEvent($info = null, $success = null, $error = null)
     {

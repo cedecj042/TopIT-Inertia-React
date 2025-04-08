@@ -58,7 +58,7 @@ function CourseDetail({ title, course, pdfs, queryParams }) {
                                 <PdfTable data={pdfs.data}
                                     visibleColumns={visibleColumns}
                                 />
-                                <Pagination links={pdfs.meta.links} />
+                                <Pagination links={pdfs.meta.links} queryParams={queryParams}  />
                             </div>
                         </div>
                     </div>

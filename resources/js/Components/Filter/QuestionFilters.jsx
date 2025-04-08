@@ -8,7 +8,7 @@ import TextInputFilter from "./Filters/TextInputFilter";
 import SelectFilter from "./Filters/SelectFilter";
 import OtherFilter from "./Filters/OtherFilter";
 
-export default function QuestionFilters({filters}){
+export default function QuestionFilters({ filters }) {
     const { state, dispatch, visibleColumns, onColumnChange } =
         useContext(ContextProvider);
     const { handleClearSort } = useSortState(dispatch);
@@ -32,11 +32,6 @@ export default function QuestionFilters({filters}){
             filterKey: "question_type",
             keyValue: filterState.question_type,
         },
-        // {
-        //     data: filters.test_types,
-        //     filterKey: "test_types",
-        //     keyValue: filterState.test_types,
-        // },
     ];
     return (
         <>
@@ -54,13 +49,13 @@ export default function QuestionFilters({filters}){
             />
             <div className="row g-0 w-100">
                 <div className="col-lg-5 col-md-12 input-container mb-3">
-                <TextInputFilter
-                    onKeyPress={onKeyPress}
-                    value={otherState.question}
-                    filterKey={"question"}
-                    handleInputChange={handleInputChange}
-                    handleClearInput={handleOtherChange}
-                />
+                    <TextInputFilter
+                        onKeyPress={onKeyPress}
+                        value={otherState.question}
+                        filterKey={"question"}
+                        handleInputChange={handleInputChange}
+                        handleClearInput={handleOtherChange}
+                    />
                 </div>
                 <div className="col-md-4 col-lg-2 px-2 dropdown mb-3">
                     <button
@@ -89,7 +84,7 @@ export default function QuestionFilters({filters}){
                             <button
                                 className="btn btn-light w-100"
                                 onClick={() =>
-                                    handleClearFilter(["course","difficulty","question_type"])
+                                    handleClearFilter(["course", "difficulty", "question_type"])
                                 }
                             >
                                 Clear Filters

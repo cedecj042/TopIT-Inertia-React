@@ -6,6 +6,7 @@ use App\Enums\QuestionDifficulty;
 use App\Enums\QuestionType;
 use App\Enums\TestType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BulkQuestionRequest;
 use App\Http\Requests\EditQuestionRequest;
 use App\Http\Requests\GenerateQuestionRequest;
 use App\Http\Resources\CourseResource;
@@ -14,11 +15,16 @@ use App\Jobs\GenerateQuestionJob;
 use App\Jobs\ProcessQuestionsJob;
 use App\Models\Course;
 use App\Models\Question;
+use App\Services\FastApiService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class QuestionController extends Controller
 {
+    protected $fastAPIService;
+    public function __construct(FastApiService $fastAPIService){
+        $this->fastAPIService = $fastAPIService;
+    }
     public function index()
     {
         //
@@ -93,7 +99,8 @@ class QuestionController extends Controller
         $filters = [
             'courses' => $title,
             'difficulty' => $difficulty,
-            'question_type' => $questionTypes
+            'question_type' => $questionTypes,
+            'test_type' => $testTypes,
         ];
 
         return Inertia::render('Admin/Questions/Question', [
@@ -133,14 +140,23 @@ class QuestionController extends Controller
     {
         $validated = $request->validated();
 
+        $course = Course::where('title', $validated['course_title'])->first();
+        if (!$course){
+            return redirect()->back()->withErrors('Course not found');
+        }
         // Update course if changed
-        if ($question->course->course_id !== $validated['course_id']) {
-            $question->course_id = Course::where('course_id', $validated['course_id'])->firstOrFail()->course_id;
+        if ($question->course->course_id !== $course->course_id) {
+            $question->course_id = $course->course_id;
         }
 
-        $validated['answer'] = is_array($validated['answer']) ? json_encode($validated['answer']) : $validated['answer'];
-        $validated['choices'] = !empty($validated['choices']) ? json_encode($validated['choices']) : null;
+        if (!is_array($validated['answer'])) {
+            $validated['answer'] = json_encode([$validated['answer']]);
+        } else {
+            $validated['answer'] = json_encode($validated['answer']);
+        }
 
+        $validated['choices'] = !empty($validated['choices']) ? json_encode($validated['choices']) : null;
+        unset($validated['course_title']);
         $question->update($validated);
 
         return redirect()->back()->with('success', 'Successfully updated');
@@ -168,5 +184,26 @@ class QuestionController extends Controller
         return redirect()->back()->with('success', 'Deleted Successfully');
     }
 
+    public function bulkDelete(BulkQuestionRequest $request)
+    {
+        $validated = $request->validated();
+        $questionIds = $validated['questions'];
+    
+        // Call FastAPI once with all IDs
+        $questionUids = Question::whereIn('question_id', $questionIds)->pluck('question_uid');
+        $response = $this->fastAPIService->bulkDeleteQuestions($questionUids->toArray());
+        if ($response->failed()) {
+            return redirect()->back()->withErrors('FastAPI bulk delete failed.');
+        }
+    
+        Question::whereIn('question_id', $questionIds)->delete();
+    
+        $query = request()->query();
+        $query['page'] = 1;
+    
+        return redirect()->route('admin.question.index', $query)
+            ->with('success', 'Deleted Successfully');
+    }
+    
 
 }

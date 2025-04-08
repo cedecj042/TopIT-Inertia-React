@@ -3,13 +3,14 @@ import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import Pagination from "@/Components/Pagination";
 import QuestionTable from "@/Components/Tables/QuestionTable";
 import { TableContext } from "@/Components/Context/TableContext";
-import { QUESTION_COLUMN, QUESTION_FILTER_COMPONENT } from "@/Library/constants";
+import { PRETEST_COLUMN, QUESTION_COLUMN, QUESTION_FILTER_COMPONENT } from "@/Library/constants";
 import { INITIAL_QUESTION_STATE } from "@/Library/filterState";
 import { useRequest } from "@/Library/hooks";
+import { SelectedQuestionsProvider, useSelectedQuestions } from "@/Components/Context/SelectedQuestionsProvider";
 
-function Pretest({questions,filters,queryParams = {}}){
+function PretestInner({questions,filters,queryParams = {}}){
     const {isProcessing,getRequest} = useRequest();
-    
+    const { selectedQuestions } = useSelectedQuestions();
     const addPretest = () =>{
         getRequest('admin.pretest.add');
     }
@@ -35,7 +36,7 @@ function Pretest({questions,filters,queryParams = {}}){
                                 initialState={INITIAL_QUESTION_STATE(queryParams)}
                                 routeName={"admin.pretest.index"}
                                 components={QUESTION_FILTER_COMPONENT}
-                                column={QUESTION_COLUMN}
+                                column={PRETEST_COLUMN}
                             >
                                 <QuestionFilters filters={filters} />
                                 <QuestionTable
@@ -51,6 +52,14 @@ function Pretest({questions,filters,queryParams = {}}){
             </div>
         </>
     );
+}
+
+function Pretest(props){
+    return(
+        <SelectedQuestionsProvider>
+            <PretestInner {...props} />
+        </SelectedQuestionsProvider>
+    )
 }
 
 export default AdminContent(Pretest);

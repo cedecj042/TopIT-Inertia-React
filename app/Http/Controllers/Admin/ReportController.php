@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\AssessmentStatus;
+use App\Enums\ItemStatus;
 use App\Enums\QuestionDifficulty;
 use App\Enums\QuestionType;
+use App\Enums\TestType;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AssessmentResource;
 use App\Http\Resources\StudentResource;
+use App\Models\Assessment;
 use App\Models\AssessmentCourse;
 use App\Models\Course;
 use App\Models\Question;
@@ -65,6 +70,16 @@ class ReportController extends Controller
         $students = $query->paginate($perPage)->onEachSide(1);
 
         $thetaScores = StudentCourseTheta::with('course') // Assuming a relationship exists
+            ->when(request('year') || request('school'), function ($query) {
+                $query->whereHas('student', function ($q) {
+                    if (request('year')) {
+                        $q->where('year', request('year'));
+                    }
+                    if (request('school')) {
+                        $q->where('school', request('school'));
+                    }
+                });
+            })
             ->selectRaw('course_id, MAX(theta_score) as high_score, MIN(theta_score) as low_score, AVG(theta_score) as avg_score')
             ->groupBy('course_id')
             ->get()
@@ -86,23 +101,24 @@ class ReportController extends Controller
         ];
 
 
-        $schools = DB::table('students')->distinct()->pluck('school');
-        $years = DB::table('students')->distinct()->orderBy('year', 'asc')->pluck('year');
+        $schools = Student::distinct()->pluck('school');
+        $years = Student::distinct()->orderBy('year', 'asc')->pluck('year');
+        $courses = Course::select('course_id', 'title')->distinct()->get();
         $filters = [
             'schools' => $schools,
             'years' => $years,
         ];
-
-
+        $questionCourse = request('question_course', 'all');
         return Inertia::render('Admin/Reports', [
             'title' => 'Admin Reports',
             'highlowData' => $highlowData,
-            'difficultyDistribution' => $this->getQuestionData(),
+            'difficultyDistribution' => $this->getQuestionData($questionCourse),
             'questionLogsData' => $this->getQuestionComparisonData(),
             'totalAssessmentCourses' => $this->getTotalAssessmentCourses(),
             'students' => StudentResource::collection($students),
             'queryParams' => request()->query() ?: null,
             'filters' => $filters,
+            'courses' => $courses,
         ]);
     }
     public function student($studentId)
@@ -118,11 +134,74 @@ class ReportController extends Controller
             'data' => $coursesTheta->pluck('theta_score')->toArray(),
         ];
 
+        $query = Assessment::with(['assessment_courses.course', 'assessment_courses.assessment_items.question', 'assessment_courses.theta_score_logs'])
+            ->where('student_id', $studentId);
+
+        if ($courseTitle = request('course')) {
+            $query->whereHas('assessment_courses.course', function ($q) use ($courseTitle) {
+                $q->where('title', 'like', '%' . $courseTitle . '%');
+            });
+        }
+
+        // Filter by date range
+        if ($fromDate = request('from')) {
+            $query->whereDate('created_at', '>=', $fromDate);
+        }
+
+        if ($toDate = request('to')) {
+            $query->whereDate('created_at', '<=', $toDate);
+        }
+        if ($testType = request('test_types')) {
+            $query->where('type', $testType);
+        }
+        if ($status = request('status')) {
+            $query->where('status', $status);
+        }
+
+        $sort = request()->query('sort', ''); // Empty by default
+        $sortField = $sortDirection = null;
+        // Only split if $sort is not empty
+        if (!empty($sort)) {
+            [$sortField, $sortDirection] = explode(':', $sort);
+
+            // Ensure sortDirection is either 'asc' or 'desc', otherwise set it to null
+            if (!in_array($sortDirection, ['asc', 'desc'])) {
+                $sortDirection = null;
+            }
+        }
+        if (!empty($sortField) && !empty($sortDirection)) {
+            $query->orderBy($sortField, $sortDirection);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+
+        $perPage = request('items', 5);
+        $assessments = $query->paginate($perPage)->onEachSide(1);
+
+
+        $title = Course::distinct()->pluck('title');
+        $testTypes = collect(TestType::cases())->map(function ($case) {
+            return $case->value;
+        })->toArray();
+        $statusTypes = collect(ItemStatus::cases())->map(function ($case) {
+            return $case->value;
+        })->toArray();
+
+
+        $filters = [
+            'course' => $title,
+            'test_types' => $testTypes,
+            'status' => $statusTypes,
+        ];
+
         return Inertia::render('Admin/Student', [
             'title' => 'Admin Reports',
             'student' => new StudentResource($student),
             'queryParams' => request()->query() ?: null,
-            'theta_score' => $thetaScoreData, // Pass structured data for the chart
+            'theta_score' => $thetaScoreData,
+            'assessments' => AssessmentResource::collection($assessments),
+            'filters' => $filters,
         ]);
     }
     public function getQuestionComparisonData()
@@ -144,13 +223,22 @@ class ReportController extends Controller
 
         return $chartData;
     }
-    private function getQuestionData()
+    private function getQuestionData($questionCourse)
     {
-        $difficultyCounts = Question::selectRaw('difficulty_type, COUNT(*) as count')
+        \Log::info($questionCourse);
+        $difficultyCounts = Question::
+            when($questionCourse !== 'all', function ($query) use ($questionCourse) {
+                $query->where('course_id', $questionCourse);
+            })
+            ->selectRaw('difficulty_type, COUNT(*) as count')
             ->groupBy('difficulty_type')
             ->pluck('count', 'difficulty_type');
 
-        $questionTypeCounts = Question::selectRaw('difficulty_type, question_type, COUNT(*) as count')
+        $questionTypeCounts = Question::
+            when($questionCourse !== 'all', function ($query) use ($questionCourse) {
+                $query->where('course_id', $questionCourse);
+            })
+            ->selectRaw('difficulty_type, question_type, COUNT(*) as count')
             ->groupBy('difficulty_type', 'question_type')
             ->get()
             ->groupBy('difficulty_type');

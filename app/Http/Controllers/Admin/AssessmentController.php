@@ -16,7 +16,7 @@ class AssessmentController extends Controller
 {
     public function index()
     {
-        $query = Assessment::with(['assessment_courses.course'])
+        $query = Assessment::with(['assessment_courses.course', 'assessment_courses.assessment_items.question', 'assessment_courses.theta_score_logs'])		
             ->where('status', AssessmentStatus::COMPLETED->value);
 
         if ($courseTitle = request('course')) {

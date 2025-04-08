@@ -29,14 +29,14 @@ class EditQuestionRequest extends FormRequest
             'discrimination_index' => 'required|numeric',
             'question' => 'required|string',
             'question_type'=> 'required|in:Multiple Choice - Single,Multiple Choice - Many,Identification',
+            'test_type'=> 'required|in:Pretest,Test',
             'answer' => ['required', function ($attribute, $value, $fail) {
                 if (!in_array(gettype($value), ['string', 'array'])) {
                     $fail("The $attribute must be either a string or an array.");
                 }
             }],
             'choices' => 'array',
-            'course' => 'required',
-            'course_id' => 'required | int'
+            'course_title' => 'required|exists:courses,title',
         ];
     }
 }

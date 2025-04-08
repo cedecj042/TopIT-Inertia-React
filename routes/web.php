@@ -119,6 +119,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/generate/show', [QuestionController::class, 'show'])->name('show');
         Route::post('/generate', [QuestionController::class, 'generate'])->name('generate');
         Route::get('/courses', [QuestionController::class, 'courses'])->name('courses');
+        Route::post('/bulkDelete', [QuestionController::class,'bulkDelete'])->name('bulkDelete');
     });
     Route::prefix('recalibration')->name('recalibration.')->group(function(){
         Route::get('/',[RecalibrationController::class,'index'])->name('index');

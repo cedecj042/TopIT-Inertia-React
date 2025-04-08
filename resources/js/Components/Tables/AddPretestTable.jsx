@@ -10,34 +10,66 @@ export default function AddPretestTable({ data, filters, queryParams }) {
     const keyField = "question_id"; // Unique identifier for each question
     const { toggleTableSort } = useSortState(dispatch);
     const { selectedQuestions, setSelectedQuestions } = useSelectedQuestions();
-    
-    // Handle row selection toggle
-    const handleRowClick = (e, rowData) => {
-        e.preventDefault();
 
+    const toggleQuestionSelection = (rowData) => {
         const isSelected = selectedQuestions.some(
             (question) => question[keyField] === rowData[keyField]
-        ); // Check if the rowData is already in selectedQuestions
+        );
 
         const updatedSelection = isSelected
             ? selectedQuestions.filter(
-                  (question) => question[keyField] !== rowData[keyField]
-              ) // Remove if already selected
-            : [...selectedQuestions, rowData]; // Add the full question object if not selected
+                (question) => question[keyField] !== rowData[keyField]
+            )
+            : [...selectedQuestions, rowData];
 
-        setSelectedQuestions(updatedSelection); // Update context
+        setSelectedQuestions(updatedSelection);
     };
 
-    // Render checkbox state
+    const handleRowClick = (e, rowData) => {
+        e.preventDefault();
+        toggleQuestionSelection(rowData);
+    };
+
     const renderCheckbox = (rowData) => (
         <input
             type="checkbox"
             className="form-check-input align-content-center"
             checked={selectedQuestions.some(
                 (question) => question[keyField] === rowData[keyField]
-            )} // Check if rowData is in selectedQuestions
-            onChange={(e) => handleRowClick(e, rowData)} // Sync checkbox click with row selection
+            )}
+            onClick={(e) => e.stopPropagation()}
+            onChange={() => toggleQuestionSelection(rowData)}
         />
+    );
+
+    const allSelected = data.length > 0 && data.every((row) =>
+        selectedQuestions.some((q) => q[keyField] === row[keyField])
+    );
+
+    const toggleSelectAll = () => {
+        if (allSelected) {
+            const remaining = selectedQuestions.filter(
+                (q) => !data.some((d) => d[keyField] === q[keyField])
+            );
+            setSelectedQuestions(remaining);
+        } else {
+            const newSelections = data.filter(
+                (row) => !selectedQuestions.some((q) => q[keyField] === row[keyField])
+            );
+            setSelectedQuestions([...selectedQuestions, ...newSelections]);
+        }
+    };
+
+    const renderSelectAllCheckbox = () => (
+        <>
+            <input
+                type="checkbox"
+                className="form-check-input align-content-center"
+                checked={allSelected}
+                onChange={toggleSelectAll}
+                id="selectAllCheckbox"
+            />
+        </>
     );
 
     return (
@@ -52,6 +84,7 @@ export default function AddPretestTable({ data, filters, queryParams }) {
                 handleClick={handleRowClick}
                 isSelectable={true}
                 renderCheckbox={renderCheckbox}
+                renderSelectAllCheckbox={renderSelectAllCheckbox}
             />
         </>
     );

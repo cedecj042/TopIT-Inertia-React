@@ -100,15 +100,19 @@ class PretestController extends Controller
                 'type' => 'Pretest',
             ], $assessmentData);
 
-            $assessmentCourses = collect($filtered_courses)->map(fn($course) => [
-                'assessment_id' => $existingPretest->assessment_id,
-                'course_id' => $course->course_id,
-                'total_items' => $course->questions->count(),
-                'initial_theta_score' => 0.0,
-                'total_score' => 0,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ])->toArray();
+
+            $assessmentCourses = collect($courses)->map(function($course) use($existingPretest) {
+                $currentTheta = StudentCourseTheta::getCurrentTheta($existingPretest->student_id, $course->course_id)->first()->theta_score ?? 0.0;
+                return[
+                    'assessment_id' => $existingPretest->assessment_id,
+                    'course_id' => $course->course_id,
+                    'total_items' => $course->questions->count(),
+                    'initial_theta_score' => $currentTheta,
+                    'total_score' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            })->toArray();
 
             AssessmentCourse::upsert(
                 $assessmentCourses,
@@ -180,9 +184,9 @@ class PretestController extends Controller
                 ];
             })->toArray();
 
-            $updatedTheta = $this->thetaService->estimateThetaMLE(
-                $assessmentCourse->initial_theta_score ?? 0.0,
-                $responses
+            $updatedTheta = $this->thetaService->estimateThetaMAP(
+                $responses,
+                $assessmentCourse->initial_theta_score ?? 0.0
             );
             
             $currentCourseTheta = StudentCourseTheta::getCurrentTheta($assessment->student_id,$assessment_course->course_id)->first();

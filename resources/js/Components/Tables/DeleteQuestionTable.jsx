@@ -4,40 +4,42 @@ import Table from "./Table";
 import { PRETEST_COLUMN, QUESTION_COLUMN } from "@/Library/constants";
 import { toast } from "sonner";
 
-export default function SelectedPretestTable(
+export default function DeleteQuestionTable(
     { closeModal }
 ) {
     const keyField = 'question_id';
     const { selectedQuestions, setSelectedQuestions } = useSelectedQuestions();
     const { visibleColumns, onColumnChange } = useColumnVisibility(PRETEST_COLUMN);
     const { isProcessing, postRequest } = useRequest();
-    const addToPretest = () => {
+    const deleteQuestions = () => {
         const questions = selectedQuestions.map((question) => question.question_id);
-        postRequest("admin.pretest.add", { questions: questions }, {
+        postRequest("admin.question.bulkDelete", { questions: questions }, {
             onSuccess: (success) => {
-                toast.success("Questions added to Pretest successfully.", { duration: 3000 });
+                toast.success("Questions deleted successfully.", { duration: 3000 });
                 setSelectedQuestions([]);
             },
             onError: () => {
-                toast.error("Error saving the questions.", { duration: 3000 });
+                toast.error("Error deleting questions.", { duration: 3000 });
             },
+            preserveState: false,
+            preserveQuery:false
         });
     };
-    // Handle row selection toggle
+
     const handleRowClick = (e, rowData) => {
         e.preventDefault();
 
         const isSelected = selectedQuestions.some(
             (question) => question[keyField] === rowData[keyField]
-        ); // Check if the rowData is already in selectedQuestions
+        );
 
         const updatedSelection = isSelected
             ? selectedQuestions.filter(
                 (question) => question[keyField] !== rowData[keyField]
-            ) // Remove if already selected
-            : [...selectedQuestions, rowData]; // Add the full question object if not selected
+            )
+            : [...selectedQuestions, rowData]; 
 
-        setSelectedQuestions(updatedSelection); // Update context
+        setSelectedQuestions(updatedSelection);
     };
 
     // Render checkbox state
@@ -52,6 +54,35 @@ export default function SelectedPretestTable(
         />
     );
 
+    const allSelected = selectedQuestions.length > 0 && selectedQuestions.every((row) =>
+        selectedQuestions.some((q) => q[keyField] === row[keyField])
+    );
+
+    const toggleSelectAll = () => {
+        if (allSelected) {
+            const remaining = selectedQuestions.filter(
+                (q) => !selectedQuestions.some((d) => d[keyField] === q[keyField])
+            );
+            setSelectedQuestions(remaining);
+        } else {
+            const newSelections = selectedQuestions.filter(
+                (row) => !selectedQuestions.some((q) => q[keyField] === row[keyField])
+            );
+            setSelectedQuestions([...selectedQuestions, ...newSelections]);
+        }
+    };
+
+    const renderSelectAllCheckbox = () => (
+        <>
+            <input
+                type="checkbox"
+                className="form-check-input align-content-center"
+                checked={allSelected}
+                onChange={toggleSelectAll}
+                id="selectAllCheckbox"
+            />
+        </>
+    );
 
     return (
         <>
@@ -60,7 +91,7 @@ export default function SelectedPretestTable(
                     <div className="accordion-item">
                         <h2 className="accordion-header">
                             <button className="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                                Selected Question Summary
+                                Summary
                             </button>
                         </h2>
                         <div id="collapseOne" className="accordion-collapse collapse show" data-bs-parent="#accordianSummary">
@@ -113,6 +144,7 @@ export default function SelectedPretestTable(
                     keyField={keyField}
                     isRowClickable={true}
                     renderCheckbox={renderCheckbox}
+                    renderSelectAllCheckbox={renderSelectAllCheckbox}
                 />
             </div>
             <div className="modal-footer">
@@ -120,8 +152,8 @@ export default function SelectedPretestTable(
                     <button className="btn btn-secondary" onClick={closeModal}>
                         Cancel
                     </button>
-                    <button className="btn btn-primary" onClick={addToPretest}>
-                        Submit
+                    <button className="btn btn-danger" onClick={deleteQuestions} disabled={isProcessing}>
+                        Delete Questions
                     </button>
                 </div>
             </div>
