@@ -101,7 +101,7 @@ class PretestController extends Controller
             ], $assessmentData);
 
 
-            $assessmentCourses = collect($courses)->map(function($course) use($existingPretest) {
+            $assessmentCourses = collect($filtered_courses)->map(function($course) use($existingPretest) {
                 $currentTheta = StudentCourseTheta::getCurrentTheta($existingPretest->student_id, $course->course_id)->first()->theta_score ?? 0.0;
                 return[
                     'assessment_id' => $existingPretest->assessment_id,

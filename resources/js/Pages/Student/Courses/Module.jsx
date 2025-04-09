@@ -75,7 +75,7 @@ function Module({ module }) {
                                         )}
                                     />
                                 ) : (
-                                    <p>No content available for this module.</p>
+                                    <p></p>
                                 )}
                             </div>
                         </div>
