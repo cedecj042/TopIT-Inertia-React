@@ -22,13 +22,18 @@ class DashboardController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $monthlyCounts = User::where('userable_type', 'App\\Models\\Student')
-            ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
-            ->groupBy('month')
-            ->pluck('count', 'month');
+        $year = $request->input('year', date('Y')); 
 
+        $monthlyCounts = User::where('userable_type', 'App\\Models\\Student')
+            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(*) as count')
+            ->when($year, function ($query) use ($year) {
+                $query->whereYear('created_at', $year);
+            })
+            ->groupBy('year', 'month')
+            ->get()
+            ->pluck('count', 'month');
 
         $questionCounts = Question::selectRaw('test_type, COUNT(*) as total')
             ->whereIn('test_type', ['Pretest', 'Test'])
@@ -38,8 +43,8 @@ class DashboardController extends Controller
         $cards = [
             'Total Students' => Student::count(),
             'Total Courses' => Course::count(),
-            'Test Questions' => $questionCounts['Test'] ?? 0, // Default to 0 if no test questions
-            'Pretest Questions' => $questionCounts['Pretest'] ?? 0, // Default to 0 if no pretest questions
+            'Test Questions' => $questionCounts['Test'] ?? 0,
+            'Pretest Questions' => $questionCounts['Pretest'] ?? 0,
         ];
 
         $chartData = $this->prepareChartData($monthlyCounts);
@@ -53,6 +58,7 @@ class DashboardController extends Controller
                 'chartData' => $chartData,
                 'cards' => $cards,
                 'pdfs' => PdfResource::collection($pdfs),
+                'initialYear' => $year,
             ]
         );
     }
