@@ -98,9 +98,10 @@ class PdfController extends Controller
      */
     public function delete($id)
     {
+        \Log::info('Deleting PDF with ID: ' . $id);
         try {
-            $pdf = Pdf::firstOrFail($id);
-
+            $pdf = Pdf::findOrFail($id)->first();
+            
             $this->deletePdfFile($pdf);
             $this->deleteImagesViaFastAPI($pdf);
 

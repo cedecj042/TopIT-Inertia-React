@@ -21,7 +21,6 @@ class FastApiController extends Controller
     //
     public function storeProcessedPdf(ProcessContentRequest $request)
     {
-        Log::info("storing pdf");
         $validated = $request->validated();
         $course_id = $validated['course_id'];
         $pdf_id = $validated['pdf_id'];
@@ -42,7 +41,6 @@ class FastApiController extends Controller
                 $this->updatePdfStatus(PdfStatus::FAILED, $course_id, $pdf_id);
             })
             ->finally(function () {
-                Log::info("Batch processing of modules completed.");
             })
             ->dispatch();
 
@@ -53,10 +51,8 @@ class FastApiController extends Controller
     {
         $pdf = Pdf::findOrFail($pdf_id);
         if ($pdf) {
-            Log::info('PDF found', ['pdf' => $pdf]);
             $pdf->status = $status->value;
             $pdf->save();
-            Log::info('PDF processing status updated', ['status' => $status->name, 'pdf_id' => $pdf_id]);
         } else {
             Log::warning('PDF not found', ['course_id' => $course_id, 'file_name' => $pdf_id]);
         }
@@ -66,14 +62,12 @@ class FastApiController extends Controller
     public function storeProcessedQuestion(Request $request)
     {
         $data = $request->json()->all();
-        // Dispatch the job
         ProcessQuestionsJob::dispatch($data);
         return redirect()->back()->with('success', 'Deleted Successfully');
     }
 
     public function updateModuleStatus(Request $request)
     {
-        Log::info('updating mmodule status');
         $validated = $request->validate([
             'module_uids' => 'required|array',
         ]);

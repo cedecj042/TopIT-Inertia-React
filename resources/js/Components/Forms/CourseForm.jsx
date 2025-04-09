@@ -20,7 +20,7 @@ export default function CourseForm({ onClose }) {
                 if (data.props.flash.error) {
                     toast.error(data.props.flash.error, { duration: 3000 });
                 } else {
-                    toast.info("Adding new course", { duration: 3000 });
+                    toast.success("Successfully added new course", { duration: 3000 });
                 }
                 onClose();
             }

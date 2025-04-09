@@ -31,6 +31,11 @@ const ReviewQuestionForm = ({ assessment_items }) => {
                                         is_correct ? (<CheckCircleFill className="ms-2 text-success" />) : (<XCircleFill className="ms-2 text-danger" />)
                                     )}
                                 </label>
+                                {/* {!question.is_correct && (
+                                    <div className="text-danger mt-1">
+                                        <strong>Correct Answer:</strong> {correctAnswer}
+                                    </div>
+                                )} */}
                             </div>
                         )
                     })}
@@ -52,7 +57,7 @@ const ReviewQuestionForm = ({ assessment_items }) => {
                                 className="form-check-input"
                                 checked={studentAnswerArray.includes(choice)}
                                 readOnly
-                                disabled= { !studentAnswerArray.includes(choice)}
+                                disabled={!studentAnswerArray.includes(choice)}
                             />
                             <label
                                 className={`form-check-label ${Array.isArray(correctAnswer) &&

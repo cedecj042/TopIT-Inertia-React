@@ -1,13 +1,13 @@
 <?php
 namespace App\Jobs;
 
+use App\Services\FastApiService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use App\Services\FastAPIService;
 
 class ProcessPdfJob implements ShouldQueue
 {
@@ -24,7 +24,7 @@ class ProcessPdfJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($pdfFilePath, $fileName, $courseTitle, $courseId,$pdfId)
+    public function __construct($pdfFilePath, $fileName, $courseTitle, $courseId, $pdfId)
     {
         $this->pdfFilePath = $pdfFilePath;
         $this->fileName = $fileName;
@@ -38,7 +38,7 @@ class ProcessPdfJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(FastAPIService $fastAPIService)
+    public function handle(FastApiService $fastAPIService)
     {
         try {
             // Ensure the file exists before processing

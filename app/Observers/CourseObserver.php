@@ -25,8 +25,20 @@ class CourseObserver
     {
         $this->thetaService->initializeThetaForCourse($course);
         // Dispatch job to process the course
-        ProcessCourse::dispatch($course);
-
+        // ProcessCourse::dispatch($course);
+        $courseData = [
+            'course_id' => $course->course_id,
+            'title' => $course->title,
+            'description' => $course->description,
+        ];
+        $response = $this->fastAPIService->sendToFastAPI($courseData, 'create_course/');
+        if ($response) {
+            Log::info('Data was successfully sent to FastAPI.');
+            // $this->broadcastEvent(null, "Successfully added a new course", null);
+        } else {
+            Log::warning('Data failed to send to FastAPI.');
+            // $this->broadcastEvent(null, null, "Failed to save course.");
+        }
         Log::info('Course created and job dispatched', [
             'course_id' => $course->course_id,
         ]);
@@ -35,7 +47,7 @@ class CourseObserver
     public function deleted(Course $course)
     {
         StudentCourseTheta::byCourse($course->course_id)->delete();
-        FacadesLog::info('Course deleted and related records cleaned up', [
+        Log::info('Course deleted and related records cleaned up', [
             'course_id' => $course->course_id,
         ]);
 

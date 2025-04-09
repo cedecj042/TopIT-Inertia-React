@@ -108,7 +108,7 @@ function Reports({
                         <BarChart chartData={difficultyDistribution} />
                     </div>
                 </div>
-                <div className="row justify-content-center mt-5 g-0">
+                {/* <div className="row justify-content-center mt-5 g-0">
                     <div className="d-flex justify-content-between">
                         <h5 className="fw-bold mb-0 align-content-center">Recalibration Report</h5>
                         <Link href={route('admin.recalibration.index')} className="btn btn-outline-primary">View Recalibration Logs</Link>
@@ -133,7 +133,7 @@ function Reports({
                             />
                         </div>
                     </div>
-                </div>
+                </div> */}
             </div>
         </>
     )

@@ -86,35 +86,51 @@ class ThetaService
      * @param float $tol Convergence tolerance.
      * @return float Estimated θ.
      */
-    public function estimateThetaMAP(array $responses, float $theta_init): float
+    public function estimateThetaMAP($responses, $theta_init)
     {
         $max_iter = 100;
         $tol = 1e-6;
         $theta = $theta_init;
+        \Log::info("[Simulation Log]\n");
+        \Log::info("---------------------------------------------------------------\n");
+        \Log::info( "Starting MAP estimation with theta = " . round($theta, 4) . "\n");
+
         for ($i = 0; $i < $max_iter; $i++) {
             $grad = $this->firstDerivative($theta, $responses);
             $hess = $this->secondDerivative($theta, $responses);
 
-            // Avoid division by zero
             if ($hess == 0) {
+                \Log::info( "Hessian is zero. Stopping iteration.\n");
                 break;
             }
 
-            // Newton-Raphson update step
             $theta_new = $theta - $grad / $hess;
-
-            // Enforce the ability range constraint [-5, 5]
+            // Enforce the constraint [-5, 5]
             $theta_new = max(-5, min(5, $theta_new));
+            $delta = abs($theta_new - $theta);
 
-            // Check for convergence
-            if (abs($theta_new - $theta) < $tol) {
+            // Log only if the change is significant or it's the final iteration.
+            if ($i == 0 || $delta > 0.01 || $delta < $tol) {
+                \Log::info("Iteration " . ($i + 1) . ":\n");
+                \Log::info("  Theta: " . round($theta, 4) . " → " . round($theta_new, 4) . "\n");
+                \Log::info("  Gradient: " . round($grad, 4) . "\n");
+                \Log::info("  Hessian: " . round($hess, 4) . "\n");
+                \Log::info("  Delta: " . round($delta, 4) . "\n");
+            }
+
+            if ($delta < $tol) {
                 $theta = $theta_new;
+                \Log::info("Convergence achieved.\n");
                 break;
             }
+
             $theta = $theta_new;
         }
+        \Log::info("Final MAP theta estimate: " . round($theta, 4) . "\n");
+        \Log::info("---------------------------------------------------------------\n");
         return $theta;
     }
+
 
     // public function calculateWeightedPriorDistribution(
     //     array $theta_scores,
@@ -124,7 +140,7 @@ class ThetaService
     // ) {
     //     $n = count($theta_scores);
     //     \Log::info("Calculating weighted prior distribution from {$n} tests using exponential decay with λ = {$lambda}.");
-    
+
     //     // Fallback to defaults if there are no scores
     //     if ($n === 0) {
     //         return [
@@ -132,7 +148,7 @@ class ThetaService
     //             'variance' => $defaultVariance,
     //         ];
     //     }
-    
+
     //     // Calculate weights for each assessment.
     //     // Assumption: $theta_scores is ordered from oldest (index 0) to newest.
     //     $weights = [];
@@ -140,7 +156,7 @@ class ThetaService
     //         // Newest test (i = n-1) gets a weight of 1; older ones have exponentially lower weights.
     //         $weights[$i] = exp(-$lambda * ($n - 1 - $i));
     //     }
-    
+
     //     // Normalize the weights
     //     $sumWeights = array_sum($weights);
     //     if ($sumWeights == 0) {
@@ -148,14 +164,14 @@ class ThetaService
     //         $weights = array_fill(0, $n, 1.0);
     //         $sumWeights = $n;
     //     }
-    
+
     //     // Calculate the weighted mean.
     //     $weightedMean = 0.0;
     //     foreach ($theta_scores as $i => $score) {
     //         $weightedMean += $score * $weights[$i];
     //     }
     //     $weightedMean /= $sumWeights;
-    
+
     //     // Calculate the weighted variance.
     //     $weightedVariance = 0.0;
     //     foreach ($theta_scores as $i => $score) {
@@ -163,13 +179,13 @@ class ThetaService
     //         $weightedVariance += $weights[$i] * ($diff * $diff);
     //     }
     //     $weightedVariance /= $sumWeights; // Population-based estimation (could adjust for sample bias if needed)
-    
+
     //     // Enforce minimum and maximum variance limits if necessary.
     //     $minVariance = 1e-6;
     //     $maxVariance = 2.0;
     //     $weightedVariance = max($weightedVariance, $minVariance);
     //     $weightedVariance = min($weightedVariance, $maxVariance);
-    
+
     //     return [
     //         'mean' => $weightedMean,
     //         'variance' => $weightedVariance,
@@ -184,7 +200,7 @@ class ThetaService
     // ) {
     //     $n = count($theta_scores);
     //     \Log::info("Calculating weighted prior distribution from {$n} tests using exponential decay with λ = {$lambda}.");
-    
+
     //     // Fallback to defaults if there are no scores
     //     if ($n < 5) {
     //         return [
@@ -192,7 +208,7 @@ class ThetaService
     //             'variance' => $defaultVariance,
     //         ];
     //     }
-    
+
     //     // Calculate weights for each assessment.
     //     // Assumption: $theta_scores is ordered from oldest (index 0) to newest.
     //     $weights = [];
@@ -200,7 +216,7 @@ class ThetaService
     //         // Newest test (i = n-1) gets a weight of 1; older ones have exponentially lower weights.
     //         $weights[$i] = exp(-$lambda * ($n - 1 - $i));
     //     }
-    
+
     //     // Normalize the weights
     //     $sumWeights = array_sum($weights);
     //     if ($sumWeights == 0) {
@@ -208,14 +224,14 @@ class ThetaService
     //         $weights = array_fill(0, $n, 1.0);
     //         $sumWeights = $n;
     //     }
-    
+
     //     // Calculate the weighted mean.
     //     $weightedMean = 0.0;
     //     foreach ($theta_scores as $i => $score) {
     //         $weightedMean += $score * $weights[$i];
     //     }
     //     $weightedMean /= $sumWeights;
-    
+
     //     // Calculate the weighted variance.
     //     $weightedVariance = 0.0;
     //     foreach ($theta_scores as $i => $score) {
@@ -223,20 +239,20 @@ class ThetaService
     //         $weightedVariance += $weights[$i] * ($diff * $diff);
     //     }
     //     $weightedVariance /= $sumWeights; // Population-based estimation (could adjust for sample bias if needed)
-    
+
     //     // Enforce minimum and maximum variance limits if necessary.
     //     // $minVariance = 1e-6;
     //     // $maxVariance = 0.5;
     //     // $weightedVariance = max($weightedVariance, $minVariance);
     //     // $weightedVariance = min($weightedVariance, $maxVariance);
-    
+
     //     return [
     //         'mean' => $weightedMean,
     //         'variance' => $weightedVariance,
     //     ];
     // }
-    
-    
+
+
 
     // public function estimateThetaMAP(
     //     array $responses,
@@ -251,44 +267,44 @@ class ThetaService
     //     $thetaMin = -5.0;       // Lower bound for theta
     //     $thetaMax = 5.0;        // Upper bound for theta
     //     $damping = 1.0;         // Optionally adjust damping (set less than 1.0 to be more cautious)
-    
+
     //     for ($iteration = 0; $iteration < $maxIterations; $iteration++) {
     //         $numerator = 0.0;
     //         $denom = 0.0;
-    
+
     //         // Calculate contributions from the observed responses (likelihood)
     //         foreach ($responses as $response) {
     //             $a = $response['discrimination']; // item discrimination parameter
     //             $b = $response['difficulty'];     // item difficulty parameter
     //             $isCorrect = $response['is_correct']; // student's response (1 for correct; 0 otherwise)
-    
+
     //             // Logistic model: probability of a correct response P(θ)
     //             $pTheta = 1.0 / (1.0 + exp(-$a * ($theta - $b)));
     //             $qTheta = 1.0 - $pTheta;
-    
+
     //             // Gradient (first derivative) and curvature (second derivative)
     //             $numerator += $a * ($isCorrect - $pTheta);
     //             $denom += $a * $a * $pTheta * $qTheta;
     //         }
-    
+
     //         // Incorporate the prior: subtract the gradient from the prior and add to the hessian.
     //         // The priorWeight allows you to control how strongly the prior influences the update.
     //         $numerator -= $priorWeight * ($theta - $priorMean) / $priorVariance;
     //         $denom += $priorWeight * (1 / $priorVariance);
-    
+
     //         // Avoid division by a near-zero denominator.
     //         if (abs($denom) < 1e-6) {
     //             \Log::warning("Denominator too small in Newton update; breaking from iterations.");
     //             break;
     //         }
-    
+
     //         $update = $numerator / $denom;
     //         // Newton-Raphson update step (note: the sign is adjusted because our numerator comes from the log-posterior gradient)
     //         $theta += $damping * $update;
-    
+
     //         // Clamp theta to its allowed range.
     //         $theta = max($thetaMin, min($thetaMax, $theta));
-    
+
     //         // Convergence check
     //         if (abs($update) < $tolerance) {
     //             break;
@@ -296,7 +312,7 @@ class ThetaService
     //     }
     //     return $theta;
     // }
-    
+
 
     // public function estimateThetaMLE(float $initialTheta, array $responses): float
     // {
@@ -439,13 +455,15 @@ class ThetaService
         $courses = Course::all();
 
         if ($courses->isNotEmpty()) {
-            $data = $courses->map(fn($course) => [
-                'student_id' => $student->student_id,
-                'course_id' => $course->course_id,
-                'theta_score' => 0.0,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ])->toArray();
+            $data = $courses->map(function($course) use($student){ 
+                return [
+                    'student_id' => $student->student_id,
+                    'course_id' => $course->course_id,
+                    'theta_score' => 0.0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            })->toArray();
 
             StudentCourseTheta::upsert($data, ['student_id', 'course_id'], ['theta_score', 'updated_at']);
         }
