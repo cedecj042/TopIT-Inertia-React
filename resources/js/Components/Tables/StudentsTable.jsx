@@ -13,7 +13,7 @@ export default function StudentsTable({
     const {getRequest,isProcessing} = useRequest();
     const onClick = (e, rowData) => {
         e.preventDefault();
-        getRequest("admin.student",{ id: rowData[keyField], ...queryParams },{});
+        getRequest("admin.student",{ id: rowData[keyField]},{});
     };
     
     return (
