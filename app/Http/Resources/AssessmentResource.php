@@ -19,6 +19,7 @@ class AssessmentResource extends JsonResource
     {
         return [
             'assessment_id' => $this->assessment_id,
+            'sequence_number' => $this->sequence_number,
             'student_id' => $this->student_id,
             'start_time' => Carbon::parse($this->start_time)->format('g:i A'), 
             'type' => $this->type,

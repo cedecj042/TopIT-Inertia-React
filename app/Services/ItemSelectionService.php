@@ -8,22 +8,12 @@ use Illuminate\Support\Facades\Log;
 
 class ItemSelectionService
 {
-    /**
-     * THis function calculates the probability of a correct response for an item using the 2-parameter logistic model (2PL).
-     *
-     * Formula: P(θ) = 1 / (1 + e^(-a(θ - b)))
-     *
-     * @param float $theta The examinee's ability level.
-     * @param float $a The item's discrimination parameter.
-     * @param float $b The item's difficulty parameter.
-     * @return float The probability of a correct response.
-     */
     public function calculateProbability(float $theta, float $a, float $b): float
     {
         try {
             $exponent = -$a * ($theta - $b);
             $probability = 1 / (1 + exp($exponent));
-            
+
 
             return $probability;
         } catch (\Exception $e) {
@@ -32,78 +22,56 @@ class ItemSelectionService
         }
     }
 
-    /**
-     * Calculates the Fisher Information for an item.
-     *
-     * Formula: I(θ) = [P'(θ)]^2 / (P(θ)(1 - P(θ)))
-     *
-     * @param float $theta The examinee's ability level.
-     * @param float $a The item's discrimination parameter.
-     * @param float $b The item's difficulty parameter.
-     * @return float The Fisher Information for the item.
-     */
     public function calculateFisherInformation(float $theta, float $a, float $b): float
     {
-            // P(θ)
-            $pTheta = $this->calculateProbability($theta, $a, $b);
+        // P(θ)
+        $pTheta = $this->calculateProbability($theta, $a, $b);
 
-            // Fisher Information I(θ)
-            $fisherInformation = pow($a, 2) * $pTheta * (1 - $pTheta);
+        // Fisher Information I(θ)
+        $fisherInformation = pow($a, 2) * $pTheta * (1 - $pTheta);
 
-            // Log::debug('Probability calculated', [
-            //     'P(θ)' => $pTheta,
-            // ]);
+        Log::debug('Probability calculated', [
+            'a' => $a,
+            'b' => $b,
+            'theta' => $theta,
+            'P(θ)' => $pTheta,
+            'fisher' => $fisherInformation
+        ]);
 
-            return $fisherInformation;
+        return $fisherInformation;
 
     }
 
-    /**
-     * Calculates Fisher Information for all items and selects the item with the maximum value.
-     *
-     * @param float $theta The examinee's ability level.
-     * @param array $items An array of items, where each item is an associative array with 'a' and 'b' parameters.
-     *                     Example: [['id' => 1, 'a' => 1.2, 'b' => 0.5], ['id' => 2, 'a' => 0.9, 'b' => 1.1]]
-     * @return array|null The selected item with the maximum Fisher Information.
-     */
     public function getMaximumItem(float $theta, array $items): ?array
     {
         try {
-            $fisherInfoResults = [];
+            $maxFisherInfo = -INF;
+            $maxItem = null;
 
-            // Step 1: Calculate Fisher Information for all items
+            // Calculate Fisher Information and track maximum in a single pass
             foreach ($items as $item) {
-                $a = $item['a'] ?? 1.0; 
-                $b = $item['b'] ?? 0.0; 
+                $a = $item['a'] ?? 1.0;
+                $b = $item['b'] ?? 0.0;
 
                 $fisherInfo = $this->calculateFisherInformation($theta, $a, $b);
 
-                // Log::debug('Fisher Information calculated', [
-                //     'a' => $a,
-                //     'b' => $b,
-                //     'I(θ)' => $fisherInfo,
-                //     'theta' => $theta,
-                // ]);
-
-                // Store the item with its Fisher Information
-                $fisherInfoResults[] = [
-                    'item' => $item,
-                    'fisher_information' => $fisherInfo,
-                ];
+                // Update maximum if current Fisher info is higher
+                if ($fisherInfo > $maxFisherInfo) {
+                    $maxFisherInfo = $fisherInfo;
+                    $maxItem = $item;
+                }
             }
 
-            // Step 2: Select the item with the maximum Fisher Information
-            $selectedItem = collect($fisherInfoResults)->sortByDesc('fisher_information')->first();
+            if ($maxItem) {
+                Log::debug('Item with maximum Fisher Information selected', [
+                    'max_fisher_info' => $maxFisherInfo,
+                    'b (difficulty)' => $maxItem['b'],
+                    'a (discrimination)' => $maxItem['a'],
+                    'theta' => $theta,
+                ]);
+            }
 
-            Log::debug('Item with maximum Fisher Information selected', [
-                // 'selected_item' => $selectedItem['item'],
-                'max_fisher_info' => $selectedItem['fisher_information'],
-                'b (difficulty)' => $selectedItem['item']['b'],
-                'a (discrimination)' => $selectedItem['item']['a'],
-                'theta' => $theta,
-            ]);
-
-            return $selectedItem['item'] ?? null;
+            return $maxItem;
         } catch (\Exception $e) {
             Log::error('Error in getMaximumItem: ' . $e->getMessage());
             return null;
@@ -112,14 +80,7 @@ class ItemSelectionService
 
     /**
      * Selects the item with the maximum Fisher Information for a specific course.
-     *
-     * @param float $theta The examinee's ability level.
-     * @param string $course The course identifier.
-     * @param array $items An array of items with 'a', 'b', and 'course' parameters.
-     *                     Example: [['id' => 1, 'a' => 1.2, 'b' => 0.5, 'course' => 'math']]
-     * @return array|null The selected item with the maximum Fisher Information for the course.
      */
-
     public function getMaximumItemByCourse(float $theta, int $course, array $items): ?array
     {
         try {
@@ -135,7 +96,7 @@ class ItemSelectionService
             }
 
             $maximumCourseItem = $this->getMaximumItem($theta, $filteredItems);
-            
+
             return $maximumCourseItem;
         } catch (\Exception $e) {
             Log::error('Error in getMaximumItemByCourse: ' . $e->getMessage());
@@ -143,13 +104,6 @@ class ItemSelectionService
         }
     }
 
-
-    /**
-     * Calculates the standard error of measurement for the current assessment state
-     * @param float $theta The examinee's ability level
-     * @param array $items Array of items with their parameters
-     * @return float The standard error of measurement
-     */
     public function calculateStandardError(float $theta, array $items): float
     {
         try {

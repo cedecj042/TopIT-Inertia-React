@@ -26,7 +26,7 @@ function CourseDetail({ course }) {
                     <p>{course.description}</p>
                 </div>
                 <div className="row">
-                    <h5>List of Modules</h5>
+                    <h5 className="mb-3">List of Modules</h5>
                     <div className="course-list mx-auto" style={{ width: "100%" }}>
                         {course.modules && course.modules.length > 0 ? (
                             course.modules.map((module) => (

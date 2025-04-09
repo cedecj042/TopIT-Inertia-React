@@ -61,12 +61,28 @@ class TestController extends Controller
     {
         $studentId = Auth::user()->userable->student_id;
 
-        // Get 3 recent test history
-        $tests = Assessment::where('student_id', $studentId)
+        $allAssessments = Assessment::where('student_id', $studentId)
             ->where('status', AssessmentStatus::COMPLETED->value)
-            ->orderBy('updated_at', 'desc')
+            ->orderBy('created_at', 'asc') 
+            ->orderBy('assessment_id', 'asc')
+            ->get(['assessment_id', 'created_at']);
+
+        $sequenceMap = [];
+        foreach ($allAssessments as $index => $assessment) {
+            $sequenceMap[$assessment->assessment_id] = $index + 1;
+        }
+
+        $tests = Assessment::with(['assessment_courses.course'])
+            ->where('student_id', $studentId)
+            ->where('status', AssessmentStatus::COMPLETED->value)
+            ->orderBy('created_at', 'desc')
+            ->orderBy('assessment_id', 'desc')
             ->take(3)
-            ->get();
+            ->get()
+            ->map(function ($test) use ($sequenceMap) {
+                $test->sequence_number = $sequenceMap[$test->assessment_id] ?? 'N/A';
+                return $test;
+            });
 
         // Log::info('Tests retrieved:', ['count' => $tests->count(), 'tests' => $tests->toArray()]);
 
@@ -193,8 +209,10 @@ class TestController extends Controller
             ];
         })->toArray();
 
+        \Log::info(['responses' => $responses]);
+
         $currentCourse = $assessment_item->assessment_course;
-        
+
         $currentCourseTheta = StudentCourseTheta::getCurrentTheta($assessment->student_id, $currentCourse->course_id)->first();
         $previousTheta = $currentCourseTheta->theta_score;
 
@@ -228,18 +246,23 @@ class TestController extends Controller
 
         if ($this->terminationRuleService->shouldTerminateTest($assessment)) {
             $assessment_courses = $assessment->assessment_courses()->get();
-            $assessment_courses->each(function ($assessment_course) use ($assessment, $updatedTheta) {
+            $assessment_courses->each(function ($assessment_course) {
+                $latestThetaLog = ThetaScoreLog::where('assessment_course_id', $assessment_course->assessment_course_id)
+                    ->latest('created_at')
+                    ->first();
 
+                $finalThetaScore = $latestThetaLog->new_theta_score;
                 $assessment_course->loadAggregate('assessment_items as courseScore', 'sum(score)');
                 $assessment_course->loadCount('assessment_items as courseItems');
                 $courseScore = $assessment_course->courseScore ?? 0;
                 $courseItems = $assessment_course->courseItems ?? 0;
                 $percentage = ($courseItems > 0) ? ($courseScore / $courseItems) * 100 : 0;
+
                 $assessment_course->update([
                     'total_items' => $courseItems,
                     'total_score' => $courseScore,
                     'percentage' => $percentage,
-                    'final_theta_score' => $updatedTheta,
+                    'final_theta_score' => $finalThetaScore,
                     'updated_at' => now()
                 ]);
             });
@@ -301,6 +324,16 @@ class TestController extends Controller
             ->where('student_id', $studentId)
             ->where('status', AssessmentStatus::COMPLETED->value);
 
+        $allAssessments = clone $query;
+        $allAssessments = $allAssessments->orderBy('created_at', 'asc')
+            ->orderBy('assessment_id', 'asc')
+            ->get(['assessment_id', 'created_at']);
+
+        $sequenceMap = [];
+        foreach ($allAssessments as $index => $assessment) {
+            $sequenceMap[$assessment->assessment_id] = $index + 1;
+        }
+
         if ($courseTitle = request('course')) {
             $query->whereHas('assessment_courses.course', function ($q) use ($courseTitle) {
                 $q->where('title', 'like', '%' . $courseTitle . '%');
@@ -339,6 +372,11 @@ class TestController extends Controller
 
         $perPage = request('items', 5);
         $assessments = $query->paginate($perPage)->onEachSide(1);
+
+        $assessments->getCollection()->transform(function ($item) use ($sequenceMap) {
+            $item->sequence_number = $sequenceMap[$item->assessment_id] ?? 'N/A';
+            return $item;
+        });
 
 
         $title = DB::table('courses')->distinct()->pluck('title');

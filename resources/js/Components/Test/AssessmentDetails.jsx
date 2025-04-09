@@ -10,6 +10,7 @@ const getScoreBadgeClass = (score) => {
 
 // Helper function to display participant answer nicely (handle potential null/empty)
 const formatParticipantAnswer = (answer) => {
+    console.log(answer);
     if (answer === null || answer === undefined || answer === '') {
         return <span className="text-muted fst-italic">No Answer</span>;
     }
@@ -135,9 +136,9 @@ export default function AssessmentDetailsModal({ test }) {
                                                                         )}
                                                                     </div>
                                                                     <div className="col-md-4 d-flex flex-column align-items-md-end">
-                                                                        <div className='mb-1'> {/* Add margin */}
-                                                                            <span className='small text-muted'>Answered:</span> {formatParticipantAnswer(item.participant_answer)}
-                                                                        </div>
+                                                                        {/* <div className='mb-1'> Add margin */}
+                                                                            {/* <span className='small text-muted'>Answered:</span> {formatParticipantAnswer(item.participant_answer)} */}
+                                                                        {/* </div> */}
                                                                         <div className="mt-1">
                                                                             <span className={getScoreBadgeClass(item.score)}>
                                                                                 Score: {item.score}

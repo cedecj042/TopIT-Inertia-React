@@ -30,7 +30,7 @@ export default function TestHistoryList({ tests = [] }) {
                                                 <h6
                                                     className="card-title my-2 align-content-center"
                                                 >
-                                                    Assessment #{test.assessment_id}
+                                                    Assessment #{test.sequence_number}
                                                 </h6>
                                                 <div
                                                     className="d-flex flex-row flex-wrap gap-2"
