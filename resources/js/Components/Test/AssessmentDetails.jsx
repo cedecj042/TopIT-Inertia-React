@@ -10,7 +10,6 @@ const getScoreBadgeClass = (score) => {
 
 // Helper function to display participant answer nicely (handle potential null/empty)
 const formatParticipantAnswer = (answer) => {
-    console.log(answer);
     if (answer === null || answer === undefined || answer === '') {
         return <span className="text-muted fst-italic">No Answer</span>;
     }
@@ -46,9 +45,8 @@ export default function AssessmentDetailsModal({ test }) {
     const coursesAccordionId = `coursesAccordion-${assessment_id}`;
     return (
         <div className="modal-body px-4 py-3">
-            {/* Overall Summary Section */}
+            <h5 className="mb-3">Overall Summary</h5>
             <div className="mb-4 p-3 bg-light rounded border">
-                <h5 className="mb-3">Overall Summary</h5>
                 <div className="row g-3">
                     <div className="col-md-6 col-lg-4">
                         <strong>Assessment ID:</strong> {assessment_id}
@@ -120,7 +118,7 @@ export default function AssessmentDetailsModal({ test }) {
                                                     <ul className="list-group list-group-flush">
                                                         {ac.assessment_items.map((item, itemIndex) => (
                                                             <li key={item.assessment_item_id || itemIndex} className="list-group-item px-0 py-3"> {/* Added padding */}
-                                                                <div className="row g-2 align-items-start">
+                                                                <div className="row g-2 align-items-center">
                                                                     <div className="col-md-8">
                                                                         <strong>Q{itemIndex + 1}:</strong>
                                                                         <div className="mt-1 ps-2 border-start border-2">
@@ -129,16 +127,17 @@ export default function AssessmentDetailsModal({ test }) {
                                                                         {item.question?.answer && (
                                                                             <div className="text-muted small mt-2">
                                                                                 <em>Correct Answer:</em>
-                                                                                <div className='text-success fw-semibold ps-2'>
+                                                                                <div className='text-success fw-semibold'>
                                                                                     {formatParticipantAnswer(item.question.answer)}
                                                                                 </div>
                                                                             </div>
                                                                         )}
+                                                                        <em className='text-muted small'>{item.question?.question_type}</em>
                                                                     </div>
-                                                                    <div className="col-md-4 d-flex flex-column align-items-md-end">
-                                                                        {/* <div className='mb-1'> Add margin */}
-                                                                            {/* <span className='small text-muted'>Answered:</span> {formatParticipantAnswer(item.participant_answer)} */}
-                                                                        {/* </div> */}
+                                                                    <div className="col-md-4 d-flex flex-column align-items-md-end h-full">
+                                                                        <div className='mb-1 d-flex flex-column justify-content-end'> {/* Add margin */}
+                                                                            <span className='small text-muted text-end'>Answered:</span> {formatParticipantAnswer(item.participants_answer)}
+                                                                        </div>
                                                                         <div className="mt-1">
                                                                             <span className={getScoreBadgeClass(item.score)}>
                                                                                 Score: {item.score}

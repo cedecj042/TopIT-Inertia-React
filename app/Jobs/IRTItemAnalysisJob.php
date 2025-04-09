@@ -30,6 +30,8 @@ class IRTItemAnalysisJob implements ShouldQueue
         $this->questions = $questions;
     }
 
+
+
     // public function handle()
     // {
     //     $recalibration = Recalibration::find($this->recalibration_id);
@@ -141,7 +143,8 @@ class IRTItemAnalysisJob implements ShouldQueue
     //     }
     // }
 
-    public function handle(){
+    public function handle()
+    {
         $recalibration = Recalibration::find($this->recalibration_id);
         if (!$recalibration) {
             Log::error("Recalibration job failed: Invalid recalibration_id ({$this->recalibration_id})");
@@ -155,24 +158,24 @@ class IRTItemAnalysisJob implements ShouldQueue
             $totalIterations = 0;
 
             foreach ($this->questions as $questionId => $questionData) {
-                $responses = [];
-                $thetas = [];
+                // $responses = [];
+                // $thetas = [];
 
-                if (count($questionData['assessment_items']) < 5) {
+                if (count($questionData['assessment_items']) < 10) {
                     continue;
                 }
 
-                foreach ($questionData['assessment_items'] as $item) {
-                    $responses[] = $item['score'];
-                    $thetas[] = $item['final_theta_score'];
-                }
+                // foreach ($questionData['assessment_items'] as $item) {
+                //     $responses[] = $item['score'];
+                //     $thetas[] = $item['final_theta_score'];
+                // }
 
-                $initialGuess = [
-                    'a' => $questionData['discrimination_index'] ?? 1.0,
-                    'b' => $questionData['difficulty_value'] ?? 0.0
-                ];
+                // $initialGuess = [
+                //     'a' => $questionData['discrimination_index'] ?? 1.0,
+                //     'b' => $questionData['difficulty_value'] ?? 0.0
+                // ];
 
-                $params = $this->estimate2PLParametersMAP($responses, $thetas, $initialGuess);
+                $params = $this->estimateItemParametersMAP($questionData['assessment_items']->toArray(), $questionData['discrimination_index'], $questionData['difficulty_value']);
 
                 if (!is_nan($params['a']) && !is_nan($params['b']) && !is_null($params['a']) && !is_null($params['b'])) {
                     $difficultyType = $this->getDifficultyType($params['b']);
@@ -237,237 +240,379 @@ class IRTItemAnalysisJob implements ShouldQueue
             $this->broadcastEvent(null, null, "Recalibration job failed.");
         }
     }
-
-
-    private function estimate2PLParametersMAP($responses, $thetas, $initialGuess, $priorA = ['mean' => 1.0, 'variance' => 0.3], $priorB = ['mean' => 0.0, 'variance' => 4.0])
+    public function logistic(float $x): float
     {
-        $maxIterations = 100;
-        $tolerance = 1e-6;
-        $learningRate = 0.1;
-    
-        $a = $initialGuess['a'];
-        $b = $initialGuess['b'];
-        $prevLoss = null;
-    
-        for ($i = 0; $i < $maxIterations; $i++) {
-            $gradA = 0.0;
-            $gradB = 0.0;
-            $loss = 0.0;
-    
-            foreach ($responses as $index => $u) {
-                $theta = $thetas[$index];
-                $p = $this->probCorrect2PL($theta, $a, $b);
-                $q = 1 - $p;
-    
-                $loss += $u * log($p + 1e-9) + (1 - $u) * log($q + 1e-9);
-                $gradA += ($u - $p) * ($theta - $b);
-                $gradB += ($u - $p) * (-$a);
-            }
-    
-            // Add log prior loss
-            $loss -= pow($a - $priorA['mean'], 2) / (2 * $priorA['variance']);
-            $loss -= pow($b - $priorB['mean'], 2) / (2 * $priorB['variance']);
-    
-            // Add prior regularization to gradients
-            $gradA -= ($a - $priorA['mean']) / $priorA['variance'];
-            $gradB -= ($b - $priorB['mean']) / $priorB['variance'];
-    
-            // Update parameters
-            $a += $learningRate * $gradA;
-            $b += $learningRate * $gradB;
-    
-            // Clamp values
-            $a = min(max($a, 0.1), 2.0);
-            $b = min(max($b, -5.0), 5.0);
-    
-            if ($prevLoss !== null && abs($prevLoss - $loss) < $tolerance) {
+        return 1.0 / (1.0 + exp(-$x));
+    }
+
+    public function logLikelihoodItem(float $a, float $b, array $responses): float
+    {
+        $epsilon = 1e-10; // avoid log(0)
+        $sum = 0.0;
+        foreach ($responses as $response) {
+            $theta = $response['theta'];
+            $p = $this->logistic($a * ($theta - $b));
+            $p = max($epsilon, min(1 - $epsilon, $p));
+            $sum += $response['is_correct'] * log($p) + (1 - $response['is_correct']) * log(1 - $p);
+        }
+        // Priors:
+        // For a: use LogNormal prior. Here we assume parameters: mu_a (mean of ln(a)) and sigma_a.
+        $mu_a = 0.0;
+        $sigma_a = 0.5;
+        // log P(a) = -ln(a) - ((ln(a) - mu_a)^2)/(2*sigma_a^2) (ignoring additive constant)
+        $logPriorA = -log($a) - (pow(log($a) - $mu_a, 2) / (2 * pow($sigma_a, 2)));
+
+        // For b: use Normal prior with mean mu_b and variance sigma_b^2.
+        $mu_b = 0.0;
+        $sigma_b = 1.0;
+        // log P(b) = -((b - mu_b)^2)/(2*sigma_b^2)  (ignoring constant)
+        $logPriorB = -(pow($b - $mu_b, 2) / (2 * pow($sigma_b, 2)));
+
+        return $sum + $logPriorA + $logPriorB;
+    }
+
+
+    public function firstDerivativesItem(float $a, float $b, array $responses): array
+    {
+        $grad_a = 0.0;
+        $grad_b = 0.0;
+        foreach ($responses as $response) {
+            $theta = $response['theta'];
+            $z = $a * ($theta - $b);
+            $p = $this->logistic($z);
+            $diff = $response['is_correct'] - $p;
+            // Likelihood part gradients:
+            $grad_a += $diff * ($theta - $b);
+            $grad_b += -$a * $diff;
+        }
+
+        // Prior gradients:
+        // For a with LogNormal prior: derivative of -log(a) is -1/a and derivative of -((ln(a)-mu_a)^2/(2*sigma_a^2))
+        // is -((ln(a) - mu_a) / (a * sigma_a^2))
+        $mu_a = 0.0;
+        $sigma_a = 0.5;
+        $grad_a += -1 / $a - (log($a) - $mu_a) / ($a * pow($sigma_a, 2));
+
+        // For b with Normal prior: derivative of -((b-mu_b)^2/(2*sigma_b^2)) is -((b-mu_b)/(sigma_b^2))
+        $mu_b = 0.0;
+        $sigma_b = 1.0;
+        $grad_b += -($b - $mu_b) / pow($sigma_b, 2);
+
+        return ['a' => $grad_a, 'b' => $grad_b];
+    }
+    public function secondDerivativesItem(float $a, float $b, array $responses): array
+    {
+        $d2a = 0.0;  // second derivative wrt a
+        $d2b = 0.0;  // second derivative wrt b
+        $d2ab = 0.0; // mixed derivative
+        foreach ($responses as $response) {
+            $theta = $response['theta'];
+            $z = $a * ($theta - $b);
+            $p = $this->logistic($z);
+            $w = $p * (1 - $p); // weight factor
+
+            // From likelihood:
+            $d2a += -pow($theta - $b, 2) * $w;
+            $d2b += -pow($a, 2) * $w;
+            $d2ab += $a * ($theta - $b) * $w;
+        }
+
+        // Add prior second derivatives.
+        // For a with LogNormal prior, our prior log density is L(a) = -log(a) - ((log(a) - mu_a)^2)/(2*sigma_a^2).
+        // Its second derivative is approximated by: 1/a^2 - (1 - (log(a)-mu_a)) / (a^2 * sigma_a^2)
+        $mu_a = 0.0;
+        $sigma_a = 0.5;
+        $prior_d2a = 1 / pow($a, 2) - (1 - (log($a) - $mu_a)) / (pow($a, 2) * pow($sigma_a, 2));
+        $d2a += $prior_d2a;
+
+        // For b with Normal prior (mean mu_b, variance sigma_b^2):
+        // The second derivative is -1/(sigma_b^2)
+        $sigma_b = 1.0;
+        $prior_d2b = -1 / pow($sigma_b, 2);
+        $d2b += $prior_d2b;
+
+        // Prior does not couple a and b (mixed derivative = 0).
+        return [
+            ['a' => $d2a, 'b' => $d2ab],
+            ['a' => $d2ab, 'b' => $d2b]
+        ];
+    }
+    public function estimateItemParametersMAP(array $responses, float $a_init, float $b_init, int $max_iter = 100, float $tol = 1e-6): array
+    {
+        $a = $a_init;
+        $b = $b_init;
+
+        for ($i = 0; $i < $max_iter; $i++) {
+            $grad = $this->firstDerivativesItem($a, $b, $responses);
+            $hessian = $this->secondDerivativesItem($a, $b, $responses);
+
+            // Hessian matrix:
+            // [ [h11, h12],
+            //   [h21, h22] ]
+            $h11 = $hessian[0]['a'];
+            $h12 = $hessian[0]['b'];
+            $h21 = $hessian[1]['a'];
+            $h22 = $hessian[1]['b'];
+
+            // Compute determinant of Hessian.
+            $det = $h11 * $h22 - $h12 * $h21;
+            if (abs($det) < 1e-10) {
+                // Hessian nearly singular—stop update.
                 break;
             }
-    
-            $prevLoss = $loss;
-        }
-    
-        return ['a' => round($a, 2), 'b' => round($b, 2)];
-    }
-    
-    private function estimate2PLParameters($responses, $thetas, $initialGuess)
-    {
-        // Optimization parameters
-        $maxIterations = 100;
-        $tolerance = 1e-6;
-        $learningRate = 0.1;
 
-        $params = $initialGuess;
-        $prevLoss = null; // Initialize to null instead of INF
-        $iterations = 0;
-        $converged = false;
+            // Newton-Raphson update: delta = - H^-1 * grad.
+            // For 2x2 matrix, the inverse is (1/det) * [ [h22, -h12], [-h21, h11] ]
+            $delta_a = -(($h22 * $grad['a'] - $h12 * $grad['b']) / $det);
+            $delta_b = -((-$h21 * $grad['a'] + $h11 * $grad['b']) / $det);
 
-        // Simple gradient descent implementation
-        for ($i = 0; $i < $maxIterations; $i++) {
-            // Calculate loss and gradient
-            $loss = $this->logLikelihood2PL($params, $responses, $thetas);
-            $gradient = $this->gradLogLikelihood2PL($params, $responses, $thetas);
+            $a_new = $a + $delta_a;
+            $b_new = $b + $delta_b;
 
-            // Update parameters
-            $params['a'] -= $learningRate * $gradient['a'];
-            $params['b'] -= $learningRate * $gradient['b'];
+            // Enforce a > 0. (Here we use a minimum value such as 0.01.)
+            $a_new = max(0.01, $a_new);
 
-            // Ensure discrimination is positive
-            $params['a'] = round(min(max($params['a'], 0.1), 2.0), 2);
-            $params['b'] = round(min(max($params['b'], -5.0), 5.0), 2);
-            // Check convergence
-            if ($prevLoss !== null && abs($prevLoss - $loss) < $tolerance) {
-                $converged = true;
+            if (abs($a_new - $a) < $tol && abs($b_new - $b) < $tol) {
+                $a = $a_new;
+                $b = $b_new;
                 break;
             }
-            $iterations++;
-            $prevLoss = $loss;
+            $a = $a_new;
+            $b = $b_new;
         }
-
-        // Calculate standard errors
-        $hessian = $this->hessianLogLikelihood2PL($params, $responses, $thetas);
-
-        // Invert Hessian to get variance-covariance matrix
-        // Note: This is a simplified approach; you may want to use a linear algebra library
-        $det = $hessian[0]['aa'] * $hessian[1]['bb'] - $hessian[0]['ab'] * $hessian[1]['ba'];
-
-        if (abs($det) < 1e-10) {
-            $stdErrors = [
-                'a' => INF,
-                'b' => INF
-            ];
-        } else {
-            $vcov = [
-                ['aa' => $hessian[1]['bb'] / $det, 'ab' => -$hessian[0]['ab'] / $det],
-                ['ba' => -$hessian[1]['ba'] / $det, 'bb' => $hessian[0]['aa'] / $det]
-            ];
-
-            $stdErrors = [
-                'a' => round(sqrt($vcov[0]['aa']), 2), // Round to 2 decimal places
-                'b' => round(sqrt($vcov[1]['bb']), 2)  // Round to 2 decimal places
-            ];
-        }
-
-        $convergenceInfo = [
-            'success' => $converged,
-            'message' => $converged ? 'Optimization converged.' : 'Maximum iterations reached without convergence.',
-            'iterations' => $iterations
-        ];
-        $params['a'] = round($params['a'], 2);
-        $params['b'] = round(min(max($params['b'], -5.0), 5.0), 2);
-
-        return [$params, $stdErrors, $convergenceInfo];
+        return ['a' => $a, 'b' => $b];
     }
 
-    private function probCorrect2PL($theta, $a, $b)
-    {
-        $z = $a * ($theta - $b);
-        return 1.0 / (1.0 + exp(-$z));
-    }
 
-    private function logLikelihood2PL($params, $responses, $thetas)
-    {
-        $a = $params['a'];
-        $b = $params['b'];
+    // private function estimate2PLParametersMAP($responses, $thetas, $initialGuess, $priorA = ['mean' => 1.0, 'variance' => 0.3], $priorB = ['mean' => 0.0, 'variance' => 4.0])
+    // {
+    //     $maxIterations = 100;
+    //     $tolerance = 1e-6;
+    //     $learningRate = 0.1;
 
-        // Discrimination should be positive
-        if ($a <= 0) {
-            return INF;
-        }
+    //     $a = $initialGuess['a'];
+    //     $b = $initialGuess['b'];
+    //     $prevLoss = null;
 
-        $logLike = 0;
+    //     for ($i = 0; $i < $maxIterations; $i++) {
+    //         $gradA = 0.0;
+    //         $gradB = 0.0;
+    //         $loss = 0.0;
 
-        for ($i = 0; $i < count($responses); $i++) {
-            // Calculate probability
-            $p = $this->probCorrect2PL($thetas[$i], $a, $b);
+    //         foreach ($responses as $index => $u) {
+    //             $theta = $thetas[$index];
+    //             $p = $this->probCorrect2PL($theta, $a, $b);
+    //             $q = 1 - $p;
 
-            // Avoid log(0) errors
-            $p = max(min($p, 0.9999999), 0.0000001);
+    //             $loss += $u * log($p + 1e-9) + (1 - $u) * log($q + 1e-9);
+    //             $gradA += ($u - $p) * ($theta - $b);
+    //             $gradB += ($u - $p) * (-$a);
+    //         }
 
-            // Add to log likelihood
-            if ($responses[$i] == 1) {
-                $logLike += log($p);
-            } else {
-                $logLike += log(1 - $p);
-            }
-        }
+    //         // Add log prior loss
+    //         $loss -= pow($a - $priorA['mean'], 2) / (2 * $priorA['variance']);
+    //         $loss -= pow($b - $priorB['mean'], 2) / (2 * $priorB['variance']);
 
-        // Return negative log likelihood for minimization
-        return -$logLike;
-    }
+    //         // Add prior regularization to gradients
+    //         $gradA -= ($a - $priorA['mean']) / $priorA['variance'];
+    //         $gradB -= ($b - $priorB['mean']) / $priorB['variance'];
 
-    /**
-     * Calculate gradient of log likelihood for optimization
-     * 
-     * @param array $params [a, b] where a is discrimination and b is difficulty
-     * @param array $responses Binary response data (0 or 1)
-     * @param array $thetas Ability estimates for examinees
-     * @return array Gradient [d_a, d_b]
-     */
-    private function gradLogLikelihood2PL($params, $responses, $thetas)
-    {
-        $a = $params['a'];
-        $b = $params['b'];
+    //         // Update parameters
+    //         $a += $learningRate * $gradA;
+    //         $b += $learningRate * $gradB;
 
-        $d_a = 0;
-        $d_b = 0;
+    //         // Clamp values
+    //         $a = min(max($a, 0.1), 2.0);
+    //         $b = min(max($b, -5.0), 5.0);
 
-        for ($i = 0; $i < count($responses); $i++) {
-            $theta = $thetas[$i];
-            $p = $this->probCorrect2PL($theta, $a, $b);
+    //         if ($prevLoss !== null && abs($prevLoss - $loss) < $tolerance) {
+    //             break;
+    //         }
 
-            // Gradient components
-            $common = ($responses[$i] - $p);
-            $d_a += $common * ($theta - $b);
-            $d_b += $common * (-$a);
-        }
+    //         $prevLoss = $loss;
+    //     }
 
-        return [
-            'a' => -$d_a,  // Negative because we're minimizing negative log likelihood
-            'b' => -$d_b
-        ];
-    }
+    //     return ['a' => round($a, 2), 'b' => round($b, 2)];
+    // }
 
-    /**
-     * Calculate the Hessian matrix for standard error estimation
-     * 
-     * @param array $params [a, b] where a is discrimination and b is difficulty
-     * @param array $responses Binary response data (0 or 1)
-     * @param array $thetas Ability estimates for examinees
-     * @return array 2x2 Hessian matrix
-     */
-    private function hessianLogLikelihood2PL($params, $responses, $thetas)
-    {
-        $a = $params['a'];
-        $b = $params['b'];
+    // private function estimate2PLParameters($responses, $thetas, $initialGuess)
+    // {
+    //     // Optimization parameters
+    //     $maxIterations = 100;
+    //     $tolerance = 1e-6;
+    //     $learningRate = 0.1;
 
-        $hessian = [
-            ['aa' => 0, 'ab' => 0],
-            ['ba' => 0, 'bb' => 0]
-        ];
+    //     $params = $initialGuess;
+    //     $prevLoss = null; // Initialize to null instead of INF
+    //     $iterations = 0;
+    //     $converged = false;
 
-        for ($i = 0; $i < count($responses); $i++) {
-            $theta = $thetas[$i];
-            $p = $this->probCorrect2PL($theta, $a, $b);
+    //     // Simple gradient descent implementation
+    //     for ($i = 0; $i < $maxIterations; $i++) {
+    //         // Calculate loss and gradient
+    //         $loss = $this->logLikelihood2PL($params, $responses, $thetas);
+    //         $gradient = $this->gradLogLikelihood2PL($params, $responses, $thetas);
 
-            // Second derivatives
-            $d2_aa = ($theta - $b) * ($theta - $b) * $p * (1 - $p);
-            $d2_bb = $a * $a * $p * (1 - $p);
-            $d2_ab = ($theta - $b) * (-$a) * $p * (1 - $p);
+    //         // Update parameters
+    //         $params['a'] -= $learningRate * $gradient['a'];
+    //         $params['b'] -= $learningRate * $gradient['b'];
 
-            // Update Hessian
-            $hessian[0]['aa'] += $d2_aa;
-            $hessian[1]['bb'] += $d2_bb;
-            $hessian[0]['ab'] += $d2_ab;
-            $hessian[1]['ba'] += $d2_ab;
-        }
+    //         // Ensure discrimination is positive
+    //         $params['a'] = round(min(max($params['a'], 0.1), 2.0), 2);
+    //         $params['b'] = round(min(max($params['b'], -5.0), 5.0), 2);
+    //         // Check convergence
+    //         if ($prevLoss !== null && abs($prevLoss - $loss) < $tolerance) {
+    //             $converged = true;
+    //             break;
+    //         }
+    //         $iterations++;
+    //         $prevLoss = $loss;
+    //     }
 
-        // Negative because we're minimizing negative log likelihood
-        return [
-            ['aa' => -$hessian[0]['aa'], 'ab' => -$hessian[0]['ab']],
-            ['ba' => -$hessian[1]['ba'], 'bb' => -$hessian[1]['bb']]
-        ];
-    }
+    //     // Calculate standard errors
+    //     $hessian = $this->hessianLogLikelihood2PL($params, $responses, $thetas);
+
+    //     // Invert Hessian to get variance-covariance matrix
+    //     // Note: This is a simplified approach; you may want to use a linear algebra library
+    //     $det = $hessian[0]['aa'] * $hessian[1]['bb'] - $hessian[0]['ab'] * $hessian[1]['ba'];
+
+    //     if (abs($det) < 1e-10) {
+    //         $stdErrors = [
+    //             'a' => INF,
+    //             'b' => INF
+    //         ];
+    //     } else {
+    //         $vcov = [
+    //             ['aa' => $hessian[1]['bb'] / $det, 'ab' => -$hessian[0]['ab'] / $det],
+    //             ['ba' => -$hessian[1]['ba'] / $det, 'bb' => $hessian[0]['aa'] / $det]
+    //         ];
+
+    //         $stdErrors = [
+    //             'a' => round(sqrt($vcov[0]['aa']), 2), // Round to 2 decimal places
+    //             'b' => round(sqrt($vcov[1]['bb']), 2)  // Round to 2 decimal places
+    //         ];
+    //     }
+
+    //     $convergenceInfo = [
+    //         'success' => $converged,
+    //         'message' => $converged ? 'Optimization converged.' : 'Maximum iterations reached without convergence.',
+    //         'iterations' => $iterations
+    //     ];
+    //     $params['a'] = round($params['a'], 2);
+    //     $params['b'] = round(min(max($params['b'], -5.0), 5.0), 2);
+
+    //     return [$params, $stdErrors, $convergenceInfo];
+    // }
+
+    // private function probCorrect2PL($theta, $a, $b)
+    // {
+    //     $z = $a * ($theta - $b);
+    //     return 1.0 / (1.0 + exp(-$z));
+    // }
+
+    // private function logLikelihood2PL($params, $responses, $thetas)
+    // {
+    //     $a = $params['a'];
+    //     $b = $params['b'];
+
+    //     // Discrimination should be positive
+    //     if ($a <= 0) {
+    //         return INF;
+    //     }
+
+    //     $logLike = 0;
+
+    //     for ($i = 0; $i < count($responses); $i++) {
+    //         // Calculate probability
+    //         $p = $this->probCorrect2PL($thetas[$i], $a, $b);
+
+    //         // Avoid log(0) errors
+    //         $p = max(min($p, 0.9999999), 0.0000001);
+
+    //         // Add to log likelihood
+    //         if ($responses[$i] == 1) {
+    //             $logLike += log($p);
+    //         } else {
+    //             $logLike += log(1 - $p);
+    //         }
+    //     }
+
+    //     // Return negative log likelihood for minimization
+    //     return -$logLike;
+    // }
+
+    // /**
+    //  * Calculate gradient of log likelihood for optimization
+    //  * 
+    //  * @param array $params [a, b] where a is discrimination and b is difficulty
+    //  * @param array $responses Binary response data (0 or 1)
+    //  * @param array $thetas Ability estimates for examinees
+    //  * @return array Gradient [d_a, d_b]
+    //  */
+    // private function gradLogLikelihood2PL($params, $responses, $thetas)
+    // {
+    //     $a = $params['a'];
+    //     $b = $params['b'];
+
+    //     $d_a = 0;
+    //     $d_b = 0;
+
+    //     for ($i = 0; $i < count($responses); $i++) {
+    //         $theta = $thetas[$i];
+    //         $p = $this->probCorrect2PL($theta, $a, $b);
+
+    //         // Gradient components
+    //         $common = ($responses[$i] - $p);
+    //         $d_a += $common * ($theta - $b);
+    //         $d_b += $common * (-$a);
+    //     }
+
+    //     return [
+    //         'a' => -$d_a,  // Negative because we're minimizing negative log likelihood
+    //         'b' => -$d_b
+    //     ];
+    // }
+
+    // /**
+    //  * Calculate the Hessian matrix for standard error estimation
+    //  * 
+    //  * @param array $params [a, b] where a is discrimination and b is difficulty
+    //  * @param array $responses Binary response data (0 or 1)
+    //  * @param array $thetas Ability estimates for examinees
+    //  * @return array 2x2 Hessian matrix
+    //  */
+    // private function hessianLogLikelihood2PL($params, $responses, $thetas)
+    // {
+    //     $a = $params['a'];
+    //     $b = $params['b'];
+
+    //     $hessian = [
+    //         ['aa' => 0, 'ab' => 0],
+    //         ['ba' => 0, 'bb' => 0]
+    //     ];
+
+    //     for ($i = 0; $i < count($responses); $i++) {
+    //         $theta = $thetas[$i];
+    //         $p = $this->probCorrect2PL($theta, $a, $b);
+
+    //         // Second derivatives
+    //         $d2_aa = ($theta - $b) * ($theta - $b) * $p * (1 - $p);
+    //         $d2_bb = $a * $a * $p * (1 - $p);
+    //         $d2_ab = ($theta - $b) * (-$a) * $p * (1 - $p);
+
+    //         // Update Hessian
+    //         $hessian[0]['aa'] += $d2_aa;
+    //         $hessian[1]['bb'] += $d2_bb;
+    //         $hessian[0]['ab'] += $d2_ab;
+    //         $hessian[1]['ba'] += $d2_ab;
+    //     }
+
+    //     // Negative because we're minimizing negative log likelihood
+    //     return [
+    //         ['aa' => -$hessian[0]['aa'], 'ab' => -$hessian[0]['ab']],
+    //         ['ba' => -$hessian[1]['ba'], 'bb' => -$hessian[1]['bb']]
+    //     ];
+    // }
 
     public function broadcastEvent($info = null, $success = null, $error = null)
     {

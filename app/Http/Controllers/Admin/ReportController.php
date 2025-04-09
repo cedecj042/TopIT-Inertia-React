@@ -188,7 +188,6 @@ class ReportController extends Controller
             return $case->value;
         })->toArray();
 
-
         $filters = [
             'course' => $title,
             'test_types' => $testTypes,

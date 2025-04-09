@@ -4,10 +4,11 @@ import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import ThetaScoreLine from "@/Components/Chart/ThetaScoreLine";
 import { useRequest } from "@/Library/hooks";
 import { FilterContext } from "@/Components/Context/FilterContext";
-import { INITIAL_TEST_STATE } from "@/Library/filterState";
+import { INITIAL_ASSESSMENT_STATE, INITIAL_TEST_STATE } from "@/Library/filterState";
 import AssessmentFilters from "@/Components/Filter/AssessmentFilters";
 import AssessmentList from "@/Components/Test/AssessmentList";
 import Pagination from "@/Components/Pagination";
+import TestFilters from "@/Components/Filter/TestFilters";
 function Student({ student, theta_score, queryParams ={},filters,assessments }) {
     const { getRequest,isProcessing } = useRequest();
     const handleBackClick = () => {
@@ -45,7 +46,7 @@ function Student({ student, theta_score, queryParams ={},filters,assessments }) 
                         routeId={student.data.student_id}
                         components={assessments}
                     >
-                        <AssessmentFilters filters={filters}/>
+                        <TestFilters filters={filters}/>
                         <AssessmentList tests={assessments.data} />
                     </FilterContext>
                     <Pagination links={assessments.meta.links} queryParams={queryParams} />

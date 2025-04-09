@@ -19,7 +19,7 @@ class AssessmentItemResource extends JsonResource
             'assessment_item_id' => $this->assessment_item_id,
             'assessment_course_id' => $this->assessment_course_id,
             'question_id' => $this->question_id,
-            'participant_answer' => $this->participant_answer,
+            'participants_answer' => $this->participants_answer,
             'score' => $this->score,
             'created_at' => Carbon::parse($this->created_at)->format('F j, Y '), 
             'updated_at' => Carbon::parse( $this->updated_at)->format('F j, Y '), 

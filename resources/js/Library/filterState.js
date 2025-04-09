@@ -116,6 +116,29 @@ export const INITIAL_TEST_STATE = (queryParams = {}) => ({
     })()
 });
 
+export const INITIAL_ASSESSMENT_STATE  = (queryParams = {}) => ({
+    filterState: {
+        course: queryParams?.course || "",
+        test_types: queryParams?.test_types || "",
+        status:queryParams?.status || "",
+        school: queryParams?.school || "",
+        year: queryParams?.year || "",
+    },
+    dateState : {
+        from: queryParams?.from || "",
+        to: queryParams?.to || "",
+    },
+    otherState: {
+        items: queryParams?.items || "",
+    },
+    sortState: (() => {
+        const field = queryParams?.field || "";
+        const direction = queryParams?.direction || "";
+        return `${field}:${direction}`;
+    })()
+});
+
+
 export const INITIAL_RECALIBRATION_LOG_STATE = (queryParams = {}) => ({
     filterState: {
         course: queryParams?.course || "",

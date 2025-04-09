@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\AssessmentResource;
 use App\Models\Assessment;
 use App\Models\Course;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -38,6 +39,17 @@ class AssessmentController extends Controller
         }
         if ($status = request('status')) {
             $query->where('status', $status);
+        }
+        if(request('school') || request('year')){
+            $school = request('school');
+            $year = request('year');
+            $query->whereHas('student', function ($q) use ($school, $year) {
+                $q->when($school, function ($q) use ($school) {
+                    $q->where('school', $school);
+                })->when($year, function ($q) use ($year) {
+                    $q->where('year', $year);
+                });
+            });
         }
 
         $sort = request()->query('sort', ''); // Empty by default
@@ -70,11 +82,15 @@ class AssessmentController extends Controller
             return $case->value;
         })->toArray();
 
+        $schools = Student::distinct()->pluck('school');
+        $years = Student::distinct()->orderBy('year', 'asc')->pluck('year');
 
         $filters = [
             'course' => $title,
             'test_types' => $testTypes,
-            'status'=>$statusTypes,
+            'status' => $statusTypes,
+            'school'=> $schools,
+            'year' => $years,
         ];
 
         return Inertia::render('Admin/Assessment/Assessments', [

@@ -213,9 +213,8 @@ class RecalibrationController extends Controller
                         'discrimination_index' => $question->discrimination_index,
                         'assessment_items' => $question->assessment_items->map(fn($item) => [
                             'assessment_item_id' => $item->assessment_item_id,
-                            'score' => $item->score > 0 ? 1 : 0,
-                            'previous_theta_score' => round($item->previous_theta_score, 2),
-                            'final_theta_score' => round(optional($item->assessment_course)->final_theta_score, 2)
+                            'is_correct' => $item->score > 0 ? 1 : 0,
+                            'theta' => $item->previous_theta_score,
                         ])->values()
                     ]
                 ];

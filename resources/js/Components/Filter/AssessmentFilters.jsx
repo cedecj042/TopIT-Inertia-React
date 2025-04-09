@@ -5,7 +5,7 @@ import OtherFilter from "./Filters/OtherFilter";
 import SelectFilter from "./Filters/SelectFilter";
 import FilterProvider from "../Context/FilterContext";
 import ClearFunction from "./Filters/ClearFunction";
-import { INITIAL_TEST_STATE } from "@/Library/filterState";
+import { INITIAL_ASSESSMENT_STATE, INITIAL_TEST_STATE } from "@/Library/filterState";
 import DateRangeFilter from "./Filters/DateRangeFilter";
 import SortFilter from "./Filters/SortFilter";
 import { TEST_SORTING_OPTIONS } from "@/Library/constants";
@@ -15,8 +15,8 @@ export default function AssessmentFilters({ filters }) {
     const { handleClearFilter, handleFilterChange } = useFilterState(dispatch);
     const { handleInputChange, handleOtherChange, onKeyPress } = useOtherState(dispatch);
     const { handleDateChange, onDateClear } = useDateState(dispatch);
-    const { handleClearSort,changeDropdownSort } = useSortState(dispatch);
-    const { filterState, otherState, dateState,sortState } = state;
+    const { handleClearSort, changeDropdownSort } = useSortState(dispatch);
+    const { filterState, otherState, dateState, sortState } = state;
 
     const FILTER_DATA = [
         {
@@ -35,24 +35,36 @@ export default function AssessmentFilters({ filters }) {
             keyValue: filterState.status,
         },
     ];
+    const STUDENT_FILTER = [
+        {
+            data: filters.school,
+            filterKey: "school",
+            keyValue: filterState.school,
+        },
+        {
+            data: filters.year,
+            filterKey: "year",
+            keyValue: filterState.year,
+        },
+    ]
 
     return (
         <>
             <ClearFunction
                 currentState={filterState}
-                initialState={INITIAL_TEST_STATE().filterState}
+                initialState={INITIAL_ASSESSMENT_STATE().filterState}
                 handleClearFunction={handleClearFilter}
                 label={"filter"}
             />
             <ClearFunction
                 currentState={dateState}
-                initialState={INITIAL_TEST_STATE().dateState}
+                initialState={INITIAL_ASSESSMENT_STATE().dateState}
                 handleClearFunction={onDateClear}
                 label={"date"}
             />
             <ClearFunction
                 currentState={sortState}
-                initialState={INITIAL_TEST_STATE().sortState}
+                initialState={INITIAL_ASSESSMENT_STATE().sortState}
                 handleClearFunction={handleClearSort}
                 label={"sort"}
             />
@@ -67,37 +79,76 @@ export default function AssessmentFilters({ filters }) {
                         />
                     </div>
                     <div className="col-lg-2 col-md-3 input-container mb-3">
-                        <button
-                            className="btn bg-white btn-outline-secondary-subtle dropdown-toggle"
-                            type="button"
-                            id="filterDropdown"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                        >
-                            Filters{" "}
-                        </button>
-                        <div
-                            className="dropdown-menu p-3"
-                            aria-labelledby="filterDropdown"
-                        >
-                            {FILTER_DATA.map((filter, index) => (
-                                <SelectFilter
-                                    key={index} // Use index as key
-                                    data={filter.data}
-                                    filterKey={filter.filterKey}
-                                    keyValue={filter.keyValue}
-                                    handleFilterChange={handleFilterChange}
-                                />
-                            ))}
-                            <div className="mb-3">
+                        <div className="d-flex flex-row gap-2">
+                            <div>
                                 <button
-                                    className="btn btn-light w-100"
-                                    onClick={() =>
-                                        handleClearFilter(["course", "test_types","status"])
-                                    }
+                                    className="btn bg-white btn-outline-secondary-subtle dropdown-toggle"
+                                    type="button"
+                                    id="filterDropdown"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
                                 >
-                                    Clear Filters
+                                    Filters{" "}
                                 </button>
+                                <div
+                                    className="dropdown-menu p-3"
+                                    aria-labelledby="filterDropdown"
+                                >
+                                    {FILTER_DATA.map((filter, index) => (
+                                        <SelectFilter
+                                            key={index} // Use index as key
+                                            data={filter.data}
+                                            filterKey={filter.filterKey}
+                                            keyValue={filter.keyValue}
+                                            handleFilterChange={handleFilterChange}
+                                        />
+                                    ))}
+                                    <div className="mb-3">
+                                        <button
+                                            className="btn btn-light w-100"
+                                            onClick={() =>
+                                                handleClearFilter(["course", "test_types", "status"])
+                                            }
+                                        >
+                                            Clear Filters
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <button
+                                    className="btn bg-white btn-outline-secondary-subtle dropdown-toggle"
+                                    type="button"
+                                    id="filterDropdown"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                >
+                                    Student Filter{" "}
+                                </button>
+                                <div
+                                    className="dropdown-menu p-3"
+                                    aria-labelledby="filterDropdown"
+                                >
+                                    {STUDENT_FILTER.map((filter, index) => (
+                                        <SelectFilter
+                                            key={index} // Use index as key
+                                            data={filter.data}
+                                            filterKey={filter.filterKey}
+                                            keyValue={filter.keyValue}
+                                            handleFilterChange={handleFilterChange}
+                                        />
+                                    ))}
+                                    <div className="mb-3">
+                                        <button
+                                            className="btn btn-light w-100"
+                                            onClick={() =>
+                                                handleClearFilter(["school", "year"])
+                                            }
+                                        >
+                                            Clear Filters
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

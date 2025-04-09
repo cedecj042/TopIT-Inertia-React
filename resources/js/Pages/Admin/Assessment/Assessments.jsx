@@ -1,6 +1,6 @@
 import { Link } from "@inertiajs/react";
 import Pagination from "@/Components/Pagination";
-import { INITIAL_TEST_STATE } from "@/Library/filterState";
+import { INITIAL_ASSESSMENT_STATE, INITIAL_TEST_STATE } from "@/Library/filterState";
 import { FilterContext } from "@/Components/Context/FilterContext";
 import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import AssessmentList from "@/Components/Test/AssessmentList";
@@ -8,7 +8,6 @@ import AssessmentFilters from "@/Components/Filter/AssessmentFilters";
 
 const Assessments = ({ tests = [],queryParams={},filters}) => {
     const testsData = tests.data || [];
-
     return (
         <>
             <main className="row p-3">
@@ -26,13 +25,11 @@ const Assessments = ({ tests = [],queryParams={},filters}) => {
                 <div className="row mt-3 px-5">
 
                 <FilterContext
-                    initialState={INITIAL_TEST_STATE(queryParams)}
+                    initialState={INITIAL_ASSESSMENT_STATE(queryParams)}
                     routeName={'admin.assessments.index'}
                     components={tests}
                 >
-                    <AssessmentFilters
-                        filters={filters}
-                    />
+                    <AssessmentFilters filters={filters} />
                     <AssessmentList tests={testsData} />
                 </FilterContext>
                 </div>
