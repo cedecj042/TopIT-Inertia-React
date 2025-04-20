@@ -32,13 +32,18 @@ const ReviewQuestionForm = ({ assessment_items }) => {
                                     )}
                                 </label>
                                 {/* {!question.is_correct && (
-                                    <div className="text-danger mt-1">
+                                    <div className="text-success mt-1">
                                         <strong>Correct Answer:</strong> {correctAnswer}
                                     </div>
                                 )} */}
                             </div>
                         )
                     })}
+                    {!is_correct && (
+                        <div className="text-success mt-1">
+                            <strong>Correct Answer:</strong> {correctAnswer}
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -76,6 +81,11 @@ const ReviewQuestionForm = ({ assessment_items }) => {
                             </label>
                         </div>
                     ))}
+                    {!is_correct && (
+                        <div className="text-success mt-1">
+                            <strong>Correct Answer:</strong> {Array.isArray(correctAnswer) ? correctAnswer.join(", ") : correctAnswer}
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -100,6 +110,11 @@ const ReviewQuestionForm = ({ assessment_items }) => {
                             )}
                         </div>
                     </div>
+                    {!is_correct && (
+                        <div className="text-success mt-1">
+                            <strong>Correct Answer:</strong> {correctAnswer}
+                        </div>
+                    )}
                 </div>
             );
         }
