@@ -8,7 +8,7 @@ use App\Models\AssessmentItem;
 
 class TerminationRuleService
 {
-    public const MAX_QUESTIONS = 5;
+    public const MAX_QUESTIONS = 10;
     public const MAX_QUESTIONS_TOTAL = 12; 
     public function shouldTerminateTest(Assessment $assessment): bool
     {

@@ -245,31 +245,31 @@ class IRTItemAnalysisJob implements ShouldQueue
         return 1.0 / (1.0 + exp(-$x));
     }
 
-    public function logLikelihoodItem(float $a, float $b, array $responses): float
-    {
-        $epsilon = 1e-10; // avoid log(0)
-        $sum = 0.0;
-        foreach ($responses as $response) {
-            $theta = $response['theta'];
-            $p = $this->logistic($a * ($theta - $b));
-            $p = max($epsilon, min(1 - $epsilon, $p));
-            $sum += $response['is_correct'] * log($p) + (1 - $response['is_correct']) * log(1 - $p);
-        }
-        // Priors:
-        // For a: use LogNormal prior. Here we assume parameters: mu_a (mean of ln(a)) and sigma_a.
-        $mu_a = 0.0;
-        $sigma_a = 0.5;
-        // log P(a) = -ln(a) - ((ln(a) - mu_a)^2)/(2*sigma_a^2) (ignoring additive constant)
-        $logPriorA = -log($a) - (pow(log($a) - $mu_a, 2) / (2 * pow($sigma_a, 2)));
+    // public function logLikelihoodItem(float $a, float $b, array $responses): float
+    // {
+    //     $epsilon = 1e-10; 
+    //     $sum = 0.0;
+    //     foreach ($responses as $response) {
+    //         $theta = $response['theta'];
+    //         $p = $this->logistic($a * ($theta - $b));
+    //         $p = max($epsilon, min(1 - $epsilon, $p));
+    //         $sum += $response['is_correct'] * log($p) + (1 - $response['is_correct']) * log(1 - $p);
+    //     }
+    //     // Priors:
+    //     // For a: use LogNormal prior. Here we assume parameters: mu_a (mean of ln(a)) and sigma_a.
+    //     $mu_a = 0.0;
+    //     $sigma_a = 0.5;
+    //     // log P(a) = -ln(a) - ((ln(a) - mu_a)^2)/(2*sigma_a^2) (ignoring additive constant)
+    //     $logPriorA = -log($a) - (pow(log($a) - $mu_a, 2) / (2 * pow($sigma_a, 2)));
 
-        // For b: use Normal prior with mean mu_b and variance sigma_b^2.
-        $mu_b = 0.0;
-        $sigma_b = 1.0;
-        // log P(b) = -((b - mu_b)^2)/(2*sigma_b^2)  (ignoring constant)
-        $logPriorB = -(pow($b - $mu_b, 2) / (2 * pow($sigma_b, 2)));
+    //     // For b: use Normal prior with mean mu_b and variance sigma_b^2.
+    //     $mu_b = 0.0;
+    //     $sigma_b = 1.0;
+    //     // log P(b) = -((b - mu_b)^2)/(2*sigma_b^2)  (ignoring constant)
+    //     $logPriorB = -(pow($b - $mu_b, 2) / (2 * pow($sigma_b, 2)));
 
-        return $sum + $logPriorA + $logPriorB;
-    }
+    //     return $sum + $logPriorA + $logPriorB;
+    // }
 
 
     public function firstDerivativesItem(float $a, float $b, array $responses): array
@@ -295,7 +295,7 @@ class IRTItemAnalysisJob implements ShouldQueue
 
         // For b with Normal prior: derivative of -((b-mu_b)^2/(2*sigma_b^2)) is -((b-mu_b)/(sigma_b^2))
         $mu_b = 0.0;
-        $sigma_b = 1.0;
+        $sigma_b = 1.5;
         $grad_b += -($b - $mu_b) / pow($sigma_b, 2);
 
         return ['a' => $grad_a, 'b' => $grad_b];
@@ -382,58 +382,6 @@ class IRTItemAnalysisJob implements ShouldQueue
         }
         return ['a' => $a, 'b' => $b];
     }
-
-
-    // private function estimate2PLParametersMAP($responses, $thetas, $initialGuess, $priorA = ['mean' => 1.0, 'variance' => 0.3], $priorB = ['mean' => 0.0, 'variance' => 4.0])
-    // {
-    //     $maxIterations = 100;
-    //     $tolerance = 1e-6;
-    //     $learningRate = 0.1;
-
-    //     $a = $initialGuess['a'];
-    //     $b = $initialGuess['b'];
-    //     $prevLoss = null;
-
-    //     for ($i = 0; $i < $maxIterations; $i++) {
-    //         $gradA = 0.0;
-    //         $gradB = 0.0;
-    //         $loss = 0.0;
-
-    //         foreach ($responses as $index => $u) {
-    //             $theta = $thetas[$index];
-    //             $p = $this->probCorrect2PL($theta, $a, $b);
-    //             $q = 1 - $p;
-
-    //             $loss += $u * log($p + 1e-9) + (1 - $u) * log($q + 1e-9);
-    //             $gradA += ($u - $p) * ($theta - $b);
-    //             $gradB += ($u - $p) * (-$a);
-    //         }
-
-    //         // Add log prior loss
-    //         $loss -= pow($a - $priorA['mean'], 2) / (2 * $priorA['variance']);
-    //         $loss -= pow($b - $priorB['mean'], 2) / (2 * $priorB['variance']);
-
-    //         // Add prior regularization to gradients
-    //         $gradA -= ($a - $priorA['mean']) / $priorA['variance'];
-    //         $gradB -= ($b - $priorB['mean']) / $priorB['variance'];
-
-    //         // Update parameters
-    //         $a += $learningRate * $gradA;
-    //         $b += $learningRate * $gradB;
-
-    //         // Clamp values
-    //         $a = min(max($a, 0.1), 2.0);
-    //         $b = min(max($b, -5.0), 5.0);
-
-    //         if ($prevLoss !== null && abs($prevLoss - $loss) < $tolerance) {
-    //             break;
-    //         }
-
-    //         $prevLoss = $loss;
-    //     }
-
-    //     return ['a' => round($a, 2), 'b' => round($b, 2)];
-    // }
 
     // private function estimate2PLParameters($responses, $thetas, $initialGuess)
     // {
@@ -541,14 +489,6 @@ class IRTItemAnalysisJob implements ShouldQueue
     //     return -$logLike;
     // }
 
-    // /**
-    //  * Calculate gradient of log likelihood for optimization
-    //  * 
-    //  * @param array $params [a, b] where a is discrimination and b is difficulty
-    //  * @param array $responses Binary response data (0 or 1)
-    //  * @param array $thetas Ability estimates for examinees
-    //  * @return array Gradient [d_a, d_b]
-    //  */
     // private function gradLogLikelihood2PL($params, $responses, $thetas)
     // {
     //     $a = $params['a'];
@@ -573,14 +513,7 @@ class IRTItemAnalysisJob implements ShouldQueue
     //     ];
     // }
 
-    // /**
-    //  * Calculate the Hessian matrix for standard error estimation
-    //  * 
-    //  * @param array $params [a, b] where a is discrimination and b is difficulty
-    //  * @param array $responses Binary response data (0 or 1)
-    //  * @param array $thetas Ability estimates for examinees
-    //  * @return array 2x2 Hessian matrix
-    //  */
+
     // private function hessianLogLikelihood2PL($params, $responses, $thetas)
     // {
     //     $a = $params['a'];

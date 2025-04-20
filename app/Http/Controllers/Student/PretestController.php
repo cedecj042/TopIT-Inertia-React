@@ -176,6 +176,7 @@ class PretestController extends Controller
 
         $assessment_courses = $assessment->assessment_courses()->get();
         $assessment_courses->each(function ($assessment_course) use($assessment) {
+
             $responses = $assessment_course->assessment_items()->get()->map(function ($item) {
                 return [
                     'is_correct' => $item->score > 0,
@@ -188,6 +189,7 @@ class PretestController extends Controller
                 $responses,
                 $assessmentCourse->initial_theta_score ?? 0.0
             );
+            
             
             $currentCourseTheta = StudentCourseTheta::getCurrentTheta($assessment->student_id,$assessment_course->course_id)->first();
             $currentCourseTheta->update(['theta_score'=>$updatedTheta,'updated_at' => now()]);

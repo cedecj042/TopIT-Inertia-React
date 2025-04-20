@@ -7,6 +7,7 @@ use App\Enums\ItemStatus;
 use App\Enums\QuestionType;
 use App\Models\Assessment;
 use App\Models\AssessmentCourse;
+use App\Models\AssessmentItem;
 use App\Models\Course;
 use App\Models\Student;
 use App\Models\StudentCourseTheta;
@@ -50,7 +51,7 @@ class GenerateAssessmentJob implements ShouldQueue
         $courses = Course::pluck('course_id')->toArray();
         $usedCourses = collect($courses)->shuffle();
 
-        $startDate = now()->subMonths(5)->startOfDay(); // 1 month ago
+        $startDate = now()->subMonths(2)->startOfDay(); // 1 month ago
         $endDate = now()->startOfDay(); // today
 
         $days = $startDate->diffInDays($endDate) + 1;
@@ -95,7 +96,7 @@ class GenerateAssessmentJob implements ShouldQueue
                 ['total_items', 'total_score', 'initial_theta_score', 'final_theta_score', 'percentage', 'updated_at']
             );
 
-            $this->autoAnswerAssessment($assessment, $questionService, $scoringService, $thetaService, $terminationRuleService,$currentDate);
+            $this->autoAnswerAssessment($assessment, $questionService, $scoringService, $thetaService, $terminationRuleService, $currentDate);
         }
     }
 
@@ -120,10 +121,35 @@ class GenerateAssessmentJob implements ShouldQueue
                 'participants_answer' => is_string($randomAnswer) ? json_encode($randomAnswer) : $randomAnswer,
                 'score' => $score,
                 'status' => ItemStatus::COMPLETED->value,
-                'updated_at'=>$currentDate,
-                'created_at'=>$currentDate,
+                'updated_at' => $currentDate,
+                'created_at' => $currentDate,
             ]);
-            $responses = $assessmentItem->assessment_course->assessment_items->map(function ($item) {
+            // $responses = $assessmentItem->assessment_course->assessment_items->map(function ($item) {
+            //     return [
+            //         'is_correct' => $item->score > 0,
+            //         'discrimination' => $item->question->discrimination_index ?? 1.0,
+            //         'difficulty' => $item->question->difficulty_value ?? 0.0,
+            //     ];
+            // })->toArray();
+            $currentCourse = $assessmentItem->assessment_course;
+            $course_id = $currentCourse->course_id;
+
+            $items = AssessmentItem::with('question:question_id,difficulty_value,discrimination_index')
+                ->whereHas('assessment_course', function ($query) use ($course_id) {
+                    $query->where('course_id', $course_id)
+                        ->whereHas('assessment', function ($query) {
+                            $query->where('student_id', $this->student->student_id);
+                        });
+                })
+                ->orderBy('created_at', 'desc') // get newest first
+                ->take(30)
+                ->get()
+                // ->unique('question_id')
+                ->sortBy('created_at')
+                ->values();
+
+
+            $responses = $items->values()->map(function ($item, $index) {
                 return [
                     'is_correct' => $item->score > 0,
                     'discrimination' => $item->question->discrimination_index ?? 1.0,
@@ -131,7 +157,7 @@ class GenerateAssessmentJob implements ShouldQueue
                 ];
             })->toArray();
 
-            $currentCourse = $assessmentItem->assessment_course;
+
             $currentCourseTheta = StudentCourseTheta::getCurrentTheta($assessment->student_id, $currentCourse->course_id)->first();
             $previousTheta = $currentCourseTheta->theta_score ?? 0.0;
 
@@ -145,13 +171,13 @@ class GenerateAssessmentJob implements ShouldQueue
                 'assessment_item_id' => $assessmentItem->assessment_item_id,
                 'previous_theta_score' => $previousTheta,
                 'new_theta_score' => $updatedTheta,
-                'updated_at'=>$currentDate,
-                'created_at'=>$currentDate,
+                'updated_at' => $currentDate,
+                'created_at' => $currentDate,
             ]);
             if ($terminationRuleService->shouldTerminateTest($assessment)) {
                 $assessment_courses = $assessment->assessment_courses()->get();
 
-                $assessment_courses->each(function ($assessment_course) use ($assessment,$currentDate) {
+                $assessment_courses->each(function ($assessment_course) use ($assessment, $currentDate) {
                     $currentCourseTheta = StudentCourseTheta::getCurrentTheta($assessment->student_id, $assessment_course->course_id)->first();
                     $assessment_course->loadAggregate('assessment_items as courseScore', 'sum(score)');
                     $assessment_course->loadCount('assessment_items as courseItems');
@@ -184,7 +210,7 @@ class GenerateAssessmentJob implements ShouldQueue
         }
     }
 
-    private function generateRandomAnswer($question,$num, $denum)
+    private function generateRandomAnswer($question, $num, $denum)
     {
 
         $choices = $question->choices ? json_decode($question->choices, true) : [];
@@ -194,13 +220,13 @@ class GenerateAssessmentJob implements ShouldQueue
         // Simulate a correct (1) or incorrect (0) response
         $isCorrect = (mt_rand() / mt_getrandmax()) < $probability ? 1 : 0;
         if ($question->question_type === QuestionType::MULTIPLE_CHOICE_SINGLE->value) {
-            return  $isCorrect ? (is_array($correctAnswer) ? [collect($correctAnswer)->random()] : [$correctAnswer])
+            return !$isCorrect ? (is_array($correctAnswer) ? [collect($correctAnswer)->random()] : [$correctAnswer])
                 : [collect($choices)->random()];
         } elseif ($question->question_type === QuestionType::MULTIPLE_CHOICE_MANY->value) {
-            return $isCorrect? (is_array($correctAnswer) ? $correctAnswer : [$correctAnswer])
+            return !$isCorrect ? (is_array($correctAnswer) ? $correctAnswer : [$correctAnswer])
                 : collect($choices)->random(rand(1, count($choices)))->toArray();
         } else {
-            return $isCorrect ? (is_array($correctAnswer) ? collect($correctAnswer)->random() : $correctAnswer)
+            return !$isCorrect ? (is_array($correctAnswer) ? collect($correctAnswer)->random() : $correctAnswer)
                 : 'wrong_answer';
         }
     }

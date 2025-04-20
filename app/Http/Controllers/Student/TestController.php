@@ -216,19 +216,32 @@ class TestController extends Controller
             'student'
         ])->where('assessment_id', $validated['assessment_id'])->first();
 
-        $responses = $responses = $assessment_item->assessment_course->assessment_items->map(function ($item) {
+        $currentCourse = $assessment_item->assessment_course;
+        $course_id = $currentCourse->course_id;
+        $student_id = $assessment->student_id;
+
+        $items = AssessmentItem::with('question:question_id,difficulty_value,discrimination_index')
+            ->whereHas('assessment_course', function ($query) use ($course_id, $student_id) {
+                $query->where('course_id', $course_id)
+                    ->whereHas('assessment', function ($query) use($student_id) {
+                        $query->where('student_id', $student_id);
+                    });
+            })
+            ->orderBy('created_at', 'desc') // get newest first
+            ->take(30)
+            ->get()
+            ->sortBy('created_at')
+            ->values();
+
+
+        $responses = $items->values()->map(function ($item, $index) {
             return [
                 'is_correct' => $item->score > 0,
                 'discrimination' => $item->question->discrimination_index ?? 1.0,
                 'difficulty' => $item->question->difficulty_value ?? 0.0,
             ];
         })->toArray();
-
-        \Log::info(['responses' => $responses]);
-
-        $currentCourse = $assessment_item->assessment_course;
-
-        $currentCourseTheta = StudentCourseTheta::getCurrentTheta($assessment->student_id, $currentCourse->course_id)->first();
+        $currentCourseTheta = StudentCourseTheta::getCurrentTheta($student_id, $currentCourse->course_id)->first();
         $previousTheta = $currentCourseTheta->theta_score;
 
         \Log::info('Fetching StudentCourseTheta:', [

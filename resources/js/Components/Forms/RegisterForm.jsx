@@ -10,6 +10,7 @@ export default function RegisterForm({ routeName }) {
         register,
         handleSubmit,
         setValue,
+        setError,
         formState: { errors, isSubmitting },
         reset,
     } = useForm();
@@ -53,6 +54,16 @@ export default function RegisterForm({ routeName }) {
                 setPreviewImage(null); // Clear the preview
             },
             onError: (error) => {
+                if (error) {
+                    Object.entries(error).forEach(([key, messages]) => {
+                        setError(key, {
+                            type: "manual",
+                            message: messages,
+                        });
+                    });
+                } else {
+                    toast.error("Registration Failed", { duration: 3000 });
+                }
                 toast.error("Registration Failed", { duration: 3000 });
             },
         });
