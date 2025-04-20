@@ -19,11 +19,11 @@ use InvalidArgumentException;
 
 class ProcessModuleJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels,Batchable;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
 
     protected $moduleData;
     protected $courseId;
-
+    public $timeout = 300;
     public function __construct($moduleData, $courseId)
     {
         $this->moduleData = $moduleData;
@@ -32,70 +32,152 @@ class ProcessModuleJob implements ShouldQueue
 
     public function handle()
     {
-        DB::beginTransaction();
-        try {
-            $module = Module::create([
-                'course_id' => $this->courseId,
-                'title' => $this->moduleData['Title'],
-            ]);
+        \DB::reconnect();
+        $module = Module::create([
+            'module_uid' => $this->moduleData['module_uid'],
+            'course_id' => $this->courseId,
+            'title' => $this->moduleData['Title'],
+        ]);
 
-            $this->processLessons($module);
-            DB::commit();
-            Log::info('Successfully processed module', ['module' => $this->moduleData['Title']]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to process module', ['module' => $this->moduleData['Title'], 'error' => $e->getMessage()]);
-            throw $e;
-        }
+        $this->processContents($module, $this->moduleData);
+        $this->processLessons($module);
+        Log::info('Successfully processed module', ['module' => $this->moduleData['Title']]);
+
     }
-
-    // private function processLessons(Module $module)
-    // {
-    //     foreach ($this->moduleData['Lessons'] as $lessonData) {
-    //         $lesson = Lesson::create([
-    //             'module_id' => $module->module_id,
-    //             'title' => $lessonData['Title'],
-    //         ]);
-    //         $this->processSections($lesson, $lessonData['Sections']);
-    //     }
-    // }
     private function processLessons(Module $module)
     {
         if (!isset($this->moduleData['Lessons']) || !is_array($this->moduleData['Lessons'])) {
             Log::warning("No lessons found for module: " . $module->title);
-            return; // Or throw an exception if lessons are required
+            return;
         }
 
-        foreach ($this->moduleData['Lessons'] as $lessonData) {
-            $lesson = Lesson::create([
-                'module_id' => $module->module_id, 
-                'title' => $lessonData['Title'],
-            ]);
-            $this->processSections($lesson, $lessonData['Sections'] ?? []); // Handle missing sections
+        $lessons = collect($this->moduleData['Lessons']);
+        $existingLessons = Lesson::where('module_id', $module->module_id)
+            ->whereIn('lesson_uid', $lessons->pluck('lesson_uid'))
+            ->get()
+            ->keyBy('lesson_uid');
+
+        $lessonData = [];
+        foreach ($this->moduleData['Lessons'] as $lessonDataItem) {
+            if (!isset($existingLessons[$lessonDataItem['lesson_uid']])) {
+                $lessonData[] = [
+                    'module_id' => $module->module_id,
+                    'lesson_uid' => $lessonDataItem['lesson_uid'],
+                    'title' => $lessonDataItem['Title'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+
+        if (count($lessonData)) {
+            Lesson::insert($lessonData);
+        }
+
+        unset($lessonData, $existingLessons);
+        gc_collect_cycles();
+
+        foreach ($this->moduleData['Lessons'] as $lessonDataItem) {
+            $lesson = Lesson::where('lesson_uid', $lessonDataItem['lesson_uid'])->first();
+            if ($lesson) {
+                $this->processSections($lesson, $lessonDataItem['Sections'] ?? []);
+                $this->processContents($lesson, $lessonDataItem);
+            } else {
+                Log::warning("Lesson with lesson_uid {$lessonDataItem['lesson_uid']} not found.");
+            }
         }
     }
 
     private function processSections(Lesson $lesson, $sections)
     {
-        foreach ($sections as $sectionData) {
-            $section = Section::create([
-                'lesson_id' => $lesson->lesson_id,
-                'title' => $sectionData['Title'],
-            ]);
-            $this->processSubsections($section, $sectionData['Subsections']);
-            $this->processContents($section, $sectionData);
+        $sectionData = [];
+        $sections = collect($sections);
+
+        // Fetch existing sections based on section_uid
+        $existingSections = Section::where('lesson_id', $lesson->lesson_id)
+            ->whereIn('section_uid', $sections->pluck('section_uid')) // Use pluck to get section_uids
+            ->get()
+            ->keyBy('section_uid');
+
+        foreach ($sections as $sectionDataItem) {
+            if (!isset($existingSections[$sectionDataItem['section_uid']])) {
+                $sectionData[] = [
+                    'lesson_id' => $lesson->lesson_id,
+                    'section_uid' => $sectionDataItem['section_uid'],
+                    'title' => $sectionDataItem['Title'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
         }
+
+        // Upsert the new sections if necessary
+        if (count($sectionData)) {
+            Section::upsert($sectionData, ['lesson_id', 'section_uid'], ['updated_at', 'title']);
+        }
+
+        // Re-fetch existing sections to ensure the latest data is available after upsert
+        $existingSections = Section::where('lesson_id', $lesson->lesson_id)
+            ->whereIn('section_uid', $sections->pluck('section_uid'))
+            ->get()
+            ->keyBy('section_uid');
+
+        // Process each section and its subsections and contents
+        foreach ($sections as $sectionDataItem) {
+            $section = $existingSections[$sectionDataItem['section_uid']] ?? null;
+            if ($section) {
+                $this->processSubsections($section, $sectionDataItem['Subsections'] ?? []);
+                $this->processContents($section, $sectionDataItem);
+            } else {
+                Log::warning("Section with section_uid {$sectionDataItem['section_uid']} not found.");
+            }
+        }
+
+        // Free memory after processing sections
+        unset($sectionData, $existingSections);
+        gc_collect_cycles();
     }
 
     private function processSubsections(Section $section, $subsections)
     {
-        foreach ($subsections as $subsectionData) {
-            $subsection = Subsection::create([
-                'section_id' => $section->section_id,
-                'title' => $subsectionData['Title'],
-            ]);
-            $this->processContents($subsection, $subsectionData);
+        $subsectionData = [];
+        $subsections = collect($subsections);
+
+        // Fetch existing subsections based on subsection_uid
+        $existingSubsections = Subsection::where('section_id', $section->section_id)
+            ->whereIn('subsection_uid', $subsections->pluck('subsection_uid'))
+            ->get()
+            ->keyBy('subsection_uid');
+
+        foreach ($subsections as $subsectionDataItem) {
+            if (!isset($existingSubsections[$subsectionDataItem['subsection_uid']])) {
+                $subsectionData[] = [
+                    'section_id' => $section->section_id,
+                    'subsection_uid' => $subsectionDataItem['subsection_uid'],
+                    'title' => $subsectionDataItem['Title'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
         }
+
+        // Upsert subsections if necessary
+        if (count($subsectionData)) {
+            Subsection::upsert($subsectionData, ['section_id', 'subsection_uid'], ['updated_at', 'title']);
+        }
+
+        foreach ($subsections as $subsectionDataItem) {
+            $subsection = Subsection::where('subsection_uid', $subsectionDataItem['subsection_uid'])->first();
+            if ($subsection) {
+                $this->processContents($subsection, $subsectionDataItem);
+            } else {
+                Log::warning("Subsection with subsection_uid {$subsectionDataItem['subsection_uid']} not found.");
+            }
+        }
+
+        // Free memory after processing subsections
+        unset($subsectionData, $existingSubsections);
+        gc_collect_cycles();
     }
 
     private function processContents($parent, $data)
@@ -114,14 +196,12 @@ class ProcessModuleJob implements ShouldQueue
 
     private function createContent($data, $parent)
     {
-        // $contentData = [
-        //     'type' => $data['type'],
-        //     'description' => $data['text'] ?? '',
-        //     'caption' => $data['caption'],
-        //     'order' => $data['order'],
-        //     'file_name' => '',  // Will be updated if image is saved
-        //     'file_path' => '',  // Will be updated if image is saved
-        // ];
+        $validTypes = ['Figures', 'Tables', 'Code', 'Text', 'Header'];
+
+        if (!in_array($data['type'], $validTypes)) {
+            Log::warning("Skipped invalid content type: " . $data['type']);
+            return;
+        }
         $contentData = [
             'type' => match ($data['type']) {
                 'Figures' => ContentType::FIGURE->value,
@@ -129,7 +209,6 @@ class ProcessModuleJob implements ShouldQueue
                 'Code' => ContentType::CODE->value,
                 'Text' => ContentType::TEXT->value,
                 'Header' => ContentType::HEADER->value,
-                default => throw new InvalidArgumentException("Invalid content type"),
             },
             'description' => $data['text'] ?? null,
             'image_base64' => $data['image_base64'] ?? null,
@@ -137,14 +216,8 @@ class ProcessModuleJob implements ShouldQueue
             'order' => isset($data['order']) ? (int) $data['order'] : null,
         ];
 
-        // Use polymorphic relationship to create content
         $content = $parent->contents()->create($contentData);
 
-        // Store image if available
-        // if (isset($data['image_base64'])) {
-        //     $imageName = $this->storeBase64Image($data['image_base64'], $data['type'], $content);
-        //     ProcessBase64ImageJob::dispatch($imageName, strtolower($data['type']), $content);
-        // }
         if (isset($data['image_base64'])) {
             ProcessBase64ImageJob::dispatch($data['image_base64'], $content, $data['type']);
         }

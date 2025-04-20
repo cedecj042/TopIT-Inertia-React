@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\JobStatus;
 use App\Enums\QuestionDifficulty;
 use App\Enums\QuestionType;
 use App\Enums\TestType;
@@ -15,14 +16,17 @@ use App\Jobs\GenerateQuestionJob;
 use App\Jobs\ProcessQuestionsJob;
 use App\Models\Course;
 use App\Models\Question;
+use App\Models\QuestionJob;
 use App\Services\FastApiService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class QuestionController extends Controller
 {
     protected $fastAPIService;
-    public function __construct(FastApiService $fastAPIService){
+    public function __construct(FastApiService $fastAPIService)
+    {
         $this->fastAPIService = $fastAPIService;
     }
     public function index()
@@ -30,7 +34,6 @@ class QuestionController extends Controller
         //
         $query = Question::query()
             ->with('course')
-            ->where('test_type', 'Test')
             ->withCount('assessment_items')
             ->withCount([
                 'assessment_items as correct_count' => function ($query) {
@@ -91,16 +94,11 @@ class QuestionController extends Controller
             return $case->value;
         })->toArray();
 
-        $testTypes = collect(TestType::cases())->map(function ($case) {
-            return $case->value;
-        })->toArray();
-
         // Add all filters to the filters array
         $filters = [
             'courses' => $title,
             'difficulty' => $difficulty,
             'question_type' => $questionTypes,
-            'test_type' => $testTypes,
         ];
 
         return Inertia::render('Admin/Questions/Question', [
@@ -117,7 +115,31 @@ class QuestionController extends Controller
     public function generate(GenerateQuestionRequest $request)
     {
         $validatedData = $request->validated();
-        GenerateQuestionJob::dispatch($validatedData);
+        $jobs = collect();
+
+        foreach ($request->all() as $data) {
+            $job_id = QuestionJob::insertGetId([
+                'course_id' => $data['course_id'],
+                'total_very_easy' => $data['difficulty']['numOfVeryEasy'],
+                'total_easy' => $data['difficulty']['numOfEasy'],
+                'total_average' => $data['difficulty']['numOfAverage'],
+                'total_hard' => $data['difficulty']['numOfHard'],
+                'total_very_hard' => $data['difficulty']['numOfVeryHard'],
+                'total_questions' => array_sum($data['difficulty']),
+                'status' => JobStatus::PENDING->value,
+                'generated_by' => Auth::user()->userable->firstname . ', ' . Auth::user()->userable->lastname,
+            ]);
+
+            // Store the data with the job ID included
+            $jobs->push([
+                'course_id' => $data['course_id'],
+                'course_title' => $data['course_title'] ?? 'Unknown',
+                'question_job_id' => $job_id,
+                'difficulty' => $data['difficulty'],
+            ]);
+        }
+
+        GenerateQuestionJob::dispatch($jobs->toArray());
         return redirect()->back()->with('message', 'Generating questions based on the selected courses.');
     }
 
@@ -141,7 +163,7 @@ class QuestionController extends Controller
         $validated = $request->validated();
 
         $course = Course::where('title', $validated['course_title'])->first();
-        if (!$course){
+        if (!$course) {
             return redirect()->back()->withErrors('Course not found');
         }
         // Update course if changed
@@ -169,7 +191,15 @@ class QuestionController extends Controller
     }
     public function courses()
     {
-        $courses = Course::all();
+        $courses = Course::with([
+            'question_jobs' => function ($query) {
+                $query->status('pending');
+            },
+            'modules' => function ($query) {
+                $query->where('vectorized', true);
+            }
+        ])->get();
+        
         $difficulty = array_map(fn($case) => $case->value, QuestionDifficulty::cases());
         $questionTypes = collect(QuestionType::cases())->map(function ($case) {
             return $case->value;
@@ -188,22 +218,22 @@ class QuestionController extends Controller
     {
         $validated = $request->validated();
         $questionIds = $validated['questions'];
-    
+
         // Call FastAPI once with all IDs
         $questionUids = Question::whereIn('question_id', $questionIds)->pluck('question_uid');
         $response = $this->fastAPIService->bulkDeleteQuestions($questionUids->toArray());
         if ($response->failed()) {
             return redirect()->back()->withErrors('FastAPI bulk delete failed.');
         }
-    
+
         Question::whereIn('question_id', $questionIds)->delete();
-    
+
         $query = request()->query();
         $query['page'] = 1;
-    
+
         return redirect()->route('admin.question.index', $query)
             ->with('success', 'Deleted Successfully');
     }
-    
+
 
 }

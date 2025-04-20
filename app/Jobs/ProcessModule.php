@@ -108,27 +108,9 @@ class ProcessModule implements ShouldQueue
 
             // Use Laravel's Storage facade to store the file
             Storage::disk('local')->put("public/json/{$fileName}", $jsonData);
-            Log::info("Sending all module data to FastAPI", ['module_data' => $allModulesData]);
 
-            // Send all module data to FastAPI for processing
             $result = $fastApiService->sendToFastAPI($allModulesData, 'add-modules/');
             
-            // if ($result) {
-            //     // Update each module's vectorized status
-            //     foreach ($allModulesData as $moduleData) {
-            //         $module = Module::find($moduleData['module_id']);
-            //         if ($module) {
-            //             $module->vectorized = true;
-            //             $module->save();
-            //         }
-            //     }
-            //     Log::info('Data was successfully sent to FastAPI.');
-            //     $this->broadcastEvent(null, "Successfully vectorized selected modules", null);
-            // } else {
-            //     Log::warning('Data failed to send to FastAPI.');
-            //     $this->broadcastEvent(null, null, "Failed to process modules.");
-            // }
-
             if ($result) {
                 Log::info('Data sent to FastAPI successfully. Waiting for vectorization callback.');
                 $this->broadcastEvent("Modules are being vectorized...", null, null);
@@ -145,24 +127,20 @@ class ProcessModule implements ShouldQueue
     private function formatContents($contents)
     {
         return $contents->map(function ($content) {
-
             $description = $this->sanitizeForJson($content->description ?? "");
-
-            // Include basic fields for all content types
+    
             $formattedContent = [
                 'content_id' => $content->content_id,
                 'type' => $content->type,
-                'description' =>  $description,
-                'order' => $content->order,
+                'description' => $description,
             ];
-
-            // Include additional fields for Table, Figure, and Code types
+    
             if (in_array($content->type, ['Table', 'Figure', 'Code'])) {
                 $formattedContent['caption'] = $content->caption ?? "";
             }
-
+    
             return $formattedContent;
-        });
+        })->toArray(); // 🔥 This is what converts the Collection to a plain array
     }
     public function broadcastEvent($info = null, $success = null, $error = null)
     {

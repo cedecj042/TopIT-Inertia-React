@@ -66,6 +66,7 @@ class User extends Authenticatable
         return $this->userable instanceof Student;
     }
 
+
     protected static function booted()
     {
         static::deleting(function ($user) {

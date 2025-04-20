@@ -157,7 +157,6 @@ class QuestionService
         $answeredQuestions = $selectedCourse->assessment_items->pluck('question_id')->toArray();
         return Question::where('course_id', $selectedCourse->course_id)
             ->whereNotIn('question_id', $answeredQuestions)
-            ->where('test_type', 'Test')
             ->with(['course'])
             ->get();
     }

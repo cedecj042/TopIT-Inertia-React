@@ -19,7 +19,8 @@ class QuestionResource extends JsonResource
         return [
             'question_id' => $this->question_id,
             'course_id' => $this->course_id,
-            'test_type' => $this->test_type,
+            'module_uid' => $this->module_uid,
+            'generate_question_id' => $this->generate_question_id,
             'question' => $this->question,
             'discrimination_index' => $this->discrimination_index,
             'created_at' => Carbon::parse($this->created_at)->format('F j, Y '), 

@@ -7,10 +7,14 @@ export default function PdfTable({
 }){
     const {isProcessing,deleteRequest} = useRequest();
 
-    const deletePdf = async (event, pdf_id) => {
-        event.stopPropagation();
+    const deletePdf = (pdf_id) => {
+        // e.stopPropagation();
 
-        await deleteRequest("admin.course.pdf.delete", pdf_id, {});
+        deleteRequest("admin.course.pdf.delete", pdf_id, {
+            onError: (error) => {
+                toast.error(error.error ?? "Failed to delete the PDF. Please try again.", { duration: 3000 });
+            },
+        });
     };
     
     
@@ -18,7 +22,7 @@ export default function PdfTable({
         return (
             <button
                 type="button"
-                onClick={(e) => deletePdf(e, rowData.pdf_id)}
+                onClick={(e) => deletePdf(rowData.pdf_id)}
                 disabled={isProcessing}
                 className="btn btn-outline-danger d-flex justify-content-center"
             >

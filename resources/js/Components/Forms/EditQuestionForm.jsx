@@ -17,7 +17,6 @@ export default function EditQuestionForm({ question, onClose, filters }) {
             question: question?.question || '',
             answer: question?.answer || [],
             choices: question?.choices?.map(choice => ({ value: choice })) || [],
-            test_type: question?.test_type || '',
             difficulty: question?.difficulty_type || '',
             difficulty_value: question?.difficulty_value || '',
             question_type: question?.question_type || '',
@@ -72,10 +71,18 @@ export default function EditQuestionForm({ question, onClose, filters }) {
 
     const onSubmit = (data) => {
         const finalChoices = data.choices.map(choice => choice.value).filter(Boolean);
+    
+        let answer = data.answer;
+        if (type === "Identification" && typeof answer === "string") {
+            answer = answer.split(",").map(a => a.trim()).filter(Boolean);
+        }
+    
         const finalData = {
             ...data,
+            answer,
             choices: finalChoices,
         };
+    
         putRequest('admin.question.update', data.question_id, finalData, {
             onSuccess: () => {
                 toast.success('Question updated successfully', { duration: 3000 });
@@ -178,14 +185,6 @@ export default function EditQuestionForm({ question, onClose, filters }) {
                             <label className="form-label">Question Type</label>
                             <select className="form-select" {...register("question_detail_type")}>
                                 {filters.question_type.map((type, index) => (
-                                    <option value={type} key={index}>{type}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="mb-3">
-                            <label className="form-label">Test Type</label>
-                            <select className="form-select" {...register("test_type")}>
-                                {filters.test_type.map((type, index) => (
                                     <option value={type} key={index}>{type}</option>
                                 ))}
                             </select>

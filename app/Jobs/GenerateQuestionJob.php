@@ -32,17 +32,10 @@ class GenerateQuestionJob implements ShouldQueue
      */
     public function handle(FastApiService $fastApiService)
     {
-        // Log the received data for debugging
         Log::info("Processing GenerateQuestionJob with data:", $this->requestData);
-
-        // Prepare the JSON content to send to FastAPI
         $jsonContent = json_encode($this->requestData, JSON_PRETTY_PRINT);
-        Log::info($jsonContent);
-
-        // Send data to FastAPI
         $fastApiService->generateQuestions($jsonContent);
 
-        // Log success
         Log::info("Questions successfully sent to FastAPI.");
     }
 }

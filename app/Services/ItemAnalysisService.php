@@ -15,9 +15,7 @@ class ItemAnalysisService
             ->havingRaw('COUNT(*) > 10')
             ->pluck('question_id'); 
 
-        $questions = Question::where('test_type', 'Test')
-            ->whereIn('question_id', $validQuestionIds)
-            ->get();
+        $questions = Question::whereIn('question_id', $validQuestionIds)->get();
 
 
         foreach ($questions as $question) {

@@ -95,11 +95,7 @@ class TestController extends Controller
     public function select()
     {
         // Added to can only select course with greater than 50 questions
-        $courses = Course::withCount([
-            'questions' => function ($query) {
-                $query->where('test_type', 'TEST');
-            }
-        ])
+        $courses = Course::withCount(['questions'])
             ->having('questions_count', '>=', 10)
             ->get();
 
@@ -362,7 +358,7 @@ class TestController extends Controller
             $query->whereDate('created_at', '<=', $toDate);
         }
         if ($testType = request('test_types')) {
-            $query->where('type', $testType);
+            $query->testType($testType);
         }
 
         $sort = request()->query('sort', ''); // Empty by default

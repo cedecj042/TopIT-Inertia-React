@@ -46,7 +46,7 @@ class PretestController extends Controller
         $student = Student::find(Auth::user()->userable->student_id);
 
         $existingPretest = Assessment::where('student_id', $student->student_id)
-            ->where('type', 'Pretest')
+            ->testType('Pretest')
             ->where('status', 'Completed')
             ->first();
 
@@ -66,7 +66,9 @@ class PretestController extends Controller
         }
 
         $existingPretest = $student->assessments()
-            ->where('type', 'Pretest')
+            ->whereHas('assessment_type',function($query) {
+                $query->where('type', 'Pretest');
+            })
             ->where('status', 'In Progress')
             ->with('assessment_courses.course', 'assessment_courses.assessment_items.question')
             ->first();

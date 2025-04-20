@@ -17,7 +17,6 @@ return new class extends Migration
             $table->enum('status', ['Pending', 'Failed', 'Success','Processing'])->default('Pending');
             $table->string('recalibrated_by');
             $table->integer('total_iterations')->nullable();
-            $table->enum('convergence_status',['All','Some','None'])->nullable();
             $table->timestamps();
         });
         Schema::create('question_recalibration_logs', function (Blueprint $table) {

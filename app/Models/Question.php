@@ -12,20 +12,23 @@ class Question extends Model
     protected $primaryKey = 'question_id';
     protected $fillable = [
         'course_id',
+        'question_job_id',	
         'question_uid',
-        'difficulty_id',
-        'test_type',
-        'question',
+        'module_uid',
         'difficulty_type',
         'difficulty_value',
         'discrimination_index',
+        'question',
         'question_type',
         'answer',
         'choices',
         'created_at',
         'updated_at'
     ];
-
+    public function question_job()
+    {
+        return $this->belongsTo(QuestionJob::class, 'generate_question_id', 'generate_question_id');
+    }
     public function course()
     {
         return $this->belongsTo(Course::class, 'course_id', 'course_id');

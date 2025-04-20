@@ -51,7 +51,6 @@ class ProcessBase64ImageJob implements ShouldQueue
                 'content' => $this->content->id,
                 'error' => $e->getMessage()
             ]);
-            // Optionally re-throw or handle the exception based on your application's error handling policy
         }
     }
 }

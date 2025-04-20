@@ -5,23 +5,30 @@ import { FilterContext } from "@/Components/Context/FilterContext";
 import { AdminContent } from "@/Components/LayoutContent/AdminContent";
 import AssessmentList from "@/Components/Test/AssessmentList";
 import AssessmentFilters from "@/Components/Filter/AssessmentFilters";
+import { useState } from "react";
+import Modal from "@/Components/Modal/Modal";
 
 const Assessments = ({ tests = [],queryParams={},filters}) => {
     const testsData = tests.data || [];
+
+    const [openModal,setOpenModal] = useState(false);
     return (
         <>
             <main className="row p-3">
                 <div className="row mt-3 px-5">
-                    <div className="d-flex justify-content-between">
-                        <Link
-                            href={route('admin.report')}
-                            className="btn btn-link text-dark text-decoration-none mb-2 p-0"
+                    <div className="col mb-3 btn-toolbar justify-content-between">
+                        <h2 className="fw-bolder m-0">Assessments</h2>
+                        <button
+                            type="button"
+                            className="btn btn-primary btn-md btn-size btn-toolbar gap-2"
+                            // onClick={openModal}
                         >
-                            <i className="bi bi-arrow-left"></i> Back to Report
-                        </Link>
+                            <span className="material-symbols-outlined">tune</span>
+                            <span className="fs-6">Adjust Types</span>
+                        </button>
                     </div>
-                    <h3 className="fw-bold mb-2 mt-2">Assessments</h3>
                 </div>
+                
                 <div className="row mt-3 px-5">
 
                 <FilterContext
@@ -40,6 +47,14 @@ const Assessments = ({ tests = [],queryParams={},filters}) => {
                     </div>
                 </div>
             </main>
+            <Modal
+                show={openModal}
+                onClose={() => setOpenModal(false)}
+                modalSize={"lg"}
+                modalTitle={"Adjust Assessment Types"}
+            >
+                
+            </Modal>
         </>
     );
 };

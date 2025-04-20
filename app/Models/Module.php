@@ -16,19 +16,8 @@ class Module extends Model
         'module_uid',
         'course_id',
         'title',
+        'vectorized'
     ];
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($module) {
-            if (!$module->module_uid) {
-                $module->module_uid = 'MD' . ((Module::max('module_id') ?? 0) + 1);
-            }
-        });
-    }
-
 
     public function lessons()
     {

@@ -13,16 +13,6 @@ use App\Models\Figure;
 class Subsection extends Model
 {
     use HasFactory;
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($subsection) {
-            if (!$subsection->subsection_uid) {
-                $subsection->subsection_uid = 'SS' . ((Subsection::max('subsection_id') ?? 0) + 1);
-            }
-        });
-    }
     protected $primaryKey = 'subsection_id';
 
     protected $fillable = [

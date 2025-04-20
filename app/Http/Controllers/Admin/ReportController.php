@@ -151,9 +151,6 @@ class ReportController extends Controller
         if ($toDate = request('to')) {
             $query->whereDate('created_at', '<=', $toDate);
         }
-        if ($testType = request('test_types')) {
-            $query->where('type', $testType);
-        }
         if ($status = request('status')) {
             $query->where('status', $status);
         }
@@ -181,16 +178,12 @@ class ReportController extends Controller
 
 
         $title = Course::distinct()->pluck('title');
-        $testTypes = collect(TestType::cases())->map(function ($case) {
-            return $case->value;
-        })->toArray();
         $statusTypes = collect(ItemStatus::cases())->map(function ($case) {
             return $case->value;
         })->toArray();
 
         $filters = [
             'course' => $title,
-            'test_types' => $testTypes,
             'status' => $statusTypes,
         ];
 

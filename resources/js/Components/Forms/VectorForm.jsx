@@ -80,7 +80,6 @@ export default function VectorForm({ courses, closeModal }) {
 
         postRequest("admin.module.vectorize", formData, {
             onSuccess: () => {
-                toast.success('Successfully sent the request', { duration: 3000 });
                 closeModal();
             },
             onError: (error) => {

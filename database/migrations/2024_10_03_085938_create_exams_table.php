@@ -11,10 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('assessment_types', function (Blueprint $table) {
+            $table->id('type_id');
+            $table->enum('type',['Pretest','Test'])->unique();
+            $table->integer('total_questions');
+            $table->boolean('evenly_distributed')->default(false);
+            $table->timestamps();
+        });
+
         Schema::create('assessments',function (Blueprint $table){
             $table->id('assessment_id');
             $table->foreignID('student_id')->references('student_id')->on('students')->cascadeOnDelete();
-            $table->enum('type',['Pretest','Test']);
+            $table->foreignID('type_id')->references('type_id')->on('assessment_types')->cascadeOnDelete();
             $table->time('start_time');
             $table->time('end_time')->nullable();
             $table->integer('total_items');
@@ -61,6 +69,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('assessment_settings');
         Schema::dropIfExists('assessments');
         Schema::dropIfExists('assessment_courses');
         Schema::dropIfExists('assessment_items');

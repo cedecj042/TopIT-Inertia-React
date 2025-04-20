@@ -40,12 +40,11 @@ export default function PdfForm({ course, onClose }) {
                     reset();
                     onClose();
                 },
-                onError: () => {
-                    toast.error("Failed to upload the PDF. Please try again.");
+                onError: (error) => {
+                    toast.error(error.error ?? "Failed to upload the PDF. Please try again.",{duration: 3000});
                 },
             });
         } catch (error) {
-            console.error("Unexpected error during upload:", error);
             toast.error("An unexpected error occurred.");
         }
     };

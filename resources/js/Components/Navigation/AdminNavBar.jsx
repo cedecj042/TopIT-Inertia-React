@@ -120,13 +120,6 @@ export default function AdminNavbar({ title }) {
                                 
                             </li>
                             <li className="w-100">
-                                <Link href={route('admin.pretest.index')} className={`nav-link text-white py-3 ps-5 d-flex align-items-center gap-1  ${title === 'Admin Pretest' ? 'active' : ''} `}>
-                                    <span className="material-symbols-outlined">inventory</span>
-                                    <span className="ms-1 d-none d-sm-inline fs-6">Pretest Items</span>
-                                    
-                                </Link>
-                            </li>
-                            <li className="w-100">
                                 <Link href={route('admin.recalibration.index')} className={`nav-link text-white py-3 ps-5 d-flex align-items-center gap-1 ${title === 'Admin Recalibration' ? 'active' : ''}`}>
                                     <span className="material-symbols-outlined">tune</span>
                                     <span className="ms-1 d-none d-sm-inline fs-6">Recalibration Logs</span>
@@ -134,6 +127,17 @@ export default function AdminNavbar({ title }) {
                                 
                             </li>
                         </ul>
+                    </li>
+                    <li className="nav-item w-100">
+                        <Link
+                            href={route('admin.assessments.index')}
+                            className={`nav-link text-white py-3 ps-4 d-flex align-items-center gap-1 ${title === 'Assessments' ? 'active' : ''} `}
+                            id="users-link"
+                            data-page="users"
+                        >
+                            <span className="material-symbols-outlined">quiz</span>
+                            <span className="ms-1 d-none d-sm-inline fs-6">Assessments</span>
+                        </Link>
                     </li>
                     <li className="nav-item w-100">
                         <Link
@@ -157,7 +161,7 @@ export default function AdminNavbar({ title }) {
                             id="reports"
                             data-page="admin-reports"
                         >
-                            <span className="material-symbols-outlined">quiz</span>
+                            <span className="material-symbols-outlined">equalizer</span>
                             <span className="ms-1 d-none d-sm-inline fs-6">
                                 Reports
                             </span>

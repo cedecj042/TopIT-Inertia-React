@@ -16,11 +16,14 @@ class ModuleObserver
 
     public function deleted(Module $module)
     {
-        $response = $this->fastAPIService->deleteModule($module->module_uid);
-        if ($response->successful()) {
-            Log::info('FastAPI delete response: ' . $response->body());
-        } else {
-            Log::error('FastAPI delete request failed: ' . $response->body());
+        if($module->vectorized){
+            $response = $this->fastAPIService->deleteModule($module->module_uid);
+            if ($response->successful()) {
+                Log::info('FastAPI delete response: ' . $response->body());
+            } else {
+                Log::error('FastAPI delete request failed: ' . $response->body());
+            }
         }
+        
     }
 }

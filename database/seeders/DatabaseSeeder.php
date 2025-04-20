@@ -48,8 +48,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             // DifficultySeeder::class,
             CourseSeeder::class,
-            // QuestionSeeder::class,
             StudentSeeder::class,
+            AssessmentTypeSeeder::class,
             // TestSeeder::class,
             // TestSeeder::class,
             // TestSeeder::class,

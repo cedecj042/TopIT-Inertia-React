@@ -13,7 +13,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\PretestController as AdminPretestController;
 use App\Http\Controllers\Student\PretestController as StudentPretestController;
 use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Student\StudentCourseController;
@@ -131,12 +130,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/{assessment}',[AssessmentController::class,'show'])->name('show');
     });
 
-    Route::prefix('pretest')->name('pretest.')->group(function () {
-        Route::get('/', [AdminPretestController::class, 'index'])->name('index');
-        Route::get('/add', [AdminPretestController::class, 'show'])->name('add');
-        Route::post('/add', [AdminPretestController::class, 'add'])->name('add');
-
-    });
+    // Route::prefix('pretest')->name('pretest.')->group(function () {
+    //     Route::get('/', [AdminPretestController::class, 'index'])->name('index');
+    //     Route::get('/add', [AdminPretestController::class, 'show'])->name('add');
+    //     Route::post('/add', [AdminPretestController::class, 'add'])->name('add');
+    // });
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [AdminUserController::class, 'index'])->name('index');
         Route::post('/create', [AdminUserController::class, 'create'])->name('create');

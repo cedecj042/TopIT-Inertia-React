@@ -34,8 +34,8 @@ class AssessmentController extends Controller
         if ($toDate = request('to')) {
             $query->whereDate('created_at', '<=', $toDate);
         }
-        if ($testType = request('test_types')) {
-            $query->where('type', $testType);
+        if ($type = request('type')) {
+            $query->testType($type);
         }
         if ($status = request('status')) {
             $query->where('status', $status);
@@ -94,7 +94,7 @@ class AssessmentController extends Controller
         ];
 
         return Inertia::render('Admin/Assessment/Assessments', [
-            'title' => 'Assessment Histories',
+            'title' => 'Assessments',
             'tests' => AssessmentResource::collection($assessments),
             'filters' => $filters,
             'queryParams' => request()->query() ?: null,
@@ -108,4 +108,5 @@ class AssessmentController extends Controller
             'assessment' => new AssessmentResource($assessment),
         ]);
     }
+    
 }

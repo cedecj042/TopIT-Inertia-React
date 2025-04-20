@@ -19,18 +19,6 @@ class Lesson extends Model
         'title',
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($lesson) {
-            if (!$lesson->lesson_uid) {
-                $lesson->lesson_uid = 'LS' . ((Lesson::max('lesson_id') ?? 0) + 1);
-            }
-        });
-    }
-
-
     public function module()
     {
         return $this->belongsTo(Module::class, 'module_id', 'module_id');

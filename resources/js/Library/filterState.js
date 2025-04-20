@@ -63,7 +63,6 @@ export const INITIAL_QUESTION_STATE = (queryParams = {}) => ({
         course: queryParams?.course || "",
         difficulty: queryParams?.difficulty || "",
         question_type: queryParams?.question_type || "",
-        // test_types: queryParams?.question_types || "",
     },
     otherState: {
         question: queryParams?.question || "",
@@ -144,7 +143,6 @@ export const INITIAL_RECALIBRATION_LOG_STATE = (queryParams = {}) => ({
         course: queryParams?.course || "",
         difficulty: queryParams?.difficulty || "",
         question_type: queryParams?.question_type || "",
-        // test_type: queryParams?.test_type || "",
     },
     otherState: {
         question: queryParams?.question || "",

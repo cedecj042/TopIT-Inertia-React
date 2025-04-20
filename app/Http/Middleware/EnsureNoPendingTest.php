@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Enums\AssessmentStatus;
-use App\Enums\AssessmentType;
+use App\Enums\TestType;
 use App\Models\Assessment;
 use Closure;
 use Illuminate\Http\Request;
@@ -22,7 +22,7 @@ class EnsureNoPendingTest
         $student = Auth::user()->userable;
 
         $pendingTest = Assessment::where('student_id', $student->student_id)
-            ->where('type', AssessmentType::TEST->value)
+            ->testType('Test')
             ->where('status', AssessmentStatus::IN_PROGRESS->value)
             ->first();
 
