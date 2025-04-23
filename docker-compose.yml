@@ -19,12 +19,14 @@ services:
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:/var/www/html'
+            - ./docker/php.ini:/etc/php/8.4/fpm/conf.d/999-custom.ini
+            - ./docker/php.ini:/etc/php/8.4/cli/conf.d/999-custom.ini
         networks:
             - topit
         depends_on:
             - mysql
     mysql:
-        image: 'mysql/mysql-server:8.0'
+        image: 'mysql:8.0'
         ports:
             - '${FORWARD_DB_PORT:-3306}:3306'
         environment:
@@ -37,6 +39,7 @@ services:
         volumes:
             - 'sail-mysql:/var/lib/mysql'
             - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+            - './docker/mysql.cnf:/etc/mysql/conf.d/z-custom.cnf:ro'
         networks:
             - topit
         healthcheck:

@@ -121,10 +121,6 @@ export default function ViewQuestionModal({ question }) {
                             <label className="text-secondary" style={{ fontSize: '.8rem' }}>Question Type</label>
                             <p className="m-0">{question.question_type}</p>
                         </div>
-                        <div className="px-3 py-2 bg-light rounded">
-                            <label className="text-secondary" style={{ fontSize: '.8rem' }}>Test Type</label>
-                            <p className="m-0">{question.test_type}</p>
-                        </div>
                     </div>
 
                     <div className="d-grid mb-2 grid-3">

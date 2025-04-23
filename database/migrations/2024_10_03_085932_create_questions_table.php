@@ -48,12 +48,26 @@ return new class extends Migration
         //     $table->boolean('requires_all_answer')->nullable();
         //     $table->timestamps();
         // });
+        Schema::create('question_jobs', function (Blueprint $table) {
+            $table->id('question_job_id');
+            $table->foreignId('course_id')->references('course_id')->on('courses')->cascadeOnDelete();
+            $table->integer('total_very_easy')->nullable();
+            $table->integer('total_easy')->nullable();
+            $table->integer('total_average')->nullable();
+            $table->integer('total_hard')->nullable();
+            $table->integer('total_very_hard')->nullable();
+            $table->integer('total_questions')->nullable();
+            $table->string('generated_by');
+            $table->enum('status', ['Pending', 'Failed', 'Success','Processing'])->default('Pending');
+            $table->timestamps();
+        });
 
         Schema::create('questions', function (Blueprint $table) {
             $table->id('question_id');
             $table->string('question_uid')->nullable();
+            $table->string('module_uid')->nullable();
             $table->foreignId('course_id')->references('course_id')->on('courses')->cascadeOnDelete();
-            $table->enum('test_type', ['Pretest', 'Test']);
+            $table->foreignId('question_job_id')->references('question_job_id')->on('question_jobs')->cascadeOnDelete();
             $table->longText('question');
             $table->float('discrimination_index');
             $table->float('difficulty_value');
@@ -71,7 +85,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Schema::dropIfExists('question_details');
+        Schema::dropIfExists('generate_questions');
         Schema::dropIfExists('questions');
         // Schema::dropIfExists('question_recalibration_logs');
     }

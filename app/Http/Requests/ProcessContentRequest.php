@@ -25,9 +25,10 @@ class ProcessContentRequest extends FormRequest
     {
         return [
             'course_id' => 'required|exists:courses,course_id',
-            'processed_data' => 'required|array',
-            'file_name' => 'required',
-            'pdf_id'=>'required'
+            'processed_data' => 'nullable|array',
+            'file_name' => 'nullable',
+            'pdf_id'=>'required',
+            'error' => 'nullable|array'
         ];
         
     }

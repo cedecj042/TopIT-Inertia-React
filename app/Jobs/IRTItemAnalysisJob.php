@@ -245,32 +245,6 @@ class IRTItemAnalysisJob implements ShouldQueue
         return 1.0 / (1.0 + exp(-$x));
     }
 
-    // public function logLikelihoodItem(float $a, float $b, array $responses): float
-    // {
-    //     $epsilon = 1e-10; 
-    //     $sum = 0.0;
-    //     foreach ($responses as $response) {
-    //         $theta = $response['theta'];
-    //         $p = $this->logistic($a * ($theta - $b));
-    //         $p = max($epsilon, min(1 - $epsilon, $p));
-    //         $sum += $response['is_correct'] * log($p) + (1 - $response['is_correct']) * log(1 - $p);
-    //     }
-    //     // Priors:
-    //     // For a: use LogNormal prior. Here we assume parameters: mu_a (mean of ln(a)) and sigma_a.
-    //     $mu_a = 0.0;
-    //     $sigma_a = 0.5;
-    //     // log P(a) = -ln(a) - ((ln(a) - mu_a)^2)/(2*sigma_a^2) (ignoring additive constant)
-    //     $logPriorA = -log($a) - (pow(log($a) - $mu_a, 2) / (2 * pow($sigma_a, 2)));
-
-    //     // For b: use Normal prior with mean mu_b and variance sigma_b^2.
-    //     $mu_b = 0.0;
-    //     $sigma_b = 1.0;
-    //     // log P(b) = -((b - mu_b)^2)/(2*sigma_b^2)  (ignoring constant)
-    //     $logPriorB = -(pow($b - $mu_b, 2) / (2 * pow($sigma_b, 2)));
-
-    //     return $sum + $logPriorA + $logPriorB;
-    // }
-
 
     public function firstDerivativesItem(float $a, float $b, array $responses): array
     {
@@ -302,14 +276,14 @@ class IRTItemAnalysisJob implements ShouldQueue
     }
     public function secondDerivativesItem(float $a, float $b, array $responses): array
     {
-        $d2a = 0.0;  // second derivative wrt a
-        $d2b = 0.0;  // second derivative wrt b
-        $d2ab = 0.0; // mixed derivative
+        $d2a = 0.0;  
+        $d2b = 0.0;  
+        $d2ab = 0.0;
         foreach ($responses as $response) {
             $theta = $response['theta'];
             $z = $a * ($theta - $b);
             $p = $this->logistic($z);
-            $w = $p * (1 - $p); // weight factor
+            $w = $p * (1 - $p);
 
             // From likelihood:
             $d2a += -pow($theta - $b, 2) * $w;
@@ -369,6 +343,13 @@ class IRTItemAnalysisJob implements ShouldQueue
             $a_new = $a + $delta_a;
             $b_new = $b + $delta_b;
 
+            Log::info("Iteration $i", [
+                'a' => $a, 'b' => $b,
+                'grad_a' => $grad['a'], 'grad_b' => $grad['b'],
+                'delta_a' => $delta_a, 'delta_b' => $delta_b,
+                'a_new' => $a_new, 'b_new' => $b_new
+            ]);
+
             // Enforce a > 0. (Here we use a minimum value such as 0.01.)
             $a_new = max(0.01, $a_new);
 
@@ -382,6 +363,7 @@ class IRTItemAnalysisJob implements ShouldQueue
         }
         return ['a' => $a, 'b' => $b];
     }
+
 
     // private function estimate2PLParameters($responses, $thetas, $initialGuess)
     // {

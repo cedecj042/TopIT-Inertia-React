@@ -20,9 +20,10 @@ export default function DeleteQuestionTable(
             },
             onError: () => {
                 toast.error("Error deleting questions.", { duration: 3000 });
-            },
-            preserveState: false,
-            preserveQuery:false
+            }
+        },{
+            preserveState:false,
+            preserveQueryParams:false,
         });
     };
 

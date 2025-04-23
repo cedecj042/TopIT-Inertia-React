@@ -22,7 +22,7 @@ class AssessmentResource extends JsonResource
             'sequence_number' => $this->sequence_number,
             'student_id' => $this->student_id,
             'start_time' => Carbon::parse($this->start_time)->format('g:i A'), 
-            'type' => $this->type,
+            'type_id' => $this->type_id,
             'end_time' => Carbon::parse($this->end_time)->format('g:i A'), 
             'total_items' => $this->total_items,
             'total_score' => $this->total_score,
@@ -30,6 +30,8 @@ class AssessmentResource extends JsonResource
             'status' => $this->status,
             'created_at' => Carbon::parse($this->created_at)->format('F j, Y'), 
             'updated_at' => Carbon::parse($this->updated_at)->format('F j, Y'), 
+            'student' => new StudentResource($this->whenLoaded('student')),
+            'assessment_type'=> new AssessmentTypeResource($this->whenLoaded('assessment_type')),
             'courses' => $this->assessment_courses()->with('course:title,course_id')->get()->pluck('course.title')->filter(),
             'assessment_courses'=> AssessmentCourseResource::collection($this->whenLoaded('assessment_courses')),
         ];

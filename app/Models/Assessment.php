@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Enums\AssessmentType;
 use App\Enums\ItemStatus;
+use App\Enums\TestType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Student;
@@ -17,7 +17,7 @@ class Assessment extends Model
 
     protected $fillable = [
         'student_id',
-        'type',
+        'type_id',
         'start_time',
         'end_time',
         'total_items',
@@ -36,15 +36,16 @@ class Assessment extends Model
     {
         return $this->hasMany(AssessmentCourse::class, 'assessment_id', 'assessment_id');
     }
-
-    public function scopeIsPretest($query)
+    public function assessment_type()
     {
-        return $query->where('type', AssessmentType::PRETEST);
+        return $this->belongsTo(AssessmentType::class, 'type_id', 'type_id');
     }
 
-    public function scoeIsTest($query)
+    public function scopeTestType($query, $type)
     {
-        return $query->where('type', AssessmentType::TEST);
+        return $query->whereHas('assessment_type', function ($q) use ($type) {
+            $q->where('type', $type);
+        });
     }
     public function inProgressItems()
     {

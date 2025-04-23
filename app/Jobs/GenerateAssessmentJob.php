@@ -5,9 +5,11 @@ namespace App\Jobs;
 use App\Enums\AssessmentStatus;
 use App\Enums\ItemStatus;
 use App\Enums\QuestionType;
+use App\Enums\TestType;
 use App\Models\Assessment;
 use App\Models\AssessmentCourse;
 use App\Models\AssessmentItem;
+use App\Models\AssessmentType;
 use App\Models\Course;
 use App\Models\Student;
 use App\Models\StudentCourseTheta;
@@ -63,10 +65,10 @@ class GenerateAssessmentJob implements ShouldQueue
             if ($usedCourses->isEmpty()) {
                 $usedCourses = collect($courses)->shuffle();
             }
-
+            
             $assessment = Assessment::create([
                 'student_id' => $this->student->student_id,
-                'type' => 'TEST',
+                'type_id' => AssessmentType::getTypeIdByEnum(TestType::TEST),
                 'status' => AssessmentStatus::IN_PROGRESS->value,
                 'start_time' => $currentDate,
                 'total_items' => 0,
@@ -107,7 +109,7 @@ class GenerateAssessmentJob implements ShouldQueue
         $denum = rand(0, 20);
 
         while (true) {
-            $assessment->load('assessment_courses.assessment_items');
+            $assessment->load('assessment_type','assessment_courses.assessment_items');
             $assessmentItem = $questionService->selectQuestion($assessment);
 
             if (!$assessmentItem) {

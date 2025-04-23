@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Enums\TestType;
 use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
 use App\Models\Student;
 use App\Models\Course;
 use App\Models\Question;
-use App\Enums\AssessmentType;
 use App\Enums\AssessmentStatus;
 
 class TestSeeder extends Seeder
@@ -24,7 +24,7 @@ class TestSeeder extends Seeder
         foreach ($students as $student) {
             // Create an assessment for the student
             $assessment = $student->assessments()->create([
-                'type' => AssessmentType::TEST->value,
+                'type' => TestType::TEST->value,
                 'start_time' => $faker->time(),
                 'end_time' => $faker->time(),
                 'total_items' => $faker->numberBetween(20, 50),

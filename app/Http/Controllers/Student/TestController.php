@@ -12,6 +12,7 @@ use App\Http\Resources\AssessmentFinishResource;
 use App\Http\Resources\CourseResource;
 
 use App\Http\Resources\TestItemResource;
+use App\Models\AssessmentType;
 use App\Models\StudentCourseTheta;
 use App\Models\ThetaScoreLog;
 use App\Services\TerminationRuleService;
@@ -96,11 +97,7 @@ class TestController extends Controller
     {
         $studentId = Auth::user()->userable->student_id;
 
-        $eligibleCourses = Course::withCount([
-            'questions' => function ($query) {
-                $query->where('test_type', 'TEST');
-            }
-        ])
+        $eligibleCourses = Course::withCount(['questions'])
             ->having('questions_count', '>=', 50)
             ->pluck('course_id');
 
@@ -138,11 +135,11 @@ class TestController extends Controller
         }
 
         Log::info("===!!! NEW TEST !!!===");
-
+        
         // Create a new assessment record
         $assessment = Assessment::create([
             'student_id' => $student->student_id,
-            'type' => TestType::TEST->value,
+            'type_id' => AssessmentType::getTypeIdByEnum(TestType::TEST),
             'status' => AssessmentStatus::IN_PROGRESS->value,
             'start_time' => now(),
             'total_items' => 0,
@@ -377,7 +374,7 @@ class TestController extends Controller
             $query->whereDate('created_at', '<=', $toDate);
         }
         if ($testType = request('test_types')) {
-            $query->where('type', $testType);
+            $query->testType($testType);
         }
 
         $sort = request()->query('sort', ''); // Empty by default

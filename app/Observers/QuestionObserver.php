@@ -22,23 +22,42 @@ class QuestionObserver
             Log::error('FastAPI delete request failed: ' . $response->body());
         }
     }
-    public function updating(Question $question)
-    {
-        // Check if 'test_type' is the only key that has changed
-        if ($question->isDirty() && $question->isDirty('test_type') && !$question->isDirty(['another_attribute', 'yet_another_attribute'])) {
-            // Here, you can log something or just return as updating FastAPI is not needed
-            Log::info('Only test_type was changed, not updating FastAPI.');
-            return;
-        }
     
-        // If other attributes have changed besides 'test_type', proceed with updating FastAPI
-        $response = $this->fastAPIService->updateQuestion($question->question_uid, $question->toArray());
-        if ($response->successful()) {
-            Log::info('FastAPI update response: ' . $response->body());
-        } else {
-            Log::error('FastAPI update request failed: ' . $response->body());
-        }
-    }
-    
+    // public function updating(Question $question)
+    // {
+    //     if (
+    //         $question->isDirty() &&
+    //         !$question->isDirty([
+    //             'course_id',
+    //             'difficulty_type',
+    //             'difficulty_value',
+    //             'discrimination_index',
+    //             'question_type',
+    //             'question'
+    //         ])
+    //     ) {
+    //         Log::info('Only non-critical fields changed, not updating FastAPI.', [
+    //             'dirty_fields' => $question->getDirty()
+    //         ]);
+    //         return;
+    //     }
+
+    //     $data = $question->makeHidden(['course'])->toArray();
+    //     $data['choices'] = json_decode($data['choices'], true);
+    //     $data['answer'] = json_decode($data['answer'], true);
+    //     Log::info('Updating question in FastAPI', [
+    //         'question_uid' => $question->question_uid,
+    //         'data' => $data
+    //     ]);
+
+    //     // If other attributes have changed besides 'test_type', proceed with updating FastAPI
+    //     $response = $this->fastAPIService->updateQuestion($question->question_uid, $data);
+    //     if ($response->successful()) {
+    //         Log::info('FastAPI update response: ' . $response->body());
+    //     } else {
+    //         Log::error('FastAPI update request failed: ' . $response->body());
+    //     }
+    // }
+
 
 }

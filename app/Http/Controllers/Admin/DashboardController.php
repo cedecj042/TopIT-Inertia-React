@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\PdfResource;
 use App\Http\Resources\StudentResource;
 use App\Http\Resources\UserResource;
+use App\Models\Assessment;
 use App\Models\Course;
 use App\Models\Pdf;
 use App\Models\Question;
@@ -35,16 +36,14 @@ class DashboardController extends Controller
             ->get()
             ->pluck('count', 'month');
 
-        $questionCounts = Question::selectRaw('test_type, COUNT(*) as total')
-            ->whereIn('test_type', ['Pretest', 'Test'])
-            ->groupBy('test_type')
-            ->pluck('total', 'test_type');
+        $total_question = Question::count();
+        $total_assessments = Assessment::count();
 
         $cards = [
             'Total Students' => Student::count(),
             'Total Courses' => Course::count(),
-            'Test Questions' => $questionCounts['Test'] ?? 0,
-            'Pretest Questions' => $questionCounts['Pretest'] ?? 0,
+            'Total Questions' => $total_question ?? 0,
+            'Total Assessments' => $total_assessments ?? 0,
         ];
 
         $chartData = $this->prepareChartData($monthlyCounts);

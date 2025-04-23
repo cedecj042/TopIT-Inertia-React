@@ -35,4 +35,7 @@ class Course extends Model
     public function student_course_thetas(){
         return $this->hasMany(StudentCourseTheta::class,'course_id','course_id');
     }
+    public function question_jobs(){
+        return $this->hasMany(QuestionJob::class,'course_id','course_id');
+    }
 }

@@ -17,7 +17,7 @@ export default function ModuleContent({ data }) {
             // If a text is found but no current header exists, create a sample header
             if (!currentHeader) {
                 currentHeader = {
-                    header: `Sample Header ${headerCounter}`,
+                    header: `Header ${headerCounter}`,
                     text: null,
                 };
                 headerCounter++; // Increment to create unique sample headers

@@ -23,6 +23,7 @@ class CourseResource extends JsonResource
             'created_at' => (new Carbon($this->created_at))->format('Y-m-d'),
             'pdfs' => PdfResource::collection($this->whenLoaded('pdfs')),
             'questions' => QuestionResource::collection($this->whenLoaded('questions')),
+            'question_jobs'=> QuestionJobResource::collection($this->whenLoaded('question_jobs')),
         ];
     }
 }

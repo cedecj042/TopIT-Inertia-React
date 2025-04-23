@@ -21,7 +21,7 @@ class EnsurePretestNotTaken
         $student = Auth::user()->userable;
 
         $existingPretest = Assessment::where('student_id', $student->student_id)
-            ->where('type', 'Pretest')
+            ->testType( 'Pretest')
             ->where('status', 'Completed')
             ->exists();
 

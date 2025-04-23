@@ -2,10 +2,12 @@
 
 namespace App\Jobs;
 
+use App\Enums\JobStatus;
 use App\Enums\QuestionDifficulty;
 use App\Enums\QuestionType;
 use App\Events\UploadEvent;
 use App\Models\Question;
+use App\Models\QuestionJob;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -40,11 +42,14 @@ class ProcessQuestionsJob implements ShouldQueue
 
         try {
             $questions = [];
+            $questionJobIds = [];
             foreach ($this->data as $courseData) {
                 Log::info('Processing course', [
                     'course_id' => $courseData['course_id'],
                     'course_title' => $courseData['course_title'],
+                    'question_job_id'=> $courseData['question_job_id'],
                 ]);
+                $questionJobIds[] = $courseData['question_job_id'];
                 foreach ($courseData['questions'] as $qData) {
                     $question_uid = $qData['question_uid'];
                     $difficultyName = ucwords($qData['difficulty_type']);
@@ -55,8 +60,9 @@ class ProcessQuestionsJob implements ShouldQueue
 
                     $questions[] = [
                         'question_uid' => $question_uid,
+                        'question_job_id' => $courseData['question_job_id'],
                         'course_id' => $courseData['course_id'],
-                        'test_type' => TestType::TEST->value,
+                        'module_uid' => $qData['module_uid'] ?? null,
                         'question' => $qData['question'],
                         'discrimination_index' => $qData['discrimination_index'] ?? null,
                         'difficulty_value' => $qData['difficulty_value'] ?? null,
@@ -71,6 +77,10 @@ class ProcessQuestionsJob implements ShouldQueue
             }
             if (!empty($questions)) {
                 Question::insert($questions);
+            }
+            if (!empty($questionJobIds)) {
+                QuestionJob::whereIn('question_job_id', $questionJobIds)
+                    ->update(['status' => JobStatus::SUCCESS->value]);
             }
             Log::info('Finished processing questions.');
             $this->broadcastEvent(null, "Successfully processed the question", null);

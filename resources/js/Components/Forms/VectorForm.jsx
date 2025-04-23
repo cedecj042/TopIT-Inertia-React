@@ -80,7 +80,6 @@ export default function VectorForm({ courses, closeModal }) {
 
         postRequest("admin.module.vectorize", formData, {
             onSuccess: () => {
-                toast.success('Successfully sent the request', { duration: 3000 });
                 closeModal();
             },
             onError: (error) => {
@@ -111,7 +110,7 @@ export default function VectorForm({ courses, closeModal }) {
                                         id={`course_${course.course_id}`}
                                         checked={selectedCourses[course.course_id]?.checked || false}
                                         onChange={() => handleCourseCheck(course.course_id)}
-                                        disabled={course.modules.every(module => module.vectorized) ||course.modules.length === 0}
+                                        disabled={course.modules.every(module => module.vectorized) || course.modules.length === 0}
                                     />
                                     <label className="form-check-label fw-bold" htmlFor={`course_${course.course_id}`}>
                                         {course.title}

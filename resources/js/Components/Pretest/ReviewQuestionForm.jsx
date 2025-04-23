@@ -7,11 +7,18 @@ const ReviewQuestionForm = ({ assessment_items }) => {
         const is_correct = item.score > 0;
         const correctAnswer = question.answer;
 
+        const getAnswerStyle = (isCorrect) => ({
+            backgroundColor: isCorrect ? "#e7f6e7" : "#ffe7e7",
+            padding: "0.5rem",
+            borderRadius: "0.25rem",
+            marginTop: "0.5rem",
+        });
+
         // Multiple Choice - Single
         if (question.question_type === "Multiple Choice - Single") {
             const singleAnswer = item.participants_answer || "No answer provided";
             return (
-                <div>
+                <>
                     {question.choices.map((choice, index) => {
                         const isTheAnswer = singleAnswer === choice;
                         return (
@@ -31,20 +38,19 @@ const ReviewQuestionForm = ({ assessment_items }) => {
                                         is_correct ? (<CheckCircleFill className="ms-2 text-success" />) : (<XCircleFill className="ms-2 text-danger" />)
                                     )}
                                 </label>
-                                {/* {!question.is_correct && (
-                                    <div className="text-success mt-1">
-                                        <strong>Correct Answer:</strong> {correctAnswer}
-                                    </div>
-                                )} */}
                             </div>
                         )
                     })}
-                    {!is_correct && (
-                        <div className="text-success mt-1">
-                            <strong>Correct Answer:</strong> {correctAnswer}
-                        </div>
-                    )}
-                </div>
+                    <div style={getAnswerStyle(is_correct)}>
+                        <strong>Your Answer:</strong> {singleAnswer}
+                        {!is_correct && (
+                            <div className="text-danger mt-1">
+                                <strong>Correct Answer:</strong> {correctAnswer}
+                            </div>
+                        )}
+                    </div>
+                </>
+
             );
         }
 
@@ -54,7 +60,7 @@ const ReviewQuestionForm = ({ assessment_items }) => {
                 : [];
 
             return (
-                <div>
+                <>
                     {question.choices.map((choice, index) => (
                         <div key={index} className="form-check mb-2">
                             <input
@@ -81,12 +87,21 @@ const ReviewQuestionForm = ({ assessment_items }) => {
                             </label>
                         </div>
                     ))}
-                    {!is_correct && (
-                        <div className="text-success mt-1">
-                            <strong>Correct Answer:</strong> {Array.isArray(correctAnswer) ? correctAnswer.join(", ") : correctAnswer}
-                        </div>
-                    )}
-                </div>
+                    <div style={getAnswerStyle(is_correct)}>
+                        <strong>Your Answers:</strong>{" "}
+                        {studentAnswerArray.length > 0
+                            ? studentAnswerArray.join(", ")
+                            : "No answer provided"}
+                        {!is_correct &&
+                            Array.isArray(correctAnswer) &&
+                            correctAnswer.length > 0 && (
+                                <div className="text-danger mt-1">
+                                    <strong>Correct Answers:</strong> {correctAnswer.join(", ")}
+                                </div>
+                            )}
+                    </div>
+                </>
+
             );
         }
 
@@ -110,11 +125,15 @@ const ReviewQuestionForm = ({ assessment_items }) => {
                             )}
                         </div>
                     </div>
-                    {!is_correct && (
-                        <div className="text-success mt-1">
-                            <strong>Correct Answer:</strong> {correctAnswer}
-                        </div>
-                    )}
+                    <div style={getAnswerStyle(is_correct)}>
+                        <strong>Your Answer:</strong>{" "}
+                        {item.participants_answer || "No answer provided"}
+                        {!is_correct && correctAnswer && (
+                            <div className="text-danger mt-1">
+                                <strong>Correct Answer:</strong> {correctAnswer}
+                            </div>
+                        )}
+                    </div>
                 </div>
             );
         }

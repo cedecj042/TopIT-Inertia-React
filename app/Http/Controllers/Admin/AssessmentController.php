@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\AssessmentStatus;
 use App\Enums\ItemStatus;
+use App\Enums\QuestionDifficulty;
 use App\Enums\TestType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AssessmentResource;
+use App\Http\Resources\AssessmentTypeResource;
 use App\Models\Assessment;
+use App\Models\AssessmentType;
 use App\Models\Course;
 use App\Models\Student;
 use Illuminate\Http\Request;
@@ -17,7 +20,7 @@ class AssessmentController extends Controller
 {
     public function index()
     {
-        $query = Assessment::with(['assessment_courses.course', 'assessment_courses.assessment_items.question', 'assessment_courses.theta_score_logs'])		
+        $query = Assessment::with(['assessment_courses.course', 'assessment_courses.assessment_items.question', 'assessment_courses.theta_score_logs','student','assessment_type'])
             ->where('status', AssessmentStatus::COMPLETED->value);
 
         if ($courseTitle = request('course')) {
@@ -34,13 +37,13 @@ class AssessmentController extends Controller
         if ($toDate = request('to')) {
             $query->whereDate('created_at', '<=', $toDate);
         }
-        if ($testType = request('test_types')) {
-            $query->where('type', $testType);
+        if ($type = request('type')) {
+            $query->testType($type);
         }
         if ($status = request('status')) {
             $query->where('status', $status);
         }
-        if(request('school') || request('year')){
+        if (request('school') || request('year')) {
             $school = request('school');
             $year = request('year');
             $query->whereHas('student', function ($q) use ($school, $year) {
@@ -78,7 +81,7 @@ class AssessmentController extends Controller
         $testTypes = collect(TestType::cases())->map(function ($case) {
             return $case->value;
         })->toArray();
-        $statusTypes = collect(ItemStatus::cases())->map(function ($case){
+        $statusTypes = collect(ItemStatus::cases())->map(function ($case) {
             return $case->value;
         })->toArray();
 
@@ -89,23 +92,58 @@ class AssessmentController extends Controller
             'course' => $title,
             'test_types' => $testTypes,
             'status' => $statusTypes,
-            'school'=> $schools,
+            'school' => $schools,
             'year' => $years,
         ];
 
+        $assessment_types = AssessmentType::all();
+        $difficultyCount = count(QuestionDifficulty::cases());
+
         return Inertia::render('Admin/Assessment/Assessments', [
-            'title' => 'Assessment Histories',
+            'title' => 'Assessments',
             'tests' => AssessmentResource::collection($assessments),
+            'types' => AssessmentTypeResource::collection($assessment_types),
+            'difficultyCount'=> $difficultyCount,
             'filters' => $filters,
             'queryParams' => request()->query() ?: null,
         ]);
     }
-    public function show(Assessment $assessment){
+    public function show(Assessment $assessment)
+    {
         $assessment->load(['assessment_courses.course', 'assessment_courses.assessment_items.question']);
-        
+
         return Inertia::render('Admin/Assessment/Details', [
             'title' => 'Assessment Details',
             'assessment' => new AssessmentResource($assessment),
         ]);
     }
+    public function bulkUpdate(Request $request)
+    {
+        $validated = $request->validate([
+            'types' => 'required|array',
+            'types.*.type_id' => 'required|integer',
+            'types.*.type' => 'required|string|max:255',
+            'types.*.total_questions' => 'required|integer|min:0',
+            'types.*.evenly_distributed' => 'required|boolean',
+        ]);
+        $difficultyCount = count(QuestionDifficulty::cases());
+        foreach ($validated['types'] as $index => $type) {
+            if (
+                $type['evenly_distributed'] &&
+                $type['total_questions'] % $difficultyCount !== 0
+            ) {
+                return redirect()->back()->withErrors([
+                    "types.$index.total_questions" => "Total questions for '{$type['type']}' must be divisible by $difficultyCount when evenly distributed is enabled.",
+                ])->withInput();
+            }
+        }
+        AssessmentType::upsert(
+            $validated['types'],
+            ['type_id', 'type'], // unique key columns
+            ['total_questions', 'evenly_distributed', 'updated_at'] // columns to update
+        );
+
+        return redirect()->back()->with(['message' => 'Assessment types updated successfully.']);
+    }
+
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\PdfStatus;
+use App\Events\UploadEvent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProcessContentRequest;
 use App\Jobs\ProcessModuleJob;
@@ -25,6 +26,19 @@ class FastApiController extends Controller
         $course_id = $validated['course_id'];
         $pdf_id = $validated['pdf_id'];
         $modules = $validated['processed_data']['Modules'];
+
+        if (isset($validated['error'])) {
+            $error = $validated['error'];
+    
+            if ($error['error_type'] === 'DUPLICATE_MODULE') {
+                $this->updatePdfStatus(PdfStatus::FAILED, $validated['course_id'], $validated['pdf_id']);
+                $this->broadcastEvent(null, null, "Duplicate modules found");
+                return response()->json([
+                    'message' => 'Duplicate module found',
+                    'error' => $error['message']
+                ], 422);
+            }
+        }
 
         $jobs = collect($modules)->map(function ($moduleData) use ($course_id) {
             return new ProcessModuleJob($moduleData, $course_id);
@@ -58,6 +72,13 @@ class FastApiController extends Controller
         }
     }
 
+    public function broadcastEvent($info = null, $success = null, $error = null)
+    {
+        Log::info('starting the event');
+        broadcast(new UploadEvent($info, $success, $error));
+        Log::info('Event broadcasted');
+    }
+
 
     public function storeProcessedQuestion(Request $request)
     {
@@ -82,7 +103,7 @@ class FastApiController extends Controller
                 Log::warning("Module ID {$moduleUid} not found.");
             }
         }
-
+        $this->broadcastEvent(null, "Modules updated successfully", null);
         return response()->json(['message' => 'Modules updated successfully'], 200);
     }
 }

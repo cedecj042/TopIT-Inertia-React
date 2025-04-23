@@ -101,7 +101,6 @@ class QuestionSeeder extends Seeder
                         DB::table('questions')->insert([
                             'course_id' => $course->course_id,
                             'difficulty_type' => $difficultyName,
-                            'test_type' => TestType::TEST->value,
                             'question' => $questionData[0],
                             'discrimination_index' => $discriminationIndex,
                             'difficulty_value' => $difficultyValue,

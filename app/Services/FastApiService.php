@@ -152,7 +152,7 @@ class FastApiService
         }
     }
     public function updateQuestion(string $question_uid, array $data){
-        return Http::delete("{$this->baseUrl}/update_question/{$question_uid}",$data);
+        return Http::put("{$this->baseUrl}/update_question/{$question_uid}",$data);
     }
     public function deleteCourse(int $course_id)
     {

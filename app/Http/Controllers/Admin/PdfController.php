@@ -13,6 +13,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class PdfController extends Controller
 {
@@ -27,17 +28,27 @@ class PdfController extends Controller
     {
         $validatedData = $request->validated();
         $course = Course::findOrFail($validatedData['course_id']);
-
+        
         if ($request->hasFile('pdf_file')) {
             $file = $request->file('pdf_file');
             $fileName = $file->getClientOriginalName();
-            $filePath = $file->storeAs('', $fileName, 'pdfs');
+            $extension = $file->getClientOriginalExtension();
+
+            $fileNameExist = Pdf::where('file_name', $fileName)->exists();
+            if ($fileNameExist) {
+                Log::error('File already exists: ' . $fileName);
+                return redirect()->back()->withErrors(['error' => 'File already uploaded.']);
+            }
+            
+            $uuid = Str::uuid()->toString();
+            $storedFileName = $uuid . '.' . $extension;
+            $filePath = $file->storeAs('', $storedFileName, 'pdfs');
 
             Log::info('File stored at: ' . $filePath);
 
             $pdf = $this->savePdfToDatabase($request, $fileName, $filePath);
 
-            $fullPath = storage_path('app/pdfs/' . $fileName);
+            $fullPath = storage_path('app/pdfs/' . $storedFileName);
             if (!file_exists($fullPath)) {
                 Log::error('File not found: ' . $fullPath);
                 return redirect()->back()->withErrors(['error' => 'File could not be found after upload.']);
@@ -100,10 +111,10 @@ class PdfController extends Controller
     {
         \Log::info('Deleting PDF with ID: ' . $id);
         try {
-            $pdf = Pdf::findOrFail($id)->first();
+            $pdf = Pdf::where('pdf_id', $id)->firstOrFail();	
             
             $this->deletePdfFile($pdf);
-            $this->deleteImagesViaFastAPI($pdf);
+            // $this->deleteImagesViaFastAPI($pdf);
 
             $pdf->delete();
             return redirect()->back()->with(['success' => 'PDF and associated images deleted successfully']);

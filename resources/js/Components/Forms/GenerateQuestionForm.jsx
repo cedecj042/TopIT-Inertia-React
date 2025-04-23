@@ -66,7 +66,7 @@ export default function GenerateQuestionForm({ data, closeModal }) {
 
         postRequest("admin.question.generate", formData, {
             onSuccess: () => {
-                toast.success("Successfully submitted", { duration: 3000 });
+                toast.info("Successfully submitted", { duration: 3000 });
                 closeModal();
             },
             onError: (error) => {
@@ -79,66 +79,80 @@ export default function GenerateQuestionForm({ data, closeModal }) {
         <>
             <div className="modal-body">
                 <form onSubmit={handleSubmit} className="row g-3 p-2">
-                    {courses.map((course) => (
-                        <div
-                            className={`form-check custom-checkbox ${
-                                selectedCourses.some(selected => selected.course_id === course.course_id) ? "selected-course" : ""
-                            }`}
-                            key={course.course_id}
-                        >
-                            <div className="custom-label">
-                                <input
-                                    type="checkbox"
-                                    className="form-check-input"
-                                    id={`course_${course.course_id}`}
-                                    onChange={() => handleCourseCheck(course.course_id)}
-                                    checked={selectedCourses.some(selected => selected.course_id === course.course_id)}
-                                />
-                                <label className="form-check-label" htmlFor={`course_${course.course_id}`}>{course.title}</label>
-                            </div>
-
-                            {selectedCourses.some(selected => selected.course_id === course.course_id) && (
-                                <div className="materials-container">
-                                    <div className="card custom-card p-3 mt-2">
-                                        <table className="table">
-                                            <thead>
-                                                <tr>
-                                                    {difficulties.map((difficulty) => (
-                                                        <th key={difficulty}>{difficulty}</th>
-                                                    ))}
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    {difficulties.map((difficulty) => (
-                                                        <td key={difficulty}>
-                                                            <input
-                                                                type="number"
-                                                                className="form-control"
-                                                                min="0"
-                                                                step="1"
-                                                                defaultValue="0"
-                                                                disabled={
-                                                                    !selectedCourses.some(selected => selected.course_id === course.course_id)
-                                                                }
-                                                                onChange={(e) =>
-                                                                    handleDifficultyInput(
-                                                                        course.course_id,
-                                                                        difficulty,
-                                                                        e.target.value
-                                                                    )
-                                                                }
-                                                            />
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                    {courses.map((course) => {
+                        const hasPendingJob = course.question_jobs?.some(
+                            (job) => ['Pending', 'Processing'].includes(job.status)
+                        );
+                        const hasVectorizedModules = course.modules.length > 0;
+                        return (
+                            <div
+                                className={`form-check custom-checkbox ${selectedCourses.some(selected => selected.course_id === course.course_id) ? "selected-course" : ""
+                                    }`}
+                                key={course.course_id}
+                            >
+                                <div className="custom-label">
+                                    <input
+                                        type="checkbox"
+                                        className="form-check-input"
+                                        id={`course_${course.course_id}`}
+                                        onChange={() => handleCourseCheck(course.course_id)}
+                                        checked={selectedCourses.some(selected => selected.course_id === course.course_id)}
+                                        disabled={hasPendingJob || !hasVectorizedModules}
+                                    />
+                                    <label className="form-check-label" htmlFor={`course_${course.course_id}`}>{course.title}</label>
+                                    <div className="">
+                                        {hasPendingJob && (
+                                            <small><em className="text-danger">Generation in progress</em></small>
+                                        )}
+                                        {!hasVectorizedModules && (
+                                            <small><em className="text-danger">No saved modules in vector database</em></small>
+                                        )}
                                     </div>
                                 </div>
-                            )}
-                        </div>
-                    ))}
+
+                                {selectedCourses.some(selected => selected.course_id === course.course_id) && (
+                                    <div className="materials-container">
+                                        <div className="card custom-card p-3 mt-2">
+                                            <table className="table">
+                                                <thead>
+                                                    <tr>
+                                                        {difficulties.map((difficulty) => (
+                                                            <th key={difficulty}>{difficulty}</th>
+                                                        ))}
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        {difficulties.map((difficulty) => (
+                                                            <td key={difficulty}>
+                                                                <input
+                                                                    type="number"
+                                                                    className="form-control"
+                                                                    min="0"
+                                                                    step="1"
+                                                                    defaultValue="0"
+                                                                    disabled={
+                                                                        !selectedCourses.some(selected => selected.course_id === course.course_id)
+                                                                    }
+                                                                    onChange={(e) =>
+                                                                        handleDifficultyInput(
+                                                                            course.course_id,
+                                                                            difficulty,
+                                                                            e.target.value
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </td>
+                                                        ))}
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    })}
                 </form>
             </div>
             <div className="modal-footer">
