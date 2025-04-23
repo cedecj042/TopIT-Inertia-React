@@ -95,18 +95,33 @@ class TestController extends Controller
 
     public function select()
     {
-        // Added to can only select course with greater than 50 questions
-        $courses = Course::withCount(['questions'])
-            ->having('questions_count', '>=', 10)
-            ->get();
+        $studentId = Auth::user()->userable->student_id;
 
-        if ($courses->isEmpty()) {
+        $eligibleCourses = Course::withCount(['questions'])
+            ->having('questions_count', '>=', 50)
+            ->pluck('course_id');
+
+        if ($eligibleCourses->isEmpty()) {
             return back()->with('error', 'No courses currently have enough questions for testing.');
         }
 
+        $coursesWithTheta = StudentCourseTheta::with(['course'])
+            ->where('student_id', $studentId)
+            ->whereIn('course_id', $eligibleCourses)
+            ->get()
+            ->map(function ($theta) {
+                return [
+                    'course_id' => $theta->course_id,
+                    'title' => $theta->course->title,
+                    'theta_score' => $theta->theta_score,
+                ];
+            });
+
         return Inertia::render('Student/Test/SelectCourses', [
             'title' => 'Student Test',
-            'courses' => CourseResource::collection($courses),
+            'courses' => [
+                'data' => $coursesWithTheta,
+            ],
         ]);
     }
 

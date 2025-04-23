@@ -4,7 +4,14 @@ import { StudentContent } from "@/Components/LayoutContent/StudentContent";
 import { toast } from "sonner";
 import { useRequest } from "@/Library/hooks";
 
-function SelectCourses({ courses }) {
+const getScoreClass = (theta) => {
+    if (theta === null || theta === undefined) return "secondary";
+    if (theta <= -3) return "danger";
+    if (theta >= 3) return "success";
+    return "primary";
+};
+
+function SelectCourses({ courses = {} }) {
     const [selectedCourses, setSelectedCourses] = useState([]);
     const { isProcessing, postRequest } = useRequest();
 
@@ -24,7 +31,7 @@ function SelectCourses({ courses }) {
         if (selectedCourses.length === courses.data.length) {
             setSelectedCourses([]);
         } else {
-            const allCourseIds = courses.data.map(course => course.course_id);
+            const allCourseIds = courses.data.map((course) => course.course_id);
             setSelectedCourses(allCourseIds);
         }
     };
@@ -75,7 +82,10 @@ function SelectCourses({ courses }) {
                                 <input
                                     className="form-check-input mt-0"
                                     type="checkbox"
-                                    checked={selectedCourses.length === courses.data.length}
+                                    checked={
+                                        selectedCourses.length ===
+                                        courses.data.length
+                                    }
                                     onChange={handleSelectAll}
                                     id="selectAll"
                                 />
@@ -87,43 +97,64 @@ function SelectCourses({ courses }) {
                                     Select All
                                 </label>
                                 <span className="text-muted ms-auto">
-                                    {selectedCourses.length} of {courses.data.length} courses selected
+                                    {selectedCourses.length} of{" "}
+                                    {courses.data.length} courses selected
                                 </span>
                             </div>
                         </div>
-                        
-                        {courses.data.map((course) => (
-                            <div className="input-group" key={course.course_id}>
+
+                        {courses.data.map((course) => {
+                            const scoreClass = getScoreClass(
+                                course.theta_score
+                            );
+                            const formattedScore =
+                                course.theta_score?.toFixed(2) ?? "N/A";
+
+                            return (
                                 <div
-                                    className={`input-group-text gap-2 flex-grow-1 p-3 border rounded-4
-                        ${
-                            selectedCourses.includes(course.course_id)
-                                ? "bg-primary text-white"
-                                : "bg-light"
-                        }`}
+                                    className="input-group"
+                                    key={course.course_id}
                                 >
-                                    <input
-                                        className="form-check-input mt-0"
-                                        type="checkbox"
-                                        value={course.course_id}
-                                        checked={selectedCourses.includes(
-                                            course.course_id
-                                        )}
-                                        onChange={() =>
-                                            handleCourseSelect(course.course_id)
-                                        }
-                                        id={`course${course.course_id}`}
-                                    />
-                                    <label
-                                        htmlFor={`course${course.course_id}`}
-                                        className="flex-grow-1 text-start"
-                                        role="button"
+                                    <div
+                                        className={`input-group-text gap-2 flex-grow-1 p-3 border rounded-4
+                                            ${
+                                                selectedCourses.includes(
+                                                    course.course_id
+                                                )
+                                                    ? "bg-primary text-white"
+                                                    : "bg-light"
+                                            }`}
                                     >
-                                        {course.title}
-                                    </label>
+                                        <input
+                                            className="form-check-input mt-0"
+                                            type="checkbox"
+                                            value={course.course_id}
+                                            checked={selectedCourses.includes(
+                                                course.course_id
+                                            )}
+                                            onChange={() =>
+                                                handleCourseSelect(
+                                                    course.course_id
+                                                )
+                                            }
+                                            id={`course${course.course_id}`}
+                                        />
+                                        <label
+                                            htmlFor={`course${course.course_id}`}
+                                            className="flex-grow-1 text-start d-flex justify-content-between align-items-center"
+                                            role="button"
+                                        >
+                                            <span>{course.title}</span>
+                                            <span
+                                                className={`badge bg-${scoreClass} rounded-pill ms-2`}
+                                            >
+                                                {formattedScore}
+                                            </span>
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                         <div className="text-center mt-3">
                             <button
                                 className="btn btn-primary px-4 pt-2 pb-2 btn-hover-primary"

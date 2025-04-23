@@ -38,7 +38,6 @@ const ReviewQuestionForm = ({ assessment_items }) => {
                                         is_correct ? (<CheckCircleFill className="ms-2 text-success" />) : (<XCircleFill className="ms-2 text-danger" />)
                                     )}
                                 </label>
-
                             </div>
                         )
                     })}
@@ -51,6 +50,7 @@ const ReviewQuestionForm = ({ assessment_items }) => {
                         )}
                     </div>
                 </>
+
             );
         }
 
@@ -101,6 +101,7 @@ const ReviewQuestionForm = ({ assessment_items }) => {
                             )}
                     </div>
                 </>
+
             );
         }
 
