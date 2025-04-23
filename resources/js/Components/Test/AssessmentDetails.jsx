@@ -31,10 +31,10 @@ export default function AssessmentDetailsModal({ test }) {
     }
     const {
         assessment_id,
-        student_id,
+        student,
         start_time,
         end_time,
-        type,
+        assessment_type,
         total_items,
         total_score,
         percentage,
@@ -52,7 +52,7 @@ export default function AssessmentDetailsModal({ test }) {
                         <strong>Assessment ID:</strong> {assessment_id}
                     </div>
                     <div className="col-md-6 col-lg-4">
-                        <strong>Student ID:</strong> {student_id}
+                        <strong>Student:</strong> {student.firstname + ' ' + student.lastname}
                     </div>
                     <div className="col-md-6 col-lg-4">
                         <strong>Date Taken:</strong> {created_at}
@@ -61,10 +61,10 @@ export default function AssessmentDetailsModal({ test }) {
                         <strong>Time:</strong> {start_time} - {end_time}
                     </div>
                     <div className="col-md-6 col-lg-4">
-                        <strong>Type:</strong> <span className="badge bg-secondary">{type}</span>
+                        <strong>Type:</strong> <span className="badge bg-primary p-2">{assessment_type.type}</span>
                     </div>
                     <div className="col-md-6 col-lg-4">
-                        <strong>Status:</strong> <span className={`badge ${status === 'Completed' ? 'bg-success' : 'bg-warning'}`}>{status ?? 'N/A'}</span>
+                        <strong>Status:</strong> <span className={`badge p-2 ${status === 'Completed' ? 'bg-success' : 'bg-warning'}`}>{status ?? 'N/A'}</span>
                     </div>
                     <div className="col-md-6 col-lg-4">
                         <strong>Overall Score:</strong> {total_score} / {total_items}

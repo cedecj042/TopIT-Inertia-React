@@ -13,19 +13,6 @@ class ThetaService
         return 1 / (1 + exp(-$x));
     }
 
-    public function logLikelihood(float $theta, array $responses): float
-    {
-        $epsilon = 1e-10; // To avoid log(0)
-        $sum = 0.0;
-        foreach ($responses as $response) {
-            $p = $this->logistic($response['discrimination'] * ($theta - $response['difficulty']));
-            // Bound the probabilities to avoid extreme values
-            $p = max($epsilon, min(1 - $epsilon, $p));
-            $sum += $response['is_correct'] * log($p) + (1 - $response['is_correct']) * log(1 - $p);
-        }
-        return $sum;
-    }
-
     public function firstDerivative(float $theta, array $responses): float
     {
         $sum = 0.0;
@@ -94,6 +81,19 @@ class ThetaService
         \Log::info("---------------------------------------------------------------\n");
         return $theta;
     }
+
+    // public function logLikelihood(float $theta, array $responses): float
+    // {
+    //     $epsilon = 1e-10; // To avoid log(0)
+    //     $sum = 0.0;
+    //     foreach ($responses as $response) {
+    //         $p = $this->logistic($response['discrimination'] * ($theta - $response['difficulty']));
+    //         // Bound the probabilities to avoid extreme values
+    //         $p = max($epsilon, min(1 - $epsilon, $p));
+    //         $sum += $response['is_correct'] * log($p) + (1 - $response['is_correct']) * log(1 - $p);
+    //     }
+    //     return $sum;
+    // }
 
     // public function firstDerivative(float $theta, array $responses): float
     // {

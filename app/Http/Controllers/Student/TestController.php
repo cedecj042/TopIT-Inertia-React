@@ -12,6 +12,7 @@ use App\Http\Resources\AssessmentFinishResource;
 use App\Http\Resources\CourseResource;
 
 use App\Http\Resources\TestItemResource;
+use App\Models\AssessmentType;
 use App\Models\StudentCourseTheta;
 use App\Models\ThetaScoreLog;
 use App\Services\TerminationRuleService;
@@ -119,11 +120,11 @@ class TestController extends Controller
         }
 
         Log::info("===!!! NEW TEST !!!===");
-
+        
         // Create a new assessment record
         $assessment = Assessment::create([
             'student_id' => $student->student_id,
-            'type' => TestType::TEST->value,
+            'type_id' => AssessmentType::getTypeIdByEnum(TestType::TEST),
             'status' => AssessmentStatus::IN_PROGRESS->value,
             'start_time' => now(),
             'total_items' => 0,

@@ -7,11 +7,25 @@ import AssessmentList from "@/Components/Test/AssessmentList";
 import AssessmentFilters from "@/Components/Filter/AssessmentFilters";
 import { useState } from "react";
 import Modal from "@/Components/Modal/Modal";
+import AssessmentTypeModal from "@/Components/Modal/AssessmentTypeModal";
+import AssessmentTypeForm from "@/Components/Forms/AssessmentTypeForm";
 
-const Assessments = ({ tests = [],queryParams={},filters}) => {
+const Assessments = ({ tests = [],types=[],difficultyCount,queryParams={},filters}) => {
     const testsData = tests.data || [];
 
     const [openModal,setOpenModal] = useState(false);
+    const [openEditModal,setOpenEditModal] = useState(false);
+    const handleOpenModal = ()=>{
+        setOpenModal(true);
+    }
+    const handleOpenEditModal = () =>{
+        setOpenModal(false);
+        setOpenEditModal(true);
+    }
+    const handleCloseEditModal = () =>{
+        setOpenEditModal(false);
+        setOpenModal(true);
+    }
     return (
         <>
             <main className="row p-3">
@@ -21,7 +35,7 @@ const Assessments = ({ tests = [],queryParams={},filters}) => {
                         <button
                             type="button"
                             className="btn btn-primary btn-md btn-size btn-toolbar gap-2"
-                            // onClick={openModal}
+                            onClick={handleOpenModal}
                         >
                             <span className="material-symbols-outlined">tune</span>
                             <span className="fs-6">Adjust Types</span>
@@ -50,11 +64,28 @@ const Assessments = ({ tests = [],queryParams={},filters}) => {
             <Modal
                 show={openModal}
                 onClose={() => setOpenModal(false)}
-                modalSize={"lg"}
-                modalTitle={"Adjust Assessment Types"}
+                modalSize={"modal-lg"}
+                modalTitle={"Assessment Types"}
             >
-                
+                <AssessmentTypeModal 
+                    types={types.data}
+                    close={()=> setOpenModal(false)}
+                    openEditModal={handleOpenEditModal}
+                />
             </Modal>
+            <Modal
+                show={openEditModal}
+                onClose={() => setOpenEditModal(false)}
+                modalSize={"modal-lg"}
+                modalTitle={"Assessment Types"}
+            >
+                <AssessmentTypeForm
+                    types={types.data}
+                    difficultyCount= {difficultyCount}
+                    close={handleCloseEditModal}
+                />
+            </Modal>
+
         </>
     );
 };

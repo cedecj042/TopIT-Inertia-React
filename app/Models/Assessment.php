@@ -17,7 +17,7 @@ class Assessment extends Model
 
     protected $fillable = [
         'student_id',
-        'assessment_type_id',
+        'type_id',
         'start_time',
         'end_time',
         'total_items',

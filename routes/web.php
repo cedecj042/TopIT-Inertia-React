@@ -128,6 +128,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::prefix('assessments')->name('assessments.')->group(function(){
         Route::get('/',[AssessmentController::class,'index'])->name('index');
         Route::get('/{assessment}',[AssessmentController::class,'show'])->name('show');
+        Route::post('/bulkUpdate',[AssessmentController::class,'bulkUpdate'])->name('bulkUpdate');
     });
 
     // Route::prefix('pretest')->name('pretest.')->group(function () {

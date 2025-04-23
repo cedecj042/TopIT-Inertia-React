@@ -12,7 +12,7 @@ class TerminationRuleService
     public const MAX_QUESTIONS_TOTAL = 12; 
     public function shouldTerminateTest(Assessment $assessment): bool
     {
-        $maxQuestionsPerCourse = self::MAX_QUESTIONS;
+        $maxQuestionsPerCourse = $assessment->assessment_type->total_questions;
 
         $allCoursesTerminated = $assessment->assessment_courses->every(function ($course) use ($maxQuestionsPerCourse) {
             return $course->assessment_items->count() >= $maxQuestionsPerCourse;
@@ -39,13 +39,13 @@ class TerminationRuleService
     //     return $limitReached;
     // }
 
-    public function fixedLength(Assessment $assessment): bool {
-        $maxQuestions = self::MAX_QUESTIONS;
+    // public function fixedLength(Assessment $assessment): bool {
+    //     $maxQuestions = self::MAX_QUESTIONS;
 
-    }
+    // }
 
-    public function getTerminationReason(): string
-    {
-        return "Maximum number of questions " . self::MAX_QUESTIONS . " reached." ;
-    }
+    // public function getTerminationReason(): string
+    // {
+    //     return "Maximum number of questions " . self::MAX_QUESTIONS . " reached." ;
+    // }
 }

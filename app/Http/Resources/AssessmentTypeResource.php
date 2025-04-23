@@ -16,7 +16,7 @@ class AssessmentTypeResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'assessment_type_id' => $this->assessment_type_id,
+            'type_id' => $this->type_id,
             'type'=> $this->type,
             'total_questions'=>$this->total_questions,
             'evenly_distributed'=> $this->evenly_distributed,
