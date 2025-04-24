@@ -4,23 +4,17 @@ namespace App\Http\Controllers\Student;
 
 use App\Enums\AssessmentStatus;
 use App\Enums\ItemStatus;
-use App\Enums\QuestionDifficulty;
 use App\Enums\TestType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePretestRequest;
-use App\Http\Resources\AssessmentCourseResource;
-use App\Http\Resources\AssessmentResource;
-use App\Http\Resources\AssessmentReviewResource;
 use App\Http\Resources\TestCoursesResource;
 use App\Models\AssessmentType;
 use App\Models\Question;
 use App\Models\StudentCourseTheta;
 use App\Services\ScoringService;
 use App\Services\ThetaService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 use App\Models\Course;

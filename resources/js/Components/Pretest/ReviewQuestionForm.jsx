@@ -1,7 +1,12 @@
+import { useRequest } from "@/Library/hooks";
 import React from "react";
 import { CheckCircleFill, XCircleFill } from "react-bootstrap-icons";
 
 const ReviewQuestionForm = ({ assessment_items }) => {
+    const { isProcessing, getRequest } = useRequest();
+    const openModule = (module_id) => {
+        getRequest('course.module', { id: module_id }, {});
+    }
     const renderAnswer = (item) => {
         const question = item.question;
         const is_correct = item.score > 0;
@@ -130,7 +135,7 @@ const ReviewQuestionForm = ({ assessment_items }) => {
                         {item.participants_answer || "No answer provided"}
                         {!is_correct && correctAnswer && (
                             <div className="text-danger mt-1">
-                                <strong>Correct Answer:</strong> {correctAnswer}
+                                <strong>Correct Answer:</strong> {Array.isArray(correctAnswer) ? correctAnswer.join(", ") : correctAnswer}
                             </div>
                         )}
                     </div>
@@ -159,6 +164,14 @@ const ReviewQuestionForm = ({ assessment_items }) => {
                             </div>
                             <p className="card-text">{item.question.question}</p>
                             {renderAnswer(item)}
+                            {item.question.module_id && (
+                                <button
+                                    className="btn btn-outline-primary btn-sm mt-3"
+                                    onClick={() => openModule(item.question.module_id)}
+                                >
+                                    View Module
+                                </button>
+                            )}
                         </div>
                     </div>
                 ))

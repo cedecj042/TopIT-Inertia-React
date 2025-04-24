@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use Carbon\Carbon;
+use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -32,6 +32,7 @@ class AssessmentReviewResource extends JsonResource
                     'question' => [
                         'question_id' => $item->question->question_id,
                         'question' => $item->question->question,
+                        'module_id'=> Module::getModuleId($item->question->module_uid),
                         'choices' => json_decode($item->question->choices),
                         'question_type' => $item->question->question_type,
                         'answer' => json_decode($item->question->answer),

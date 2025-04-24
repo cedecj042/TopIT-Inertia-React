@@ -32,4 +32,9 @@ class Module extends Model
         return $this->morphMany(Content::class, 'contentable');
     }
 
+    public static function getModuleId(string $moduleUid)
+    {
+        return static::where('module_uid', $moduleUid)->value('module_id');
+    }
+
 }
