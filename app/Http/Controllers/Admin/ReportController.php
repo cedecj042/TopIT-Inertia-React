@@ -134,13 +134,16 @@ class ReportController extends Controller
             'data' => $coursesTheta->pluck('theta_score')->toArray(),
         ];
 
-        $query = Assessment::with(['assessment_courses.course', 'assessment_courses.assessment_items.question', 'assessment_courses.theta_score_logs'])
+        $query = Assessment::with(['assessment_courses.course', 'assessment_courses.assessment_items.question', 'assessment_courses.theta_score_logs','student','assessment_type'])
             ->where('student_id', $studentId);
 
         if ($courseTitle = request('course')) {
             $query->whereHas('assessment_courses.course', function ($q) use ($courseTitle) {
                 $q->where('title', 'like', '%' . $courseTitle . '%');
             });
+        }
+        if ($type = request('test_types')) {
+            $query->testType($type);
         }
 
         // Filter by date range
@@ -181,9 +184,13 @@ class ReportController extends Controller
         $statusTypes = collect(ItemStatus::cases())->map(function ($case) {
             return $case->value;
         })->toArray();
+        $testTypes = collect(TestType::cases())->map(function($test){
+            return $test->value;
+        });
 
         $filters = [
             'course' => $title,
+            'test_types'=> $testTypes,
             'status' => $statusTypes,
         ];
 

@@ -129,6 +129,7 @@ export const INITIAL_ASSESSMENT_STATE  = (queryParams = {}) => ({
     },
     otherState: {
         items: queryParams?.items || "",
+        name: queryParams?.name || "",
     },
     sortState: (() => {
         const field = queryParams?.field || "";

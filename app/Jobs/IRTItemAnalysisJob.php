@@ -161,7 +161,7 @@ class IRTItemAnalysisJob implements ShouldQueue
                 // $responses = [];
                 // $thetas = [];
 
-                if (count($questionData['assessment_items']) < 10) {
+                if (count($questionData['assessment_items']) < 20) {
                     continue;
                 }
 
@@ -222,7 +222,6 @@ class IRTItemAnalysisJob implements ShouldQueue
             $recalibration->update([
                 'status' => JobStatus::SUCCESS->value,
                 'total_question_logs' => count($questionLogs),
-                'convergence_status' => ConvergenceStatus::ALL->value,
                 'total_iterations' => $totalIterations,
                 'updated_at' => now(),
             ]);
@@ -351,7 +350,7 @@ class IRTItemAnalysisJob implements ShouldQueue
             ]);
 
             // Enforce a > 0. (Here we use a minimum value such as 0.01.)
-            $a_new = max(0.01, $a_new);
+            $a_new = min(max(0.01, $a_new), 2.0);
 
             if (abs($a_new - $a) < $tol && abs($b_new - $b) < $tol) {
                 $a = $a_new;

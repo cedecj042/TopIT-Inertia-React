@@ -57,7 +57,9 @@ class ProcessQuestionsJob implements ShouldQueue
                     $questionType = $this->determineQuestionType($qData['questionType']);
                     $answer = $this->normalizeArray($qData['answer'] ?? []);
                     $choices = $this->normalizeArray($qData['choices'] ?? []);
-
+                    if (is_array($choices)) {
+                        shuffle($choices);
+                    }
                     $questions[] = [
                         'question_uid' => $question_uid,
                         'question_job_id' => $courseData['question_job_id'],

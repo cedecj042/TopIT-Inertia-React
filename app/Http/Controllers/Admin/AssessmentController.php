@@ -13,6 +13,7 @@ use App\Models\Assessment;
 use App\Models\AssessmentType;
 use App\Models\Course;
 use App\Models\Student;
+use DB;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -29,6 +30,13 @@ class AssessmentController extends Controller
             });
         }
 
+        if ($name = request('name')) {
+            $query->whereHas('student', function ($q) use ($name) {
+                $q->where('firstname', 'like', '%' . $name . '%')
+                    ->orWhere('lastname', 'like', '%' . $name . '%')
+                    ->orWhere(DB::raw("CONCAT(firstname, ' ', lastname)"), 'like', '%' . $name . '%');
+            });
+        }
         // Filter by date range
         if ($fromDate = request('from')) {
             $query->whereDate('created_at', '>=', $fromDate);

@@ -21,7 +21,9 @@ const ReviewQuestionForm = ({ assessment_items }) => {
 
         // Multiple Choice - Single
         if (question.question_type === "Multiple Choice - Single") {
-            const singleAnswer = item.participants_answer || "No answer provided";
+            const singleAnswer = typeof item.participants_answer === "string" && item.participants_answer.trim() !== ""
+            ? item.participants_answer
+            : "No answer provided"
             return (
                 <>
                     {question.choices.map((choice, index) => {
@@ -47,7 +49,7 @@ const ReviewQuestionForm = ({ assessment_items }) => {
                         )
                     })}
                     <div style={getAnswerStyle(is_correct)}>
-                        <strong>Your Answer:</strong> {singleAnswer}
+                        <strong>Your Answer:</strong> {singleAnswer ?? "No Answer Provided"}
                         {!is_correct && (
                             <div className="text-danger mt-1">
                                 <strong>Correct Answer:</strong> {correctAnswer}
@@ -132,7 +134,10 @@ const ReviewQuestionForm = ({ assessment_items }) => {
                     </div>
                     <div style={getAnswerStyle(is_correct)}>
                         <strong>Your Answer:</strong>{" "}
-                        {item.participants_answer || "No answer provided"}
+                        {typeof item.participants_answer === "string" && item.participants_answer.trim() !== ""
+                            ? item.participants_answer
+                            : "No answer provided"}
+
                         {!is_correct && correctAnswer && (
                             <div className="text-danger mt-1">
                                 <strong>Correct Answer:</strong> {Array.isArray(correctAnswer) ? correctAnswer.join(", ") : correctAnswer}

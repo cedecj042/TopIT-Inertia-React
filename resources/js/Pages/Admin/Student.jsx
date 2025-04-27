@@ -9,6 +9,7 @@ import AssessmentFilters from "@/Components/Filter/AssessmentFilters";
 import AssessmentList from "@/Components/Test/AssessmentList";
 import Pagination from "@/Components/Pagination";
 import TestFilters from "@/Components/Filter/TestFilters";
+import StudentAssessmentFilter from "@/Components/Filter/StudentAssessmentFilter";
 function Student({ student, theta_score, queryParams ={},filters,assessments }) {
     const { getRequest,isProcessing } = useRequest();
     const handleBackClick = () => {
@@ -46,7 +47,7 @@ function Student({ student, theta_score, queryParams ={},filters,assessments }) 
                         routeId={student.data.student_id}
                         components={assessments}
                     >
-                        <TestFilters filters={filters}/>
+                        <StudentAssessmentFilter filters={filters}/>
                         <AssessmentList tests={assessments.data} />
                     </FilterContext>
                     <Pagination links={assessments.meta.links} queryParams={queryParams} />

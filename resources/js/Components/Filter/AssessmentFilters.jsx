@@ -9,6 +9,7 @@ import { INITIAL_ASSESSMENT_STATE, INITIAL_TEST_STATE } from "@/Library/filterSt
 import DateRangeFilter from "./Filters/DateRangeFilter";
 import SortFilter from "./Filters/SortFilter";
 import { TEST_SORTING_OPTIONS } from "@/Library/constants";
+import TextInputFilter from "./Filters/TextInputFilter";
 
 export default function AssessmentFilters({ filters }) {
     const { state, dispatch } = useContext(FilterProvider);
@@ -17,7 +18,7 @@ export default function AssessmentFilters({ filters }) {
     const { handleDateChange, onDateClear } = useDateState(dispatch);
     const { handleClearSort, changeDropdownSort } = useSortState(dispatch);
     const { filterState, otherState, dateState, sortState } = state;
-
+    console.log(filters);
     const FILTER_DATA = [
         {
             data: filters.course,
@@ -70,7 +71,16 @@ export default function AssessmentFilters({ filters }) {
             />
             <div className="col-12">
                 <div className="row g-3">
-                    <div className="col-md-4 col-lg-3 mb-3">
+                    <div className="col-lg-3 col-md-3 input-container">
+                        <TextInputFilter
+                            onKeyPress={onKeyPress}
+                            value={otherState.name}
+                            filterKey={"name"}
+                            handleInputChange={handleInputChange}
+                            handleClearInput={handleOtherChange}
+                        />
+                    </div>
+                    <div className="col-md-2 col-lg-2">
                         <DateRangeFilter
                             from={dateState.from}
                             to={dateState.to}
@@ -152,7 +162,7 @@ export default function AssessmentFilters({ filters }) {
                             </div>
                         </div>
                     </div>
-                    <div className="col-md-3 col-lg-2 offset-md-4 offset-lg-4 ">
+                    <div className="col-md-3 col-lg-2 offset-md-2 offset-lg-2 ">
                         <SortFilter
                             onSortChange={(field, direction) => changeDropdownSort(field, direction)}
                             filterKey={"sort"}
