@@ -81,7 +81,7 @@ const Test = ({ test_item, item_count }) => {
                             register={register}
                             watch={watch}
                         />
-                        <div className="text-end mt-5">
+                        <div className="text-start mt-2">
                             <button
                                 type="submit"
                                 className="btn btn-primary px-4 btn-hover-primary"

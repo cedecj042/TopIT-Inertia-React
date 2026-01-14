@@ -37,7 +37,7 @@ class PdfController extends Controller
             $fileNameExist = Pdf::where('file_name', $fileName)->exists();
             if ($fileNameExist) {
                 Log::error('File already exists: ' . $fileName);
-                return redirect()->back()->withErrors(['error' => 'File already uploaded.']);
+                return redirect()->back()->withErrors(['error' => 'File already exists.']);
             }
             
             $uuid = Str::uuid()->toString();
