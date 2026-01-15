@@ -75,7 +75,7 @@ export default function AssessmentTypeForm({ difficultyCount, types, close }) {
                                     </div>
 
                                     <div className="mb-3">
-                                        <label className="form-label">Total Questions</label>
+                                        <label className="form-label">Total Questions per Course</label>
                                         <input
                                             type="number"
                                             className={`form-control ${errors?.types?.[index]?.total_questions ? 'is-invalid' : ''}`}
