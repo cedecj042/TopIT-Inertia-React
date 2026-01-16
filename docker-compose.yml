@@ -26,35 +26,6 @@ services:
         depends_on:
             - mysql
 
-    # ✅ QUEUE WORKER (Sail-style)
-    laravel.queue:
-        image: 'sail-8.3/app'
-        command: php artisan queue:work --tries=3 --timeout=0
-        environment:
-            WWWUSER: '${WWWUSER}'
-            LARAVEL_SAIL: 1
-        volumes:
-            - '.:/var/www/html'
-        networks:
-            - topit
-        depends_on:
-            - laravel.test
-            - mysql
-
-    # ✅ SCHEDULER (Sail-style)
-    laravel.scheduler:
-        image: 'sail-8.3/app'
-        command: php artisan schedule:work
-        environment:
-            WWWUSER: '${WWWUSER}'
-            LARAVEL_SAIL: 1
-        volumes:
-            - '.:/var/www/html'
-        networks:
-            - topit
-        depends_on:
-            - laravel.test
-
     mysql:
         image: 'mysql:8.0'
         ports:
