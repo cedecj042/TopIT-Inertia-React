@@ -32,9 +32,6 @@ echo "🗄️ Running database migrations (SAFE)..."
 echo "🧹 Clearing caches..."
 ./vendor/bin/sail exec laravel.test php artisan optimize:clear
 
-echo "🔁 Restarting queue workers..."
-./vendor/bin/sail exec laravel.test php artisan queue:restart
-
 echo " Seeding Database..."
 #./vendor/bin/sail exec laravel.test php artisan db:seed
 
