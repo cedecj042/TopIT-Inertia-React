@@ -5,34 +5,34 @@ echo "📥 Pulling latest code..."
 git pull origin main
 
 echo "🐳 Ensuring containers are up..."
-./vendor/bin/sail up -d
+# docker-compose up -d
 
 echo "📦 Installing PHP dependencies (no scripts)..."
-./vendor/bin/sail exec laravel.test composer install \
+docker exec topit_laravel_1 composer install \
   --no-interaction \
   --prefer-dist \
   --optimize-autoloader \
   --no-scripts
 
 echo "📦 Running composer post-install scripts..."
-./vendor/bin/sail exec laravel.test composer run-script post-autoload-dump
+docker exec topit_laravel_1 composer run-script post-autoload-dump
 
 echo "📂 Linking storage..."
-./vendor/bin/sail exec laravel.test php artisan storage:link || true
+docker exec topit_laravel_1 php artisan storage:link || true
 
 echo "📦 Installing Node dependencies..."
-./vendor/bin/sail exec laravel.test npm install
+docker exec topit_laravel_1 npm install
 
 echo "🎨 Building frontend assets..."
-./vendor/bin/sail exec laravel.test npm run build
+docker exec topit_laravel_1 npm run build
 
 echo "🗄️ Running database migrations (SAFE)..."
-./vendor/bin/sail exec laravel.test php artisan migrate:fresh --force
+docker exec topit_laravel_1 php artisan migrate:fresh --force
 
 echo "🧹 Clearing caches..."
-./vendor/bin/sail exec laravel.test php artisan optimize:clear
+docker exec topit_laravel_1 php artisan optimize:clear
 
 echo " Seeding Database..."
-#./vendor/bin/sail exec laravel.test php artisan db:seed
+#docker exec topit_laravel_1 php artisan db:seed
 
 echo "✅ Deployment completed successfully!"
