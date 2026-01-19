@@ -27,7 +27,7 @@ echo "🎨 Building frontend assets..."
 ./vendor/bin/sail exec laravel.test npm run build
 
 echo "🗄️ Running database migrations (SAFE)..."
-./vendor/bin/sail exec laravel.test php artisan migrate --force
+./vendor/bin/sail exec laravel.test php artisan migrate:fresh --force
 
 echo "🧹 Clearing caches..."
 ./vendor/bin/sail exec laravel.test php artisan optimize:clear
